@@ -42,7 +42,7 @@ test("mirrors source files and preserves an existing index", async (context) => 
   );
   assert.match(
     await readFile(path.join(output, "releases", "index.html"), "utf8"),
-    /aria-label="Breadcrumb"><a href="\.\.\/">\/<\/a><span[^>]*>\/<\/span><span aria-current="page">releases<\/span>/,
+    /aria-label="Breadcrumb"><a href="\.\.\/">Home<\/a><span[^>]*>\/<\/span><span aria-current="page">releases<\/span>/,
   );
   assert.match(
     await readFile(path.join(output, "releases", "index.html"), "utf8"),
