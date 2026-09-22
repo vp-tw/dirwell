@@ -21,8 +21,8 @@ A failed render leaves the last successful output intact.
 
 SSG copies the small runtime beside every generated page. MPA emits the same
 directly addressable HTML pages but shares runtime assets through the reserved
-output-root `__dirwell/` directory. A source collision with that path is an
-error in MPA mode.
+output-root `__dirwell/` directory. Both modes use that reserved directory for
+generated raw-link artifacts, so a source collision with the path is an error.
 
 Both modes mirror source files by default and preserve an existing
 `index.html` or `index.htm`.
@@ -43,7 +43,8 @@ markup, styling, icons, and browser behavior together.
 - Generated directories navigate in the same tab.
 - Files and preserved custom indexes open in a new tab.
 - Internal symlinks use canonical root-relative targets.
-- Broken and outside-root targets remain visible without a link.
+- Broken targets open their raw `readlink()` text in a new tab. Outside-root
+  targets remain visible without a link.
 - Ancestor cycles remain visible and navigable but are never expanded again.
 - Directory symlink traversal is opt-in; the default boundary is the source
   root.

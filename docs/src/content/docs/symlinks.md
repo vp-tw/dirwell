@@ -26,7 +26,8 @@ than a dead item.
 ## Broken links
 
 Broken targets stay in the list with a status badge and their raw target text.
-They are not keyboard-focusable links.
+Selecting one opens that raw `readlink()` text as a plain-text document in a
+new tab. It does not attempt to navigate to the missing target.
 
 ## Outside the root
 

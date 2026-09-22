@@ -13,6 +13,7 @@ import {
   writeFile,
 } from "node:fs/promises";
 import type { Stats } from "node:fs";
+import { createHash } from "node:crypto";
 import path from "node:path";
 import type {
   DirectoryData,
@@ -141,16 +142,14 @@ export async function generateExplorer(options: GenerateOptions): Promise<void> 
   if (sourceDir === outputDir) {
     throw new Error("outputDir must not be the sourceDir");
   }
-  if (mode === "mpa") {
-    try {
-      await lstat(path.join(sourceDir, "__dirwell"));
-      throw new Error('MPA mode reserves the source-root path "__dirwell"');
-    } catch (error) {
-      if (error instanceof Error && "code" in error && error.code === "ENOENT") {
-        // The reserved asset path is available.
-      } else {
-        throw error;
-      }
+  try {
+    await lstat(path.join(sourceDir, "__dirwell"));
+    throw new Error('Dirwell reserves the source-root path "__dirwell"');
+  } catch (error) {
+    if (error instanceof Error && "code" in error && error.code === "ENOENT") {
+      // The reserved asset path is available.
+    } else {
+      throw error;
     }
   }
   const outputIsWithinSource = isInsideRoot(sourceDir, outputDir);
@@ -283,6 +282,7 @@ export async function generateExplorer(options: GenerateOptions): Promise<void> 
       plans.filter((plan) => plan.outputName !== null).map((plan) => plan.logicalDir),
     );
     const sharedAssets = new Map<string, string | Uint8Array>();
+    const rawLinkFiles = new Map<string, string>();
 
     for (const plan of plans) {
       const { directory, logicalDir, outputName: name } = plan;
@@ -296,6 +296,25 @@ export async function generateExplorer(options: GenerateOptions): Promise<void> 
         return path.posix.join(logicalDir, entry.name);
       };
       const hrefFor = (entry: FileSystemEntry): string | null => {
+        if (entry.symlink?.isBroken) {
+          const filename = `${createHash("sha256")
+            .update(entry.relativePath)
+            .update("\0")
+            .update(entry.symlink.target)
+            .digest("hex")
+            .slice(0, 16)}.txt`;
+          rawLinkFiles.set(filename, entry.symlink.target);
+          const relativeRawLink = path.posix.relative(
+            logicalDir === "" ? "." : logicalDir,
+            path.posix.join("__dirwell", "raw-links", filename),
+          );
+          return relativeRawLink
+            .split("/")
+            .map((segment) =>
+              segment === "." || segment === ".." ? segment : encodeURIComponent(segment),
+            )
+            .join("/");
+        }
         const targetLogicalPath = targetLogicalPathFor(entry);
         if (targetLogicalPath === null) return null;
         const relativeTarget = path.posix.relative(
@@ -332,6 +351,7 @@ export async function generateExplorer(options: GenerateOptions): Promise<void> 
         },
         hrefFor,
         exitsExplorerFor: (entry) => {
+          if (entry.symlink?.isBroken) return true;
           const targetLogicalPath = targetLogicalPathFor(entry);
           const directoryLike =
             entry.kind === "directory" || entry.symlink?.targetKind === "directory";
@@ -363,6 +383,14 @@ export async function generateExplorer(options: GenerateOptions): Promise<void> 
       await mkdir(assetDirectory, { recursive: true });
       for (const [assetName, contents] of sharedAssets) {
         await writeFile(path.join(assetDirectory, assetName), contents);
+      }
+    }
+
+    if (rawLinkFiles.size > 0) {
+      const rawLinkDirectory = path.join(buildOutputDir, "__dirwell", "raw-links");
+      await mkdir(rawLinkDirectory, { recursive: true });
+      for (const [filename, target] of rawLinkFiles) {
+        await writeFile(path.join(rawLinkDirectory, filename), target);
       }
     }
 

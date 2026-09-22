@@ -56,12 +56,16 @@ directory.
 - `mpa` keeps every directory directly addressable while sharing runtime
   assets from the output-root `__dirwell/` directory.
 
+`__dirwell/` is reserved in both modes for generated assets such as broken-link
+raw views.
+
 Both modes work without JavaScript. The optional runtime adds fuzzy search,
 IME-safe keyboard controls, Backspace parent navigation, theme persistence, and
 watch-mode live reload.
 
-Symlinks always remain visible and show their declared target. Broken links,
-targets outside the configured root, and cycles receive explicit states.
+Symlinks always remain visible and show their declared target. Broken links can
+open their raw target text; targets outside the configured root remain
+unavailable. Broken links, outside-root targets, and cycles receive explicit states.
 Following directory links is opt-in. Ancestor cycles remain navigable but are
 never expanded recursively.
 

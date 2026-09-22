@@ -25,8 +25,9 @@ simple default experience and typed extension points.
 - `outputName(directory)` may return `null` to skip a directory.
 - Symlink cycles remain visible and link to their canonical generated target;
   traversal itself must terminate.
-- Broken and out-of-root symlinks show their declared target but do not become
-  usable links or expose resolved absolute machine paths.
+- Broken symlinks may expose their declared target through the raw-text view.
+  Out-of-root symlinks stay unavailable and never expose resolved absolute
+  machine paths.
 - A destination outside generated Explorer pages opens in a new tab with opener
   isolation. Explorer-to-Explorer navigation remains in the same tab.
 - Keyboard shortcuts do not run in editable controls or during IME composition.

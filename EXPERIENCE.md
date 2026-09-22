@@ -26,7 +26,8 @@
 - Backspace navigates to the parent outside editable controls. At the root it
   becomes a no-op.
 - Modifier shortcuts and IME key events, including key code 229, are ignored.
-- Unusable symlinks are excluded from keyboard navigation.
+- Broken symlinks participate in keyboard navigation through their raw-text
+  view. Outside-root symlinks remain excluded.
 - Destinations without a generated explorer page open in a new tab with opener
   isolation. Explorer-to-explorer directory navigation stays in the current
   tab, including canonical links used to represent symlink cycles.

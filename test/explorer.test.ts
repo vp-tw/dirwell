@@ -20,6 +20,7 @@ async function fixture(): Promise<{ output: string; root: string }> {
   await writeFile(path.join(root, "docs", "index.html"), "<!doctype html><title>Docs</title>");
   await symlink("..", path.join(root, "releases", "back-to-root"));
   await symlink("../external", path.join(root, "external-link"));
+  await symlink("missing", path.join(root, "broken-link"));
   return { output, root };
 }
 
@@ -58,6 +59,11 @@ test("mirrors source files and preserves an existing index", async (context) => 
   assert.match(rootIndex, /→ \.\.\/external/);
   assert.match(rootIndex, /external link/);
   assert.doesNotMatch(rootIndex, /href="external-link\/"/);
+  const rawLinkHref = rootIndex.match(
+    /href="(__dirwell\/raw-links\/[a-f0-9]{16}\.txt)" target="_blank" rel="noopener"/,
+  )?.[1];
+  assert.ok(rawLinkHref);
+  assert.equal(await readFile(path.join(output, rawLinkHref), "utf8"), "missing");
 });
 
 test("supports a clean output directory inside the source tree", async (context) => {
