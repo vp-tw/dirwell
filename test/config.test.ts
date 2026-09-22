@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
 import { renderUsage } from "citty";
-import { mainCommand } from "../src/cli.ts";
+import { buildCommand, mainCommand } from "../src/cli.ts";
 import { loadDirwellConfig, resolveGenerateOptions } from "../src/config.ts";
 
 async function temporaryDirectory(): Promise<string> {
@@ -56,6 +56,22 @@ test("rejects invalid runtime config", async (context) => {
   await assert.rejects(() => loadDirwellConfig(cwd, "build"), /mode must be either/);
 });
 
+test("validates and resolves URL configuration", async (context) => {
+  const cwd = await temporaryDirectory();
+  context.after(() => rm(cwd, { recursive: true, force: true }));
+  await writeFile(
+    path.join(cwd, "dirwell.config.ts"),
+    'export default { base: "/repo/", urls: "html-base" };\n',
+  );
+  const loaded = await loadDirwellConfig(cwd, "build");
+  const resolved = resolveGenerateOptions(cwd, loaded.config);
+  assert.equal(resolved.base, "/repo/");
+  assert.equal(resolved.urlStrategy, "html-base");
+
+  await writeFile(path.join(cwd, "dirwell.config.ts"), 'export default { urls: "magic" };\n');
+  await assert.rejects(() => loadDirwellConfig(cwd, "build"), /urls must be/);
+});
+
 test("CLI help exposes zero-config usage and primary commands", async () => {
   const usage = await renderUsage(mainCommand);
   assert.match(usage, /dirwell build\|daemon\|serve\|dev/);
@@ -63,4 +79,7 @@ test("CLI help exposes zero-config usage and primary commands", async () => {
   assert.match(usage, /Generate a deployable static file explorer/);
   assert.match(usage, /Watch files and serve the explorer with live reload/);
   assert.match(usage, /Manage a detached file explorer server/);
+  const buildUsage = await renderUsage(buildCommand);
+  assert.match(buildUsage, /--base/);
+  assert.match(buildUsage, /--urls/);
 });

@@ -56,10 +56,12 @@ export interface RenderedPage {
 }
 
 export interface ThemeContext {
+  readonly documentBaseHref: string | null;
   readonly directory: DirectoryData;
   readonly outputName: string;
   readonly mode: "mpa" | "ssg";
   readonly assetHref: (assetName: string) => string;
+  readonly hrefForDirectory: (relativePath: string) => string;
   readonly hrefFor: (entry: FileSystemEntry) => string | null;
   readonly exitsExplorerFor: (entry: FileSystemEntry) => boolean;
 }
@@ -70,12 +72,14 @@ export interface ExplorerTheme {
 }
 
 export interface GenerateOptions {
+  readonly base?: string;
   readonly sourceDir: string;
   readonly outputDir: string;
   readonly mode?: "mpa" | "ssg";
   readonly mirror?: boolean;
-  readonly outputName?: OutputNameResolver;
+  readonly outputName?: OutputNameResolver | string;
   readonly theme?: ExplorerTheme;
+  readonly urlStrategy?: "base" | "html-base" | "relative";
   readonly symlinks?: {
     readonly follow?: boolean;
     readonly boundary?: "anywhere" | "root";

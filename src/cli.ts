@@ -14,6 +14,10 @@ const directoryArgument = {
 
 const commonArguments = {
   directory: directoryArgument,
+  base: {
+    type: "string" as const,
+    description: "Deployment base path or URL",
+  },
   cwd: {
     type: "string" as const,
     description: "Directory used to discover dirwell.config.ts",
@@ -23,6 +27,11 @@ const commonArguments = {
     type: "enum" as const,
     description: "Output mode",
     options: ["ssg", "mpa"],
+  },
+  urls: {
+    type: "enum" as const,
+    description: "Generated URL strategy",
+    options: ["relative", "base", "html-base"],
   },
 };
 
@@ -38,12 +47,14 @@ const serveArguments = {
 };
 
 interface ServeInputs {
+  readonly base: string | undefined;
   readonly cwd: string;
   readonly directory: string;
   readonly host: string | undefined;
   readonly mode: string | undefined;
   readonly outDir: string | undefined;
   readonly port: string | undefined;
+  readonly urls: string | undefined;
 }
 
 async function runServe(inputs: ServeInputs): Promise<void> {
@@ -51,9 +62,13 @@ async function runServe(inputs: ServeInputs): Promise<void> {
   const { config } = await loadDirwellConfig(cwd, "serve");
   const outputDir = inputs.outDir ?? config.outDir ?? ".dirwell-preview";
   const options = resolveGenerateOptions(cwd, config, {
+    ...(inputs.base === undefined ? {} : { base: inputs.base }),
     root: inputs.directory,
     outDir: outputDir,
     ...(inputs.mode === undefined ? {} : { mode: inputs.mode as "mpa" | "ssg" }),
+    ...(inputs.urls === undefined
+      ? {}
+      : { urls: inputs.urls as "base" | "html-base" | "relative" }),
   });
   const configuredPort = inputs.port ?? process.env.PORT;
   const port =
@@ -84,9 +99,11 @@ export const buildCommand = defineCommand({
     const cwd = pathFromProcess(args.cwd);
     const { config } = await loadDirwellConfig(cwd, "build");
     const options = resolveGenerateOptions(cwd, config, {
+      ...(args.base === undefined ? {} : { base: args.base }),
       root: args.directory,
       ...(args.outDir === undefined ? {} : { outDir: args.outDir }),
       ...(args.mode === undefined ? {} : { mode: args.mode as "mpa" | "ssg" }),
+      ...(args.urls === undefined ? {} : { urls: args.urls as "base" | "html-base" | "relative" }),
     });
     await generateExplorer(options);
     console.log(`Built ${options.sourceDir} → ${options.outputDir}`);
@@ -116,10 +133,12 @@ const daemonStartCommand = defineCommand({
       binPath,
       cwd,
       directory: args.directory,
+      ...(args.base === undefined ? {} : { base: args.base }),
       ...(args.host === undefined ? {} : { host: args.host }),
       ...(args.mode === undefined ? {} : { mode: args.mode }),
       ...(args.outDir === undefined ? {} : { outDir: args.outDir }),
       ...(args.port === undefined ? {} : { port: args.port }),
+      ...(args.urls === undefined ? {} : { urls: args.urls }),
     });
     console.log(`Started Dirwell daemon with PID ${state.pid}`);
     console.log(`Log: ${state.logFile}`);

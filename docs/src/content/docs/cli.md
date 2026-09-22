@@ -15,6 +15,7 @@ The default command is `serve`. It watches files and enables live reload.
 
 ```bash
 dirwell build [directory] [--out-dir path] [--mode ssg|mpa]
+  [--urls relative|base|html-base] [--base /repository/]
 ```
 
 `build` writes deployable files and exits. Its default output is `dist/`.
@@ -23,6 +24,7 @@ dirwell build [directory] [--out-dir path] [--mode ssg|mpa]
 
 ```bash
 dirwell serve [directory] [--host host] [--port port]
+  [--urls relative|base|html-base] [--base /repository/]
 dirwell dev [directory]
 ```
 

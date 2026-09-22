@@ -3,6 +3,7 @@ import path from "node:path";
 import type { ExplorerTheme, GenerateOptions, OutputNameResolver } from "./model.ts";
 
 export interface DirwellConfig {
+  readonly base?: string;
   readonly extends?: string | readonly string[];
   readonly mode?: "mpa" | "ssg";
   readonly mirror?: boolean;
@@ -15,6 +16,7 @@ export interface DirwellConfig {
   };
   readonly symlinks?: GenerateOptions["symlinks"];
   readonly theme?: ExplorerTheme;
+  readonly urls?: "base" | "html-base" | "relative";
 }
 
 export interface DirwellConfigContext {
@@ -48,6 +50,7 @@ export function validateConfig(value: unknown): asserts value is DirwellConfig {
   const config = value as Record<string, unknown>;
   assertOptionalString(config.root, "root");
   assertOptionalString(config.outDir, "outDir");
+  assertOptionalString(config.base, "base");
   if (
     config.extends !== undefined &&
     typeof config.extends !== "string" &&
@@ -60,8 +63,20 @@ export function validateConfig(value: unknown): asserts value is DirwellConfig {
   if (config.mode !== undefined && config.mode !== "mpa" && config.mode !== "ssg") {
     throw new TypeError('mode must be either "ssg" or "mpa"');
   }
-  if (config.outputName !== undefined && typeof config.outputName !== "function") {
-    throw new TypeError("outputName must be a function");
+  if (
+    config.urls !== undefined &&
+    config.urls !== "relative" &&
+    config.urls !== "base" &&
+    config.urls !== "html-base"
+  ) {
+    throw new TypeError('urls must be "relative", "base", or "html-base"');
+  }
+  if (
+    config.outputName !== undefined &&
+    typeof config.outputName !== "function" &&
+    (typeof config.outputName !== "string" || config.outputName.length === 0)
+  ) {
+    throw new TypeError("outputName must be a non-empty string or function");
   }
   if (config.theme !== undefined) {
     const theme = config.theme as Record<string, unknown>;
@@ -106,13 +121,16 @@ export async function loadDirwellConfig(
 export function resolveGenerateOptions(
   cwd: string,
   config: DirwellConfig,
-  overrides: Partial<Pick<DirwellConfig, "mode" | "outDir" | "root">> = {},
+  overrides: Partial<Pick<DirwellConfig, "base" | "mode" | "outDir" | "root" | "urls">> = {},
 ): GenerateOptions {
   const sourceDir = path.resolve(cwd, overrides.root ?? config.root ?? ".");
   const outputDir = path.resolve(cwd, overrides.outDir ?? config.outDir ?? "dist");
   return {
     sourceDir,
     outputDir,
+    ...(overrides.base === undefined && config.base === undefined
+      ? {}
+      : { base: overrides.base ?? config.base }),
     ...(overrides.mode === undefined && config.mode === undefined
       ? {}
       : { mode: overrides.mode ?? config.mode }),
@@ -120,5 +138,8 @@ export function resolveGenerateOptions(
     ...(config.outputName === undefined ? {} : { outputName: config.outputName }),
     ...(config.symlinks === undefined ? {} : { symlinks: config.symlinks }),
     ...(config.theme === undefined ? {} : { theme: config.theme }),
+    ...(overrides.urls === undefined && config.urls === undefined
+      ? {}
+      : { urlStrategy: overrides.urls ?? config.urls }),
   };
 }

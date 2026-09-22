@@ -5,10 +5,12 @@ import path from "node:path";
 import { generateExplorer } from "./generator.ts";
 import type { GenerateOptions } from "./model.ts";
 
-const reloadClient = `<script>
-const events=new EventSource('/__explorer/events');
+function reloadClient(eventsPath: string): string {
+  return `<script>
+const events=new EventSource(${JSON.stringify(eventsPath)});
 events.addEventListener('reload',()=>location.reload());
 </script>`;
+}
 
 const contentTypes: Readonly<Record<string, string>> = {
   ".css": "text/css; charset=utf-8",
@@ -28,6 +30,11 @@ export async function createExplorerDevServer(
   options: GenerateOptions & { readonly host?: string; readonly port?: number },
 ) {
   const outputDir = path.resolve(options.outputDir);
+  const mountPath =
+    options.urlStrategy === "base" || options.urlStrategy === "html-base"
+      ? `${new URL(options.base ?? "/", "http://dirwell.local").pathname.replace(/\/+$/, "")}/`
+      : "/";
+  const eventsPath = `${mountPath}__explorer/events`;
   const clients = new Set<ServerResponse>();
   let building = false;
   let rebuildRequested = false;
@@ -64,7 +71,7 @@ export async function createExplorerDevServer(
 
   const server = createServer(async (request, response) => {
     const requestUrl = new URL(request.url ?? "/", "http://localhost");
-    if (requestUrl.pathname === "/__explorer/events") {
+    if (requestUrl.pathname === eventsPath) {
       response.writeHead(200, {
         "cache-control": "no-cache",
         connection: "keep-alive",
@@ -76,7 +83,22 @@ export async function createExplorerDevServer(
       return;
     }
 
-    const decodedPath = decodeURIComponent(requestUrl.pathname);
+    if (requestUrl.pathname === mountPath.slice(0, -1)) {
+      response.writeHead(308, { location: mountPath });
+      response.end();
+      return;
+    }
+    if (!requestUrl.pathname.startsWith(mountPath)) {
+      send(response, 404, "Not found");
+      return;
+    }
+    let decodedPath: string;
+    try {
+      decodedPath = decodeURIComponent(`/${requestUrl.pathname.slice(mountPath.length)}`);
+    } catch {
+      send(response, 400, "Invalid URL encoding");
+      return;
+    }
     let filePath = path.resolve(outputDir, `.${decodedPath}`);
     if (!filePath.startsWith(`${outputDir}${path.sep}`) && filePath !== outputDir) {
       send(response, 403, "Forbidden");
@@ -96,7 +118,7 @@ export async function createExplorerDevServer(
       if (extension === ".html") {
         let html = "";
         for await (const chunk of createReadStream(filePath, { encoding: "utf8" })) html += chunk;
-        response.end(html.replace("</body>", `${reloadClient}</body>`));
+        response.end(html.replace("</body>", `${reloadClient(eventsPath)}</body>`));
       } else {
         createReadStream(filePath).pipe(response);
       }
@@ -113,7 +135,7 @@ export async function createExplorerDevServer(
   const port = typeof address === "object" && address !== null ? address.port : options.port;
 
   return {
-    url: `http://${options.host ?? "127.0.0.1"}:${port ?? 4173}/`,
+    url: `http://${options.host ?? "127.0.0.1"}:${port ?? 4173}${mountPath}`,
     async close(): Promise<void> {
       clearTimeout(timer);
       fileWatcher.close();

@@ -34,6 +34,8 @@ export default defineConfig({
   root: "./public",
   outDir: "./dist",
   mode: "mpa",
+  base: "/downloads/",
+  urls: "base",
   outputName: (directory) =>
     directory.entries.some((entry) => entry.name === "index.html") ? null : "index.html",
   symlinks: { follow: true, boundary: "root", onCycle: "skip" },
@@ -45,9 +47,13 @@ export default defineConfig({
 });
 ```
 
-`outputName` receives `DirectoryData`: root, current directory, parent,
-complete entry metadata, and symlink state. Returning `null` skips the current
-directory.
+`outputName` accepts a filename or receives `DirectoryData`: root, current
+directory, parent, complete entry metadata, and symlink state. Returning `null`
+skips the current directory.
+
+URL generation supports portable depth-aware `relative` links, Vite-style
+`base` prefixes for deployments such as GitHub Pages, and native
+`html-base` documents using `<base href>`.
 
 ## Output modes
 

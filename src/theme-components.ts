@@ -17,9 +17,11 @@ export interface PageShellProps {
   readonly assets: string;
   readonly breadcrumbs: string;
   readonly directory: DirectoryData;
+  readonly documentBaseHref: string | null;
   readonly emptyState: string;
   readonly entryList: string;
   readonly footer: string;
+  readonly parentHref: string | null;
   readonly runtimeConfig: Readonly<{
     colorScheme: boolean;
     fuzzySearch: boolean;
@@ -49,6 +51,7 @@ export interface EntryListItem {
 
 export interface EntryListProps {
   readonly directory: DirectoryData;
+  readonly parentHref: string | null;
   readonly rows: string;
 }
 

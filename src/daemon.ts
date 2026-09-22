@@ -57,6 +57,7 @@ export async function daemonStatus(cwd: string): Promise<{
 }
 
 export async function startDaemon(options: {
+  readonly base?: string;
   readonly binPath: string;
   readonly cwd: string;
   readonly directory: string;
@@ -64,6 +65,7 @@ export async function startDaemon(options: {
   readonly mode?: string;
   readonly outDir?: string;
   readonly port?: string;
+  readonly urls?: string;
 }): Promise<DaemonState> {
   const current = await daemonStatus(options.cwd);
   if (current.running && current.state !== null) {
@@ -73,10 +75,12 @@ export async function startDaemon(options: {
   const paths = statePaths(options.cwd);
   await mkdir(paths.directory, { recursive: true });
   const args = [options.binPath, "serve", options.directory, "--cwd", options.cwd];
+  if (options.base !== undefined) args.push("--base", options.base);
   if (options.host !== undefined) args.push("--host", options.host);
   if (options.mode !== undefined) args.push("--mode", options.mode);
   if (options.outDir !== undefined) args.push("--outDir", options.outDir);
   if (options.port !== undefined) args.push("--port", options.port);
+  if (options.urls !== undefined) args.push("--urls", options.urls);
 
   const logDescriptor = openSync(paths.log, "a");
   const child = spawn(process.execPath, args, {

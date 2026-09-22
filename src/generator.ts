@@ -124,13 +124,40 @@ function assertSafeOutputName(name: string): void {
   }
 }
 
+function normalizeBase(value: string): string {
+  if (value.includes("?") || value.includes("#")) {
+    throw new TypeError("base must not contain a query string or fragment");
+  }
+  if (/^https?:\/\//i.test(value)) {
+    const url = new URL(value);
+    url.pathname = `${url.pathname.replace(/\/+$/, "")}/`;
+    return url.href;
+  }
+  if (!value.startsWith("/")) {
+    throw new TypeError('base must start with "/" or be an absolute HTTP(S) URL');
+  }
+  return `${value.replace(/\/+$/, "")}/`;
+}
+
+function encodeLogicalPath(value: string): string {
+  return value
+    .split("/")
+    .filter((segment) => segment.length > 0)
+    .map((segment) => encodeURIComponent(segment))
+    .join("/");
+}
+
 export async function generateExplorer(options: GenerateOptions): Promise<void> {
   const sourceDir = path.resolve(options.sourceDir);
   const outputDir = path.resolve(options.outputDir);
   const rootRealPath = await realpath(sourceDir);
   const outputName = options.outputName ?? defaultOutputName;
+  const resolveOutputName: OutputNameResolver =
+    typeof outputName === "string" ? () => outputName : outputName;
   const theme: ExplorerTheme = options.theme ?? defaultTheme;
   const mode = options.mode ?? "ssg";
+  const urlStrategy = options.urlStrategy ?? "relative";
+  const base = normalizeBase(options.base ?? "/");
   const followSymlinks = options.symlinks?.follow ?? false;
   const boundary = options.symlinks?.boundary ?? "root";
   const onCycle = options.symlinks?.onCycle ?? "skip";
@@ -251,7 +278,7 @@ export async function generateExplorer(options: GenerateOptions): Promise<void> 
       entries,
     };
 
-    const name = await outputName(directory);
+    const name = await resolveOutputName(directory);
     if (name !== null) assertSafeOutputName(name);
     plans.push({ directory, logicalDir, outputName: name });
 
@@ -295,6 +322,27 @@ export async function generateExplorer(options: GenerateOptions): Promise<void> 
         }
         return path.posix.join(logicalDir, entry.name);
       };
+      const hrefForLogicalPath = (targetPath: string, directoryLike: boolean): string => {
+        if (urlStrategy === "relative") {
+          const relativeTarget = path.posix.relative(
+            logicalDir === "" ? "." : logicalDir,
+            targetPath === "" ? "." : targetPath,
+          );
+          const encodedTarget = relativeTarget
+            .split("/")
+            .map((segment) =>
+              segment === "." || segment === ".." ? segment : encodeURIComponent(segment),
+            )
+            .join("/");
+          return `${encodedTarget || "."}${directoryLike ? "/" : ""}`;
+        }
+        const encodedTarget = encodeLogicalPath(targetPath);
+        if (encodedTarget === "") {
+          return urlStrategy === "base" ? base : "./";
+        }
+        const suffix = `${encodedTarget}${directoryLike ? "/" : ""}`;
+        return urlStrategy === "base" ? `${base}${suffix}` : suffix;
+      };
       const hrefFor = (entry: FileSystemEntry): string | null => {
         if (entry.symlink?.isBroken) {
           const filename = `${createHash("sha256")
@@ -304,52 +352,30 @@ export async function generateExplorer(options: GenerateOptions): Promise<void> 
             .digest("hex")
             .slice(0, 16)}.txt`;
           rawLinkFiles.set(filename, entry.symlink.target);
-          const relativeRawLink = path.posix.relative(
-            logicalDir === "" ? "." : logicalDir,
-            path.posix.join("__dirwell", "raw-links", filename),
-          );
-          return relativeRawLink
-            .split("/")
-            .map((segment) =>
-              segment === "." || segment === ".." ? segment : encodeURIComponent(segment),
-            )
-            .join("/");
+          return hrefForLogicalPath(path.posix.join("__dirwell", "raw-links", filename), false);
         }
         const targetLogicalPath = targetLogicalPathFor(entry);
         if (targetLogicalPath === null) return null;
-        const relativeTarget = path.posix.relative(
-          logicalDir === "" ? "." : logicalDir,
-          targetLogicalPath === "" ? "." : targetLogicalPath,
-        );
-        const encodedTarget = relativeTarget
-          .split("/")
-          .map((segment) =>
-            segment === "." || segment === ".." ? segment : encodeURIComponent(segment),
-          )
-          .join("/");
         const directoryLike =
           entry.kind === "directory" || entry.symlink?.targetKind === "directory";
-        return `${encodedTarget || "."}${directoryLike ? "/" : ""}`;
+        return hrefForLogicalPath(targetLogicalPath, directoryLike);
       };
       const page = await theme.render({
         directory,
+        documentBaseHref: urlStrategy === "html-base" ? base : null,
         outputName: name,
         mode,
         assetHref: (assetName) => {
           assertSafeOutputName(assetName);
-          if (mode === "ssg") return encodeURIComponent(assetName);
-          const relativeAsset = path.posix.relative(
-            logicalDir === "" ? "." : logicalDir,
-            path.posix.join("__dirwell", assetName),
+          return hrefForLogicalPath(
+            mode === "ssg"
+              ? path.posix.join(logicalDir, assetName)
+              : path.posix.join("__dirwell", assetName),
+            false,
           );
-          return relativeAsset
-            .split("/")
-            .map((segment) =>
-              segment === "." || segment === ".." ? segment : encodeURIComponent(segment),
-            )
-            .join("/");
         },
         hrefFor,
+        hrefForDirectory: (relativePath) => hrefForLogicalPath(relativePath, true),
         exitsExplorerFor: (entry) => {
           if (entry.symlink?.isBroken) return true;
           const targetLogicalPath = targetLogicalPathFor(entry);

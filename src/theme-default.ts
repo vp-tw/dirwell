@@ -106,8 +106,8 @@ export const defaultThemeComponents: DirwellThemeComponents = {
       <time datetime="${entry.metadata.times.modifiedAt}">${modified} UTC</time>
     </li>`;
   },
-  EntryList: ({ directory, rows }) =>
-    `<ul class="entries" data-entry-list>${directory.depth > 0 ? '<li class="entry" data-parent><a class="name" href="../">../</a><span class="kind">parent</span><span></span></li>' : ""}${rows}</ul>`,
+  EntryList: ({ directory, parentHref, rows }) =>
+    `<ul class="entries" data-entry-list>${directory.depth > 0 && parentHref !== null ? `<li class="entry" data-parent><a class="name" href="${escapeHtml(parentHref)}">../</a><span class="kind">parent</span><span></span></li>` : ""}${rows}</ul>`,
   EmptyState: ({ message }) => `<p class="empty" data-empty hidden>${escapeHtml(message)}</p>`,
   Footer: ({ keyboardNavigation, parentHref }) => {
     const shortcuts = keyboardNavigation
@@ -119,30 +119,38 @@ export const defaultThemeComponents: DirwellThemeComponents = {
     assets,
     breadcrumbs,
     directory,
+    documentBaseHref,
     emptyState,
     entryList,
     footer,
+    parentHref,
     runtimeConfig,
     styles,
     toolbar,
     visiblePath,
   }) => `<!doctype html>
-<html lang="en" data-theme="system"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light dark"><title>${escapeHtml(visiblePath)} · Files</title><style>${styles}</style></head>
-<body><main data-explorer data-config="${escapeHtml(JSON.stringify(runtimeConfig))}"${directory.depth > 0 ? ' data-parent-href="../"' : ""}>
+<html lang="en" data-theme="system"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light dark">${documentBaseHref === null ? "" : `<base href="${escapeHtml(documentBaseHref)}">`}<title>${escapeHtml(visiblePath)} · Files</title><style>${styles}</style></head>
+<body><main data-explorer data-config="${escapeHtml(JSON.stringify(runtimeConfig))}"${parentHref === null ? "" : ` data-parent-href="${escapeHtml(parentHref)}"`}>
 <header><h1><span class="visually-hidden">Directory ${escapeHtml(visiblePath)}</span>${breadcrumbs}</h1><p class="summary"><span data-visible-count>${directory.entries.length}</span> <span data-count-label>${directory.entries.length === 1 ? "entry" : "entries"}</span></p></header>
 ${toolbar}${entryList}${emptyState}<p class="visually-hidden" aria-live="polite" data-live-status></p>${footer}</main>${assets}</body></html>`,
 };
 
-function createBreadcrumbs(relativePath: string): readonly BreadcrumbItem[] {
+function createBreadcrumbs(
+  relativePath: string,
+  hrefForDirectory: (relativePath: string) => string,
+): readonly BreadcrumbItem[] {
   const segments = relativePath === "" ? [] : relativePath.split("/");
   return [
     {
-      href: segments.length === 0 ? null : "../".repeat(segments.length),
+      href: segments.length === 0 ? null : hrefForDirectory(""),
       isCurrent: segments.length === 0,
       label: segments.length === 0 ? "/" : "Home",
     },
     ...segments.map((label, index) => ({
-      href: index === segments.length - 1 ? null : "../".repeat(segments.length - index - 1),
+      href:
+        index === segments.length - 1
+          ? null
+          : hrefForDirectory(segments.slice(0, index + 1).join("/")),
       isCurrent: index === segments.length - 1,
       label,
     })),
@@ -164,7 +172,14 @@ export function createDefaultTheme(options: DefaultThemeOptions = {}): ExplorerT
 
   return {
     name: "ledger",
-    render({ assetHref, directory, exitsExplorerFor, hrefFor }) {
+    render({
+      assetHref,
+      directory,
+      documentBaseHref,
+      exitsExplorerFor,
+      hrefFor,
+      hrefForDirectory,
+    }) {
       const visiblePath =
         directory.current.relativePath === "" ? "/" : `/${directory.current.relativePath}/`;
       const rows = directory.entries
@@ -184,18 +199,22 @@ export function createDefaultTheme(options: DefaultThemeOptions = {}): ExplorerT
         ? `<script src="${escapeHtml(assetHref("dirwell.runtime.js"))}" type="module"></script>`
         : "";
       const runtimeConfig = { colorScheme, fuzzySearch, keyboardNavigation };
+      const parentHref =
+        directory.parent === null ? null : hrefForDirectory(directory.parent.relativePath);
       const html = components.PageShell({
         assets,
         breadcrumbs: components.Breadcrumbs({
-          items: createBreadcrumbs(directory.current.relativePath),
+          items: createBreadcrumbs(directory.current.relativePath, hrefForDirectory),
         }),
         directory,
+        documentBaseHref,
         emptyState: components.EmptyState({ message: "No matching entries." }),
-        entryList: components.EntryList({ directory, rows }),
+        entryList: components.EntryList({ directory, parentHref, rows }),
         footer: components.Footer({
           keyboardNavigation,
-          parentHref: directory.depth > 0 ? "../" : null,
+          parentHref,
         }),
+        parentHref,
         runtimeConfig,
         styles: defaultStyles,
         toolbar: components.Toolbar({

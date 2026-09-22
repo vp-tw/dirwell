@@ -43,8 +43,9 @@ the network.
 
 ## Output filename
 
-`outputName` receives complete `DirectoryData` and returns a filename or
-`null`. Returning `null` skips generation for that directory.
+`outputName` accepts a fixed filename or a function. The function receives
+complete `DirectoryData` and returns a filename or `null`. Returning `null`
+skips generation for that directory.
 
 ```ts
 export default defineConfig({
@@ -53,3 +54,21 @@ export default defineConfig({
   },
 });
 ```
+
+## URL strategy
+
+`relative` is the portable default. `base` prefixes every generated URL with
+a Vite-style deployment base. `html-base` emits the native HTML `<base>`
+element and makes every generated URL relative to it.
+
+```ts
+export default defineConfig({
+  base: "/repository-name/",
+  urls: "base", // "relative" | "base" | "html-base"
+});
+```
+
+`base` may be a root-relative pathname or a complete HTTP(S) URL. Query
+strings and fragments are rejected. Dirwell applies the strategy consistently
+to files, directories, breadcrumbs, parent navigation, theme assets, and
+broken-link raw views.
