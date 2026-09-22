@@ -1,0 +1,9 @@
+.dirwell/
+.dirwell-preview/
+.DS_Store
+coverage/
+dist/
+docs/.astro/
+docs/dist/
+generated/
+node_modules/

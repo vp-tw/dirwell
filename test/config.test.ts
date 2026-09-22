@@ -1,0 +1,66 @@
+import assert from "node:assert/strict";
+import { mkdtemp, realpath, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import path from "node:path";
+import test from "node:test";
+import { renderUsage } from "citty";
+import { mainCommand } from "../src/cli.ts";
+import { loadDirwellConfig, resolveGenerateOptions } from "../src/config.ts";
+
+async function temporaryDirectory(): Promise<string> {
+  return mkdtemp(path.join(tmpdir(), "dirwell-config-"));
+}
+
+test("loads zero-config defaults", async (context) => {
+  const cwd = await temporaryDirectory();
+  context.after(() => rm(cwd, { recursive: true, force: true }));
+
+  const loaded = await loadDirwellConfig(cwd, "build");
+  const resolved = resolveGenerateOptions(cwd, loaded.config);
+
+  assert.equal(loaded.configFile, null);
+  assert.equal(resolved.sourceDir, cwd);
+  assert.equal(resolved.outputDir, path.join(cwd, "dist"));
+});
+
+test("loads TypeScript function configs and local extends", async (context) => {
+  const cwd = await temporaryDirectory();
+  context.after(() => rm(cwd, { recursive: true, force: true }));
+  await writeFile(
+    path.join(cwd, "base.config.ts"),
+    'export default { mode: "mpa", mirror: false };\n',
+  );
+  await writeFile(
+    path.join(cwd, "dirwell.config.ts"),
+    `export default (context) => ({
+      extends: "./base.config.ts",
+      root: context.command === "serve" ? "preview" : "public",
+      outDir: "site",
+    });\n`,
+  );
+
+  const loaded = await loadDirwellConfig(cwd, "serve");
+
+  assert.equal(loaded.config.root, "preview");
+  assert.equal(loaded.config.outDir, "site");
+  assert.equal(loaded.config.mode, "mpa");
+  assert.equal(loaded.config.mirror, false);
+  assert.equal(loaded.configFile, path.join(await realpath(cwd), "dirwell.config.ts"));
+});
+
+test("rejects invalid runtime config", async (context) => {
+  const cwd = await temporaryDirectory();
+  context.after(() => rm(cwd, { recursive: true, force: true }));
+  await writeFile(path.join(cwd, "dirwell.config.ts"), 'export default { mode: "spa" };\n');
+
+  await assert.rejects(() => loadDirwellConfig(cwd, "build"), /mode must be either/);
+});
+
+test("CLI help exposes zero-config usage and primary commands", async () => {
+  const usage = await renderUsage(mainCommand);
+  assert.match(usage, /dirwell build\|daemon\|serve\|dev/);
+  assert.match(usage, /Build and serve a static file explorer/);
+  assert.match(usage, /Generate a deployable static file explorer/);
+  assert.match(usage, /Watch files and serve the explorer with live reload/);
+  assert.match(usage, /Manage a detached file explorer server/);
+});

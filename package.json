@@ -1,0 +1,62 @@
+{
+  "name": "dirwell",
+  "version": "0.0.0",
+  "description": "A static file explorer with safe symlinks, themes, and live reload.",
+  "keywords": [
+    "directory-index",
+    "file-browser",
+    "static-site-generator"
+  ],
+  "license": "MIT",
+  "bin": {
+    "dirwell": "./dist/bin.mjs"
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md"
+  ],
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs"
+    },
+    "./theme": {
+      "types": "./dist/theme-components.d.mts",
+      "import": "./dist/theme-components.mjs"
+    }
+  },
+  "scripts": {
+    "build": "vp pack",
+    "build:explorer": "node src/bin.ts build",
+    "check": "vp check && tsc --noEmit",
+    "dev": "node src/bin.ts serve fixture --out-dir generated",
+    "dirwell": "node src/bin.ts",
+    "docs:build": "pnpm --dir docs build",
+    "docs:dev": "pnpm --dir docs dev",
+    "format": "vp fmt --write",
+    "lint": "vp lint",
+    "test": "node --test test/*.test.ts",
+    "check:types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "c12": "4.0.0-rc.1",
+    "chokidar": "5.0.0",
+    "citty": "0.2.2",
+    "giget": "3.3.1",
+    "jiti": "2.7.0"
+  },
+  "devDependencies": {
+    "@astrojs/starlight": "0.42.2",
+    "@types/node": "26.6.2",
+    "astro": "7.3.3",
+    "typescript": "7.0.2",
+    "vite": "catalog:",
+    "vite-plus": "catalog:"
+  },
+  "engines": {
+    "node": ">=26"
+  },
+  "packageManager": "pnpm@11.25.0"
+}

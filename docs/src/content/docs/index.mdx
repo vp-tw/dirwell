@@ -1,0 +1,30 @@
+---
+title: Dirwell
+description: A static file explorer that starts with one command and scales to custom themes.
+template: splash
+hero:
+  tagline: A static file explorer that is easy to start and deep to customize.
+  actions:
+    - text: Get started
+      link: /getting-started/
+      variant: primary
+    - text: CLI reference
+      link: /cli/
+---
+
+import { Card, CardGrid } from "@astrojs/starlight/components";
+
+<CardGrid>
+  <Card title="Zero configuration" icon="rocket">
+    Serve a directory or generate deployable static files with one command.
+  </Card>
+  <Card title="Safe symlinks" icon="seti:folder-symlink">
+    Cycles remain navigable, while broken and out-of-root targets stay visible and safe.
+  </Card>
+  <Card title="Replaceable components" icon="puzzle">
+    Layer typed components, wrap a default component, or provide a complete renderer.
+  </Card>
+  <Card title="Keyboard first" icon="approve-check">
+    Fuzzy search, IME-safe input, directory shortcuts, and accessible navigation are included.
+  </Card>
+</CardGrid>
