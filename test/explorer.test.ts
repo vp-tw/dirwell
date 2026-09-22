@@ -60,7 +60,7 @@ test("mirrors source files and preserves an existing index", async (context) => 
   assert.match(rootIndex, /href="space%20name\.txt"/);
   assert.doesNotMatch(rootIndex, /href="releases\/" target="_blank"/);
   assert.match(rootIndex, /external-link/);
-  assert.match(rootIndex, /→ \.\.\/external/);
+  assert.match(rootIndex, /Target:<\/span> \.\.\/external/);
   assert.match(rootIndex, /external link/);
   assert.doesNotMatch(rootIndex, /href="external-link\/"/);
   const rawLinkHref = rootIndex.match(
@@ -91,7 +91,7 @@ test("output names support strings, resolver skips, and safe filename validation
   assert.match(await readFile(path.join(output, "listing.html"), "utf8"), /README\.txt/);
   assert.match(
     await readFile(path.join(output, "docs", "listing.html"), "utf8"),
-    /Directory \/docs\//,
+    /directory-label">Directory<\/span><h1>\/docs\//,
   );
 
   await generateExplorer({
