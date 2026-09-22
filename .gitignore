@@ -1,9 +1,11 @@
 .dirwell/
 .dirwell-preview/
+.impeccable/review/
 .DS_Store
 coverage/
 dist/
 docs/.astro/
 docs/dist/
 generated/
+site/
 node_modules/

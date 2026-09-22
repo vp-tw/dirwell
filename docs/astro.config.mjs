@@ -1,7 +1,11 @@
 import { defineConfig } from "astro/config";
 import starlight from "@astrojs/starlight";
 
+const siteBase = process.env.SITE_BASE ?? "/";
+
 export default defineConfig({
+  base: siteBase,
+  outDir: "../site",
   integrations: [
     starlight({
       title: "Dirwell",
@@ -11,8 +15,9 @@ export default defineConfig({
         {
           label: "Start",
           items: [
-            { label: "Overview", slug: "index" },
+            { label: "Overview", slug: "overview" },
             { label: "Getting started", slug: "getting-started" },
+            { label: "Examples", slug: "examples" },
           ],
         },
         {

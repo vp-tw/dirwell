@@ -1,0 +1,217 @@
+---
+const base = import.meta.env.BASE_URL;
+const path = (value: string) => `${base}${value}`.replace(/\/+/g, "/");
+const repositoryUrl = import.meta.env.PUBLIC_REPOSITORY_URL ?? "https://github.com/VdustR/dirwell";
+const examples = [
+  {
+    slug: "basic",
+    name: "Zero config",
+    description: "A portable SSG build with relative URLs. Copy it anywhere and open it.",
+    detail: "SSG · relative URLs",
+  },
+  {
+    slug: "base-path",
+    name: "GitHub Pages",
+    description: "An MPA build mounted below a repository base path with one shared runtime.",
+    detail: "MPA · base URLs",
+  },
+  {
+    slug: "custom-theme",
+    name: "Component theme",
+    description: "The default explorer with a replaced header and entry-row component.",
+    detail: "typed overrides",
+  },
+];
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Dirwell builds a static, searchable file explorer from any directory."
+    />
+    <meta name="theme-color" content="#f3f0e8" />
+    <title>Dirwell — a file explorer you can deploy anywhere</title>
+    <link rel="stylesheet" href={path("landing.css")} />
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="wordmark" href={base} aria-label="Dirwell home">dirwell<span>/</span></a>
+      <nav aria-label="Primary navigation">
+        <a href="#examples">Examples</a>
+        <a href={path("getting-started/")}>Docs</a>
+        <a href={repositoryUrl}>GitHub</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <h1 id="hero-title">Put a directory<br />on the web.</h1>
+          <p>
+            Dirwell builds a static file explorer with search, keyboard navigation,
+            safe symlinks, and a theme API. Run one command. Deploy the output anywhere.
+          </p>
+          <div class="actions">
+            <a class="primary-action" href={path("getting-started/")}>Build your first explorer</a>
+            <a class="text-action" href="#examples">See working examples</a>
+          </div>
+        </div>
+
+        <div class="terminal" aria-label="Dirwell quick start command">
+          <div class="terminal-bar"><span>terminal</span><span>~/releases</span></div>
+          <pre><code><span class="prompt">$</span> pnpm dlx dirwell .
+<span class="muted">Dirwell is watching /releases
+Local: http://localhost:4173</span></code></pre>
+        </div>
+
+        <div class="explorer-sample" aria-label="Example generated file explorer">
+          <div class="sample-toolbar">
+            <div class="crumbs"><a href="#examples">releases</a><span>/</span><strong>v2.4.0</strong></div>
+            <span class="search">⌘ K&nbsp;&nbsp; Search files</span>
+          </div>
+          <div class="sample-heading">
+            <div><span>Directory</span><h2>/releases/v2.4.0</h2></div>
+            <span>4 entries</span>
+          </div>
+          <div class="file-row file-head"><span>Name</span><span>Size</span><span>Modified</span></div>
+          <a class="file-row" href={path("examples/basic/releases/")}><span class="file-name"><b>DIR</b> Parent directory</span><span>—</span><span>—</span></a>
+          <a class="file-row" href={path("examples/basic/releases/v2.4.0/app.js")} target="_blank"><span class="file-name"><b>JS</b> app.js</span><span>18.4 kB</span><span>2026-09-21</span></a>
+          <a class="file-row" href={path("examples/basic/releases/v2.4.0/checksums.txt")} target="_blank"><span class="file-name"><b>TXT</b> checksums.txt</span><span>1.2 kB</span><span>2026-09-21</span></a>
+          <a class="file-row" href={path("examples/basic/releases/v2.4.0/release-notes.md")} target="_blank"><span class="file-name"><b>MD</b> release-notes.md</span><span>3.8 kB</span><span>2026-09-21</span></a>
+        </div>
+      </section>
+
+      <section class="problem" aria-labelledby="problem-title">
+        <div>
+          <h2 id="problem-title">The folder already has the information.</h2>
+          <p>
+            Most directory listings lose the context people need, or turn a small publishing
+            job into an application. Dirwell keeps the filesystem legible and the output static.
+          </p>
+        </div>
+        <dl>
+          <div><dt>Start</dt><dd>No config file required.</dd></div>
+          <div><dt>Inspect</dt><dd>Full metadata and explicit symlink states.</dd></div>
+          <div><dt>Ship</dt><dd>Plain files for any static host.</dd></div>
+          <div><dt>Adapt</dt><dd>Replace components or the renderer.</dd></div>
+        </dl>
+      </section>
+
+      <section class="examples" id="examples" aria-labelledby="examples-title">
+        <div class="section-heading">
+          <h2 id="examples-title">Three builds. Same directory model.</h2>
+          <p>Open the generated site, then inspect the exact source that produced it.</p>
+        </div>
+        <div class="example-list">
+          {examples.map((example) => (
+            <article>
+              <div>
+                <h3>{example.name}</h3>
+                <p>{example.description}</p>
+                <span class="example-detail">{example.detail}</span>
+              </div>
+              <div class="example-actions">
+                <a href={path(`examples/${example.slug}/`)} target="_blank" rel="noopener">Open demo</a>
+                <a href={`${repositoryUrl}/tree/main/examples/${example.slug}`} target="_blank" rel="noopener">View source</a>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section class="quick-start" aria-labelledby="quick-title">
+        <div class="section-heading">
+          <h2 id="quick-title">Useful before you configure it.</h2>
+          <p>Serve the current folder while you work. Build the same folder when it is ready.</p>
+        </div>
+        <div class="command-pair">
+          <div><span>Preview and watch</span><code>pnpm dlx dirwell .</code></div>
+          <div><span>Build static output</span><code>pnpm dlx dirwell build . -o dist</code></div>
+        </div>
+        <a class="text-action" href={path("getting-started/")}>Read the five-minute guide</a>
+      </section>
+
+      <section class="depth" aria-labelledby="depth-title">
+        <div class="depth-intro">
+          <h2 id="depth-title">The defaults are an entry point, not a ceiling.</h2>
+          <p>
+            Keep the built-in interface, replace one typed component, or own every byte of the
+            document. URL generation and output naming are separate decisions.
+          </p>
+        </div>
+        <div class="code-panel">
+          <div class="code-tabs" role="tablist" aria-label="Configuration examples">
+            <button id="tab-theme" type="button" role="tab" aria-selected="true" aria-controls="panel-theme" tabindex="0" data-tab="theme">Theme</button>
+            <button id="tab-urls" type="button" role="tab" aria-selected="false" aria-controls="panel-urls" tabindex="-1" data-tab="urls">URLs</button>
+            <button id="tab-naming" type="button" role="tab" aria-selected="false" aria-controls="panel-naming" tabindex="-1" data-tab="naming">Naming</button>
+          </div>
+          <pre id="panel-theme" role="tabpanel" aria-labelledby="tab-theme" data-panel="theme"><code>{`createDefaultTheme({
+  components: {
+    EntryRow: ReleaseRow,
+  },
+})`}</code></pre>
+          <pre id="panel-urls" role="tabpanel" aria-labelledby="tab-urls" data-panel="urls" hidden><code>{`defineConfig({
+  base: "/dirwell/",
+  urls: "base",
+  mode: "mpa",
+})`}</code></pre>
+          <pre id="panel-naming" role="tabpanel" aria-labelledby="tab-naming" data-panel="naming" hidden><code>{`outputName(directory) {
+  return hasIndex(directory)
+    ? null
+    : "index.html";
+}`}</code></pre>
+        </div>
+        <div class="depth-links">
+          <a href={path("configuration/")}>Configuration reference</a>
+          <a href={path("themes/")}>Theme components</a>
+          <a href={path("deployment/")}>Deployment patterns</a>
+        </div>
+      </section>
+
+      <section class="closing" aria-labelledby="closing-title">
+        <h2 id="closing-title">A directory can be the product.</h2>
+        <p>Keep it static. Make it navigable. Change only what your project needs.</p>
+        <a class="primary-action" href={path("getting-started/")}>Get started</a>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <span>Dirwell · MIT</span>
+      <div><a href={path("overview/")}>Docs</a><a href={repositoryUrl}>Source</a></div>
+    </footer>
+
+    <script>
+      const tabs = Array.from(document.querySelectorAll('[role="tab"]'));
+      const panels = Array.from(document.querySelectorAll("[data-panel]"));
+      const selectTab = (tab) => {
+          const active = tab.getAttribute("data-tab");
+          for (const item of tabs) {
+            const selected = item === tab;
+            item.setAttribute("aria-selected", String(selected));
+            item.setAttribute("tabindex", selected ? "0" : "-1");
+          }
+          for (const panel of panels) panel.toggleAttribute("hidden", panel.getAttribute("data-panel") !== active);
+      };
+      for (const tab of tabs) {
+        tab.addEventListener("click", () => selectTab(tab));
+        tab.addEventListener("keydown", (event) => {
+          const current = tabs.indexOf(tab);
+          const next =
+            event.key === "ArrowRight" ? (current + 1) % tabs.length
+            : event.key === "ArrowLeft" ? (current - 1 + tabs.length) % tabs.length
+            : event.key === "Home" ? 0
+            : event.key === "End" ? tabs.length - 1
+            : null;
+          if (next === null) return;
+          event.preventDefault();
+          selectTab(tabs[next]);
+          tabs[next].focus();
+        });
+      }
+    </script>
+  </body>
+</html>

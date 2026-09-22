@@ -1,0 +1,101 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-22T09:45:00.000Z",
+  "title": "Design System: Dirwell",
+  "extensions": {
+    "colorMeta": {
+      "deployment-blue": {
+        "role": "primary",
+        "displayName": "Deployment Blue",
+        "canonical": "#174ea6",
+        "tonalRamp": ["#061731", "#0b2854", "#103973", "#174ea6", "#4e79ba", "#88a7d3", "#bfd0e8", "#edf3fb"]
+      },
+      "paper": {
+        "role": "neutral",
+        "displayName": "Catalog Paper",
+        "canonical": "#f3f0e8",
+        "tonalRamp": ["#25241f", "#45433d", "#66635b", "#89857a", "#aaa69b", "#ccc8bd", "#e8e3d8", "#f8f6f0"]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Index Ink",
+        "canonical": "#171815",
+        "tonalRamp": ["#171815", "#30312d", "#4a4b45", "#65665f", "#82837b", "#a1a29a", "#c4c5bd", "#eff0e9"]
+      },
+      "status-green": {
+        "role": "secondary",
+        "displayName": "Status Green",
+        "canonical": "#34705c",
+        "tonalRamp": ["#10251e", "#1b3b31", "#285444", "#34705c", "#5d8e7d", "#8eb2a5", "#bfd5cd", "#edf5f2"]
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Editorial Display", "purpose": "Hero statements only." },
+      "headline": { "displayName": "Section Headline", "purpose": "Major section arguments." },
+      "body": { "displayName": "Interface Body", "purpose": "Explanations, navigation, and controls." },
+      "label": { "displayName": "Catalog Label", "purpose": "Technical modes and metadata labels." }
+    },
+    "shadows": [
+      { "name": "artifact-low", "value": "0 20px 54px rgba(46, 46, 40, 0.1)", "purpose": "Code panels and inspectable artifacts." },
+      { "name": "artifact-high", "value": "0 30px 80px rgba(46, 46, 40, 0.14)", "purpose": "Primary file-ledger demonstration." }
+    ],
+    "motion": [
+      { "name": "anchor-scroll", "value": "smooth", "purpose": "Section navigation; disabled when reduced motion is requested." }
+    ],
+    "breakpoints": [
+      { "name": "stack", "value": "850px" },
+      { "name": "compact", "value": "560px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The single high-emphasis action in a section.",
+      "html": "<a class=\"ds-primary\" href=\"#\">Get started</a>",
+      "css": ".ds-primary{display:inline-flex;align-items:center;min-height:48px;padding:0 20px;border-radius:12px;background:#174ea6;color:#fff;font:700 16px/1.2 Inter,system-ui,sans-serif;text-decoration:none}.ds-primary:hover{background:#103973}.ds-primary:focus-visible{outline:3px solid #005fcc;outline-offset:4px}"
+    },
+    {
+      "name": "Catalog Row",
+      "kind": "custom",
+      "description": "A demo or capability with direct output and source actions.",
+      "html": "<div class=\"ds-row\"><div><strong>GitHub Pages</strong><p>MPA with one shared runtime.</p><small>MPA · BASE URLS</small></div><a href=\"#\">Open demo</a></div>",
+      "css": ".ds-row{display:grid;grid-template-columns:1fr auto;gap:28px;align-items:center;padding:32px 0;border-block:1px solid #c9c5ba;color:#171815;font:16px/1.55 Inter,system-ui,sans-serif}.ds-row p{margin:8px 0;color:#64655f}.ds-row small{color:#34705c;font-weight:730;letter-spacing:.08em}.ds-row a{color:#103973;font-weight:700;text-underline-offset:.22em}.ds-row a:focus-visible{outline:3px solid #005fcc;outline-offset:4px}"
+    },
+    {
+      "name": "Code Tabs",
+      "kind": "custom",
+      "description": "A compact switcher for typed configuration examples.",
+      "html": "<div class=\"ds-tabs\"><button aria-selected=\"true\">Theme</button><button>URLs</button><button>Naming</button></div>",
+      "css": ".ds-tabs{display:flex;border:1px solid #c9c5ba;border-radius:14px 14px 0 0;background:#fbfaf6}.ds-tabs button{border:0;background:transparent;padding:15px 18px;color:#64655f;font:700 14px Inter,system-ui,sans-serif}.ds-tabs button[aria-selected=true]{color:#103973;box-shadow:inset 0 -2px #174ea6}.ds-tabs button:focus-visible{outline:3px solid #005fcc;outline-offset:-3px}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Public Release Index",
+    "overview": "Dirwell uses the visual language of a maintained technical catalog: warm paper, precise rules, readable metadata, and a restrained deployment blue. The official site is editorial at the top and increasingly dense as it explains the product. The generated explorer remains a separate, compact inventory interface that third-party themes may replace without inheriting the official site's tokens.",
+    "keyCharacteristics": [
+      "Editorial display type leads; interface type carries actions and metadata.",
+      "Real terminal and file-ledger content prove the product instead of decorative imagery.",
+      "Thin rules organize dense information; rounded surfaces are reserved for controls and demonstrations.",
+      "Keyboard focus and reduced-motion behavior are part of the visual system."
+    ],
+    "rules": [
+      { "name": "The Deployment Blue Rule", "body": "Use the accent to show navigation or action, never as a large decorative field.", "section": "colors" },
+      { "name": "The Ledger Type Rule", "body": "Use tabular numerals for file sizes, dates, and other aligned measurements.", "section": "typography" },
+      { "name": "The Evidence Surface Rule", "body": "Elevation identifies a working example or code artifact, not a generic content container.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do show real commands, directory entries, and build modes when explaining capability.",
+      "Do keep examples paired with both their live output and source directory.",
+      "Do preserve the problem-to-proof-to-setup-to-advanced reading order on marketing surfaces.",
+      "Do keep focus visible and motion optional."
+    ],
+    "donts": [
+      "Don't turn the page into an equal-card feature grid.",
+      "Don't use invented adoption claims, customers, metrics, or testimonials.",
+      "Don't use Unicode arrows or emoji as interface icons.",
+      "Don't force third-party themes to inherit either the official-site or default-theme palette."
+    ]
+  }
+}

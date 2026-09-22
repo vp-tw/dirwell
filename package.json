@@ -35,8 +35,10 @@
     "dirwell": "node src/bin.ts",
     "docs:build": "pnpm --dir docs build",
     "docs:dev": "pnpm --dir docs dev",
+    "examples:build": "node scripts/build-examples.ts",
     "format": "vp fmt --write",
     "lint": "vp lint",
+    "site:build": "pnpm run docs:build && pnpm run examples:build",
     "test": "node --test test/*.test.ts",
     "check:types": "tsc --noEmit"
   },

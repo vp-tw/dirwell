@@ -2,7 +2,7 @@ import { defineConfig } from "vite-plus";
 
 export default defineConfig({
   fmt: {
-    ignorePatterns: [],
+    ignorePatterns: ["site/**", ".impeccable/**"],
   },
   pack: {
     deps: { resolveDepSubpath: true },
