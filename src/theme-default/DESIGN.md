@@ -86,7 +86,7 @@ precede project metadata in the footer. At 19.5rem, controls may stack again.
 Content must not cause horizontal page scrolling at 320px or wider.
 
 Controls use the shared `--dw-control-height` token. Search, selects, Sort,
-color-scheme buttons, breadcrumb links, and interactive file names retain a
+breadcrumb links, and interactive file names retain a
 44px minimum target on touch-sized screens. Column-sort headings use a 44px
 minimum target whenever they are buttons.
 
@@ -109,9 +109,10 @@ use a pill shape; file entries do not become cards.
 exposes the public `createDefaultTheme` entry point. Consumers can replace
 named components through the theme API or replace the complete theme.
 
-- **Toolbar:** native search input, a three-checkbox `fieldset` for disjoint
-  folder, file, and link types, `details` for sorting, and a `fieldset` for
-  color scheme. Keep visible focus and one control height.
+- **Toolbar:** native search input, a wrapping three-checkbox `fieldset` for
+  disjoint folder, file, and link types, `details` for sorting, and a compact
+  labeled select for the secondary theme setting. Keep visible focus and one
+  control height.
 - **Breadcrumbs:** linked ancestors, plain-text current segment, and a single
   separator between segments.
 - **Entry list:** linked names, explicit symlink targets and availability,

@@ -156,6 +156,7 @@ main {
 }
 .search-cluster {
   display: flex;
+  flex-wrap: wrap;
   min-width: 0;
   flex: 1;
   gap: 0.6rem;
@@ -190,9 +191,11 @@ main {
 }
 .type-filters {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   min-width: 0;
   min-height: var(--dw-control-height);
+  max-width: 100%;
   margin: 0;
   padding: 0.2rem;
   border: 1px solid var(--rule);
@@ -267,6 +270,7 @@ main {
   padding: 1rem 1.25rem;
 }
 .global-search-head {
+  flex-wrap: wrap;
   justify-content: space-between;
   border-bottom: 1px solid var(--soft-rule);
 }
@@ -299,29 +303,21 @@ main {
   gap: 0.6rem;
 }
 .scheme {
-  display: flex;
-  margin: 0;
-  padding: 0;
-  border: 0;
-  border-radius: 0.5rem;
-  outline: 1px solid var(--rule);
-  outline-offset: -1px;
-}
-.scheme button {
-  min-height: var(--dw-control-height);
-  border: 0;
-  border-radius: 0.34rem;
-  padding: 0.35rem 0.65rem;
-  background: transparent;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
   color: var(--muted);
-  cursor: pointer;
+  font-size: 0.78rem;
+  white-space: nowrap;
 }
-.scheme button:hover {
+.scheme select {
+  min-height: var(--dw-control-height);
+  border: 1px solid var(--rule);
+  border-radius: 0.5rem;
+  padding: 0.35rem 1.65rem 0.35rem 0.6rem;
+  background: var(--control);
   color: var(--ink);
-}
-.scheme button[aria-pressed="true"] {
-  background: var(--ink);
-  color: var(--surface);
+  cursor: pointer;
 }
 .sort-panel {
   position: relative;
@@ -350,6 +346,7 @@ main {
   right: 0;
   top: calc(100% + 0.4rem);
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   width: 16rem;
   gap: 0.7rem;
   padding: 1rem;
@@ -357,6 +354,10 @@ main {
   border-radius: 0.75rem;
   background: var(--surface);
   box-shadow: var(--shadow);
+}
+.sort-menu select {
+  min-width: 0;
+  width: 100%;
 }
 .sort-menu label {
   display: grid;
@@ -588,6 +589,12 @@ kbd {
   .toolbar {
     padding: 1rem;
   }
+  .toolbar-actions {
+    flex-wrap: wrap;
+  }
+  .sort-menu {
+    width: min(16rem, calc(100vw - 2rem));
+  }
   .global-search-controls {
     flex-wrap: wrap;
   }
@@ -641,12 +648,6 @@ kbd {
   .search-cluster {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
-  }
-  .toolbar-actions {
-    flex-wrap: wrap;
-  }
-  .sort-menu {
-    width: min(16rem, calc(100vw - 2rem));
   }
 }
 @media (pointer: coarse) {

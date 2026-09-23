@@ -75,12 +75,15 @@ test("mirrors source files and preserves an existing index", async (context) => 
   }
   assert.doesNotMatch(rootIndex, /data-include-links|data-search-filter|data-global-filter/);
   assert.match(rootIndex, /data-sort-field/);
-  for (const name of ["sort-field", "name-mode", "sort-direction"]) {
+  for (const name of ["color-scheme", "sort-field", "name-mode", "sort-direction"]) {
     assert.equal(rootIndex.match(new RegExp(`<select data-${name}>`, "g"))?.length, 1);
   }
   assert.match(rootIndex, /--dw-control-height:\s*2\.75rem/);
   assert.match(rootIndex, /button\.sort-heading\s*\{[^}]*min-width:\s*var\(--dw-control-height\)/);
-  assert.match(rootIndex, /data-theme-value="system" aria-pressed="true">System<\/button>/);
+  assert.match(
+    rootIndex,
+    /<label class="scheme">Theme<select data-color-scheme><option value="system">System<\/option>/,
+  );
   assert.match(rootIndex, />Dirwell<\/a> by VdustR/);
   assert.doesNotMatch(rootIndex, /data-parent-href/);
   assert.match(rootIndex, /href="README\.txt" target="_blank" rel="noopener">[\s\S]*README\.txt/);
@@ -534,7 +537,7 @@ test("default theme interactions can be disabled", async (context) => {
     }),
   });
   const html = await readFile(path.join(output, "index.html"), "utf8");
-  assert.doesNotMatch(html, /data-search-input|data-theme-value|dirwell\.runtime/);
+  assert.doesNotMatch(html, /data-search-input|data-color-scheme|dirwell\.runtime/);
   assert.doesNotMatch(html, /data-sort-heading|<button class="sort-heading"/);
   assert.match(html, /<span class="sort-heading">name<\/span>/);
 });

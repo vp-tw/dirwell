@@ -9,7 +9,7 @@ export function escapeHtml(value: string): string {
     .replaceAll('"', "&quot;");
 }
 
-type SelectControlName = "sort-field" | "name-mode" | "sort-direction";
+type SelectControlName = "color-scheme" | "sort-field" | "name-mode" | "sort-direction";
 
 function renderSelectControl(
   name: SelectControlName,
@@ -95,18 +95,11 @@ export const defaultThemeComponents: DirwellThemeComponents = {
       ? `<div class="search-cluster"><label class="search">${searchIcon}<span class="visually-hidden">Search this folder</span><input type="search" autocomplete="off" placeholder="Search this folder"${shortcutAttributes} data-search-input></label>${renderTypeFilters()}${searchAll}</div>`
       : searchAll;
     const scheme = colorScheme
-      ? `<fieldset class="scheme" data-scheme-control><legend class="visually-hidden">Color scheme</legend>${(
-          [
-            ["system", "System"],
-            ["light", "Light"],
-            ["dark", "Dark"],
-          ] as const
-        )
-          .map(
-            ([value, label]) =>
-              `<button type="button" data-theme-value="${value}" aria-pressed="${value === "system"}">${label}</button>`,
-          )
-          .join("")}</fieldset>`
+      ? `<label class="scheme">Theme${renderSelectControl("color-scheme", [
+          ["system", "System"],
+          ["light", "Light"],
+          ["dark", "Dark"],
+        ])}</label>`
       : "";
     const sort = sorting
       ? `<details class="sort-panel"><summary>Sort</summary><div class="sort-menu"><label>Sort by${renderSelectControl(

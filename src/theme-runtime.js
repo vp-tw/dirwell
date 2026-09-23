@@ -776,20 +776,16 @@ function initializeExplorer(root) {
   }
 
   if (config.colorScheme) {
+    const schemeSelect = root.querySelector("[data-color-scheme]");
     const saved = storage.get(localStorage, "dirwell-theme");
     const initial = ["system", "light", "dark"].includes(saved) ? saved : "system";
     const setTheme = (theme) => {
       document.documentElement.dataset.theme = theme;
       storage.set(localStorage, "dirwell-theme", theme);
-      for (const button of root.querySelectorAll("[data-theme-value]")) {
-        button.setAttribute("aria-pressed", String(button.dataset.themeValue === theme));
-      }
+      if (schemeSelect) schemeSelect.value = theme;
     };
     setTheme(initial);
-    root.querySelector("[data-scheme-control]")?.addEventListener("click", (event) => {
-      const button = event.target.closest("[data-theme-value]");
-      if (button) setTheme(button.dataset.themeValue);
-    });
+    schemeSelect?.addEventListener("change", () => setTheme(schemeSelect.value));
   }
 
   if (config.keyboardNavigation) {
