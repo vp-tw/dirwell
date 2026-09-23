@@ -1,0 +1,162 @@
+---
+title: API reference
+description: Find the exported TypeScript API, configuration defaults, and CLI options.
+---
+
+import { Code } from "@astrojs/starlight/components";
+import zeroConfig from "../../../examples/api-reference/zero-config.ts?raw";
+import outputName from "../../../examples/api-reference/output-name.ts?raw";
+import symlinksUrl from "../../../examples/api-reference/symlinks-url.ts?raw";
+import theme from "../../../examples/api-reference/theme.ts?raw";
+
+The `dirwell` package root exports the values and types below from `src/index.ts`.
+The `dirwell/theme` subpath exposes the component contracts from
+`src/theme-components.ts`, including the generic `ThemeComponent<Props>` type.
+The command-line interface is described separately under [CLI](../cli/).
+Use the [configuration guide](../configuration/) and [theme guide](../themes/)
+for behavior and design examples. The code blocks on this page are imported from
+TypeScript files checked by the repository tests.
+
+## Start without configuration
+
+Run `dirwell .` to watch the current directory, or `dirwell build .` to write
+static output to `dist/`. The TypeScript API needs only source and output paths:
+
+<Code code={zeroConfig} lang="ts" />
+
+`generateExplorer()` defaults to SSG, relative URLs, mirrored source files, the
+default theme, and no symlink traversal. It writes the complete output to a
+staging directory before replacing the previous output.
+
+## Configure a build
+
+`defineConfig()` preserves the input type and accepts an object or a function
+receiving `{ command: "build" | "serve" | "daemon" }`. The function may be
+asynchronous. A `dirwell.config.ts` file is discovered from `--cwd`.
+
+| Field        | Default and effect                                                                                                                       |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `root`       | `.` for `resolveGenerateOptions()`; the CLI positional directory takes precedence and itself defaults to `.`.                            |
+| `outDir`     | `dist/` for build; `.dirwell-preview/` for serve and daemon.                                                                             |
+| `mode`       | `"ssg"`; `"mpa"` shares runtime assets under `__dirwell/`.                                                                               |
+| `mirror`     | `true`; copy source files to the output.                                                                                                 |
+| `base`       | `/`; root-relative path or HTTP(S) URL without query or fragment.                                                                        |
+| `urls`       | `"relative"`; also accepts `"base"` and `"html-base"`.                                                                                   |
+| `outputName` | `defaultOutputName`; preserve an existing `index.html` or `index.htm`. A function may return a filename, `null`, or a promise of either. |
+| `sort`       | Name, natural comparison, ascending, directories first.                                                                                  |
+| `symlinks`   | `{ follow: false, boundary: "root", onCycle: "skip" }`.                                                                                  |
+| `theme`      | `defaultTheme`.                                                                                                                          |
+| `server`     | Serve/daemon host `127.0.0.1`, port `4173`; `HOST` and `PORT` may override these.                                                        |
+| `extends`    | No inherited config; local path or array of local paths.                                                                                 |
+
+For an index rule, inspect the typed `DirectoryData` argument. Returning `null`
+skips generation for that directory:
+
+<Code code={outputName} lang="ts" />
+
+To deploy under a path and follow only symlinks within the source root:
+
+<Code code={symlinksUrl} lang="ts" />
+
+`"relative"` uses depth-aware links, `"base"` prefixes the deployment base,
+and `"html-base"` emits an HTML `<base>` element. Broken symlinks expose their
+declared target through a raw-text view; out-of-root targets have no link. See
+[symlink behavior](../symlinks/) and [deployment](../deployment/).
+
+## Compose a theme
+
+`createDefaultTheme()` accepts `colorScheme`, `fuzzySearch`, `globalSearch`,
+`keyboardNavigation`, and `sorting` switches, all enabled by default. It also
+accepts `virtualizeAfter` (default `500`), `project` metadata, and one or more
+ordered `components` overrides. This example wraps the default footer and
+escapes added text before writing HTML:
+
+<Code code={theme} lang="ts" />
+
+`createPlainTheme()` renders complete browser-native HTML without icons,
+JavaScript, or a search index. Complete replacement themes implement
+`ExplorerTheme.render(context)` and may emit named assets with their HTML.
+
+## Exported values
+
+| Export                    | Purpose                                                                                           |
+| ------------------------- | ------------------------------------------------------------------------------------------------- |
+| `defineConfig`            | Preserve the type of a configuration object or function.                                          |
+| `loadDirwellConfig`       | Load and validate config for a working directory and command; return config and config-file path. |
+| `resolveGenerateOptions`  | Resolve config and CLI overrides into absolute generator paths and options.                       |
+| `generateExplorer`        | Generate a static explorer from `GenerateOptions`.                                                |
+| `createExplorerDevServer` | Build, watch, serve, and expose a `close()` method.                                               |
+| `readGeneratedPage`       | Read a generated HTML file as text.                                                               |
+| `defaultOutputName`       | Skip generation when a directory has an existing index document.                                  |
+| `compareEntries`          | Compare two entries with optional sort settings.                                                  |
+| `createDefaultTheme`      | Create the interactive default theme.                                                             |
+| `defaultTheme`            | Ready-made instance of the default theme.                                                         |
+| `defaultThemeComponents`  | The eight replaceable default HTML component functions.                                           |
+| `createPlainTheme`        | Create a browser-native, no-script theme.                                                         |
+| `resolveThemeComponents`  | Apply ordered component override layers to a base set.                                            |
+| `escapeHtml`              | Escape untrusted text before inserting it into theme HTML.                                        |
+
+`src/index.ts` is the source of truth for this list. `src/config.ts`,
+`src/generator.ts`, `src/dev-server.ts`, `src/theme-default.ts`,
+`src/theme-components.ts`, and `src/theme-plain.ts` define the behavior.
+
+## Exported types
+
+| Type                             | Contract                                                                                                                       |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ | ------ |
+| `DirwellConfig`                  | Config object fields listed above.                                                                                             |
+| `DirwellConfigContext`           | Command passed to a config function.                                                                                           |
+| `DirwellConfigInput`             | Config object or synchronous/asynchronous config function.                                                                     |
+| `GenerateOptions`                | Generator source, output, URL, symlink, sort, and theme options.                                                               |
+| `DirectoryData`                  | Root, current directory, parent, depth, and complete entries passed to output naming and themes.                               |
+| `FileSystemEntry`                | Entry name, paths, kind, metadata, and symlink state. `absolutePath` is for Node-side renderers; do not put it in public HTML. |
+| `FileMetadata`                   | Device, ownership, inode, size, mode, link count, and times.                                                                   |
+| `FileTimes`                      | Access, change, creation, and modification ISO timestamps.                                                                     |
+| `EntryKind`                      | Directory, file, symlink, or other.                                                                                            |
+| `SymlinkMetadata`                | Declared target, resolved and root-relative paths, target kind, and safety flags.                                              |
+| `OutputNameResolver`             | Sync or async `(directory) => filename                                                                                         | null`. |
+| `SortField`                      | Name, modified time, or size.                                                                                                  |
+| `NameSortMode`                   | Unicode, locale-aware, or natural name comparison.                                                                             |
+| `SortDirection`                  | Ascending or descending.                                                                                                       |
+| `SortOptions`                    | Field, name mode, direction, and directory grouping.                                                                           |
+| `ExplorerTheme`                  | Theme name, optional search-index policy, and renderer.                                                                        |
+| `ThemeContext`                   | Prepared directory, output mode, URL helpers, sort state, and link decisions.                                                  |
+| `RenderedPage`                   | HTML plus optional named text or byte assets.                                                                                  |
+| `PlainThemeOptions`              | Optional plain-theme project metadata.                                                                                         |
+| `DirwellThemeComponents`         | The eight typed HTML component functions.                                                                                      |
+| `DirwellThemeComponentOverrides` | Partial component layer.                                                                                                       |
+| `ThemeComponent<Props>`          | Function that renders typed props to an HTML string; available from `dirwell/theme`.                                           |
+| `DefaultThemeRuntimeConfig`      | Serialized default-theme browser controls and asset links.                                                                     |
+| `BreadcrumbItem`                 | Label, link, and current-page state.                                                                                           |
+| `EntryNavigation`                | Link and whether navigation leaves the explorer.                                                                               |
+| `EntryListItem`                  | Entry, position, and navigation data.                                                                                          |
+| `PageShellProps`                 | Full-document component inputs.                                                                                                |
+| `BreadcrumbsProps`               | Breadcrumb component inputs.                                                                                                   |
+| `ToolbarProps`                   | Search, sorting, keyboard, and appearance-control inputs.                                                                      |
+| `EntryListProps`                 | List markup, directory, parent link, and sorting state.                                                                        |
+| `EntryRowProps`                  | One entry's data, navigation, and icon.                                                                                        |
+| `EmptyStateProps`                | Empty-state message.                                                                                                           |
+| `FooterProps`                    | Project metadata, shortcuts, and notice link.                                                                                  |
+| `IconName`                       | Built-in control icon names.                                                                                                   |
+| `IconProps`                      | Icon name, optional label, size, and file-type image source.                                                                   |
+
+The types are re-exported from `src/model.ts`, `src/config.ts`,
+`src/theme-components.ts`, and `src/theme-plain.ts`. Component functions return
+HTML strings; call `escapeHtml()` for untrusted entry or project text.
+
+## CLI options
+
+| Option           | Commands                                | Default or effect                                                      |
+| ---------------- | --------------------------------------- | ---------------------------------------------------------------------- |
+| `[directory]`    | `build`, `serve`, `dev`, `daemon start` | `.`; positional source directory.                                      |
+| `--cwd`          | All commands                            | `.`; config discovery and daemon state directory.                      |
+| `--base`         | `build`, `serve`, `dev`, `daemon start` | Config `base`, otherwise `/`.                                          |
+| `--mode`         | `build`, `serve`, `dev`, `daemon start` | `ssg` or `mpa`; config or SSG default.                                 |
+| `--urls`         | `build`, `serve`, `dev`, `daemon start` | `relative`, `base`, or `html-base`; config or relative default.        |
+| `-o`, `--outDir` | `build`, `serve`, `dev`, `daemon start` | Output path; build defaults to `dist/`, server to `.dirwell-preview/`. |
+| `--host`         | `serve`, `dev`, `daemon start`          | `HOST`, config, or `127.0.0.1`.                                        |
+| `-p`, `--port`   | `serve`, `dev`, `daemon start`          | `PORT`, config, or `4173`.                                             |
+
+`daemon status` and `daemon stop` accept `--cwd`. `daemon` defaults to `start`;
+`dev` aliases `serve`, and a bare directory also invokes `serve`. Run
+`dirwell <command> --help` for generated help and current flag spelling.

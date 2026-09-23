@@ -1,0 +1,9 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "paths": {
+      "dirwell": ["../../src/index.ts"]
+    }
+  },
+  "include": ["./api-reference/*.ts"]
+}
