@@ -122,6 +122,8 @@ brand marks; Dirwell's code remains MIT-licensed. See
 ```bash
 pnpm install
 pnpm test
+pnpm exec playwright install chromium --only-shell
+pnpm test:browser
 pnpm run check
 pnpm run build
 pnpm run docs:build
