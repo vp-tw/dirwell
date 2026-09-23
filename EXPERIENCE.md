@@ -17,6 +17,27 @@
 - Composition input does not filter or reorder entries until `compositionend`.
 - The query is scoped to the current pathname and survives watch reloads for the
   browser session.
+- Optional global search loads its index after the user enters a query. It
+  searches names, relative paths, and symlink targets across the published tree.
+- Physical folders, physical files, and symlinks can be filtered independently
+  in local and global search.
+
+### Sorting
+
+- Optional Name, Size, and Modified controls can change field and direction.
+  Name sorting offers Unicode, locale-aware, and natural numeric comparison.
+- Directory grouping is independent of sort direction. The chosen controls
+  persist across directories and reloads; the configured sort sets the initial
+  order.
+
+### Large directories
+
+- The default theme emits complete listing HTML in SSG mode. With its default
+  settings, MPA directories above 500 entries use a per-directory data asset
+  and a measured virtual list when the default row components are present. The
+  threshold is configurable.
+- These large MPA listings require JavaScript. Filtering and sorting use a Web
+  Worker when available, with a main-thread fallback.
 
 ### Keyboard
 
@@ -40,7 +61,8 @@
 ### Progressive enhancement
 
 - Directory links, metadata, symlink status, and parent navigation work without
-  JavaScript.
+  JavaScript in SSG and smaller MPA listings. Large virtualized MPA listings
+  still show breadcrumbs and parent navigation, but need JavaScript for rows.
 - Each interactive feature can be disabled independently in
   `createDefaultTheme()`.
 - The development-only live-reload client is injected by the dev server and is
@@ -48,22 +70,14 @@
 
 ## Candidate follow-up
 
-1. Add explicit Name, Size, and Modified sorting while preserving the scanner's
-   deterministic default order.
-2. Add copy-path and copy-link actions with success feedback and secure-context
+1. Add copy-path and copy-link actions with success feedback and secure-context
    fallback behavior.
-3. Add localization as a renderer concern, including plural rules and date/size
+2. Add localization as a renderer concern, including plural rules and date/size
    formatting.
-4. Add a large-directory strategy after measuring representative trees; choose
-   chunked DOM rendering or virtualization from evidence.
-5. Add optional file previews only after defining size, MIME, privacy, and
+3. Add optional file previews only after defining size, MIME, privacy, and
    content-security boundaries.
 
 ## Decisions for production
 
-- Confirm whether interactive controls are default-on or selected through a
-  named theme variant.
-- Confirm whether the runtime asset is emitted per directory in SSG mode or
-  shared from the output root in MPA mode.
 - Confirm the supported browser floor before choosing normalization and
   international fuzzy-matching behavior.
