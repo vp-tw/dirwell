@@ -534,9 +534,19 @@ export async function generateExplorer(options: GenerateOptions): Promise<void> 
     }
     const generatedAssetDirectory = path.join(buildOutputDir, "__dirwell");
     await mkdir(generatedAssetDirectory, { recursive: true });
+    const indexedEntries = [...searchEntries.values()];
+    const shards: string[] = [];
+    for (let offset = 0; offset < indexedEntries.length; offset += 512) {
+      const filename = `search-${String(shards.length).padStart(5, "0")}.json`;
+      shards.push(filename);
+      await writeFile(
+        path.join(generatedAssetDirectory, filename),
+        JSON.stringify({ entries: indexedEntries.slice(offset, offset + 512) }),
+      );
+    }
     await writeFile(
       path.join(generatedAssetDirectory, "search-index.json"),
-      JSON.stringify({ entries: [...searchEntries.values()], version: 1 }),
+      JSON.stringify({ count: indexedEntries.length, shards, version: 2 }),
     );
 
     await rm(outputDir, { recursive: true, force: true });

@@ -115,6 +115,12 @@ named components through the theme API or replace the complete theme.
   separator between segments.
 - **Entry list:** linked names, explicit symlink targets and availability,
   metadata aligned by column on wide screens and by row on narrow screens.
+- **Large directories:** MPA pages over the virtualization threshold load a
+  per-directory asset. Render only the visible window; measure actual row
+  heights and preserve the scroll anchor across wrapping or viewport changes.
+- **Global search:** the dedicated search dialog preserves directory context.
+  Fetch the sharded index after input, keep results bounded, and announce
+  progress and failures in the dialog.
 - **Footer:** project attribution and keyboard help remain separate groups;
   narrow screens place shortcuts before attribution.
 

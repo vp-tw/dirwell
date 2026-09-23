@@ -93,9 +93,19 @@ controls while retaining the generated order.
 
 ## Global search
 
-The generated `__dirwell/search-index.json` contains paths and display metadata,
-not file contents. The default theme starts with the current directory and
-fetches this index only when the user selects `Everywhere`. Type filters cover
+The generated `__dirwell/search-index.json` is a manifest for smaller search
+index files. They contain paths and display metadata, not file contents. The
+default theme starts with the current directory and fetches the manifest only
+after the user opens Search all files and types a query. Results stay in the
+search panel; the current directory does not change. The best 100 matches render
+progressively while the remaining index files load. Type filters cover
 folders, files, and links. Folder and file filters include symlinks whose target
 has that type by default; users can turn off `Include links` when they need only
 physical entries.
+
+In MPA mode, the default theme puts directories with more than 500 entries in a
+per-directory data asset and uses a measured virtual list. Row heights are
+remeasured when names wrap or the viewport changes. These large MPA pages need
+JavaScript; filtering and sorting run in a Web Worker when available, with a
+main-thread fallback. SSG keeps full HTML for no-JavaScript browsing. Set
+`virtualizeAfter` in `createDefaultTheme()` to change the threshold.

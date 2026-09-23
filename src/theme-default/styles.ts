@@ -205,6 +205,68 @@ main {
   color: var(--ink);
   padding: 0.35rem 1.8rem 0.35rem 0.55rem;
 }
+.search-all,
+.dialog-close {
+  min-height: var(--dw-control-height);
+  border: 1px solid var(--rule);
+  border-radius: 0.5rem;
+  padding: 0.4rem 0.75rem;
+  background: var(--control);
+  color: var(--accent);
+  white-space: nowrap;
+  cursor: pointer;
+}
+.search-all:hover,
+.dialog-close:hover {
+  background: var(--hover);
+}
+.global-search {
+  width: min(58rem, calc(100vw - 2rem));
+  max-height: min(85vh, 55rem);
+  padding: 0;
+  border: 1px solid var(--rule);
+  border-radius: 0.875rem;
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: var(--shadow);
+}
+.global-search::backdrop {
+  background: rgba(10, 12, 10, 0.62);
+}
+.global-search-head,
+.global-search-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+}
+.global-search-head {
+  justify-content: space-between;
+  border-bottom: 1px solid var(--soft-rule);
+}
+.global-search h2 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+.global-search > p {
+  margin: 0;
+  padding: 0.75rem 1.25rem;
+  color: var(--muted);
+}
+.global-search-controls .search {
+  flex: 1;
+}
+.global-results {
+  max-height: 50vh;
+  overflow: auto;
+}
+.virtual-spacer {
+  display: block;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  pointer-events: none;
+}
 .include-links[hidden] {
   display: none;
 }
@@ -329,6 +391,7 @@ button.sort-heading {
   list-style: none;
   margin: 0;
   padding: 0;
+  overflow-anchor: none;
 }
 .entry {
   min-height: 3.25rem;
@@ -414,6 +477,11 @@ summary:focus-visible {
   padding: 2rem 1.4rem;
   color: var(--muted);
   border-bottom: 1px solid var(--soft-rule);
+}
+.folder-loading {
+  margin: 0;
+  padding: 2rem 1.4rem;
+  color: var(--muted);
 }
 ::selection {
   background: var(--accent);
@@ -508,6 +576,12 @@ kbd {
   }
   .compact-select select {
     width: 100%;
+  }
+  .global-search-controls {
+    flex-wrap: wrap;
+  }
+  .global-search-controls .search {
+    flex-basis: 100%;
   }
   .entry-head {
     display: none;

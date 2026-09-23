@@ -1,4 +1,5 @@
 import { readFile } from "node:fs/promises";
+import { createHash } from "node:crypto";
 import type { ExplorerTheme } from "./model.ts";
 import {
   resolveThemeComponents,
@@ -11,6 +12,7 @@ import { defaultStyles } from "./theme-default/styles.ts";
 export { defaultThemeComponents, escapeHtml } from "./theme-default/components.ts";
 
 const runtimeSource = await readFile(new URL("./theme-runtime.js", import.meta.url), "utf8");
+const workerSource = await readFile(new URL("./theme-worker.js", import.meta.url), "utf8");
 
 export interface DefaultThemeOptions {
   readonly colorScheme?: boolean;
@@ -26,6 +28,8 @@ export interface DefaultThemeOptions {
     repositoryUrl?: string;
   }>;
   readonly sorting?: boolean;
+  /** MPA directories above this size load rows from an asset and render a measured window. */
+  readonly virtualizeAfter?: number;
 }
 
 function createBreadcrumbs(
@@ -56,6 +60,7 @@ export function createDefaultTheme(options: DefaultThemeOptions = {}): ExplorerT
   const globalSearch = options.globalSearch ?? true;
   const keyboardNavigation = options.keyboardNavigation ?? true;
   const sorting = options.sorting ?? true;
+  const virtualizeAfter = options.virtualizeAfter ?? 500;
   const project = {
     author: options.project?.author ?? "VdustR",
     license: options.project?.license ?? "MIT License",
@@ -64,7 +69,10 @@ export function createDefaultTheme(options: DefaultThemeOptions = {}): ExplorerT
     name: options.project?.name ?? "Dirwell",
     repositoryUrl: options.project?.repositoryUrl ?? "https://github.com/VdustR/dirwell",
   };
-  const interactive = colorScheme || fuzzySearch || keyboardNavigation || sorting;
+  if (!Number.isSafeInteger(virtualizeAfter) || virtualizeAfter < 0) {
+    throw new RangeError("virtualizeAfter must be a non-negative integer");
+  }
+  const interactive = colorScheme || fuzzySearch || globalSearch || keyboardNavigation || sorting;
   const layers =
     options.components === undefined
       ? []
@@ -84,22 +92,33 @@ export function createDefaultTheme(options: DefaultThemeOptions = {}): ExplorerT
       hrefForDirectory,
       searchIndexHref,
       sort,
+      mode,
     }) {
       const visiblePath =
         directory.current.relativePath === "" ? "/" : `/${directory.current.relativePath}/`;
-      const rows = directory.entries
-        .map((entry, index) => {
-          const directoryLike =
-            entry.kind === "directory" || entry.symlink?.targetKind === "directory";
-          const iconName = entry.kind === "symlink" ? "link" : directoryLike ? "folder" : "file";
-          return components.EntryRow({
-            entry,
-            icon: components.Icon({ name: iconName }),
-            index,
-            navigation: { exitsExplorer: exitsExplorerFor(entry), href: hrefFor(entry) },
+      const virtualized =
+        mode === "mpa" &&
+        interactive &&
+        directory.entries.length > virtualizeAfter &&
+        components.EntryList === defaultThemeComponents.EntryList &&
+        components.EntryRow === defaultThemeComponents.EntryRow;
+      const renderedRows = virtualized
+        ? []
+        : directory.entries.map((entry, index) => {
+            const directoryLike =
+              entry.kind === "directory" || entry.symlink?.targetKind === "directory";
+            const iconName = entry.kind === "symlink" ? "link" : directoryLike ? "folder" : "file";
+            return components.EntryRow({
+              entry,
+              icon: components.Icon({ name: iconName }),
+              index,
+              navigation: { exitsExplorer: exitsExplorerFor(entry), href: hrefFor(entry) },
+            });
           });
-        })
-        .join("");
+      const entriesAssetName = virtualized
+        ? `entries-${createHash("sha256").update(directory.current.relativePath).digest("hex").slice(0, 16)}.json`
+        : null;
+      const rows = renderedRows.join("");
       const assets = interactive
         ? `<script src="${escapeHtml(assetHref("dirwell.runtime.js"))}" type="module"></script>`
         : "";
@@ -109,6 +128,8 @@ export function createDefaultTheme(options: DefaultThemeOptions = {}): ExplorerT
         globalSearch,
         keyboardNavigation,
         searchIndexHref,
+        ...(entriesAssetName === null ? {} : { entriesHref: assetHref(entriesAssetName) }),
+        ...(entriesAssetName === null ? {} : { workerHref: assetHref("dirwell.worker.js") }),
         sort,
         sorting,
       };
@@ -141,7 +162,35 @@ export function createDefaultTheme(options: DefaultThemeOptions = {}): ExplorerT
         }),
         visiblePath,
       });
-      return interactive ? { html, assets: { "dirwell.runtime.js": runtimeSource } } : { html };
+      return interactive
+        ? {
+            html,
+            assets: {
+              "dirwell.runtime.js": runtimeSource,
+              ...(entriesAssetName === null ? {} : { "dirwell.worker.js": workerSource }),
+              ...(entriesAssetName === null
+                ? {}
+                : {
+                    [entriesAssetName]: JSON.stringify({
+                      rows: directory.entries.map((entry) => ({
+                        name: entry.name,
+                        size: entry.metadata.size,
+                        modifiedAt: entry.metadata.times.modifiedAt,
+                        kind: entry.kind,
+                        targetKind: entry.symlink?.targetKind ?? null,
+                        target: entry.symlink?.target ?? null,
+                        isCycle: entry.symlink?.isCycle ?? false,
+                        isBroken: entry.symlink?.isBroken ?? false,
+                        isOutsideRoot: entry.symlink?.isOutsideRoot ?? false,
+                        href: hrefFor(entry),
+                        exitsExplorer: exitsExplorerFor(entry),
+                      })),
+                      version: 1,
+                    }),
+                  }),
+            },
+          }
+        : { html };
     },
   };
 }

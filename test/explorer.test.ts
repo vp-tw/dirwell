@@ -6,7 +6,7 @@ import test from "node:test";
 import { createExplorerDevServer } from "../src/dev-server.ts";
 import { compareEntries, generateExplorer } from "../src/generator.ts";
 import { createDefaultTheme } from "../src/theme-default.ts";
-import { compareEntryValues, fuzzyScore } from "../src/theme-runtime.js";
+import { HeightTree, compareEntryValues, fuzzyScore } from "../src/theme-runtime.js";
 import type { DirectoryData } from "../src/model.ts";
 
 async function fixture(): Promise<{ output: string; root: string }> {
@@ -54,17 +54,12 @@ test("mirrors source files and preserves an existing index", async (context) => 
   );
   const rootIndex = await readFile(path.join(output, "index.html"), "utf8");
   assert.doesNotMatch(rootIndex, /directory-label|Static directory index/);
-  assert.match(rootIndex, /data-search-scope/);
+  assert.match(rootIndex, /data-global-open/);
+  assert.match(rootIndex, /data-global-dialog/);
   assert.match(rootIndex, /data-search-filter/);
   assert.match(rootIndex, /data-include-links/);
   assert.match(rootIndex, /data-sort-field/);
-  for (const name of [
-    "search-scope",
-    "search-filter",
-    "sort-field",
-    "name-mode",
-    "sort-direction",
-  ]) {
+  for (const name of ["search-filter", "sort-field", "name-mode", "sort-direction"]) {
     assert.equal(rootIndex.match(new RegExp(`<select data-${name}>`, "g"))?.length, 1);
   }
   assert.match(rootIndex, /--dw-control-height:\s*2\.75rem/);
@@ -191,28 +186,91 @@ test("MPA shares runtime assets from the output root", async (context) => {
   const searchIndex = JSON.parse(
     await readFile(path.join(output, "__dirwell", "search-index.json"), "utf8"),
   );
-  assert.equal(searchIndex.version, 1);
-  assert.ok(searchIndex.entries.some((entry: { path: string }) => entry.path === "README.txt"));
-  assert.ok(
-    searchIndex.entries.some((entry: { path: string }) => entry.path === "docs/index.html"),
+  assert.equal(searchIndex.version, 2);
+  const searchEntries = (
+    await Promise.all(
+      searchIndex.shards.map(async (name: string) =>
+        JSON.parse(await readFile(path.join(output, "__dirwell", name), "utf8")),
+      ),
+    )
+  ).flatMap(
+    (shard: { entries: { path: string; target: string | null; href: string | null }[] }) =>
+      shard.entries,
   );
+  assert.equal(searchIndex.count, searchEntries.length);
+  assert.ok(searchEntries.some((entry: { path: string }) => entry.path === "README.txt"));
+  assert.ok(searchEntries.some((entry: { path: string }) => entry.path === "docs/index.html"));
   assert.ok(
-    searchIndex.entries.some(
+    searchEntries.some(
       (entry: { path: string; target: string | null }) =>
         entry.path === "broken-link" && entry.target === "missing",
     ),
   );
   assert.equal(
-    searchIndex.entries.find((entry: { path: string }) => entry.path === "releases/back-to-root")
-      ?.href,
+    searchEntries.find((entry: { path: string }) => entry.path === "releases/back-to-root")?.href,
     "../",
   );
   assert.deepEqual(
-    searchIndex.entries
+    searchEntries
       .find((entry: { path: string }) => entry.path === "broken-link")
       ?.href?.startsWith("raw-links/"),
     true,
   );
+});
+
+test("large MPA directories defer rows while SSG keeps complete HTML", async (context) => {
+  const { output, root } = await fixture();
+  context.after(() => rm(path.dirname(root), { recursive: true, force: true }));
+  await Promise.all(
+    Array.from({ length: 520 }, (_, index) =>
+      writeFile(path.join(root, `file-${String(index).padStart(4, "0")}.txt`), "x"),
+    ),
+  );
+  await generateExplorer({ sourceDir: root, outputDir: output, mode: "mpa", mirror: false });
+  const html = await readFile(path.join(output, "index.html"), "utf8");
+  assert.doesNotMatch(html, /data-entry data-order=/);
+  const href = JSON.parse(
+    html.match(/data-config="([^"]+)"/)?.[1]?.replaceAll("&quot;", '"') ?? "{}",
+  ).entriesHref;
+  assert.match(href, /^__dirwell\/entries-[a-f0-9]{16}\.json$/);
+  assert.match(html, /&quot;workerHref&quot;:&quot;__dirwell\/dirwell\.worker\.js&quot;/);
+  assert.match(
+    await readFile(path.join(output, "__dirwell", "dirwell.worker.js"), "utf8"),
+    /self\.addEventListener\("message"/,
+  );
+  const data = JSON.parse(await readFile(path.join(output, href), "utf8"));
+  assert.equal(data.rows.length, 526);
+  assert.equal(typeof data.rows[0].name, "string");
+  assert.equal(typeof data.rows[0].modifiedAt, "string");
+  assert.equal(data.rows[0].html, undefined);
+  const broken = data.rows.find((row: { name: string }) => row.name === "broken-link");
+  assert.equal(broken.isBroken, true);
+  assert.equal(broken.target, "missing");
+  assert.match(broken.href, /^__dirwell\/raw-links\/[a-f0-9]{16}\.txt$/);
+  const manifest = JSON.parse(
+    await readFile(path.join(output, "__dirwell", "search-index.json"), "utf8"),
+  );
+  assert.ok(manifest.shards.length > 1);
+  for (const name of manifest.shards) {
+    const shard = JSON.parse(await readFile(path.join(output, "__dirwell", name), "utf8"));
+    assert.ok(shard.entries.length <= 512);
+  }
+
+  await generateExplorer({ sourceDir: root, outputDir: output, mode: "ssg", mirror: false });
+  const ssgHtml = await readFile(path.join(output, "index.html"), "utf8");
+  assert.equal(ssgHtml.match(/data-entry data-order=/g)?.length, 526);
+});
+
+test("measured virtual heights find wrapped rows and update offsets", () => {
+  const heights = new HeightTree(4, 64);
+  assert.equal(heights.prefix(4), 256);
+  assert.equal(heights.indexAt(130), 2);
+  assert.equal(heights.update(0, 180), 116);
+  assert.equal(heights.update(2, 92), 28);
+  assert.equal(heights.prefix(3), 336);
+  assert.equal(heights.indexAt(180), 1);
+  assert.equal(heights.indexAt(245), 2);
+  assert.equal(heights.indexAt(999), 3);
 });
 
 test("base URLs prefix pages, assets, breadcrumbs, and raw-link views", async (context) => {
@@ -463,6 +521,28 @@ test("default theme interactions can be disabled", async (context) => {
   assert.doesNotMatch(html, /data-search-input|data-theme-value|dirwell\.runtime/);
   assert.doesNotMatch(html, /data-sort-heading|<button class="sort-heading"/);
   assert.match(html, /<span class="sort-heading">name<\/span>/);
+});
+
+test("global search remains available without local search", async (context) => {
+  const { output, root } = await fixture();
+  context.after(() => rm(path.dirname(root), { recursive: true, force: true }));
+  await generateExplorer({
+    sourceDir: root,
+    outputDir: output,
+    theme: createDefaultTheme({
+      colorScheme: false,
+      fuzzySearch: false,
+      globalSearch: true,
+      keyboardNavigation: false,
+      sorting: false,
+    }),
+  });
+  const html = await readFile(path.join(output, "index.html"), "utf8");
+  assert.match(html, /data-global-open/);
+  assert.match(html, /data-global-dialog/);
+  assert.doesNotMatch(html, /data-search-input/);
+  assert.match(html, /dirwell\.runtime\.js/);
+  assert.throws(() => createDefaultTheme({ virtualizeAfter: -1 }), /virtualizeAfter/);
 });
 
 test("default theme components can be layered and replaced", async (context) => {

@@ -74,15 +74,18 @@ URL generation supports portable depth-aware `relative` links, Vite-style
 - `ssg` emits a page and runtime asset in every generated directory. This is
   the default and works on simple static hosts.
 - `mpa` keeps every directory directly addressable while sharing runtime
-  assets from the output-root `__dirwell/` directory.
+  assets from the output-root `__dirwell/` directory. The default theme moves
+  directories over 500 entries into a per-directory data asset and renders only
+  nearby rows, so these pages require JavaScript.
 
 `__dirwell/` is reserved in both modes for generated assets such as broken-link
 raw views.
 
-Both modes work without JavaScript. The optional runtime adds local and global
+SSG pages and smaller MPA pages work without JavaScript. The runtime adds local and global
 fuzzy search, type filters, configurable sorting, IME-safe keyboard controls,
 Backspace parent navigation, theme persistence, and watch-mode live reload. The
-global search index is fetched only after the user selects `Everywhere`.
+global search index is fetched only after the user opens Search all files and types a query.
+The index is split into bounded files; the first 100 best matches render progressively.
 Search matches file names, relative paths, and symlink targets. Folder and file
 filters include matching symlinks by default, with an `Include links` toggle.
 

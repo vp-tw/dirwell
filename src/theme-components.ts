@@ -12,6 +12,8 @@ export interface DefaultThemeRuntimeConfig {
   readonly globalSearch: boolean;
   readonly keyboardNavigation: boolean;
   readonly searchIndexHref: string;
+  readonly entriesHref?: string;
+  readonly workerHref?: string;
   readonly sorting: boolean;
   readonly sort: Readonly<{
     direction: SortDirection;
