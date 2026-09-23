@@ -59,12 +59,14 @@ test("plain theme emits complete HTML without icons, scripts, or search assets",
     assert.doesNotMatch(html, /<svg|<script|<img|data-theme|search-index|prefers-color-scheme/);
     assert.match(html, /<meta name="color-scheme" content="light">/);
     assert.match(html, /<time datetime="[^"]+">/);
-    assert.match(html, /<footer><hr><p>Repository: Dirwell by VdustR/);
+    assert.match(
+      html,
+      /<footer><hr><p>Repository: <a href="https:\/\/github\.com\/vp-tw\/dirwell" target="_blank" rel="noopener">Dirwell<\/a> by VdustR/,
+    );
     assert.match(
       html,
       /<a href="https:\/\/opensource\.org\/license\/mit" target="_blank" rel="noopener">MIT License<\/a>/,
     );
-    assert.doesNotMatch(html, /href="https:\/\/github\.com\/VdustR\/dirwell/);
     await assert.rejects(readFile(path.join(output, "__dirwell", "search-index.json"), "utf8"));
     const nested = await readFile(path.join(output, "releases", "index.html"), "utf8");
     assert.match(

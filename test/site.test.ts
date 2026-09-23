@@ -59,3 +59,21 @@ test("explorer preview build is scoped to the fixture directory", async () => {
     "node src/bin.ts build fixture --out-dir generated",
   );
 });
+
+test("package metadata and release configuration use the public vp-tw scope", async () => {
+  const packageJson = JSON.parse(await readFile(path.join(root, "package.json"), "utf8")) as {
+    name: string;
+    bin: Record<string, string>;
+    publishConfig: { access: string };
+    repository: { url: string };
+  };
+  const changesetConfig = JSON.parse(
+    await readFile(path.join(root, ".changeset/config.json"), "utf8"),
+  ) as { access: string; baseBranch: string };
+  assert.equal(packageJson.name, "@vp-tw/dirwell");
+  assert.equal(packageJson.bin.dirwell, "./dist/bin.mjs");
+  assert.equal(packageJson.repository.url, "git+https://github.com/vp-tw/dirwell.git");
+  assert.equal(packageJson.publishConfig.access, "public");
+  assert.equal(changesetConfig.access, "public");
+  assert.equal(changesetConfig.baseBranch, "main");
+});

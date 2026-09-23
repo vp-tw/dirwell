@@ -15,7 +15,7 @@ Each component is a typed function from props to HTML. Layers resolve from left
 to right:
 
 ```ts
-import { createDefaultTheme, defineConfig } from "dirwell";
+import { createDefaultTheme, defineConfig } from "@vp-tw/dirwell";
 
 export default defineConfig({
   theme: createDefaultTheme({

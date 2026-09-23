@@ -1,5 +1,5 @@
 {
-  "name": "dirwell",
+  "name": "@vp-tw/dirwell",
   "version": "0.0.0",
   "description": "A static file explorer with safe symlinks, themes, and live reload.",
   "keywords": [
@@ -7,7 +7,13 @@
     "file-browser",
     "static-site-generator"
   ],
+  "homepage": "https://vp-tw.github.io/dirwell/",
+  "bugs": "https://github.com/vp-tw/dirwell/issues",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vp-tw/dirwell.git"
+  },
   "bin": {
     "dirwell": "./dist/bin.mjs"
   },
@@ -28,6 +34,9 @@
       "import": "./dist/theme-components.mjs"
     }
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "vp pack && node scripts/copy-static-assets.ts",
     "build:explorer": "node src/bin.ts build fixture --out-dir generated",
@@ -39,6 +48,7 @@
     "examples:build": "node scripts/build-examples.ts",
     "format": "vp fmt --write",
     "lint": "vp lint",
+    "release:status": "changeset status",
     "site:build": "pnpm run examples:build && pnpm run docs:build",
     "test": "node --test test/*.test.ts",
     "check:types": "tsc --noEmit"

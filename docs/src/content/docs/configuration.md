@@ -7,7 +7,7 @@ Dirwell discovers `dirwell.config.ts` from `--cwd`. Configuration is loaded by
 c12 and validated at runtime before filesystem work begins.
 
 ```ts
-import { defineConfig } from "dirwell";
+import { defineConfig } from "@vp-tw/dirwell";
 
 export default defineConfig({
   root: ".",
