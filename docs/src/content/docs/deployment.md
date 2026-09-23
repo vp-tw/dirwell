@@ -12,9 +12,13 @@ default for a browsable artifact or download tree.
 
 ## MPA mode
 
-MPA emits an independently navigable document per generated directory. Themes
-must not require a client router, and directory navigation works without
-JavaScript.
+MPA emits an independently navigable document per generated directory and
+shares runtime assets from `__dirwell/`. Themes do not need a client router.
+With the default theme settings and row components, MPA keeps listings of up
+to 500 entries in HTML. Above that threshold, it loads rows from a data asset
+and renders a virtual list, so those large listings require JavaScript. The
+`virtualizeAfter` option changes the threshold. Use SSG for complete listing
+HTML without JavaScript.
 
 ## Existing index documents
 

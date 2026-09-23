@@ -20,7 +20,9 @@ simple default experience and typed extension points.
 
 ## Preserve these invariants
 
-- Generated navigation works without client JavaScript.
+- Generated pages and directory links work without a client router. Default-theme
+  SSG listings and smaller MPA listings work without JavaScript; virtualized
+  large MPA listings need JavaScript to show rows.
 - Existing `index.html` and `index.htm` documents are preserved by default.
 - `outputName(directory)` may return `null` to skip a directory.
 - Symlink cycles remain visible and link to their canonical generated target;
@@ -31,8 +33,9 @@ simple default experience and typed extension points.
 - A destination outside generated Explorer pages opens in a new tab with opener
   isolation. Explorer-to-Explorer navigation remains in the same tab.
 - Keyboard shortcuts do not run in editable controls or during IME composition.
-- The default UI remains usable when search, keyboard behavior, color switching,
-  or all runtime JavaScript is disabled.
+- The default UI remains usable when search, keyboard behavior, or color
+  switching is disabled. Without runtime JavaScript, SSG and smaller MPA
+  listings retain their rows in HTML.
 
 ## Public surfaces
 

@@ -29,11 +29,12 @@ Users run Dirwell through a CLI or its TypeScript API. They may preview a direct
 - Relative, deployment-base, and native HTML `<base>` URL strategies.
 - Directory-aware output naming that may skip generation by returning `null`; the default preserves existing `index.html` and `index.htm` files.
 - Watch mode with live reload.
-- Fuzzy search, IME-safe keyboard input, Backspace parent navigation, linked breadcrumbs, and system/light/dark appearance controls.
-- Symlinks remain visible. Cycles are navigable without recursive generation. Broken and out-of-root targets expose their target text through a safe raw-file route.
+- Local and global fuzzy search, type filters, configurable sorting, IME-safe keyboard input, Backspace parent navigation, linked breadcrumbs, and system/light/dark appearance controls.
+- The default theme keeps complete HTML listings in SSG mode. With its default settings, MPA directories above 500 entries use a data asset and a virtual list when the default row components are present; those listings require JavaScript.
+- Symlinks remain visible. Cycles are navigable without recursive generation. Broken targets expose their declared text through a safe raw-file route; out-of-root targets have no link.
 - Themes may replace typed components, add assets, wrap defaults, or replace the full document.
 - Generated sites must work as static files without a required application server.
-- Repository coordinates and the final GitHub Pages base are open deployment settings and must not be hardcoded as product truth.
+- The public repository is [vp-tw/dirwell](https://github.com/vp-tw/dirwell), and the documentation site is deployed at [vp-tw.github.io/dirwell](https://vp-tw.github.io/dirwell/). Generated sites remain configurable for other hosts and base paths.
 
 ## Brand Commitments
 
@@ -41,7 +42,7 @@ The product name is Dirwell. The project is MIT-licensed. Product writing is dir
 
 ## Evidence on Hand
 
-The repository contains the CLI, generator, watch server, daemon, default theme, component theme API, tests, a fixture directory, architecture and experience documents, and a Starlight documentation site. It has no customer quotes, adoption metrics, production logos, or public repository URL; the website must not fabricate them.
+The public repository contains the CLI, generator, watch server, daemon, default theme, component theme API, tests, a fixture directory, architecture and experience documents, and a Starlight documentation site. There are no verified customer quotes, adoption metrics, or production logos; the website must not fabricate them.
 
 ## Product Principles
 
