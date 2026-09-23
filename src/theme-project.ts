@@ -11,9 +11,9 @@ export type ThemeProjectOptions = Readonly<Partial<ThemeProject>>;
 const defaultProject: ThemeProject = {
   author: "VdustR",
   license: "MIT License",
-  licenseUrl: "https://github.com/VdustR/dirwell/blob/main/LICENSE",
+  licenseUrl: "https://github.com/vp-tw/dirwell/blob/main/LICENSE",
   name: "Dirwell",
-  repositoryUrl: "https://github.com/VdustR/dirwell",
+  repositoryUrl: "https://github.com/vp-tw/dirwell",
 };
 
 export function resolveThemeProject(options?: ThemeProjectOptions): ThemeProject {

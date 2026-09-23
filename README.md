@@ -7,8 +7,8 @@ typed theme components, and deployable SSG or MPA output.
 ## Quick start
 
 ```bash
-pnpm dlx dirwell .
-pnpm dlx dirwell build . --out-dir dist
+pnpm dlx @vp-tw/dirwell .
+pnpm dlx @vp-tw/dirwell build . --out-dir dist
 ```
 
 The first command watches the current directory and serves it. `build` writes a
@@ -28,7 +28,7 @@ dirwell daemon stop
 Create `dirwell.config.ts` only when defaults are insufficient:
 
 ```ts
-import { createDefaultTheme, defineConfig } from "dirwell";
+import { createDefaultTheme, defineConfig } from "@vp-tw/dirwell";
 
 export default defineConfig({
   root: "./public",
@@ -126,5 +126,9 @@ pnpm run check
 pnpm run build
 pnpm run docs:build
 ```
+
+Release notes use Changesets. This repository remains in `alpha` prerelease
+mode until a stable release is explicitly chosen. See [RELEASING.md](./RELEASING.md)
+for the release procedure.
 
 Dirwell is MIT licensed.

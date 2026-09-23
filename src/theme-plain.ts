@@ -68,7 +68,7 @@ function renderEntry(entry: FileSystemEntry, context: ThemeContext): string {
 /** A no-icon, no-script theme that leaves navigation and controls to the browser. */
 export function createPlainTheme(options: PlainThemeOptions = {}): ExplorerTheme {
   const project = resolveThemeProject(options.project);
-  const repositoryHref = externalHref(options.project?.repositoryUrl);
+  const repositoryHref = externalHref(project.repositoryUrl);
   const licenseHref = externalHref(
     options.project?.licenseUrl ??
       (options.project?.license === undefined ? "https://opensource.org/license/mit" : undefined),

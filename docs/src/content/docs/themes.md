@@ -12,7 +12,7 @@ Use `createPlainTheme()` for complete browser-native listings with no icons,
 JavaScript, appearance controls, or generated search index:
 
 ```ts
-import { createPlainTheme, defineConfig } from "dirwell";
+import { createPlainTheme, defineConfig } from "@vp-tw/dirwell";
 
 export default defineConfig({
   theme: createPlainTheme(),
@@ -27,8 +27,8 @@ needed. See the [plain example](../examples/).
 
 Its footer identifies the repository, author, and license. Override the defaults
 with `createPlainTheme({ project: { name, repositoryUrl, author, license, licenseUrl } })`.
-The repository name becomes a link when `repositoryUrl` is configured; the
-default project URL is intentionally not linked while the repository is unpublished.
+The repository name links to Dirwell by default. Set `repositoryUrl` to point
+to another project.
 
 ## Component overrides
 
@@ -36,7 +36,7 @@ The default theme exposes eight stable components: `PageShell`, `Breadcrumbs`,
 `Toolbar`, `EntryList`, `EntryRow`, `EmptyState`, `Footer`, and `Icon`.
 
 ```ts
-import { createDefaultTheme, defineConfig } from "dirwell";
+import { createDefaultTheme, defineConfig } from "@vp-tw/dirwell";
 
 export default defineConfig({
   theme: createDefaultTheme({
@@ -63,7 +63,7 @@ Import a default component explicitly, then call it inside the override. This is
 Dirwell's equivalent of Docusaurus `wrap`, without virtual aliases.
 
 ```ts
-import { defaultThemeComponents } from "dirwell";
+import { defaultThemeComponents } from "@vp-tw/dirwell";
 
 const components = {
   EntryRow: (props) => `<div class="company-row">${defaultThemeComponents.EntryRow(props)}</div>`,
