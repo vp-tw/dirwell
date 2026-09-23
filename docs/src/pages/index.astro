@@ -1,4 +1,6 @@
 ---
+import { landingCode } from "../landing-code.ts";
+
 const base = import.meta.env.BASE_URL;
 const path = (value: string) => `${base}${value}`.replace(/\/+/g, "/");
 // Astro's dev router does not resolve public directory indexes; static hosts do.
@@ -77,9 +79,9 @@ const examples = [
 
         <div class="terminal" aria-label="Dirwell quick start command">
           <div class="terminal-bar"><span>terminal</span><span>~/releases</span></div>
-          <pre><code><span class="prompt">$</span> pnpm dlx dirwell .
-<span class="muted">Dirwell is watching /releases
-Local: http://localhost:4173</span></code></pre>
+          <pre><code class="language-shell">{landingCode.terminal.map((token) =>
+            token.tone ? <span class={`syntax-${token.tone}`}>{token.text}</span> : token.text
+          )}</code></pre>
         </div>
 
         <div class="explorer-sample">
@@ -161,21 +163,15 @@ Local: http://localhost:4173</span></code></pre>
             <button id="tab-urls" type="button" role="tab" aria-selected="false" aria-controls="panel-urls" tabindex="-1" data-tab="urls">URLs</button>
             <button id="tab-naming" type="button" role="tab" aria-selected="false" aria-controls="panel-naming" tabindex="-1" data-tab="naming">Naming</button>
           </div>
-          <pre id="panel-theme" role="tabpanel" aria-labelledby="tab-theme" data-panel="theme"><code>{`createDefaultTheme({
-  components: {
-    EntryRow: ReleaseRow,
-  },
-})`}</code></pre>
-          <pre id="panel-urls" role="tabpanel" aria-labelledby="tab-urls" data-panel="urls" hidden><code>{`defineConfig({
-  base: "/dirwell/",
-  urls: "base",
-  mode: "mpa",
-})`}</code></pre>
-          <pre id="panel-naming" role="tabpanel" aria-labelledby="tab-naming" data-panel="naming" hidden><code>{`outputName(directory) {
-  return hasIndex(directory)
-    ? null
-    : "index.html";
-}`}</code></pre>
+          <pre id="panel-theme" role="tabpanel" aria-labelledby="tab-theme" data-panel="theme"><code class="language-typescript">{landingCode.theme.map((token) =>
+            token.tone ? <span class={`syntax-${token.tone}`}>{token.text}</span> : token.text
+          )}</code></pre>
+          <pre id="panel-urls" role="tabpanel" aria-labelledby="tab-urls" data-panel="urls" hidden><code class="language-typescript">{landingCode.urls.map((token) =>
+            token.tone ? <span class={`syntax-${token.tone}`}>{token.text}</span> : token.text
+          )}</code></pre>
+          <pre id="panel-naming" role="tabpanel" aria-labelledby="tab-naming" data-panel="naming" hidden><code class="language-typescript">{landingCode.naming.map((token) =>
+            token.tone ? <span class={`syntax-${token.tone}`}>{token.text}</span> : token.text
+          )}</code></pre>
         </div>
         <div class="depth-links">
           <a href={path("configuration/")}>Configuration reference</a>
