@@ -58,6 +58,17 @@ test("mirrors source files and preserves an existing index", async (context) => 
   assert.match(rootIndex, /data-search-filter/);
   assert.match(rootIndex, /data-include-links/);
   assert.match(rootIndex, /data-sort-field/);
+  for (const name of [
+    "search-scope",
+    "search-filter",
+    "sort-field",
+    "name-mode",
+    "sort-direction",
+  ]) {
+    assert.equal(rootIndex.match(new RegExp(`<select data-${name}>`, "g"))?.length, 1);
+  }
+  assert.match(rootIndex, /--dw-control-height:2\.75rem/);
+  assert.match(rootIndex, /data-theme-value="system" aria-pressed="true">System<\/button>/);
   assert.match(rootIndex, />Dirwell<\/a> by VdustR/);
   assert.doesNotMatch(rootIndex, /data-parent-href/);
   assert.match(rootIndex, /href="README\.txt" target="_blank" rel="noopener">[\s\S]*README\.txt/);

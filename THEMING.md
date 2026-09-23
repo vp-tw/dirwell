@@ -39,6 +39,12 @@ Global search is progressive: the browser requests the generated JSON index
 only after the user selects `Everywhere`. Sorting and search controls can be
 disabled independently without changing the component override API.
 
+Within the bundled theme, the five select controls share a private renderer,
+and `--dw-control-height` gives search, select, sort, and color-scheme controls
+one height. This is a default-theme styling hook, not a requirement for custom
+themes. The controls keep their native `input`, `select`, `details`, and
+`fieldset` semantics; override `Toolbar` to replace their markup.
+
 Default components are exported as `defaultThemeComponents`, so a replacement
 can wrap one explicitly. This provides the useful part of Docusaurus swizzling
 without virtual aliases or unsafe component categories.
