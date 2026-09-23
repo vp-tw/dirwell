@@ -25,6 +25,7 @@ export default defineConfig({
           items: [
             { label: "CLI", slug: "cli" },
             { label: "Configuration", slug: "configuration" },
+            { label: "API reference", slug: "api-reference" },
             { label: "Themes", slug: "themes" },
             { label: "Symlinks", slug: "symlinks" },
             { label: "Deployment", slug: "deployment" },
