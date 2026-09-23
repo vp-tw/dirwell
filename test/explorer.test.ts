@@ -59,6 +59,12 @@ test("plain theme emits complete HTML without icons, scripts, or search assets",
     assert.doesNotMatch(html, /<svg|<script|<img|data-theme|search-index|prefers-color-scheme/);
     assert.match(html, /<meta name="color-scheme" content="light">/);
     assert.match(html, /<time datetime="[^"]+">/);
+    assert.match(html, /<footer><hr><p>Repository: Dirwell by VdustR/);
+    assert.match(
+      html,
+      /<a href="https:\/\/opensource\.org\/license\/mit" target="_blank" rel="noopener">MIT License<\/a>/,
+    );
+    assert.doesNotMatch(html, /href="https:\/\/github\.com\/VdustR\/dirwell/);
     await assert.rejects(readFile(path.join(output, "__dirwell", "search-index.json"), "utf8"));
     const nested = await readFile(path.join(output, "releases", "index.html"), "utf8");
     assert.match(
@@ -66,7 +72,39 @@ test("plain theme emits complete HTML without icons, scripts, or search assets",
       /aria-label="Breadcrumb"><a href="\.\.\/">Home<\/a> \/ <span aria-current="page">releases<\/span>/,
     );
     assert.match(nested, /href="\.\.\/">\.\.\/<\/a>/);
+    assert.match(nested, /<footer><hr><p>Repository:/);
   }
+
+  await generateExplorer({
+    sourceDir: root,
+    outputDir: output,
+    theme: createPlainTheme({
+      project: {
+        author: "A & B",
+        license: "Custom <License>",
+        licenseUrl: "https://example.test/license",
+        name: "Example <Repo>",
+        repositoryUrl: "https://example.test/repo?a=1&b=2",
+      },
+    }),
+  });
+  const customized = await readFile(path.join(output, "index.html"), "utf8");
+  assert.match(
+    customized,
+    /href="https:\/\/example\.test\/repo\?a=1&amp;b=2" target="_blank" rel="noopener">Example &lt;Repo&gt;<\/a> by A &amp; B/,
+  );
+  assert.match(customized, /Custom &lt;License&gt;<\/a>/);
+
+  await generateExplorer({
+    sourceDir: root,
+    outputDir: output,
+    theme: createPlainTheme({
+      project: { license: "Custom", repositoryUrl: "javascript:alert(1)" },
+    }),
+  });
+  const unsafe = await readFile(path.join(output, "index.html"), "utf8");
+  assert.match(unsafe, /Repository: Dirwell by VdustR · Custom<\/p>/);
+  assert.doesNotMatch(unsafe, /href="javascript:/);
 });
 
 test("default theme self-hosts vscode-icons in SSG and MPA output", async (context) => {

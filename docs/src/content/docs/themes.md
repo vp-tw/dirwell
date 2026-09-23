@@ -25,6 +25,11 @@ opens files outside the explorer in new tabs. It does not virtualize very large
 directories; use the default theme when client-side search or virtualization is
 needed. See the [plain example](../examples/).
 
+Its footer identifies the repository, author, and license. Override the defaults
+with `createPlainTheme({ project: { name, repositoryUrl, author, license, licenseUrl } })`.
+The repository name becomes a link when `repositoryUrl` is configured; the
+default project URL is intentionally not linked while the repository is unpublished.
+
 ## Component overrides
 
 The default theme exposes eight stable components: `PageShell`, `Breadcrumbs`,

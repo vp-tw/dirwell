@@ -108,6 +108,8 @@ the default theme. See [THEMING.md](./THEMING.md) and the Starlight site in
 icons, JavaScript, appearance controls, or search index. It emits complete HTML
 in both modes; choose the default theme for search and large-directory
 virtualization. See [examples/plain](./examples/plain).
+Its footer shows the repository, author, and license. Pass `project` to
+`createPlainTheme()` to override the metadata and link to a published repository.
 
 The default theme uses selected self-hosted `vscode-icons` artwork for common
 file types. The icons are CC BY-SA 4.0 and may include separately protected

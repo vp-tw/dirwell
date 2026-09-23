@@ -3,6 +3,9 @@
 The plain theme is a browser-native directory listing. It keeps the
 filesystem as the content and uses semantic HTML: a heading, linked breadcrumbs,
 an unordered list, links, small metadata, and machine-readable timestamps.
+The footer uses a native horizontal rule and plain text to identify the
+repository, author, and license. External links open in a new tab.
+An unpublished repository stays plain text until a URL is configured.
 
 It has no icons, JavaScript, client-side search, sorting controls, color-scheme
 switch, or generated search index. The only CSS sets a readable maximum width,

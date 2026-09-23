@@ -8,6 +8,7 @@ import {
 } from "./theme-components.ts";
 import { defaultThemeComponents, escapeHtml } from "./theme-default/components.ts";
 import { defaultStyles } from "./theme-default/styles.ts";
+import { resolveThemeProject, type ThemeProjectOptions } from "./theme-project.ts";
 import {
   vscodeIconAssetName,
   vscodeIconForEntry,
@@ -41,13 +42,7 @@ export interface DefaultThemeOptions {
   readonly fuzzySearch?: boolean;
   readonly globalSearch?: boolean;
   readonly keyboardNavigation?: boolean;
-  readonly project?: Readonly<{
-    author?: string;
-    license?: string;
-    licenseUrl?: string;
-    name?: string;
-    repositoryUrl?: string;
-  }>;
+  readonly project?: ThemeProjectOptions;
   readonly sorting?: boolean;
   /** MPA directories above this size load rows from an asset and render a measured window. */
   readonly virtualizeAfter?: number;
@@ -82,14 +77,7 @@ export function createDefaultTheme(options: DefaultThemeOptions = {}): ExplorerT
   const keyboardNavigation = options.keyboardNavigation ?? true;
   const sorting = options.sorting ?? true;
   const virtualizeAfter = options.virtualizeAfter ?? 500;
-  const project = {
-    author: options.project?.author ?? "VdustR",
-    license: options.project?.license ?? "MIT License",
-    licenseUrl:
-      options.project?.licenseUrl ?? "https://github.com/VdustR/dirwell/blob/main/LICENSE",
-    name: options.project?.name ?? "Dirwell",
-    repositoryUrl: options.project?.repositoryUrl ?? "https://github.com/VdustR/dirwell",
-  };
+  const project = resolveThemeProject(options.project);
   if (!Number.isSafeInteger(virtualizeAfter) || virtualizeAfter < 0) {
     throw new RangeError("virtualizeAfter must be a non-negative integer");
   }

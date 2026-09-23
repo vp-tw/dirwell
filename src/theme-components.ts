@@ -5,6 +5,7 @@ import type {
   SortDirection,
   SortField,
 } from "./model.ts";
+import type { ThemeProject } from "./theme-project.ts";
 
 export interface DefaultThemeRuntimeConfig {
   readonly colorScheme: boolean;
@@ -93,13 +94,7 @@ export interface FooterProps {
   readonly iconNoticeHref: string;
   readonly keyboardNavigation: boolean;
   readonly parentHref: string | null;
-  readonly project: Readonly<{
-    author: string;
-    license: string;
-    licenseUrl: string;
-    name: string;
-    repositoryUrl: string;
-  }>;
+  readonly project: ThemeProject;
 }
 
 export type IconName = "chevron-right" | "file" | "folder" | "link" | "moon" | "search" | "sun";

@@ -13,6 +13,7 @@ export {
   escapeHtml,
 } from "./theme-default.ts";
 export { createPlainTheme } from "./theme-plain.ts";
+export type { PlainThemeOptions } from "./theme-plain.ts";
 export { resolveThemeComponents } from "./theme-components.ts";
 export type { DirwellConfig, DirwellConfigContext, DirwellConfigInput } from "./config.ts";
 export type {

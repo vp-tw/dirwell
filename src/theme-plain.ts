@@ -1,4 +1,9 @@
 import type { ExplorerTheme, FileSystemEntry, ThemeContext } from "./model.ts";
+import { resolveThemeProject, type ThemeProjectOptions } from "./theme-project.ts";
+
+export interface PlainThemeOptions {
+  readonly project?: ThemeProjectOptions;
+}
 
 function escapeHtml(value: string): string {
   return value
@@ -6,6 +11,22 @@ function escapeHtml(value: string): string {
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;");
+}
+
+function externalHref(value: string | undefined): string | null {
+  if (value === undefined) return null;
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" || url.protocol === "http:" ? url.href : null;
+  } catch {
+    return null;
+  }
+}
+
+function externalLink(label: string, href: string | null): string {
+  return href === null
+    ? escapeHtml(label)
+    : `<a href="${escapeHtml(href)}" target="_blank" rel="noopener">${escapeHtml(label)}</a>`;
 }
 
 function status(entry: FileSystemEntry): string {
@@ -45,7 +66,13 @@ function renderEntry(entry: FileSystemEntry, context: ThemeContext): string {
 }
 
 /** A no-icon, no-script theme that leaves navigation and controls to the browser. */
-export function createPlainTheme(): ExplorerTheme {
+export function createPlainTheme(options: PlainThemeOptions = {}): ExplorerTheme {
+  const project = resolveThemeProject(options.project);
+  const repositoryHref = externalHref(options.project?.repositoryUrl);
+  const licenseHref = externalHref(
+    options.project?.licenseUrl ??
+      (options.project?.license === undefined ? "https://opensource.org/license/mit" : undefined),
+  );
   return {
     name: "plain",
     searchIndex: false,
@@ -62,9 +89,10 @@ export function createPlainTheme(): ExplorerTheme {
         parentHref === null ? "" : `<li><a href="${escapeHtml(parentHref)}">../</a></li>`;
       const rows = context.directory.entries.map((entry) => renderEntry(entry, context)).join("");
       const count = context.directory.entries.length;
+      const footer = `<footer><hr><p>Repository: ${externalLink(project.name, repositoryHref)} by ${escapeHtml(project.author)} · ${externalLink(project.license, licenseHref)}</p></footer>`;
       const html = `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light">${context.documentBaseHref === null ? "" : `<base href="${escapeHtml(context.documentBaseHref)}">`}<title>Index of ${escapeHtml(visiblePath)}</title><style>body{max-width:72ch;margin:2rem auto;padding:0 1rem}h1,li,nav{overflow-wrap:anywhere}li{margin:.6rem 0}small{display:block}</style></head>
-<body><main>${renderBreadcrumbs(context)}<h1>Index of ${escapeHtml(visiblePath)}</h1><p>${count} ${count === 1 ? "entry" : "entries"}</p>${count === 0 ? "<p>This directory is empty.</p>" : ""}<ul>${parentRow}${rows}</ul></main></body></html>`;
+<body><main>${renderBreadcrumbs(context)}<h1>Index of ${escapeHtml(visiblePath)}</h1><p>${count} ${count === 1 ? "entry" : "entries"}</p>${count === 0 ? "<p>This directory is empty.</p>" : ""}<ul>${parentRow}${rows}</ul></main>${footer}</body></html>`;
       return { html };
     },
   };
