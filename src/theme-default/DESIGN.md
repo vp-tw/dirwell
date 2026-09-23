@@ -55,7 +55,8 @@ spacing:
 **Creative North Star: "The Inventory Sheet"**
 
 This is an operational interface. Paths and files are the subject; controls stay
-familiar, compact, and quiet. The theme ships with no external visual assets.
+familiar, compact, and quiet. The theme self-hosts selected vscode-icons SVGs
+for common file types and a generic fallback. Controls retain quiet line icons.
 It is one implementation of Dirwell's theme API, not a visual contract for
 third-party themes. The official site's design system lives in the repository
 root `DESIGN.md`.
@@ -64,7 +65,7 @@ root `DESIGN.md`.
 
 Paper and surface separate the page from the file list. Ink carries names;
 muted ink carries metadata. The accent identifies navigable paths and active
-sort state. Status green identifies file icons; warning orange identifies
+sort state. File artwork identifies formats; warning orange identifies
 broken links. Every semantic role has light and dark values in `styles.ts`.
 
 **The Path Accent Rule.** Use the accent for navigation and active state, not

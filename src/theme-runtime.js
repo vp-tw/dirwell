@@ -82,7 +82,7 @@ function formatSize(bytes, directory) {
   return `${value.toFixed(unit === 0 || value >= 100 ? 0 : 1)} ${units[unit]}`;
 }
 
-function createGlobalEntry(record, indexUrl, order, local = false) {
+function createGlobalEntry(record, indexUrl, order, icons, local = false) {
   const directory = record.kind === "directory" || record.targetKind === "directory";
   const isLink = record.isLink ?? record.kind === "symlink";
   const label = local ? record.name : record.path;
@@ -116,22 +116,15 @@ function createGlobalEntry(record, indexUrl, order, local = false) {
   }
   const entryName = document.createElement("span");
   entryName.className = "entry-name";
-  const icon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-  icon.setAttribute("class", "icon");
-  icon.setAttribute("width", "16");
-  icon.setAttribute("height", "16");
-  icon.setAttribute("viewBox", "0 0 24 24");
-  icon.setAttribute("fill", "none");
-  icon.setAttribute("stroke", "currentColor");
-  icon.setAttribute("stroke-width", "1.8");
-  icon.setAttribute("stroke-linecap", "round");
-  icon.setAttribute("stroke-linejoin", "round");
-  icon.setAttribute("aria-hidden", "true");
-  icon.innerHTML = isLink
-    ? '<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>'
-    : directory
-      ? '<path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.9 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/>'
-      : '<path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5z"/><polyline points="14 2 14 8 20 8"/>';
+  const extension = record.name.slice(record.name.lastIndexOf(".") + 1).toLowerCase();
+  const iconName = directory ? "default_folder" : (icons.byExtension[extension] ?? "default_file");
+  const icon = document.createElement("img");
+  icon.className = "icon file-icon";
+  icon.width = 20;
+  icon.height = 20;
+  icon.alt = "";
+  icon.loading = "lazy";
+  icon.src = new URL(icons.hrefs[iconName], document.baseURI).href;
   const labelNode = document.createElement("span");
   labelNode.textContent = `${label}${directory ? "/" : ""}`;
   entryName.append(icon, labelNode);
@@ -202,7 +195,7 @@ export class HeightTree {
   }
 }
 
-function createVirtualList(list) {
+function createVirtualList(list, icons) {
   let parent = list.querySelector("[data-parent]");
   let records = [];
   let heights = new HeightTree(0);
@@ -260,7 +253,7 @@ function createVirtualList(list) {
       if (nextParent) fragment.append(nextParent);
       fragment.append(nextTop);
       for (let index = start; index < end; index += 1) {
-        const row = createGlobalEntry(records[index], document.baseURI, index, true);
+        const row = createGlobalEntry(records[index], document.baseURI, index, icons, true);
         row.dataset.virtualIndex = String(index);
         row.setAttribute("aria-posinset", String(index + 1));
         row.setAttribute("aria-setsize", String(records.length));
@@ -609,7 +602,9 @@ function initializeExplorer(root) {
         );
         best.length = Math.min(best.length, 100);
         globalResults?.replaceChildren(
-          ...best.map(({ record }, index) => createGlobalEntry(record, indexUrl, index)),
+          ...best.map(({ record }, index) =>
+            createGlobalEntry(record, indexUrl, index, config.icons),
+          ),
         );
         if (globalStatus)
           globalStatus.textContent = `${found} matches · ${Math.min(offset + 4, manifest.shards.length)} of ${manifest.shards.length} index parts searched${found > 100 ? " · showing best 100" : ""}`;
@@ -721,7 +716,7 @@ function initializeExplorer(root) {
           search: `${row.name} ${row.target ?? ""}`.toLocaleLowerCase(),
           modified: Date.parse(row.modifiedAt),
         }));
-        virtualList = createVirtualList(list);
+        virtualList = createVirtualList(list, config.icons);
         if (config.workerHref && typeof Worker !== "undefined") {
           try {
             virtualWorker = new Worker(new URL(config.workerHref, document.baseURI), {

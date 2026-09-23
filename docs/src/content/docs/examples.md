@@ -11,6 +11,7 @@ documentation build publishes every generated explorer below the same site base.
 | `basic`        | The defaults produce a portable site without configuration.                         | SSG with relative URLs    |
 | `base-path`    | Shared assets and file links work below a GitHub Pages repository path.             | MPA with base URLs        |
 | `custom-theme` | Typed component overrides can change product language without forking the renderer. | SSG with a layered theme  |
+| `file-icons`   | The default theme self-hosts selected vscode-icons file-type artwork.               | SSG with bundled SVGs     |
 | `plain`        | Plain HTML listings work without icons, JavaScript, or client-side search.          | SSG without search assets |
 
 From the repository root, build the documentation and all examples together:
@@ -29,6 +30,7 @@ site/
 │   ├── basic/
 │   ├── base-path/
 │   ├── custom-theme/
+│   ├── file-icons/
 │   └── plain/
 └── _astro/
 ```

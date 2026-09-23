@@ -1,0 +1,16 @@
+Dirwell includes selected, unmodified icons from vscode-icons.
+Source: https://github.com/vscode-icons/vscode-icons/tree/6b4471cf8dcdeafc9d1203f9156d285fc3e9d552/icons
+Authors: vscode-icons contributors
+Icon license: Creative Commons Attribution-ShareAlike 4.0 International
+https://creativecommons.org/licenses/by-sa/4.0/
+
+The icons in this directory are file and folder artwork. The vscode-icons
+project states that branded icons remain subject to their owners' copyright.
+Neither vscode-icons nor those owners endorse Dirwell.
+
+Included source filenames:
+default_file.svg, default_folder.svg, file_type_css.svg,
+file_type_html.svg, file_type_image.svg, file_type_js.svg,
+file_type_json.svg, file_type_markdown.svg, file_type_pdf2.svg,
+file_type_shell.svg, file_type_text.svg, file_type_typescript.svg,
+file_type_yaml.svg, file_type_zip.svg.

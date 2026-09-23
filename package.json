@@ -14,6 +14,7 @@
   "files": [
     "dist",
     "LICENSE",
+    "THIRD_PARTY_NOTICES.md",
     "README.md"
   ],
   "type": "module",
@@ -28,7 +29,7 @@
     }
   },
   "scripts": {
-    "build": "vp pack",
+    "build": "vp pack && node scripts/copy-static-assets.ts",
     "build:explorer": "node src/bin.ts build fixture --out-dir generated",
     "check": "vp check && tsc --noEmit",
     "dev": "node src/bin.ts serve fixture --out-dir generated",

@@ -7,7 +7,7 @@ const root = path.resolve(import.meta.dirname, "..");
 
 test("landing page exposes every live example and source directory", async () => {
   const source = await readFile(path.join(root, "docs/src/pages/index.astro"), "utf8");
-  for (const slug of ["basic", "base-path", "custom-theme", "plain"]) {
+  for (const slug of ["basic", "base-path", "custom-theme", "file-icons", "plain"]) {
     assert.match(source, new RegExp(`slug: "${slug}"`));
     assert.match(source, /examples\/\$\{example\.slug\}/);
   }
@@ -22,7 +22,7 @@ test("site build combines docs and examples in one publish directory", async () 
   assert.equal(packageJson.scripts["site:build"], "pnpm run docs:build && pnpm run examples:build");
 
   const buildScript = await readFile(path.join(root, "scripts/build-examples.ts"), "utf8");
-  assert.match(buildScript, /\["basic", "base-path", "custom-theme", "plain"\]/);
+  assert.match(buildScript, /\["basic", "base-path", "custom-theme", "file-icons", "plain"\]/);
   assert.match(buildScript, /"build",\s*"files"/);
 });
 

@@ -69,6 +69,29 @@ test("plain theme emits complete HTML without icons, scripts, or search assets",
   }
 });
 
+test("default theme self-hosts vscode-icons in SSG and MPA output", async (context) => {
+  const { output, root } = await fixture();
+  context.after(() => rm(path.dirname(root), { recursive: true, force: true }));
+
+  for (const mode of ["ssg", "mpa"] as const) {
+    await generateExplorer({ sourceDir: root, outputDir: output, mode });
+    const html = await readFile(path.join(output, "index.html"), "utf8");
+    const assetPrefix = mode === "mpa" ? "__dirwell/" : "";
+    assert.match(html, new RegExp(`src="${assetPrefix}vscode-default_folder\\.svg"`));
+    assert.match(html, new RegExp(`src="${assetPrefix}vscode-file_type_text\\.svg"`));
+    assert.match(html, /Icon credits<\/a>/);
+    assert.match(html, /&quot;icons&quot;:\{&quot;byExtension&quot;:/);
+    const assetDir = path.join(output, mode === "mpa" ? "__dirwell" : "");
+    assert.match(await readFile(path.join(assetDir, "vscode-file_type_text.svg"), "utf8"), /<svg/);
+    assert.match(
+      await readFile(path.join(assetDir, "vscode-icons-NOTICE.txt"), "utf8"),
+      /CC BY-SA 4\.0|Creative Commons Attribution-ShareAlike 4\.0/,
+    );
+    const runtime = await readFile(path.join(assetDir, "dirwell.runtime.js"), "utf8");
+    assert.match(runtime, /icons\.hrefs\[iconName\]/);
+  }
+});
+
 test("mirrors source files and preserves an existing index", async (context) => {
   const { output, root } = await fixture();
   context.after(() => rm(path.dirname(root), { recursive: true, force: true }));
@@ -337,12 +360,14 @@ test("base URLs prefix pages, assets, breadcrumbs, and raw-link views", async (c
   const rootHtml = await readFile(path.join(output, "index.html"), "utf8");
   const nestedHtml = await readFile(path.join(output, "releases", "index.html"), "utf8");
   assert.match(rootHtml, /src="\/repo\/dirwell\.runtime\.js"/);
+  assert.match(rootHtml, /src="\/repo\/vscode-file_type_text\.svg"/);
   assert.match(rootHtml, /href="\/repo\/releases\/"/);
   assert.match(rootHtml, /href="\/repo\/space%20name\.txt"/);
   assert.match(rootHtml, /href="\/repo\/__dirwell\/raw-links\/[a-f0-9]{16}\.txt"/);
   assert.match(nestedHtml, /href="\/repo\/">Home<\/a>/);
   assert.match(nestedHtml, /href="\/repo\/releases\/v2\.4\.0\/"/);
   assert.match(nestedHtml, /src="\/repo\/releases\/dirwell\.runtime\.js"/);
+  assert.match(nestedHtml, /src="\/repo\/releases\/vscode-default_folder\.svg"/);
   assert.doesNotMatch(nestedHtml, /<base href=/);
 });
 
@@ -361,11 +386,13 @@ test("html-base emits a native base element and base-relative URLs", async (cont
   assert.match(rootHtml, /<base href="\/repo\/">/);
   assert.match(rootHtml, /href="releases\/"/);
   assert.match(rootHtml, /href="space%20name\.txt"/);
+  assert.match(rootHtml, /src="vscode-file_type_text\.svg"/);
   assert.match(rootHtml, /href="__dirwell\/raw-links\/[a-f0-9]{16}\.txt"/);
   assert.match(nestedHtml, /<base href="\/repo\/">/);
   assert.match(nestedHtml, /href="\.\/">Home<\/a>/);
   assert.match(nestedHtml, /href="releases\/v2\.4\.0\/"/);
   assert.match(nestedHtml, /src="releases\/dirwell\.runtime\.js"/);
+  assert.match(nestedHtml, /src="releases\/vscode-default_folder\.svg"/);
   assert.match(nestedHtml, /&quot;searchIndexHref&quot;:&quot;__dirwell\/search-index\.json&quot;/);
 });
 

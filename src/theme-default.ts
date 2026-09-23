@@ -8,11 +8,32 @@ import {
 } from "./theme-components.ts";
 import { defaultThemeComponents, escapeHtml } from "./theme-default/components.ts";
 import { defaultStyles } from "./theme-default/styles.ts";
+import {
+  vscodeIconAssetName,
+  vscodeIconForEntry,
+  vscodeIconNames,
+  vscodeIconsByExtension,
+} from "./theme-default/vscode-icons.ts";
 
 export { defaultThemeComponents, escapeHtml } from "./theme-default/components.ts";
 
 const runtimeSource = await readFile(new URL("./theme-runtime.js", import.meta.url), "utf8");
 const workerSource = await readFile(new URL("./theme-worker.js", import.meta.url), "utf8");
+const vscodeIconAssets = Object.fromEntries(
+  await Promise.all(
+    vscodeIconNames.map(
+      async (name) =>
+        [
+          vscodeIconAssetName(name),
+          await readFile(new URL(`./vscode-icons/${name}.svg`, import.meta.url), "utf8"),
+        ] as const,
+    ),
+  ),
+);
+const vscodeIconNotice = await readFile(
+  new URL("./vscode-icons/NOTICE.txt", import.meta.url),
+  "utf8",
+);
 
 export interface DefaultThemeOptions {
   readonly colorScheme?: boolean;
@@ -110,7 +131,10 @@ export function createDefaultTheme(options: DefaultThemeOptions = {}): ExplorerT
             const iconName = entry.kind === "symlink" ? "link" : directoryLike ? "folder" : "file";
             return components.EntryRow({
               entry,
-              icon: components.Icon({ name: iconName }),
+              icon: components.Icon({
+                name: iconName,
+                src: assetHref(vscodeIconAssetName(vscodeIconForEntry(entry))),
+              }),
               index,
               navigation: { exitsExplorer: exitsExplorerFor(entry), href: hrefFor(entry) },
             });
@@ -127,6 +151,12 @@ export function createDefaultTheme(options: DefaultThemeOptions = {}): ExplorerT
         fuzzySearch,
         globalSearch,
         keyboardNavigation,
+        icons: {
+          byExtension: vscodeIconsByExtension,
+          hrefs: Object.fromEntries(
+            vscodeIconNames.map((name) => [name, assetHref(vscodeIconAssetName(name))]),
+          ),
+        },
         searchIndexHref,
         ...(entriesAssetName === null ? {} : { entriesHref: assetHref(entriesAssetName) }),
         ...(entriesAssetName === null ? {} : { workerHref: assetHref("dirwell.worker.js") }),
@@ -145,6 +175,7 @@ export function createDefaultTheme(options: DefaultThemeOptions = {}): ExplorerT
         emptyState: components.EmptyState({ message: "No matching entries." }),
         entryList: components.EntryList({ directory, parentHref, rows, sorting }),
         footer: components.Footer({
+          iconNoticeHref: assetHref("vscode-icons-NOTICE.txt"),
           keyboardNavigation,
           parentHref,
           project,
@@ -162,35 +193,35 @@ export function createDefaultTheme(options: DefaultThemeOptions = {}): ExplorerT
         }),
         visiblePath,
       });
-      return interactive
-        ? {
-            html,
-            assets: {
-              "dirwell.runtime.js": runtimeSource,
-              ...(entriesAssetName === null ? {} : { "dirwell.worker.js": workerSource }),
-              ...(entriesAssetName === null
-                ? {}
-                : {
-                    [entriesAssetName]: JSON.stringify({
-                      rows: directory.entries.map((entry) => ({
-                        name: entry.name,
-                        size: entry.metadata.size,
-                        modifiedAt: entry.metadata.times.modifiedAt,
-                        kind: entry.kind,
-                        targetKind: entry.symlink?.targetKind ?? null,
-                        target: entry.symlink?.target ?? null,
-                        isCycle: entry.symlink?.isCycle ?? false,
-                        isBroken: entry.symlink?.isBroken ?? false,
-                        isOutsideRoot: entry.symlink?.isOutsideRoot ?? false,
-                        href: hrefFor(entry),
-                        exitsExplorer: exitsExplorerFor(entry),
-                      })),
-                      version: 1,
-                    }),
-                  }),
-            },
-          }
-        : { html };
+      return {
+        html,
+        assets: {
+          ...vscodeIconAssets,
+          "vscode-icons-NOTICE.txt": vscodeIconNotice,
+          ...(interactive ? { "dirwell.runtime.js": runtimeSource } : {}),
+          ...(entriesAssetName === null ? {} : { "dirwell.worker.js": workerSource }),
+          ...(entriesAssetName === null
+            ? {}
+            : {
+                [entriesAssetName]: JSON.stringify({
+                  rows: directory.entries.map((entry) => ({
+                    name: entry.name,
+                    size: entry.metadata.size,
+                    modifiedAt: entry.metadata.times.modifiedAt,
+                    kind: entry.kind,
+                    targetKind: entry.symlink?.targetKind ?? null,
+                    target: entry.symlink?.target ?? null,
+                    isCycle: entry.symlink?.isCycle ?? false,
+                    isBroken: entry.symlink?.isBroken ?? false,
+                    isOutsideRoot: entry.symlink?.isOutsideRoot ?? false,
+                    href: hrefFor(entry),
+                    exitsExplorer: exitsExplorerFor(entry),
+                  })),
+                  version: 1,
+                }),
+              }),
+        },
+      };
     },
   };
 }

@@ -109,6 +109,12 @@ icons, JavaScript, appearance controls, or search index. It emits complete HTML
 in both modes; choose the default theme for search and large-directory
 virtualization. See [examples/plain](./examples/plain).
 
+The default theme uses selected self-hosted `vscode-icons` artwork for common
+file types. The icons are CC BY-SA 4.0 and may include separately protected
+brand marks; Dirwell's code remains MIT-licensed. See
+[third-party notices](./THIRD_PARTY_NOTICES.md) and the
+[file-icons example](./examples/file-icons).
+
 ## Development
 
 ```bash

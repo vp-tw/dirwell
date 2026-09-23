@@ -11,6 +11,10 @@ export interface DefaultThemeRuntimeConfig {
   readonly fuzzySearch: boolean;
   readonly globalSearch: boolean;
   readonly keyboardNavigation: boolean;
+  readonly icons: Readonly<{
+    byExtension: Readonly<Record<string, string>>;
+    hrefs: Readonly<Record<string, string>>;
+  }>;
   readonly searchIndexHref: string;
   readonly entriesHref?: string;
   readonly workerHref?: string;
@@ -86,6 +90,7 @@ export interface EmptyStateProps {
 }
 
 export interface FooterProps {
+  readonly iconNoticeHref: string;
   readonly keyboardNavigation: boolean;
   readonly parentHref: string | null;
   readonly project: Readonly<{
@@ -103,6 +108,8 @@ export interface IconProps {
   readonly label?: string;
   readonly name: IconName;
   readonly size?: number;
+  /** Source of a file-type image. Control icons continue to use the named SVG. */
+  readonly src?: string;
 }
 
 export interface DirwellThemeComponents {

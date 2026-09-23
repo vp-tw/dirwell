@@ -67,8 +67,10 @@ const iconPaths: Record<IconName, string> = {
 };
 
 export const defaultThemeComponents: DirwellThemeComponents = {
-  Icon: ({ label, name, size = 16 }) =>
-    `<svg class="icon" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"${label === undefined ? ' aria-hidden="true"' : ` role="img" aria-label="${escapeHtml(label)}"`}>${iconPaths[name]}</svg>`,
+  Icon: ({ label, name, size = 16, src }) =>
+    src === undefined
+      ? `<svg class="icon" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"${label === undefined ? ' aria-hidden="true"' : ` role="img" aria-label="${escapeHtml(label)}"`}>${iconPaths[name]}</svg>`
+      : `<img class="icon file-icon" width="20" height="20" src="${escapeHtml(src)}" alt="" loading="lazy">`,
   Breadcrumbs: ({ items }) =>
     `<nav class="breadcrumbs" aria-label="Breadcrumb">${items
       .map((item) =>
@@ -156,11 +158,11 @@ export const defaultThemeComponents: DirwellThemeComponents = {
     return `<div class="entry-head">${headings}</div><ul class="entries" data-entry-list>${directory.depth > 0 && parentHref !== null ? `<li class="entry" data-parent><a class="name" href="${escapeHtml(parentHref)}">../</a><span class="kind">parent</span><span></span></li>` : ""}${rows}</ul>`;
   },
   EmptyState: ({ message }) => `<p class="empty" data-empty hidden>${escapeHtml(message)}</p>`,
-  Footer: ({ keyboardNavigation, parentHref, project }) => {
+  Footer: ({ iconNoticeHref, keyboardNavigation, parentHref, project }) => {
     const shortcuts = keyboardNavigation
       ? `<p class="shortcuts" id="keyboard-shortcuts"><kbd>/</kbd> search <kbd>↑</kbd><kbd>↓</kbd> browse <kbd>Esc</kbd> clear${parentHref === null ? "" : " <kbd>Backspace</kbd> parent"}</p>`
       : "";
-    return `<footer><p class="project-meta"><a href="${escapeHtml(project.repositoryUrl)}" target="_blank" rel="noopener">${escapeHtml(project.name)}</a> by ${escapeHtml(project.author)}<a href="${escapeHtml(project.licenseUrl)}" target="_blank" rel="noopener">${escapeHtml(project.license)}</a></p>${shortcuts}</footer>`;
+    return `<footer><p class="project-meta"><a href="${escapeHtml(project.repositoryUrl)}" target="_blank" rel="noopener">${escapeHtml(project.name)}</a> by ${escapeHtml(project.author)}<a href="${escapeHtml(project.licenseUrl)}" target="_blank" rel="noopener">${escapeHtml(project.license)}</a><a href="${escapeHtml(iconNoticeHref)}" target="_blank" rel="noopener">Icon credits</a></p>${shortcuts}</footer>`;
   },
   PageShell: ({
     assets,

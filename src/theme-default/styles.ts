@@ -453,6 +453,11 @@ a {
   vertical-align: -0.15em;
   color: var(--status);
 }
+.file-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  object-fit: contain;
+}
 .target {
   color: var(--muted);
   font:
