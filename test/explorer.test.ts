@@ -6,7 +6,7 @@ import test from "node:test";
 import { createExplorerDevServer } from "../src/dev-server.ts";
 import { compareEntries, generateExplorer } from "../src/generator.ts";
 import { createDefaultTheme } from "../src/theme-default.ts";
-import { createLightweightTheme } from "../src/theme-lightweight.ts";
+import { createPlainTheme } from "../src/theme-plain.ts";
 import { HeightTree, compareEntryValues, entryType, fuzzyScore } from "../src/theme-runtime.js";
 import type { DirectoryData } from "../src/model.ts";
 
@@ -38,7 +38,7 @@ test("type filters keep symlinks separate from physical folders and files", () =
   assert.equal(entryType({ dataset: { kind: "directory", link: "true" } }), "link");
 });
 
-test("lightweight theme emits complete HTML without icons, scripts, or search assets", async (context) => {
+test("plain theme emits complete HTML without icons, scripts, or search assets", async (context) => {
   const { output, root } = await fixture();
   context.after(() => rm(path.dirname(root), { recursive: true, force: true }));
 
@@ -48,7 +48,7 @@ test("lightweight theme emits complete HTML without icons, scripts, or search as
       outputDir: output,
       mode,
       symlinks: { follow: true },
-      theme: createLightweightTheme(),
+      theme: createPlainTheme(),
     });
     const html = await readFile(path.join(output, "index.html"), "utf8");
     assert.match(html, /<h1>Index of \/<\/h1>/);

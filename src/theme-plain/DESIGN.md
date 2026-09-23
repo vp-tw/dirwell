@@ -1,6 +1,6 @@
-# Lightweight theme
+# Plain theme
 
-The lightweight theme is a browser-native directory listing. It keeps the
+The plain theme is a browser-native directory listing. It keeps the
 filesystem as the content and uses semantic HTML: a heading, linked breadcrumbs,
 an unordered list, links, small metadata, and machine-readable timestamps.
 

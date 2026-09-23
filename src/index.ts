@@ -12,7 +12,7 @@ export {
   defaultThemeComponents,
   escapeHtml,
 } from "./theme-default.ts";
-export { createLightweightTheme } from "./theme-lightweight.ts";
+export { createPlainTheme } from "./theme-plain.ts";
 export { resolveThemeComponents } from "./theme-components.ts";
 export type { DirwellConfig, DirwellConfigContext, DirwellConfigInput } from "./config.ts";
 export type {

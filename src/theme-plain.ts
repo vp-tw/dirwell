@@ -45,9 +45,9 @@ function renderEntry(entry: FileSystemEntry, context: ThemeContext): string {
 }
 
 /** A no-icon, no-script theme that leaves navigation and controls to the browser. */
-export function createLightweightTheme(): ExplorerTheme {
+export function createPlainTheme(): ExplorerTheme {
   return {
-    name: "lightweight",
+    name: "plain",
     searchIndex: false,
     render(context) {
       const visiblePath =
