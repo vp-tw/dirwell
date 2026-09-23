@@ -67,7 +67,8 @@ test("mirrors source files and preserves an existing index", async (context) => 
   ]) {
     assert.equal(rootIndex.match(new RegExp(`<select data-${name}>`, "g"))?.length, 1);
   }
-  assert.match(rootIndex, /--dw-control-height:2\.75rem/);
+  assert.match(rootIndex, /--dw-control-height:\s*2\.75rem/);
+  assert.match(rootIndex, /button\.sort-heading\s*\{[^}]*min-width:\s*var\(--dw-control-height\)/);
   assert.match(rootIndex, /data-theme-value="system" aria-pressed="true">System<\/button>/);
   assert.match(rootIndex, />Dirwell<\/a> by VdustR/);
   assert.doesNotMatch(rootIndex, /data-parent-href/);

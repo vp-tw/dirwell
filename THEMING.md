@@ -45,6 +45,10 @@ one height. This is a default-theme styling hook, not a requirement for custom
 themes. The controls keep their native `input`, `select`, `details`, and
 `fieldset` semantics; override `Toolbar` to replace their markup.
 
+The bundled explorer has its own [design specification](src/theme-default/DESIGN.md)
+beside its components and styles. The repository-root `DESIGN.md` describes the
+official site; neither document constrains third-party themes.
+
 Default components are exported as `defaultThemeComponents`, so a replacement
 can wrap one explicitly. This provides the useful part of Docusaurus swizzling
 without virtual aliases or unsafe component categories.
