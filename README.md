@@ -86,8 +86,9 @@ fuzzy search, type filters, configurable sorting, IME-safe keyboard controls,
 Backspace parent navigation, theme persistence, and watch-mode live reload. The
 global search index is fetched only after the user opens Search all files and types a query.
 The index is split into bounded files; the first 100 best matches render progressively.
-Search matches file names, relative paths, and symlink targets. Folder and file
-filters include matching symlinks by default, with an `Include links` toggle.
+Search matches file names, relative paths, and symlink targets. Three independent
+checkboxes filter physical folders, physical files, and symlinks. All are on by
+default; any combination is available in the current folder and global search.
 
 Name sorting supports raw Unicode code-point order, locale-aware comparison,
 and natural numeric comparison. Modified time and file size are also available;

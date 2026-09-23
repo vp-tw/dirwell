@@ -17,6 +17,12 @@ export function fuzzyScore(query, value) {
   return score - haystack.length * 0.01;
 }
 
+export function entryType(entry) {
+  const link = entry.dataset?.link === "true" || entry.link === true || entry.isLink === true;
+  const kind = entry.dataset?.kind ?? entry.kind;
+  return link ? "link" : kind === "directory" ? "directory" : "file";
+}
+
 const localeCollator = new Intl.Collator(undefined, { sensitivity: "base" });
 const naturalCollator = new Intl.Collator(undefined, { numeric: true, sensitivity: "base" });
 
@@ -342,14 +348,10 @@ function initializeExplorer(root) {
   const input = root.querySelector("[data-search-input]");
   const globalDialog = document.querySelector("[data-global-dialog]");
   const globalInput = globalDialog?.querySelector("[data-global-input]");
-  const globalFilter = globalDialog?.querySelector("[data-global-filter]");
-  const globalIncludeLinks = globalDialog?.querySelector("[data-global-include-links]");
-  const globalIncludeControl = globalDialog?.querySelector("[data-global-include-links-control]");
+  const globalTypeFilters = globalDialog?.querySelector("[data-type-filters]");
   const globalResults = globalDialog?.querySelector("[data-global-results]");
   const globalStatus = globalDialog?.querySelector("[data-global-status]");
-  const filter = root.querySelector("[data-search-filter]");
-  const includeLinks = root.querySelector("[data-include-links]");
-  const includeLinksControl = root.querySelector("[data-include-links-control]");
+  const typeFilters = root.querySelector("[data-type-filters]");
   const count = root.querySelector("[data-visible-count]");
   const countLabel = root.querySelector("[data-count-label]");
   const empty = root.querySelector("[data-empty]");
@@ -370,6 +372,16 @@ function initializeExplorer(root) {
   const shardCache = new Map();
   let globalGeneration = 0;
   let composing = false;
+  const selectedTypes = (control) =>
+    new Set(
+      [...control.querySelectorAll("[data-type-filter]:checked")].map((input) => input.value),
+    );
+  let localTypes = typeFilters
+    ? selectedTypes(typeFilters)
+    : new Set(["directory", "file", "link"]);
+  let globalTypes = globalTypeFilters
+    ? selectedTypes(globalTypeFilters)
+    : new Set(["directory", "file", "link"]);
 
   const storage = {
     get(area, key) {
@@ -414,15 +426,14 @@ function initializeExplorer(root) {
     size: Number(entry.dataset.size),
   });
 
-  const matchesFilter = (entry) => {
-    const value = filter?.value ?? "all";
-    const kind = entry.dataset?.kind ?? entry.kind;
-    const link = entry.dataset?.link === "true" || entry.link === true;
-    if (value === "link") return link;
-    if (value === "directory" || value === "file") {
-      return kind === value && (includeLinks?.checked !== false || !link);
+  const matchesFilter = (entry) => localTypes.has(entryType(entry));
+
+  const updateEmpty = (visible) => {
+    if (empty) {
+      empty.hidden = visible !== 0;
+      empty.textContent =
+        localTypes.size === 0 ? "Select a file type to show entries." : "No matching entries.";
     }
-    return true;
   };
 
   const visibleLinks = () =>
@@ -457,8 +468,7 @@ function initializeExplorer(root) {
               type: "query",
               generation,
               query: query.trim(),
-              filter: filter?.value ?? "all",
-              includeLinks: includeLinks?.checked !== false,
+              types: [...localTypes],
               sort,
             }),
           70,
@@ -484,7 +494,7 @@ function initializeExplorer(root) {
       const visible = visibleVirtualRows.length;
       if (count) count.textContent = String(visible);
       if (countLabel) countLabel.textContent = visible === 1 ? "entry" : "entries";
-      if (empty) empty.hidden = visible !== 0;
+      updateEmpty(visible);
       if (status) status.textContent = `${visible} ${visible === 1 ? "entry" : "entries"} shown`;
       folderLoading?.remove();
       root.removeAttribute("aria-busy");
@@ -512,7 +522,7 @@ function initializeExplorer(root) {
     const visible = matches.length;
     if (count) count.textContent = String(visible);
     if (countLabel) countLabel.textContent = visible === 1 ? "entry" : "entries";
-    if (empty) empty.hidden = visible !== 0;
+    updateEmpty(visible);
     if (status) status.textContent = `${visible} ${visible === 1 ? "entry" : "entries"} shown`;
   };
 
@@ -561,20 +571,7 @@ function initializeExplorer(root) {
     }
     return shardCache.get(name);
   };
-  const matchesGlobalFilter = (record) => {
-    const value = globalFilter?.value ?? "all";
-    const directory = record.kind === "directory" || record.targetKind === "directory";
-    if (value === "link") return record.isLink;
-    if (value === "directory" || value === "file") {
-      return (
-        (value === "directory"
-          ? directory
-          : !directory && (!record.isLink || record.targetKind !== null)) &&
-        (globalIncludeLinks?.checked !== false || !record.isLink)
-      );
-    }
-    return true;
-  };
+  const matchesGlobalFilter = (record) => globalTypes.has(entryType(record));
   let globalTimer = 0;
   const searchGlobal = async () => {
     const generation = ++globalGeneration;
@@ -582,6 +579,11 @@ function initializeExplorer(root) {
     if (query === "") {
       globalResults?.replaceChildren();
       if (globalStatus) globalStatus.textContent = "Enter a search to begin.";
+      return;
+    }
+    if (globalTypes.size === 0) {
+      globalResults?.replaceChildren();
+      if (globalStatus) globalStatus.textContent = "Select a file type to search.";
       return;
     }
     if (globalStatus) globalStatus.textContent = "Searching published files…";
@@ -643,17 +645,13 @@ function initializeExplorer(root) {
     clearTimeout(globalTimer);
     globalTimer = setTimeout(searchGlobal, 120);
   });
-  globalFilter?.addEventListener("change", () => {
-    if (globalIncludeControl)
-      globalIncludeControl.hidden = !["directory", "file"].includes(globalFilter.value);
+  globalTypeFilters?.addEventListener("change", () => {
+    globalTypes = selectedTypes(globalTypeFilters);
     searchGlobal();
   });
-  globalIncludeLinks?.addEventListener("change", searchGlobal);
 
   const updateFilter = () => {
-    if (includeLinksControl) {
-      includeLinksControl.hidden = filter?.value !== "directory" && filter?.value !== "file";
-    }
+    localTypes = selectedTypes(typeFilters);
     updateResults();
   };
 
@@ -671,8 +669,7 @@ function initializeExplorer(root) {
       if (!composing) storage.set(sessionStorage, searchStorageKey, input.value);
       updateResults();
     });
-    filter?.addEventListener("change", updateFilter);
-    includeLinks?.addEventListener("change", updateResults);
+    typeFilters?.addEventListener("change", updateFilter);
   }
 
   if (config.sorting) {
@@ -737,7 +734,7 @@ function initializeExplorer(root) {
               const visible = visibleVirtualRows.length;
               if (count) count.textContent = String(visible);
               if (countLabel) countLabel.textContent = visible === 1 ? "entry" : "entries";
-              if (empty) empty.hidden = visible !== 0;
+              updateEmpty(visible);
               if (status)
                 status.textContent = `${visible} ${visible === 1 ? "entry" : "entries"} shown`;
               folderLoading?.remove();

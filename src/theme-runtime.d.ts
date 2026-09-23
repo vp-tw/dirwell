@@ -1,4 +1,11 @@
 export function fuzzyScore(query: string, value: string): number | null;
+export function entryType(entry: {
+  readonly kind?: string;
+  readonly targetKind?: string | null;
+  readonly link?: boolean;
+  readonly isLink?: boolean;
+  readonly dataset?: { readonly kind?: string; readonly link?: string };
+}): "directory" | "file" | "link";
 export class HeightTree {
   constructor(length: number, estimate?: number);
   readonly length: number;

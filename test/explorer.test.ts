@@ -6,7 +6,7 @@ import test from "node:test";
 import { createExplorerDevServer } from "../src/dev-server.ts";
 import { compareEntries, generateExplorer } from "../src/generator.ts";
 import { createDefaultTheme } from "../src/theme-default.ts";
-import { HeightTree, compareEntryValues, fuzzyScore } from "../src/theme-runtime.js";
+import { HeightTree, compareEntryValues, entryType, fuzzyScore } from "../src/theme-runtime.js";
 import type { DirectoryData } from "../src/model.ts";
 
 async function fixture(): Promise<{ output: string; root: string }> {
@@ -26,6 +26,16 @@ async function fixture(): Promise<{ output: string; root: string }> {
   await symlink("missing", path.join(root, "broken-link"));
   return { output, root };
 }
+
+test("type filters keep symlinks separate from physical folders and files", () => {
+  assert.equal(entryType({ kind: "directory" }), "directory");
+  assert.equal(entryType({ kind: "file" }), "file");
+  assert.equal(entryType({ kind: "other" }), "file");
+  assert.equal(entryType({ kind: "directory", isLink: true }), "link");
+  assert.equal(entryType({ kind: "file", link: true }), "link");
+  assert.equal(entryType({ kind: "symlink", isLink: true, targetKind: null }), "link");
+  assert.equal(entryType({ dataset: { kind: "directory", link: "true" } }), "link");
+});
 
 test("mirrors source files and preserves an existing index", async (context) => {
   const { output, root } = await fixture();
@@ -56,10 +66,16 @@ test("mirrors source files and preserves an existing index", async (context) => 
   assert.doesNotMatch(rootIndex, /directory-label|Static directory index/);
   assert.match(rootIndex, /data-global-open/);
   assert.match(rootIndex, /data-global-dialog/);
-  assert.match(rootIndex, /data-search-filter/);
-  assert.match(rootIndex, /data-include-links/);
+  assert.equal(rootIndex.match(/<fieldset class="type-filters" data-type-filters>/g)?.length, 2);
+  for (const type of ["directory", "file", "link"]) {
+    assert.equal(
+      rootIndex.match(new RegExp(`value="${type}" data-type-filter checked`, "g"))?.length,
+      2,
+    );
+  }
+  assert.doesNotMatch(rootIndex, /data-include-links|data-search-filter|data-global-filter/);
   assert.match(rootIndex, /data-sort-field/);
-  for (const name of ["search-filter", "sort-field", "name-mode", "sort-direction"]) {
+  for (const name of ["sort-field", "name-mode", "sort-direction"]) {
     assert.equal(rootIndex.match(new RegExp(`<select data-${name}>`, "g"))?.length, 1);
   }
   assert.match(rootIndex, /--dw-control-height:\s*2\.75rem/);

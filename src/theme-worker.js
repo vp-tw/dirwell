@@ -1,4 +1,4 @@
-import { compareEntryValues, fuzzyScore } from "./dirwell.runtime.js";
+import { compareEntryValues, entryType, fuzzyScore } from "./dirwell.runtime.js";
 
 let rows = [];
 
@@ -8,16 +8,12 @@ self.addEventListener("message", ({ data }) => {
     return;
   }
   if (data.type !== "query") return;
-  const { generation, query, filter, includeLinks, sort } = data;
+  const { generation, query, types, sort } = data;
+  const selectedTypes = new Set(types);
   const matches = [];
   for (let index = 0; index < rows.length; index += 1) {
     const row = rows[index];
-    if (filter === "link" && !row.link) continue;
-    if (
-      (filter === "directory" || filter === "file") &&
-      (row.kind !== filter || (!includeLinks && row.link))
-    )
-      continue;
+    if (!selectedTypes.has(entryType(row))) continue;
     const score = fuzzyScore(query, row.search);
     if (query !== "" && score === null) continue;
     matches.push({ index, row, score });

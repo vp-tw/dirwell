@@ -9,13 +9,7 @@ export function escapeHtml(value: string): string {
     .replaceAll('"', "&quot;");
 }
 
-type SelectControlName =
-  | "search-scope"
-  | "search-filter"
-  | "global-filter"
-  | "sort-field"
-  | "name-mode"
-  | "sort-direction";
+type SelectControlName = "sort-field" | "name-mode" | "sort-direction";
 
 function renderSelectControl(
   name: SelectControlName,
@@ -25,6 +19,21 @@ function renderSelectControl(
     .map(([value, label]) => `<option value="${escapeHtml(value)}">${escapeHtml(label)}</option>`)
     .join("");
   return `<select data-${name}>${choices}</select>`;
+}
+
+function renderTypeFilters(): string {
+  return `<fieldset class="type-filters" data-type-filters><legend class="visually-hidden">Show file types</legend>${(
+    [
+      ["directory", "Folders"],
+      ["file", "Files"],
+      ["link", "Links"],
+    ] as const
+  )
+    .map(
+      ([value, label]) =>
+        `<label><input type="checkbox" value="${value}" data-type-filter checked><span>${label}</span></label>`,
+    )
+    .join("")}</fieldset>`;
 }
 
 function formatSize(bytes: number): string {
@@ -82,17 +91,8 @@ export const defaultThemeComponents: DirwellThemeComponents = {
     const searchAll = globalSearch
       ? `<button class="search-all" type="button" data-global-open>Search all files</button>`
       : "";
-    const filter = `<label class="compact-select"><span class="visually-hidden">File type</span>${renderSelectControl(
-      "search-filter",
-      [
-        ["all", "Everything"],
-        ["directory", "Folders"],
-        ["file", "Files"],
-        ["link", "Links"],
-      ],
-    )}</label>`;
     const search = fuzzySearch
-      ? `<div class="search-cluster"><label class="search">${searchIcon}<span class="visually-hidden">Search this folder</span><input type="search" autocomplete="off" placeholder="Search this folder"${shortcutAttributes} data-search-input></label>${filter}<label class="include-links" data-include-links-control hidden><input type="checkbox" data-include-links checked> Include links</label>${searchAll}</div>`
+      ? `<div class="search-cluster"><label class="search">${searchIcon}<span class="visually-hidden">Search this folder</span><input type="search" autocomplete="off" placeholder="Search this folder"${shortcutAttributes} data-search-input></label>${renderTypeFilters()}${searchAll}</div>`
       : searchAll;
     const scheme = colorScheme
       ? `<fieldset class="scheme" data-scheme-control><legend class="visually-hidden">Color scheme</legend>${(
@@ -188,15 +188,7 @@ export const defaultThemeComponents: DirwellThemeComponents = {
 <header><div class="chrome">${breadcrumbs}<p class="summary"><span data-visible-count>${directory.entries.length}</span> <span data-count-label>${directory.entries.length === 1 ? "entry" : "entries"}</span></p></div><h1 class="visually-hidden">${escapeHtml(visiblePath)}</h1></header>
 ${toolbar}${entryList}${runtimeConfig.entriesHref ? '<p class="folder-loading" data-folder-loading>Loading this folder…</p><noscript><style>[data-folder-loading]{display:none}</style><p class="folder-loading">This large folder needs JavaScript. Use SSG mode for a complete HTML listing.</p></noscript>' : ""}${emptyState}<p class="visually-hidden" aria-live="polite" data-live-status></p>${footer}</main>${
     runtimeConfig.globalSearch
-      ? `<dialog class="global-search" data-global-dialog aria-labelledby="global-search-title"><div class="global-search-head"><h2 id="global-search-title">Search all files</h2><button type="button" class="dialog-close" data-global-close aria-label="Close search">Close</button></div><p>Search across the published directory. The index loads only after you type.</p><div class="global-search-controls"><label class="search"><span class="visually-hidden">Search all files</span><input type="search" autocomplete="off" placeholder="Type a name or path" data-global-input></label><label class="compact-select"><span class="visually-hidden">File type</span>${renderSelectControl(
-          "global-filter",
-          [
-            ["all", "Everything"],
-            ["directory", "Folders"],
-            ["file", "Files"],
-            ["link", "Links"],
-          ],
-        )}</label><label class="include-links" data-global-include-links-control hidden><input type="checkbox" data-global-include-links checked> Include links</label></div><p class="global-search-status" data-global-status role="status">Enter a search to begin.</p><ul class="entries global-results" data-global-results></ul></dialog>`
+      ? `<dialog class="global-search" data-global-dialog aria-labelledby="global-search-title"><div class="global-search-head"><h2 id="global-search-title">Search all files</h2><button type="button" class="dialog-close" data-global-close aria-label="Close search">Close</button></div><p>Search across the published directory. The index loads only after you type.</p><div class="global-search-controls"><label class="search"><span class="visually-hidden">Search all files</span><input type="search" autocomplete="off" placeholder="Type a name or path" data-global-input></label>${renderTypeFilters()}</div><p class="global-search-status" data-global-status role="status">Enter a search to begin.</p><ul class="entries global-results" data-global-results></ul></dialog>`
       : ""
   }${assets}</body></html>`,
 };
