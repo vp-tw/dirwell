@@ -119,6 +119,11 @@ test("default theme self-hosts vscode-icons in SSG and MPA output", async (conte
     assert.match(html, new RegExp(`src="${assetPrefix}vscode-file_type_text\\.svg"`));
     assert.match(html, /Icon credits<\/a>/);
     assert.match(html, /&quot;icons&quot;:\{&quot;byExtension&quot;:/);
+    assert.match(html, /main > header \{\s*position: sticky;\s*top: 0;/);
+    assert.match(
+      html,
+      /\.entry-head \{\s*position: sticky;\s*top: var\(--dw-sticky-header-height\);/,
+    );
     const assetDir = path.join(output, mode === "mpa" ? "__dirwell" : "");
     assert.match(await readFile(path.join(assetDir, "vscode-file_type_text.svg"), "utf8"), /<svg/);
     assert.match(
@@ -127,6 +132,8 @@ test("default theme self-hosts vscode-icons in SSG and MPA output", async (conte
     );
     const runtime = await readFile(path.join(assetDir, "dirwell.runtime.js"), "utf8");
     assert.match(runtime, /icons\.hrefs\[iconName\]/);
+    assert.match(runtime, /--dw-sticky-header-height/);
+    assert.match(runtime, /scrollPaddingTop/);
   }
 });
 

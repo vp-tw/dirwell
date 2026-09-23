@@ -86,6 +86,15 @@ rows put metadata below the path, the shell fills the viewport, and shortcuts
 precede project metadata in the footer. At 19.5rem, controls may stack again.
 Content must not cause horizontal page scrolling at 320px or wider.
 
+The breadcrumb header stays visible while the directory scrolls. On desktop,
+column labels stay below it after the toolbar scrolls away; on narrow screens,
+column labels are hidden and only the breadcrumb header sticks. The toolbar is
+never sticky because its wrapped controls would consume too much mobile height.
+The sticky offset follows the actual header height when long paths wrap, and
+keyboard navigation positions rows below the fixed information.
+If a deeply nested path makes the header taller than a quarter of the viewport
+or 12rem, it scrolls normally rather than covering the file list.
+
 Controls use the shared `--dw-control-height` token. Search, selects, Sort,
 breadcrumb links, and interactive file names retain a
 44px minimum target on touch-sized screens. Column-sort headings use a 44px

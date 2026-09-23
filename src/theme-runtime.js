@@ -316,7 +316,9 @@ function createVirtualList(list, icons) {
       if (next < 0 || next >= records.length) return;
       activeIndex = next;
       const listTop = list.getBoundingClientRect().top + scrollY + (parent?.offsetHeight ?? 0);
-      window.scrollTo(0, listTop + heights.prefix(activeIndex));
+      const stickyInset =
+        Number.parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0;
+      window.scrollTo(0, listTop + heights.prefix(activeIndex) - stickyInset);
       render();
       const link = list.querySelector(`[data-virtual-index="${activeIndex}"] a`);
       for (const row of list.querySelectorAll("[data-virtual-index]")) {
@@ -336,6 +338,32 @@ function createVirtualList(list, icons) {
 
 function initializeExplorer(root) {
   const config = JSON.parse(root.dataset.config ?? "{}");
+  const stickyHeader = root.querySelector("header");
+  const stickyColumns = root.querySelector(".entry-head");
+  if (stickyHeader) {
+    const updateStickyHeights = () => {
+      const headerHeight = stickyHeader.getBoundingClientRect().height;
+      const headerTooTall = headerHeight > Math.min(innerHeight * 0.25, 192);
+      root.toggleAttribute("data-sticky-header-disabled", headerTooTall);
+      document.documentElement.style.setProperty(
+        "--dw-sticky-header-height",
+        `${headerTooTall ? 0 : headerHeight}px`,
+      );
+      if (stickyColumns) {
+        document.documentElement.style.setProperty(
+          "--dw-sticky-columns-height",
+          `${stickyColumns.getBoundingClientRect().height}px`,
+        );
+      }
+    };
+    if (typeof ResizeObserver !== "undefined") {
+      const observer = new ResizeObserver(updateStickyHeights);
+      observer.observe(stickyHeader);
+      if (stickyColumns) observer.observe(stickyColumns);
+    }
+    window.addEventListener("resize", updateStickyHeights, { passive: true });
+    updateStickyHeights();
+  }
   const list = root.querySelector("[data-entry-list]");
   const localEntries = [...root.querySelectorAll("[data-entry]")];
   const input = root.querySelector("[data-search-input]");

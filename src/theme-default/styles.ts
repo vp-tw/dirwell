@@ -2,6 +2,8 @@ export const defaultStyles = `
 :root {
   color-scheme: light dark;
   --dw-control-height: 2.75rem;
+  --dw-sticky-header-height: 3.4rem;
+  --dw-sticky-columns-height: calc(var(--dw-control-height) + 2px);
   --paper: #f3f0e8;
   --surface: #fbfaf6;
   --ink: #171815;
@@ -74,6 +76,9 @@ export const defaultStyles = `
 }
 html {
   min-height: 100%;
+  scroll-padding-top: calc(
+    var(--dw-sticky-header-height) + var(--dw-sticky-columns-height) + 0.5rem
+  );
   background: var(--paper);
   color: var(--ink);
 }
@@ -103,6 +108,15 @@ main {
   border-radius: 0.875rem;
   box-shadow: var(--shadow);
   overflow: visible;
+}
+main > header {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  background: var(--surface);
+}
+main[data-sticky-header-disabled] > header {
+  position: static;
 }
 .chrome {
   display: flex;
@@ -380,6 +394,9 @@ main {
   gap: 1.25rem;
 }
 .entry-head {
+  position: sticky;
+  top: var(--dw-sticky-header-height);
+  z-index: 2;
   min-height: var(--dw-control-height);
   align-items: center;
   padding: 0 1.4rem;
@@ -578,6 +595,9 @@ kbd {
   }
 }
 @media (max-width: 42rem) {
+  :root {
+    --dw-sticky-columns-height: 0px;
+  }
   body {
     padding: 0;
     background: var(--surface);
