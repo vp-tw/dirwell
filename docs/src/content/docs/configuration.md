@@ -91,6 +91,12 @@ The default theme exposes the same choices at runtime and remembers the user's
 preference locally. Set `sorting: false` in `createDefaultTheme()` to omit those
 controls while retaining the generated order.
 
+The built-in themes display modified times in UTC with an explicit `UTC` label.
+The generated HTML is readable without JavaScript and shows the same time in
+every viewer's time zone. The `<time datetime>` value preserves the instant;
+sorting uses that instant rather than the displayed text. Custom themes can
+format dates differently.
+
 ## Global search
 
 The generated `__dirwell/search-index.json` is a manifest for smaller search

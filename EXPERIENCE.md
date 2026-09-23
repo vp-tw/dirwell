@@ -29,6 +29,11 @@
 - Directory grouping is independent of sort direction. The chosen controls
   persist across directories and reloads; the configured sort sets the initial
   order.
+- Modified times display in UTC with an explicit `UTC` label in the default
+  theme, plain theme, virtualized rows, and global search. Sorting uses the
+  underlying instant. This preserves the same readable date in static HTML
+  when JavaScript is disabled, regardless of the viewer's time zone. Themes
+  may choose their own date presentation.
 
 ### Large directories
 

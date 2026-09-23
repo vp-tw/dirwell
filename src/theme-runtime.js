@@ -23,6 +23,18 @@ export function entryType(entry) {
   return link ? "link" : kind === "directory" ? "directory" : "file";
 }
 
+export function utcTimestamp(value) {
+  if (
+    typeof value !== "string" ||
+    !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/.test(value)
+  )
+    return null;
+  const instant = new Date(value);
+  if (Number.isNaN(instant.getTime())) return null;
+  const datetime = instant.toISOString();
+  return { datetime, label: `${datetime.slice(0, 16).replace("T", " ")} UTC` };
+}
+
 const localeCollator = new Intl.Collator(undefined, { sensitivity: "base" });
 const naturalCollator = new Intl.Collator(undefined, { numeric: true, sensitivity: "base" });
 
@@ -94,7 +106,8 @@ function createGlobalEntry(record, indexUrl, order, icons, local = false) {
     `${record.name} ${local ? "" : record.path} ${record.target ?? ""}`.toLocaleLowerCase();
   entry.dataset.name = record.name;
   entry.dataset.size = String(directory ? 0 : record.size);
-  entry.dataset.modified = String(Date.parse(record.modifiedAt));
+  const timestamp = utcTimestamp(record.modifiedAt);
+  entry.dataset.modified = String(timestamp === null ? 0 : Date.parse(timestamp.datetime));
   entry.dataset.directory = String(directory);
   entry.dataset.link = String(isLink);
   entry.dataset.kind = directory
@@ -151,9 +164,9 @@ function createGlobalEntry(record, indexUrl, order, icons, local = false) {
     kind.append(badge);
   }
   kind.append(formatSize(record.size, directory));
-  const modified = document.createElement("time");
-  modified.dateTime = record.modifiedAt;
-  modified.textContent = `${record.modifiedAt.slice(0, 16).replace("T", " ")} UTC`;
+  const modified = document.createElement(timestamp === null ? "span" : "time");
+  if (timestamp !== null) modified.dateTime = timestamp.datetime;
+  modified.textContent = timestamp?.label ?? "Unknown";
   entry.append(identity, kind, modified);
   return entry;
 }
@@ -742,7 +755,7 @@ function initializeExplorer(root) {
                 ? "link"
                 : "file",
           search: `${row.name} ${row.target ?? ""}`.toLocaleLowerCase(),
-          modified: Date.parse(row.modifiedAt),
+          modified: Date.parse(row.modifiedAt) || 0,
         }));
         virtualList = createVirtualList(list, config.icons);
         if (config.workerHref && typeof Worker !== "undefined") {
