@@ -1,4 +1,14 @@
-import { lstat, mkdtemp, readFile, realpath, rm, stat, writeFile } from "node:fs/promises";
+import {
+  lstat,
+  mkdtemp,
+  readFile,
+  readdir,
+  readlink,
+  realpath,
+  rm,
+  stat,
+  writeFile,
+} from "node:fs/promises";
 import { createReadStream } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -86,6 +96,24 @@ async function assertOwnedDestination(outputDir: string): Promise<void> {
   }
 }
 
+async function assertSafeMirroredSymlinks(sourceDir: string, outputDir: string): Promise<void> {
+  async function visit(directory: string): Promise<void> {
+    for (const entry of await readdir(directory, { withFileTypes: true })) {
+      const entryPath = path.join(directory, entry.name);
+      if (isWithin(outputDir, entryPath)) continue;
+      if (entry.isSymbolicLink()) {
+        const target = await readlink(entryPath);
+        if (path.isAbsolute(target) || !isWithin(sourceDir, path.resolve(directory, target))) {
+          throw new Error(`Dirwell cannot mirror a symlink outside its output: ${entryPath}`);
+        }
+      } else if (entry.isDirectory()) {
+        await visit(entryPath);
+      }
+    }
+  }
+  await visit(sourceDir);
+}
+
 interface RuntimeOptions {
   readonly sourceDir: string;
   readonly sourceReal: string;
@@ -109,6 +137,9 @@ const createDirwellPlugin = createVitePlugin<DirwellViteOptions | undefined, fal
     async function rebuild(): Promise<void> {
       if (closed || temporary === undefined) return;
       try {
+        if (runtime.generate.mirror !== false) {
+          await assertSafeMirroredSymlinks(runtime.sourceDir, runtime.outputDir);
+        }
         await generateExplorer({ ...runtime.generate, outputDir: temporary });
         server?.ws.send({ type: "full-reload" });
       } catch (error) {
@@ -176,6 +207,9 @@ const createDirwellPlugin = createVitePlugin<DirwellViteOptions | undefined, fal
         async writeBundle() {
           if (viteConfig.command !== "build" || viteConfig.build.ssr) return;
           await assertOwnedDestination(runtime.outputDir);
+          if (runtime.generate.mirror !== false) {
+            await assertSafeMirroredSymlinks(runtime.sourceDir, runtime.outputDir);
+          }
           await generateExplorer(runtime.generate);
           await writeFile(path.join(runtime.outputDir, ownershipMarker), "dirwell-vite-v1\n");
         },
@@ -185,6 +219,9 @@ const createDirwellPlugin = createVitePlugin<DirwellViteOptions | undefined, fal
           temporary = await mkdtemp(path.join(tmpdir(), "dirwell-vite-"));
           temporaryReal = await realpath(temporary);
           try {
+            if (runtime.generate.mirror !== false) {
+              await assertSafeMirroredSymlinks(runtime.sourceDir, runtime.outputDir);
+            }
             await generateExplorer({ ...runtime.generate, outputDir: temporary });
           } catch (error) {
             await rm(temporary, { recursive: true, force: true });

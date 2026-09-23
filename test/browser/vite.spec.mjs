@@ -1,4 +1,4 @@
-import { mkdtemp, mkdir, rename, rm, symlink, writeFile } from "node:fs/promises";
+import { mkdtemp, mkdir, rename, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { expect, test } from "@playwright/test";
@@ -12,8 +12,6 @@ for (const mode of ["ssg", "mpa"]) {
     const source = path.join(root, "files");
     await mkdir(source);
     await writeFile(path.join(source, "README.txt"), "a");
-    await writeFile(path.join(root, "secret.txt"), "private data");
-    await symlink("../secret.txt", path.join(source, "outside-link"));
     await writeFile(path.join(root, "index.html"), "<main>Host application</main>");
     const output = mode === "mpa" ? "dist/catalog" : undefined;
     const mount = mode === "mpa" ? "/app/catalog/" : "/app/dirwell/";
@@ -41,8 +39,6 @@ for (const mode of ["ssg", "mpa"]) {
       expect((await page.request.get(new URL(`${mount}missing.txt`, local).href)).status()).toBe(
         404,
       );
-      const outside = await page.request.get(new URL(`${mount}outside-link`, local).href);
-      expect([403, 404]).toContain(outside.status());
       await expect(page.locator('[data-name="README.txt"]')).toContainText("1 B");
       await writeFile(path.join(source, "README.txt"), "edited content");
       await expect(page.locator('[data-name="README.txt"]')).toContainText("14 B");

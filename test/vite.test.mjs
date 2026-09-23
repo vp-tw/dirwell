@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { lstat, mkdtemp, mkdir, readFile, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { test } from "node:test";
@@ -76,6 +76,31 @@ test("a repeated build replaces only its owned destination", async () => {
       /second\.txt/,
     );
     assert.equal(await readFile(path.join(root, "dist", "host.txt"), "utf8"), "host file\n");
+  } finally {
+    await close();
+  }
+});
+
+test("Vite refuses mirrored symlinks that would expose files outside Dirwell output", async () => {
+  const { root, close } = await fixture();
+  try {
+    const secret = path.join(root, "secret.txt");
+    const link = path.join(root, "files", "outside-link");
+    await writeFile(secret, "private data\n");
+    await symlink(secret, link);
+    await assert.rejects(viteBuild(root, { root: "files" }), /cannot mirror a symlink outside/);
+    await rm(link);
+    await symlink("../secret.txt", link);
+    await assert.rejects(viteBuild(root, { root: "files" }), /cannot mirror a symlink outside/);
+    await viteBuild(root, { root: "files", mirror: false });
+    await assert.rejects(lstat(path.join(root, "dist", "dirwell", "outside-link")), /ENOENT/);
+    await rm(link);
+    await symlink("note.txt", link);
+    await viteBuild(root, { root: "files" });
+    assert.equal(
+      await readFile(path.join(root, "dist", "dirwell", "outside-link"), "utf8"),
+      "explorer file\n",
+    );
   } finally {
     await close();
   }

@@ -116,7 +116,11 @@ directory without its ownership marker. In development it serves a private
 temporary build under the public `base` through Vite, watches the source with
 Vite's watcher, and requests a browser reload after a successful rebuild. A
 failed rebuild leaves the previous output available and reports an error in
-Vite. Vite is the supported host; other unplugin hosts have not been verified.
+Vite. When mirroring is enabled, the adapter rejects absolute symlinks and
+relative symlinks that escape the source directory; either could expose files
+outside the published explorer. Set `mirror: false` when those source links
+must remain visible as metadata without copying files. Vite is the supported
+host; other unplugin hosts have not been verified.
 
 ## Sorting
 
