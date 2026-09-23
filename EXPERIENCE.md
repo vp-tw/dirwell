@@ -79,8 +79,8 @@
    fallback behavior.
 2. Add localization as a renderer concern, including plural rules and date/size
    formatting.
-3. Add optional file previews only after defining size, MIME, privacy, and
-   content-security boundaries.
+3. File previews remain deferred. See [the preview evaluation](FILE_PREVIEW_EVALUATION.md)
+   for the product decision and size, MIME, privacy, and security boundaries.
 
 ## Decisions for production
 
