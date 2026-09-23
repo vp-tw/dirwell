@@ -79,6 +79,45 @@ strings and fragments are rejected. Dirwell applies the strategy consistently
 to files, directories, breadcrumbs, parent navigation, theme assets, and
 broken-link raw views.
 
+## Vite adapter
+
+Import `dirwell/vite` in `vite.config.ts` to build and serve the explorer from
+the same Vite project:
+
+```ts
+import { defineConfig } from "vite";
+import Dirwell from "dirwell/vite";
+
+export default defineConfig({
+  base: "/my-app/",
+  plugins: [Dirwell({ root: "./downloads", mode: "mpa", outDir: "dist/downloads" })],
+});
+```
+
+The adapter loads `dirwell.config.ts` from the Vite project root, then applies
+inline plugin options over it. The inline options use the same fields as
+`DirwellConfig`, except `server` and `extends`; `extends` remains available in
+the config file. The Vite adapter defaults to `urls: "base"` so links point to
+the published mount. An explicit `urls` value takes precedence. `base` must use
+a dedicated path; mounting over the Vite application root is rejected.
+
+`outDir` is a filesystem path. A relative value resolves from the Vite project
+root; an absolute value is used as given. Its default is `dirwell/` inside the
+resolved Vite `build.outDir`. When `outDir` is inside the Vite output, Dirwell
+derives `base` from Vite's base and the output subdirectory. An output outside
+Vite's build directory is published separately and requires an explicit public
+`base`. For example, `outDir: "/srv/downloads"` with `base: "/downloads/"`
+generates files under `/srv/downloads` and uses `/downloads/` in links; Vite
+does not include those files in its own artifact.
+
+Dirwell owns the entire `outDir` subtree. The adapter refuses to replace Vite's
+output root, a parent of that root or the source directory, and an existing
+directory without its ownership marker. In development it serves a private
+temporary build under the public `base` through Vite, watches the source with
+Vite's watcher, and requests a browser reload after a successful rebuild. A
+failed rebuild leaves the previous output available and reports an error in
+Vite. Vite is the supported host; other unplugin hosts have not been verified.
+
 ## Sorting
 
 `sort.field` accepts `name`, `modified`, or `size`. Name sorting supports
