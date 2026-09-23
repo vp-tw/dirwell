@@ -1,5 +1,6 @@
 import type { FileSystemEntry } from "../model.ts";
 import type { DirwellThemeComponents, IconName } from "../theme-components.ts";
+import { utcTimestamp } from "../timestamp.ts";
 
 export function escapeHtml(value: string): string {
   return value
@@ -127,7 +128,7 @@ export const defaultThemeComponents: DirwellThemeComponents = {
   EntryRow: ({ entry, icon, index, navigation }) => {
     const directoryLike = entry.kind === "directory" || entry.symlink?.targetKind === "directory";
     const size = directoryLike ? "directory" : formatSize(entry.metadata.size);
-    const modified = entry.metadata.times.modifiedAt.slice(0, 16).replace("T", " ");
+    const modified = utcTimestamp(entry.metadata.times.modifiedAt);
     const linkAttributes = navigation.exitsExplorer ? ' target="_blank" rel="noopener"' : "";
     const label = `${escapeHtml(entry.name)}${directoryLike ? "/" : ""}`;
     const target =
@@ -141,10 +142,10 @@ export const defaultThemeComponents: DirwellThemeComponents = {
       : entry.kind === "symlink" && entry.symlink?.targetKind === null
         ? "link"
         : "file";
-    return `<li class="entry" data-entry data-order="${index}" data-search="${searchText}" data-name="${escapeHtml(entry.name)}" data-size="${directoryLike ? 0 : entry.metadata.size}" data-modified="${Date.parse(entry.metadata.times.modifiedAt)}" data-directory="${String(directoryLike)}" data-link="${String(entry.kind === "symlink")}" data-kind="${kind}">
+    return `<li class="entry" data-entry data-order="${index}" data-search="${searchText}" data-name="${escapeHtml(entry.name)}" data-size="${directoryLike ? 0 : entry.metadata.size}" data-modified="${modified === null ? 0 : Date.parse(modified.datetime)}" data-directory="${String(directoryLike)}" data-link="${String(entry.kind === "symlink")}" data-kind="${kind}">
       <span class="identity">${navigation.href === null ? `<span class="name unavailable">${name}</span>` : `<a class="name" href="${escapeHtml(navigation.href)}"${linkAttributes}>${name}</a>`}${target}</span>
       <span class="kind">${badge(entry)}${size}</span>
-      <time datetime="${entry.metadata.times.modifiedAt}">${modified} UTC</time>
+      ${modified === null ? '<span class="modified">Unknown</span>' : `<time datetime="${modified.datetime}">${modified.label}</time>`}
     </li>`;
   },
   EntryList: ({ directory, parentHref, rows, sorting }) => {
