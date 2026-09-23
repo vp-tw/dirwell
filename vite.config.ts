@@ -5,7 +5,7 @@ export default defineConfig({
     ignorePatterns: ["site/**", ".impeccable/**"],
   },
   pack: {
-    deps: { resolveDepSubpath: true },
+    deps: { resolveDepSubpath: true, dts: { neverBundle: ["vite", "unplugin"] } },
     clean: true,
     copy: {
       from: "src/theme-runtime.js",
@@ -13,7 +13,7 @@ export default defineConfig({
       to: "dist",
     },
     dts: true,
-    entry: ["src/index.ts", "src/bin.ts", "src/theme-components.ts"],
+    entry: ["src/index.ts", "src/bin.ts", "src/theme-components.ts", "src/vite.ts"],
     format: ["esm"],
     platform: "node",
     sourcemap: true,

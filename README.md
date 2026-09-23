@@ -81,6 +81,29 @@ URL generation supports portable depth-aware `relative` links, Vite-style
 `__dirwell/` is reserved in both modes for generated assets such as broken-link
 raw views.
 
+## Vite integration
+
+The `dirwell/vite` adapter builds the explorer alongside a Vite application and
+serves it through Vite's development server:
+
+```ts
+import { defineConfig } from "vite";
+import Dirwell from "dirwell/vite";
+
+export default defineConfig({
+  plugins: [Dirwell({ root: "./downloads", mode: "mpa" })],
+});
+```
+
+By default, Dirwell writes to a dedicated `dirwell/` subdirectory of Vite's
+`build.outDir` and derives its public `base` from Vite's base path. Set
+`outDir: "dist/downloads"` for another path relative to the Vite project root,
+or set an absolute `outDir` for an independent publish directory. An output
+outside Vite's build directory needs an explicit public `base`. The adapter
+never replaces Vite's output root or an existing directory it does not own.
+See [configuration](./docs/src/content/docs/configuration.md#vite-adapter) for
+the full path and development-server behavior.
+
 SSG pages and smaller MPA pages work without JavaScript. The runtime adds local and global
 fuzzy search, type filters, configurable sorting, IME-safe keyboard controls,
 Backspace parent navigation, theme persistence, and watch-mode live reload. The
