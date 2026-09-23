@@ -6,11 +6,12 @@ description: Compare complete Dirwell builds and inspect the source behind each 
 Each example is a real Dirwell input directory with its own configuration. The
 documentation build publishes every generated explorer below the same site base.
 
-| Example        | What it proves                                                                      | Output                   |
-| -------------- | ----------------------------------------------------------------------------------- | ------------------------ |
-| `basic`        | The defaults produce a portable site without configuration.                         | SSG with relative URLs   |
-| `base-path`    | Shared assets and file links work below a GitHub Pages repository path.             | MPA with base URLs       |
-| `custom-theme` | Typed component overrides can change product language without forking the renderer. | SSG with a layered theme |
+| Example        | What it proves                                                                      | Output                    |
+| -------------- | ----------------------------------------------------------------------------------- | ------------------------- |
+| `basic`        | The defaults produce a portable site without configuration.                         | SSG with relative URLs    |
+| `base-path`    | Shared assets and file links work below a GitHub Pages repository path.             | MPA with base URLs        |
+| `custom-theme` | Typed component overrides can change product language without forking the renderer. | SSG with a layered theme  |
+| `lightweight`  | Plain HTML listings work without icons, JavaScript, or client-side search.          | SSG without search assets |
 
 From the repository root, build the documentation and all examples together:
 
@@ -27,7 +28,8 @@ site/
 ├── examples/
 │   ├── basic/
 │   ├── base-path/
-│   └── custom-theme/
+│   ├── custom-theme/
+│   └── lightweight/
 └── _astro/
 ```
 

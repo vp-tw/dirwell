@@ -6,6 +6,25 @@ description: Layer typed components or replace the complete Dirwell renderer.
 Themes own HTML, CSS, icons, and optional browser behavior. Tokens alone are not
 the customization boundary.
 
+## Lightweight theme
+
+Use `createLightweightTheme()` for complete browser-native listings with no icons,
+JavaScript, appearance controls, or generated search index:
+
+```ts
+import { createLightweightTheme, defineConfig } from "dirwell";
+
+export default defineConfig({
+  theme: createLightweightTheme(),
+});
+```
+
+The theme emits the complete list in both SSG and MPA modes. It shows symlink
+targets and availability, preserves safe navigation and URL strategies, and
+opens files outside the explorer in new tabs. It does not virtualize very large
+directories; use the default theme when client-side search or virtualization is
+needed. See the [lightweight example](../examples/).
+
 ## Component overrides
 
 The default theme exposes eight stable components: `PageShell`, `Breadcrumbs`,

@@ -104,6 +104,11 @@ Replace the complete `ExplorerTheme` or layer typed component overrides over
 the default theme. See [THEMING.md](./THEMING.md) and the Starlight site in
 `docs/`.
 
+`createLightweightTheme()` provides a separate browser-native listing with no
+icons, JavaScript, appearance controls, or search index. It emits complete HTML
+in both modes; choose the default theme for search and large-directory
+virtualization. See [examples/lightweight](./examples/lightweight).
+
 ## Development
 
 ```bash

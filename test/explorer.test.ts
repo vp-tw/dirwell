@@ -6,6 +6,7 @@ import test from "node:test";
 import { createExplorerDevServer } from "../src/dev-server.ts";
 import { compareEntries, generateExplorer } from "../src/generator.ts";
 import { createDefaultTheme } from "../src/theme-default.ts";
+import { createLightweightTheme } from "../src/theme-lightweight.ts";
 import { HeightTree, compareEntryValues, entryType, fuzzyScore } from "../src/theme-runtime.js";
 import type { DirectoryData } from "../src/model.ts";
 
@@ -35,6 +36,37 @@ test("type filters keep symlinks separate from physical folders and files", () =
   assert.equal(entryType({ kind: "file", link: true }), "link");
   assert.equal(entryType({ kind: "symlink", isLink: true, targetKind: null }), "link");
   assert.equal(entryType({ dataset: { kind: "directory", link: "true" } }), "link");
+});
+
+test("lightweight theme emits complete HTML without icons, scripts, or search assets", async (context) => {
+  const { output, root } = await fixture();
+  context.after(() => rm(path.dirname(root), { recursive: true, force: true }));
+
+  for (const mode of ["ssg", "mpa"] as const) {
+    await generateExplorer({
+      sourceDir: root,
+      outputDir: output,
+      mode,
+      symlinks: { follow: true },
+      theme: createLightweightTheme(),
+    });
+    const html = await readFile(path.join(output, "index.html"), "utf8");
+    assert.match(html, /<h1>Index of \/<\/h1>/);
+    assert.match(html, /href="releases\/">releases\/<\/a>/);
+    assert.match(html, /href="README\.txt" target="_blank" rel="noopener">README\.txt<\/a>/);
+    assert.match(html, /broken link.*Target: missing/);
+    assert.match(html, /unavailable link.*Target: \.\.\/external/);
+    assert.doesNotMatch(html, /<svg|<script|<img|data-theme|search-index|prefers-color-scheme/);
+    assert.match(html, /<meta name="color-scheme" content="light">/);
+    assert.match(html, /<time datetime="[^"]+">/);
+    await assert.rejects(readFile(path.join(output, "__dirwell", "search-index.json"), "utf8"));
+    const nested = await readFile(path.join(output, "releases", "index.html"), "utf8");
+    assert.match(
+      nested,
+      /aria-label="Breadcrumb"><a href="\.\.\/">Home<\/a> \/ <span aria-current="page">releases<\/span>/,
+    );
+    assert.match(nested, /href="\.\.\/">\.\.\/<\/a>/);
+  }
 });
 
 test("mirrors source files and preserves an existing index", async (context) => {

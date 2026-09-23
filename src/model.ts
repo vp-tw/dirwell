@@ -81,6 +81,8 @@ export interface ThemeContext {
 
 export interface ExplorerTheme {
   readonly name: string;
+  /** Set to false when the theme does not offer global search. */
+  readonly searchIndex?: boolean;
   readonly render: (context: ThemeContext) => RenderedPage | Promise<RenderedPage>;
 }
 

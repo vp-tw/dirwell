@@ -385,7 +385,7 @@ export async function generateExplorer(options: GenerateOptions): Promise<void> 
       }
     >();
 
-    for (const { directory, logicalDir } of plans) {
+    for (const { directory, logicalDir } of theme.searchIndex === false ? [] : plans) {
       for (const entry of directory.entries) {
         if (searchEntries.has(entry.relativePath)) continue;
         const targetLogicalPath =
@@ -532,22 +532,24 @@ export async function generateExplorer(options: GenerateOptions): Promise<void> 
         await writeFile(path.join(rawLinkDirectory, filename), target);
       }
     }
-    const generatedAssetDirectory = path.join(buildOutputDir, "__dirwell");
-    await mkdir(generatedAssetDirectory, { recursive: true });
-    const indexedEntries = [...searchEntries.values()];
-    const shards: string[] = [];
-    for (let offset = 0; offset < indexedEntries.length; offset += 512) {
-      const filename = `search-${String(shards.length).padStart(5, "0")}.json`;
-      shards.push(filename);
+    if (theme.searchIndex !== false) {
+      const generatedAssetDirectory = path.join(buildOutputDir, "__dirwell");
+      await mkdir(generatedAssetDirectory, { recursive: true });
+      const indexedEntries = [...searchEntries.values()];
+      const shards: string[] = [];
+      for (let offset = 0; offset < indexedEntries.length; offset += 512) {
+        const filename = `search-${String(shards.length).padStart(5, "0")}.json`;
+        shards.push(filename);
+        await writeFile(
+          path.join(generatedAssetDirectory, filename),
+          JSON.stringify({ entries: indexedEntries.slice(offset, offset + 512) }),
+        );
+      }
       await writeFile(
-        path.join(generatedAssetDirectory, filename),
-        JSON.stringify({ entries: indexedEntries.slice(offset, offset + 512) }),
+        path.join(generatedAssetDirectory, "search-index.json"),
+        JSON.stringify({ count: indexedEntries.length, shards, version: 2 }),
       );
     }
-    await writeFile(
-      path.join(generatedAssetDirectory, "search-index.json"),
-      JSON.stringify({ count: indexedEntries.length, shards, version: 2 }),
-    );
 
     await rm(outputDir, { recursive: true, force: true });
     await mkdir(path.dirname(outputDir), { recursive: true });

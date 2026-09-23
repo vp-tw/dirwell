@@ -1,0 +1,1 @@
+Illustrative checksums only; no binaries are included in this example.
