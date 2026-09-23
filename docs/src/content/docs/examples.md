@@ -4,7 +4,10 @@ description: Compare complete Dirwell builds and inspect the source behind each 
 ---
 
 Each example is a real Dirwell input directory with its own configuration. The
-documentation build publishes every generated explorer below the same site base.
+documentation build generates the examples in `docs/public/examples/` before Astro
+copies them into the publish tree. The landing-page preview embeds the generated
+`file-icons` example, so its default-theme interface and assets are not duplicated
+in the documentation source.
 
 | Example        | What it proves                                                                      | Output                    |
 | -------------- | ----------------------------------------------------------------------------------- | ------------------------- |
@@ -19,6 +22,10 @@ From the repository root, build the documentation and all examples together:
 ```bash
 SITE_BASE=/repository-name/ pnpm run site:build
 ```
+
+For local iteration, run `pnpm run docs:dev`. It builds the examples before
+starting Astro, watches the Dirwell source and example inputs, and reloads the
+embedded preview after a successful rebuild.
 
 The command writes one publishable tree:
 

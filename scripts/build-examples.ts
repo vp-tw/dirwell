@@ -1,4 +1,6 @@
 import { spawn } from "node:child_process";
+import { randomUUID } from "node:crypto";
+import { writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -32,3 +34,5 @@ for (const example of examples) {
     });
   });
 }
+
+await writeFile(path.join(root, "docs/public/examples/.build-id"), randomUUID());

@@ -198,82 +198,28 @@ h1 {
   box-shadow: 0 30px 80px rgba(46, 46, 40, 0.14);
   overflow: hidden;
 }
-.sample-toolbar {
-  height: 54px;
-  padding: 0 22px;
+.sample-caption {
+  min-height: 50px;
+  padding: 10px 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
   border-bottom: 1px solid #d8d4ca;
+  color: var(--muted);
+  font-size: 0.76rem;
 }
-.crumbs {
-  display: flex;
-  gap: 8px;
-  font-size: 0.85rem;
-}
-.crumbs a {
+.sample-caption a {
   color: var(--blue);
+  font-weight: 680;
+  white-space: nowrap;
 }
-.crumbs span {
-  color: #99978f;
-}
-.search {
-  padding: 8px 12px;
-  border: 1px solid #d4d0c6;
-  border-radius: 8px;
-  color: #77766f;
-  font-size: 0.75rem;
-}
-.sample-heading {
-  padding: 27px 22px 21px;
-  display: flex;
-  justify-content: space-between;
-  align-items: end;
-}
-.sample-heading span {
-  color: #77766f;
-  font-size: 0.74rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-}
-.sample-heading h2 {
-  margin: 5px 0 0;
-  font-size: 1.35rem;
-  letter-spacing: -0.02em;
-}
-.file-row {
-  display: grid;
-  grid-template-columns: 1fr 100px 130px;
-  align-items: center;
-  min-height: 48px;
-  padding: 0 22px;
-  border-top: 1px solid #e3dfd5;
-  color: #5f605b;
-  font-size: 0.82rem;
-  text-decoration: none;
-  font-variant-numeric: tabular-nums;
-}
-a.file-row:hover {
-  background: #f0eee7;
-  color: var(--ink);
-}
-.file-head {
-  min-height: 34px;
-  background: #f3f1eb;
-  color: #797970;
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-}
-.file-name {
-  color: var(--ink);
-  font-weight: 620;
-}
-.file-name b {
-  display: inline-block;
-  width: 34px;
-  color: var(--green);
-  font-size: 0.68rem;
+.explorer-sample iframe {
+  display: block;
+  width: 100%;
+  height: 470px;
+  border: 0;
+  background: #fff;
 }
 
 .problem {
@@ -563,12 +509,14 @@ h2 {
     flex-direction: column;
   }
   .explorer-sample {
-    overflow-x: auto;
+    overflow: hidden;
   }
-  .sample-toolbar,
-  .sample-heading,
-  .file-row {
-    min-width: 620px;
+  .sample-caption {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .explorer-sample iframe {
+    height: 500px;
   }
   .problem,
   .examples,

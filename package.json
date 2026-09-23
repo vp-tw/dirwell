@@ -35,11 +35,11 @@
     "dev": "node src/bin.ts serve fixture --out-dir generated",
     "dirwell": "node src/bin.ts",
     "docs:build": "pnpm --dir docs build",
-    "docs:dev": "pnpm --dir docs dev",
+    "docs:dev": "node scripts/dev-docs.ts",
     "examples:build": "node scripts/build-examples.ts",
     "format": "vp fmt --write",
     "lint": "vp lint",
-    "site:build": "pnpm run docs:build && pnpm run examples:build",
+    "site:build": "pnpm run examples:build && pnpm run docs:build",
     "test": "node --test test/*.test.ts",
     "check:types": "tsc --noEmit"
   },

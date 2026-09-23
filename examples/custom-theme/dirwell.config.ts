@@ -7,7 +7,7 @@ import {
 
 export default defineConfig({
   root: "files",
-  outDir: "../../site/examples/custom-theme",
+  outDir: "../../docs/public/examples/custom-theme",
   theme: createDefaultTheme({
     components: {
       PageShell: (props) =>

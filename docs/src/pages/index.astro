@@ -1,6 +1,8 @@
 ---
 const base = import.meta.env.BASE_URL;
 const path = (value: string) => `${base}${value}`.replace(/\/+/g, "/");
+// Astro's dev router does not resolve public directory indexes; static hosts do.
+const examplePath = (slug: string) => path(`examples/${slug}/${import.meta.env.DEV ? "index.html" : ""}`);
 const repositoryUrl = import.meta.env.PUBLIC_REPOSITORY_URL ?? "https://github.com/VdustR/dirwell";
 const examples = [
   {
@@ -80,20 +82,18 @@ const examples = [
 Local: http://localhost:4173</span></code></pre>
         </div>
 
-        <div class="explorer-sample" aria-label="Example generated file explorer">
-          <div class="sample-toolbar">
-            <div class="crumbs"><a href="#examples">releases</a><span>/</span><strong>v2.4.0</strong></div>
-            <span class="search">⌘ K&nbsp;&nbsp; Search files</span>
+        <div class="explorer-sample">
+          <div class="sample-caption">
+            <span>Default theme · generated from the file-icons example</span>
+            <a href={examplePath("file-icons")} target="_blank" rel="noopener">Open full explorer</a>
           </div>
-          <div class="sample-heading">
-            <div><span>Directory</span><h2>/releases/v2.4.0</h2></div>
-            <span>4 entries</span>
-          </div>
-          <div class="file-row file-head"><span>Name</span><span>Size</span><span>Modified</span></div>
-          <a class="file-row" href={path("examples/basic/releases/")}><span class="file-name"><b>DIR</b> Parent directory</span><span>—</span><span>—</span></a>
-          <a class="file-row" href={path("examples/basic/releases/v2.4.0/app.js")} target="_blank"><span class="file-name"><b>JS</b> app.js</span><span>18.4 kB</span><span>2026-09-21</span></a>
-          <a class="file-row" href={path("examples/basic/releases/v2.4.0/checksums.txt")} target="_blank"><span class="file-name"><b>TXT</b> checksums.txt</span><span>1.2 kB</span><span>2026-09-21</span></a>
-          <a class="file-row" href={path("examples/basic/releases/v2.4.0/release-notes.md")} target="_blank"><span class="file-name"><b>MD</b> release-notes.md</span><span>3.8 kB</span><span>2026-09-21</span></a>
+          <iframe
+            id="default-theme-preview"
+            title="Interactive Dirwell default theme preview"
+            src={examplePath("file-icons")}
+            data-build-id-url={path("examples/.build-id")}
+            loading="lazy"
+          ></iframe>
         </div>
       </section>
 
@@ -127,7 +127,7 @@ Local: http://localhost:4173</span></code></pre>
                 <span class="example-detail">{example.detail}</span>
               </div>
               <div class="example-actions">
-                <a href={path(`examples/${example.slug}/`)} target="_blank" rel="noopener">Open demo</a>
+                <a href={examplePath(example.slug)} target="_blank" rel="noopener">Open demo</a>
                 <a href={`${repositoryUrl}/tree/main/examples/${example.slug}`} target="_blank" rel="noopener">View source</a>
               </div>
             </article>
@@ -197,6 +197,26 @@ Local: http://localhost:4173</span></code></pre>
     </footer>
 
     <script>
+      if (import.meta.env.DEV) {
+        const preview = document.querySelector<HTMLIFrameElement>("#default-theme-preview");
+        const buildIdUrl = preview?.dataset.buildIdUrl;
+        let lastBuildId: string | undefined;
+        if (preview && buildIdUrl) {
+          window.setInterval(async () => {
+            if (document.hidden) return;
+            try {
+              const response = await fetch(buildIdUrl, { cache: "no-store" });
+              if (!response.ok) return;
+              const buildId = await response.text();
+              if (lastBuildId && buildId !== lastBuildId) preview.contentWindow?.location.reload();
+              lastBuildId = buildId;
+            } catch {
+              // Keep the current preview visible while the development server restarts.
+            }
+          }, 1000);
+        }
+      }
+
       const tabs = Array.from(document.querySelectorAll('[role="tab"]'));
       const panels = Array.from(document.querySelectorAll("[data-panel]"));
       const selectTab = (tab) => {

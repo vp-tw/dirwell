@@ -2,6 +2,6 @@ import { createPlainTheme, defineConfig } from "../../src/index.ts";
 
 export default defineConfig({
   root: "files",
-  outDir: "../../site/examples/plain",
+  outDir: "../../docs/public/examples/plain",
   theme: createPlainTheme(),
 });

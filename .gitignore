@@ -6,6 +6,7 @@ coverage/
 dist/
 docs/.astro/
 docs/dist/
+docs/public/examples/
 generated/
 site/
 node_modules/
