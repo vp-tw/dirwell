@@ -19,6 +19,14 @@ import { createDefaultTheme, defineConfig } from "dirwell";
 
 export default defineConfig({
   theme: createDefaultTheme({
+    globalSearch: true,
+    sorting: true,
+    project: {
+      author: "Your name",
+      repositoryUrl: "https://github.com/you/project",
+      license: "MIT License",
+      licenseUrl: "https://github.com/you/project/blob/main/LICENSE",
+    },
     components: {
       Footer: ({ parentHref }) =>
         parentHref === null ? "<footer>Home</footer>" : "<footer>Nested</footer>",
@@ -26,6 +34,10 @@ export default defineConfig({
   }),
 });
 ```
+
+Global search is progressive: the browser requests the generated JSON index
+only after the user selects `Everywhere`. Sorting and search controls can be
+disabled independently without changing the component override API.
 
 Default components are exported as `defaultThemeComponents`, so a replacement
 can wrap one explicitly. This provides the useful part of Docusaurus swizzling

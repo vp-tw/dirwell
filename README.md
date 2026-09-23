@@ -39,10 +39,24 @@ export default defineConfig({
   outputName: (directory) =>
     directory.entries.some((entry) => entry.name === "index.html") ? null : "index.html",
   symlinks: { follow: true, boundary: "root", onCycle: "skip" },
+  sort: {
+    field: "name",
+    nameMode: "natural",
+    direction: "asc",
+    directoriesFirst: true,
+  },
   theme: createDefaultTheme({
     colorScheme: true,
     fuzzySearch: true,
+    globalSearch: true,
     keyboardNavigation: true,
+    sorting: true,
+    project: {
+      author: "Your name",
+      repositoryUrl: "https://github.com/you/project",
+      license: "MIT License",
+      licenseUrl: "https://github.com/you/project/blob/main/LICENSE",
+    },
   }),
 });
 ```
@@ -65,9 +79,16 @@ URL generation supports portable depth-aware `relative` links, Vite-style
 `__dirwell/` is reserved in both modes for generated assets such as broken-link
 raw views.
 
-Both modes work without JavaScript. The optional runtime adds fuzzy search,
-IME-safe keyboard controls, Backspace parent navigation, theme persistence, and
-watch-mode live reload.
+Both modes work without JavaScript. The optional runtime adds local and global
+fuzzy search, type filters, configurable sorting, IME-safe keyboard controls,
+Backspace parent navigation, theme persistence, and watch-mode live reload. The
+global search index is fetched only after the user selects `Everywhere`.
+Search matches file names, relative paths, and symlink targets. Folder and file
+filters include matching symlinks by default, with an `Include links` toggle.
+
+Name sorting supports raw Unicode code-point order, locale-aware comparison,
+and natural numeric comparison. Modified time and file size are also available;
+direction and directory grouping are independent controls.
 
 Symlinks always remain visible and show their declared target. Broken links can
 open their raw target text; targets outside the configured root remain

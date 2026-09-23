@@ -55,11 +55,24 @@ export interface RenderedPage {
   readonly assets?: Readonly<Record<string, string | Uint8Array>>;
 }
 
+export type SortField = "modified" | "name" | "size";
+export type NameSortMode = "locale" | "natural" | "unicode";
+export type SortDirection = "asc" | "desc";
+
+export interface SortOptions {
+  readonly direction?: SortDirection;
+  readonly directoriesFirst?: boolean;
+  readonly field?: SortField;
+  readonly nameMode?: NameSortMode;
+}
+
 export interface ThemeContext {
   readonly documentBaseHref: string | null;
   readonly directory: DirectoryData;
   readonly outputName: string;
   readonly mode: "mpa" | "ssg";
+  readonly searchIndexHref: string;
+  readonly sort: Required<SortOptions>;
   readonly assetHref: (assetName: string) => string;
   readonly hrefForDirectory: (relativePath: string) => string;
   readonly hrefFor: (entry: FileSystemEntry) => string | null;
@@ -85,4 +98,5 @@ export interface GenerateOptions {
     readonly boundary?: "anywhere" | "root";
     readonly onCycle?: "error" | "skip";
   };
+  readonly sort?: SortOptions;
 }

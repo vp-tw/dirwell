@@ -14,6 +14,12 @@ export default defineConfig({
   outDir: "dist",
   mode: "ssg",
   mirror: true,
+  sort: {
+    field: "name",
+    nameMode: "natural",
+    direction: "asc",
+    directoriesFirst: true,
+  },
 });
 ```
 
@@ -72,3 +78,24 @@ export default defineConfig({
 strings and fragments are rejected. Dirwell applies the strategy consistently
 to files, directories, breadcrumbs, parent navigation, theme assets, and
 broken-link raw views.
+
+## Sorting
+
+`sort.field` accepts `name`, `modified`, or `size`. Name sorting supports
+`unicode` code-point order, locale-aware `locale` comparison, and `natural`
+comparison for names such as `file2` and `file10`. `direction` and
+`directoriesFirst` are independent, so descending order does not force folders
+to the bottom.
+
+The default theme exposes the same choices at runtime and remembers the user's
+preference locally. Set `sorting: false` in `createDefaultTheme()` to omit those
+controls while retaining the generated order.
+
+## Global search
+
+The generated `__dirwell/search-index.json` contains paths and display metadata,
+not file contents. The default theme starts with the current directory and
+fetches this index only when the user selects `Everywhere`. Type filters cover
+folders, files, and links. Folder and file filters include symlinks whose target
+has that type by default; users can turn off `Include links` when they need only
+physical entries.

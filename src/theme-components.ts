@@ -1,4 +1,25 @@
-import type { DirectoryData, FileSystemEntry } from "./model.ts";
+import type {
+  DirectoryData,
+  FileSystemEntry,
+  NameSortMode,
+  SortDirection,
+  SortField,
+} from "./model.ts";
+
+export interface DefaultThemeRuntimeConfig {
+  readonly colorScheme: boolean;
+  readonly fuzzySearch: boolean;
+  readonly globalSearch: boolean;
+  readonly keyboardNavigation: boolean;
+  readonly searchIndexHref: string;
+  readonly sorting: boolean;
+  readonly sort: Readonly<{
+    direction: SortDirection;
+    directoriesFirst: boolean;
+    field: SortField;
+    nameMode: NameSortMode;
+  }>;
+}
 
 export type ThemeComponent<Props> = (props: Props) => string;
 
@@ -22,11 +43,7 @@ export interface PageShellProps {
   readonly entryList: string;
   readonly footer: string;
   readonly parentHref: string | null;
-  readonly runtimeConfig: Readonly<{
-    colorScheme: boolean;
-    fuzzySearch: boolean;
-    keyboardNavigation: boolean;
-  }>;
+  readonly runtimeConfig: DefaultThemeRuntimeConfig;
   readonly styles: string;
   readonly toolbar: string;
   readonly visiblePath: string;
@@ -39,8 +56,10 @@ export interface BreadcrumbsProps {
 export interface ToolbarProps {
   readonly colorScheme: boolean;
   readonly fuzzySearch: boolean;
+  readonly globalSearch: boolean;
   readonly keyboardNavigation: boolean;
   readonly searchIcon: string;
+  readonly sorting: boolean;
 }
 
 export interface EntryListItem {
@@ -53,6 +72,7 @@ export interface EntryListProps {
   readonly directory: DirectoryData;
   readonly parentHref: string | null;
   readonly rows: string;
+  readonly sorting: boolean;
 }
 
 export interface EntryRowProps extends EntryListItem {
@@ -66,6 +86,13 @@ export interface EmptyStateProps {
 export interface FooterProps {
   readonly keyboardNavigation: boolean;
   readonly parentHref: string | null;
+  readonly project: Readonly<{
+    author: string;
+    license: string;
+    licenseUrl: string;
+    name: string;
+    repositoryUrl: string;
+  }>;
 }
 
 export type IconName = "chevron-right" | "file" | "folder" | "link" | "moon" | "search" | "sun";

@@ -29,7 +29,7 @@
   },
   "scripts": {
     "build": "vp pack",
-    "build:explorer": "node src/bin.ts build",
+    "build:explorer": "node src/bin.ts build fixture --out-dir generated",
     "check": "vp check && tsc --noEmit",
     "dev": "node src/bin.ts serve fixture --out-dir generated",
     "dirwell": "node src/bin.ts",

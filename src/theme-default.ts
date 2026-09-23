@@ -14,7 +14,16 @@ export interface DefaultThemeOptions {
   readonly colorScheme?: boolean;
   readonly components?: DirwellThemeComponentOverrides | readonly DirwellThemeComponentOverrides[];
   readonly fuzzySearch?: boolean;
+  readonly globalSearch?: boolean;
   readonly keyboardNavigation?: boolean;
+  readonly project?: Readonly<{
+    author?: string;
+    license?: string;
+    licenseUrl?: string;
+    name?: string;
+    repositoryUrl?: string;
+  }>;
+  readonly sorting?: boolean;
 }
 
 export function escapeHtml(value: string): string {
@@ -60,8 +69,10 @@ const defaultStyles = `
 :root[data-theme="light"]{color-scheme:light;--paper:#f3f0e8;--surface:#fbfaf6;--ink:#171815;--muted:#64655f;--rule:#c9c5ba;--soft-rule:#e3dfd5;--accent:#174ea6;--accent-strong:#103973;--focus:#005fcc;--hover:#f0eee7;--control:#fff;--status:#34705c;--warning:#9a4616;--shadow:0 30px 80px rgba(46,46,40,.14)}
 :root[data-theme="dark"]{color-scheme:dark;--paper:#11130f;--surface:#191b17;--ink:#f2f0e8;--muted:#b1b4ab;--rule:#474a42;--soft-rule:#30332d;--accent:#91bff0;--accent-strong:#b7d5f4;--focus:#78b7f4;--hover:#22251f;--control:#10120f;--status:#8bc0aa;--warning:#f0a06d;--shadow:0 30px 80px rgba(0,0,0,.28)}
 @media(prefers-color-scheme:dark){:root[data-theme="system"]{--paper:#11130f;--surface:#191b17;--ink:#f2f0e8;--muted:#b1b4ab;--rule:#474a42;--soft-rule:#30332d;--accent:#91bff0;--accent-strong:#b7d5f4;--focus:#78b7f4;--hover:#22251f;--control:#10120f;--status:#8bc0aa;--warning:#f0a06d;--shadow:0 30px 80px rgba(0,0,0,.28)}}
-*{box-sizing:border-box}html{min-height:100%;background:var(--paper);color:var(--ink)}body{min-width:20rem;margin:0;padding:clamp(1rem,5vw,4rem);font:15px/1.45 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-variant-numeric:tabular-nums}button,input{font:inherit}main{width:min(72rem,100%);margin:0 auto;background:var(--surface);border:1px solid var(--rule);border-radius:.875rem;box-shadow:var(--shadow);overflow:hidden}.chrome{display:flex;min-height:3.4rem;align-items:center;justify-content:space-between;padding:0 1.4rem;border-bottom:1px solid var(--soft-rule)}.directory-heading{display:flex;align-items:end;justify-content:space-between;gap:1.5rem;padding:1.7rem 1.4rem 1.35rem}.directory-title{min-width:0}.directory-label{display:block;margin-bottom:.25rem;color:var(--muted);font-size:.72rem;font-weight:720;letter-spacing:.09em;text-transform:uppercase}h1{margin:0;font-size:clamp(1.35rem,3vw,2rem);font-weight:700;letter-spacing:-.025em;line-height:1.08;overflow-wrap:anywhere}.breadcrumbs{display:flex;align-items:center;flex-wrap:wrap;gap:.15rem;font-size:.86rem}.breadcrumbs a,.breadcrumbs span{color:inherit}.breadcrumbs a{color:var(--accent);text-decoration-thickness:.08em}.separator{display:inline-flex;color:var(--muted);font-weight:400}.summary{margin:0;color:var(--muted);font-size:.76rem;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}.toolbar{display:flex;justify-content:space-between;gap:1rem;padding:0 1.4rem 1.25rem;align-items:center}.search{display:flex;align-items:center;gap:.55rem;width:min(28rem,100%);min-height:2.55rem;padding:.5rem .7rem;border:1px solid var(--rule);border-radius:.5rem;background:var(--control)}.search:focus-within{outline:3px solid var(--focus);outline-offset:2px}.search input{width:100%;min-width:0;border:0;outline:0;background:transparent;color:var(--ink)}.search input::placeholder{color:var(--muted);opacity:1}.scheme{display:flex;margin:0;padding:.18rem;border:1px solid var(--rule);border-radius:.5rem}.scheme button{min-height:2.15rem;border:0;border-radius:.34rem;padding:.35rem .65rem;background:transparent;color:var(--muted);cursor:pointer}.scheme button:hover{color:var(--ink)}.scheme button[aria-pressed="true"]{background:var(--ink);color:var(--surface)}.entry-head,.entry{display:grid;grid-template-columns:minmax(12rem,1fr) minmax(8rem,auto) 12rem;gap:1.25rem}.entry-head{min-height:2.2rem;align-items:center;padding:0 1.4rem;border-top:1px solid var(--soft-rule);border-bottom:1px solid var(--soft-rule);background:var(--paper);color:var(--muted);font-size:.68rem;font-weight:720;letter-spacing:.09em;text-transform:uppercase}.entries{list-style:none;margin:0;padding:0}.entry{min-height:3.25rem;align-items:center;padding:.72rem 1.4rem;border-bottom:1px solid var(--soft-rule)}.entry:hover,.entry[data-active="true"]{background:var(--hover)}.entry[hidden]{display:none}a{color:var(--accent);text-decoration-thickness:.08em;text-underline-offset:.22em}.identity{display:flex;min-width:0;flex-wrap:wrap;column-gap:.65rem}.entry-name{display:inline-flex;align-items:center;gap:.55rem}.name{font-weight:650;overflow-wrap:anywhere}.icon{display:inline-block;flex:none;vertical-align:-.15em;color:var(--status)}.target{color:var(--muted);font:500 .8rem/1.6 ui-monospace,SFMono-Regular,monospace;overflow-wrap:anywhere}.target-label{font-family:ui-sans-serif,system-ui,sans-serif;font-weight:650}.unavailable{color:var(--muted);text-decoration:line-through;text-decoration-thickness:1px}.kind,time{color:var(--muted);font-size:.82rem}.badge{display:inline-block;margin-right:.5rem;padding:.08rem .4rem;border:1px solid currentColor;border-radius:999px;font-size:.72rem}.warning{color:var(--warning)}a:focus-visible,button:focus-visible{outline:3px solid var(--focus);outline-offset:3px}.empty{margin:0;padding:2rem 1.4rem;color:var(--muted);border-bottom:1px solid var(--soft-rule)}::selection{background:var(--accent);color:var(--surface)}footer{display:flex;justify-content:space-between;gap:1rem;padding:1.5rem 1.4rem;color:var(--muted);font-size:.78rem}.shortcuts{margin:0}kbd{display:inline-block;min-width:1.6em;margin:0 .12rem;padding:.02rem .3rem;border:1px solid var(--rule);border-radius:.2rem;background:var(--control);text-align:center;font:inherit}.visually-hidden{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}.breadcrumbs a{display:inline-flex;min-height:2.25rem;align-items:center;padding:0 .2rem}
-@media(max-width:42rem){body{padding:0;background:var(--surface)}main{min-height:100vh;border:0;border-radius:0;box-shadow:none}.chrome{padding-inline:1rem}.directory-heading{display:block;padding:1.4rem 1rem 1rem}.summary{margin-top:.65rem}.toolbar{align-items:stretch;flex-direction:column;padding:0 1rem 1rem}.scheme{align-self:flex-start}.entry-head{display:none}.entry{grid-template-columns:minmax(0,1fr) auto;gap:.25rem 1rem;padding:.78rem 1rem}.entry time{grid-column:1/-1}.kind{text-align:right}footer{display:block;padding:1.4rem 1rem}.shortcuts{margin-top:.75rem}}
+*{box-sizing:border-box}html{min-height:100%;background:var(--paper);color:var(--ink)}body{min-width:20rem;margin:0;padding:clamp(1rem,5vw,4rem);font:15px/1.45 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-variant-numeric:tabular-nums}button,input,select{font:inherit}main{width:min(72rem,100%);margin:0 auto;background:var(--surface);border:1px solid var(--rule);border-radius:.875rem;box-shadow:var(--shadow);overflow:hidden}.chrome{display:flex;min-height:3.4rem;align-items:center;justify-content:space-between;gap:1rem;padding:0 1.4rem;border-bottom:1px solid var(--soft-rule)}.breadcrumbs{display:flex;min-width:0;align-items:center;flex-wrap:wrap;gap:.15rem;font-size:.95rem;font-weight:650}.breadcrumbs a,.breadcrumbs span{color:inherit}.breadcrumbs a{color:var(--accent);text-decoration-thickness:.08em}.separator{display:inline-flex;color:var(--muted);font-weight:400}.summary{margin:0;color:var(--muted);font-size:.76rem;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}.toolbar{display:flex;justify-content:space-between;gap:1rem;padding:1.25rem 1.4rem;align-items:flex-start}.search-cluster{display:flex;min-width:0;flex:1;gap:.6rem;align-items:center}.search{display:flex;align-items:center;gap:.55rem;width:min(28rem,100%);min-height:2.55rem;padding:.5rem .7rem;border:1px solid var(--rule);border-radius:.5rem;background:var(--control)}.search:focus-within{outline:3px solid var(--focus);outline-offset:2px}.search input{width:100%;min-width:0;border:0;outline:0;background:transparent;color:var(--ink)}.search input::placeholder{color:var(--muted);opacity:1}.compact-select,.include-links{display:flex;align-items:center;gap:.35rem;color:var(--muted);font-size:.78rem}.compact-select select,.sort-menu select{min-height:2.55rem;border:1px solid var(--rule);border-radius:.5rem;background:var(--control);color:var(--ink);padding:.35rem 1.8rem .35rem .55rem}.include-links[hidden]{display:none}.toolbar-actions{display:flex;align-items:flex-start;gap:.6rem}.scheme{display:flex;margin:0;padding:.18rem;border:1px solid var(--rule);border-radius:.5rem}.scheme button{min-height:2.15rem;border:0;border-radius:.34rem;padding:.35rem .65rem;background:transparent;color:var(--muted);cursor:pointer}.scheme button:hover{color:var(--ink)}.scheme button[aria-pressed="true"]{background:var(--ink);color:var(--surface)}.sort-panel{position:relative}.sort-panel>summary{display:flex;min-height:2.55rem;align-items:center;list-style:none;border:1px solid var(--rule);border-radius:.5rem;background:var(--control);padding:.45rem .7rem;cursor:pointer}.sort-panel>summary::-webkit-details-marker{display:none}.sort-panel[open]>summary{outline:2px solid var(--focus);outline-offset:1px}.sort-menu{position:absolute;z-index:2;right:0;top:calc(100% + .4rem);display:grid;width:16rem;gap:.7rem;padding:1rem;border:1px solid var(--rule);border-radius:.75rem;background:var(--surface);box-shadow:var(--shadow)}.sort-menu label{display:grid;gap:.3rem;color:var(--muted);font-size:.76rem}.sort-menu label[hidden]{display:none}.sort-menu label:last-child{display:flex;align-items:center;color:var(--ink)}.entry-head,.entry{display:grid;grid-template-columns:minmax(12rem,1fr) minmax(8rem,auto) 12rem;gap:1.25rem}.entry-head{min-height:2.2rem;align-items:center;padding:0 1.4rem;border-top:1px solid var(--soft-rule);border-bottom:1px solid var(--soft-rule);background:var(--paper)}.sort-heading{width:max-content;border:0;background:transparent;color:var(--muted);padding:0;font-size:.68rem;font-weight:720;letter-spacing:.09em;text-transform:uppercase;cursor:pointer}.sort-heading[aria-pressed="true"]{color:var(--accent)}.entries{list-style:none;margin:0;padding:0}.entry{min-height:3.25rem;align-items:center;padding:.72rem 1.4rem;border-bottom:1px solid var(--soft-rule)}.entry:hover,.entry[data-active="true"]{background:var(--hover)}.entry[hidden]{display:none}a{color:var(--accent);text-decoration-thickness:.08em;text-underline-offset:.22em}.identity{display:flex;min-width:0;flex-wrap:wrap;column-gap:.65rem}.entry-name{display:inline-flex;align-items:center;gap:.55rem}.name{font-weight:650;overflow-wrap:anywhere}.icon{display:inline-block;flex:none;vertical-align:-.15em;color:var(--status)}.target{color:var(--muted);font:500 .8rem/1.6 ui-monospace,SFMono-Regular,monospace;overflow-wrap:anywhere}.target-label{font-family:ui-sans-serif,system-ui,sans-serif;font-weight:650}.unavailable{color:var(--muted);text-decoration:line-through;text-decoration-thickness:1px}.kind,time{color:var(--muted);font-size:.82rem}.badge{display:inline-block;margin-right:.5rem;padding:.08rem .4rem;border:1px solid currentColor;border-radius:999px;font-size:.72rem}.warning{color:var(--warning)}a:focus-visible,button:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid var(--focus);outline-offset:3px}.empty{margin:0;padding:2rem 1.4rem;color:var(--muted);border-bottom:1px solid var(--soft-rule)}::selection{background:var(--accent);color:var(--surface)}footer{display:flex;justify-content:space-between;gap:1rem;padding:1.5rem 1.4rem;color:var(--muted);font-size:.78rem}.project-meta,.shortcuts{margin:0}.project-meta a{margin-left:.55rem}.shortcuts{text-align:right}kbd{display:inline-block;min-width:1.6em;margin:0 .12rem;padding:.02rem .3rem;border:1px solid var(--rule);border-radius:.2rem;background:var(--control);text-align:center;font:inherit}.visually-hidden{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}.breadcrumbs a{display:inline-flex;min-height:2.25rem;align-items:center;padding:0 .2rem}
+.sort-heading:not(button){cursor:default}
+@media(max-width:52rem){.toolbar{align-items:stretch;flex-direction:column}.search-cluster{align-items:stretch;flex-wrap:wrap}.toolbar-actions{width:100%;justify-content:space-between}.sort-menu{right:auto;left:0}}
+@media(max-width:42rem){body{padding:0;background:var(--surface)}main{min-height:100vh;border:0;border-radius:0;box-shadow:none}.chrome{padding-inline:1rem}.toolbar{padding:1rem}.search{width:100%}.compact-select{flex:1}.compact-select select{width:100%}.entry-head{display:none}.entry{grid-template-columns:minmax(0,1fr) auto;gap:.25rem 1rem;padding:.78rem 1rem}.entry time{grid-column:1/-1}.kind{text-align:right}footer{display:block;padding:1.4rem 1rem}.shortcuts{margin-top:.75rem;text-align:left}}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}`;
 
 export const defaultThemeComponents: DirwellThemeComponents = {
@@ -75,17 +86,29 @@ export const defaultThemeComponents: DirwellThemeComponents = {
           : `<a href="${escapeHtml(item.href)}">${escapeHtml(item.label)}</a>`,
       )
       .join('<span class="separator" aria-hidden="true">/</span>')}</nav>`,
-  Toolbar: ({ colorScheme, fuzzySearch, keyboardNavigation, searchIcon }) => {
+  Toolbar: ({
+    colorScheme,
+    fuzzySearch,
+    globalSearch,
+    keyboardNavigation,
+    searchIcon,
+    sorting,
+  }) => {
     const shortcutAttributes = keyboardNavigation
       ? ' aria-keyshortcuts="/" aria-describedby="keyboard-shortcuts"'
       : "";
     const search = fuzzySearch
-      ? `<label class="search">${searchIcon}<span class="visually-hidden">Filter entries</span><input type="search" autocomplete="off" placeholder="Filter this directory"${shortcutAttributes} data-search-input></label>`
+      ? `<div class="search-cluster"><label class="search">${searchIcon}<span class="visually-hidden">Search files</span><input type="search" autocomplete="off" placeholder="Search files"${shortcutAttributes} data-search-input></label>${globalSearch ? '<label class="compact-select"><span class="visually-hidden">Search scope</span><select data-search-scope><option value="current">This folder</option><option value="global">Everywhere</option></select></label>' : ""}<label class="compact-select"><span class="visually-hidden">File type</span><select data-search-filter><option value="all">Everything</option><option value="directory">Folders</option><option value="file">Files</option><option value="link">Links</option></select></label><label class="include-links" data-include-links-control hidden><input type="checkbox" data-include-links checked> Include links</label></div>`
       : "";
     const scheme = colorScheme
       ? '<fieldset class="scheme" data-scheme-control><legend class="visually-hidden">Color scheme</legend><button type="button" data-theme-value="system" aria-pressed="true">System</button><button type="button" data-theme-value="light" aria-pressed="false">Light</button><button type="button" data-theme-value="dark" aria-pressed="false">Dark</button></fieldset>'
       : "";
-    return search || scheme ? `<div class="toolbar">${search}${scheme}</div>` : "";
+    const sort = sorting
+      ? '<details class="sort-panel"><summary>Sort</summary><div class="sort-menu"><label>Sort by<select data-sort-field><option value="name">Name</option><option value="modified">Modified</option><option value="size">Size</option></select></label><label data-name-mode-control>Name order<select data-name-mode><option value="natural">Natural (numbers)</option><option value="locale">Locale</option><option value="unicode">Unicode</option></select></label><label>Direction<select data-sort-direction><option value="asc">Ascending</option><option value="desc">Descending</option></select></label><label><input type="checkbox" data-directories-first> Folders first</label></div></details>'
+      : "";
+    return search || scheme || sort
+      ? `<div class="toolbar">${search}<div class="toolbar-actions">${sort}${scheme}</div></div>`
+      : "";
   },
   EntryRow: ({ entry, icon, index, navigation }) => {
     const directoryLike = entry.kind === "directory" || entry.symlink?.targetKind === "directory";
@@ -99,20 +122,33 @@ export const defaultThemeComponents: DirwellThemeComponents = {
         : `<span class="target"><span class="target-label">Target:</span> ${escapeHtml(entry.symlink.target)}</span>`;
     const searchText = escapeHtml(`${entry.name} ${entry.symlink?.target ?? ""}`.toLowerCase());
     const name = `<span class="entry-name">${icon}<span>${label}</span></span>`;
-    return `<li class="entry" data-entry data-order="${index}" data-search="${searchText}">
+    const kind = directoryLike
+      ? "directory"
+      : entry.kind === "symlink" && entry.symlink?.targetKind === null
+        ? "link"
+        : "file";
+    return `<li class="entry" data-entry data-order="${index}" data-search="${searchText}" data-name="${escapeHtml(entry.name)}" data-size="${directoryLike ? 0 : entry.metadata.size}" data-modified="${Date.parse(entry.metadata.times.modifiedAt)}" data-directory="${String(directoryLike)}" data-link="${String(entry.kind === "symlink")}" data-kind="${kind}">
       <span class="identity">${navigation.href === null ? `<span class="name unavailable">${name}</span>` : `<a class="name" href="${escapeHtml(navigation.href)}"${linkAttributes}>${name}</a>`}${target}</span>
       <span class="kind">${badge(entry)}${size}</span>
       <time datetime="${entry.metadata.times.modifiedAt}">${modified} UTC</time>
     </li>`;
   },
-  EntryList: ({ directory, parentHref, rows }) =>
-    `<div class="entry-head" aria-hidden="true"><span>Name</span><span>Size</span><span>Modified</span></div><ul class="entries" data-entry-list>${directory.depth > 0 && parentHref !== null ? `<li class="entry" data-parent><a class="name" href="${escapeHtml(parentHref)}">../</a><span class="kind">parent</span><span></span></li>` : ""}${rows}</ul>`,
+  EntryList: ({ directory, parentHref, rows, sorting }) => {
+    const headings = (["name", "size", "modified"] as const)
+      .map((field) =>
+        sorting
+          ? `<button class="sort-heading" type="button" data-sort-heading="${field}">${field}</button>`
+          : `<span class="sort-heading">${field}</span>`,
+      )
+      .join("");
+    return `<div class="entry-head">${headings}</div><ul class="entries" data-entry-list>${directory.depth > 0 && parentHref !== null ? `<li class="entry" data-parent><a class="name" href="${escapeHtml(parentHref)}">../</a><span class="kind">parent</span><span></span></li>` : ""}${rows}</ul>`;
+  },
   EmptyState: ({ message }) => `<p class="empty" data-empty hidden>${escapeHtml(message)}</p>`,
-  Footer: ({ keyboardNavigation, parentHref }) => {
+  Footer: ({ keyboardNavigation, parentHref, project }) => {
     const shortcuts = keyboardNavigation
       ? `<p class="shortcuts" id="keyboard-shortcuts"><kbd>/</kbd> search <kbd>↑</kbd><kbd>↓</kbd> browse <kbd>Esc</kbd> clear${parentHref === null ? "" : " <kbd>Backspace</kbd> parent"}</p>`
       : "";
-    return `<footer><span>Static directory index</span>${shortcuts}</footer>`;
+    return `<footer><p class="project-meta"><a href="${escapeHtml(project.repositoryUrl)}" target="_blank" rel="noopener">${escapeHtml(project.name)}</a> by ${escapeHtml(project.author)}<a href="${escapeHtml(project.licenseUrl)}" target="_blank" rel="noopener">${escapeHtml(project.license)}</a></p>${shortcuts}</footer>`;
   },
   PageShell: ({
     assets,
@@ -130,7 +166,7 @@ export const defaultThemeComponents: DirwellThemeComponents = {
   }) => `<!doctype html>
 <html lang="en" data-theme="system"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light dark">${documentBaseHref === null ? "" : `<base href="${escapeHtml(documentBaseHref)}">`}<title>${escapeHtml(visiblePath)} · Files</title><style>${styles}</style></head>
 <body><main data-explorer data-config="${escapeHtml(JSON.stringify(runtimeConfig))}"${parentHref === null ? "" : ` data-parent-href="${escapeHtml(parentHref)}"`}>
-<header><div class="chrome">${breadcrumbs}</div><div class="directory-heading"><div class="directory-title"><span class="directory-label">Directory</span><h1>${escapeHtml(visiblePath)}</h1></div><p class="summary"><span data-visible-count>${directory.entries.length}</span> <span data-count-label>${directory.entries.length === 1 ? "entry" : "entries"}</span></p></div></header>
+<header><div class="chrome">${breadcrumbs}<p class="summary"><span data-visible-count>${directory.entries.length}</span> <span data-count-label>${directory.entries.length === 1 ? "entry" : "entries"}</span></p></div><h1 class="visually-hidden">${escapeHtml(visiblePath)}</h1></header>
 ${toolbar}${entryList}${emptyState}<p class="visually-hidden" aria-live="polite" data-live-status></p>${footer}</main>${assets}</body></html>`,
 };
 
@@ -159,8 +195,18 @@ function createBreadcrumbs(
 export function createDefaultTheme(options: DefaultThemeOptions = {}): ExplorerTheme {
   const colorScheme = options.colorScheme ?? true;
   const fuzzySearch = options.fuzzySearch ?? true;
+  const globalSearch = options.globalSearch ?? true;
   const keyboardNavigation = options.keyboardNavigation ?? true;
-  const interactive = colorScheme || fuzzySearch || keyboardNavigation;
+  const sorting = options.sorting ?? true;
+  const project = {
+    author: options.project?.author ?? "VdustR",
+    license: options.project?.license ?? "MIT License",
+    licenseUrl:
+      options.project?.licenseUrl ?? "https://github.com/VdustR/dirwell/blob/main/LICENSE",
+    name: options.project?.name ?? "Dirwell",
+    repositoryUrl: options.project?.repositoryUrl ?? "https://github.com/VdustR/dirwell",
+  };
+  const interactive = colorScheme || fuzzySearch || keyboardNavigation || sorting;
   const layers =
     options.components === undefined
       ? []
@@ -178,6 +224,8 @@ export function createDefaultTheme(options: DefaultThemeOptions = {}): ExplorerT
       exitsExplorerFor,
       hrefFor,
       hrefForDirectory,
+      searchIndexHref,
+      sort,
     }) {
       const visiblePath =
         directory.current.relativePath === "" ? "/" : `/${directory.current.relativePath}/`;
@@ -197,7 +245,15 @@ export function createDefaultTheme(options: DefaultThemeOptions = {}): ExplorerT
       const assets = interactive
         ? `<script src="${escapeHtml(assetHref("dirwell.runtime.js"))}" type="module"></script>`
         : "";
-      const runtimeConfig = { colorScheme, fuzzySearch, keyboardNavigation };
+      const runtimeConfig = {
+        colorScheme,
+        fuzzySearch,
+        globalSearch,
+        keyboardNavigation,
+        searchIndexHref,
+        sort,
+        sorting,
+      };
       const parentHref =
         directory.parent === null ? null : hrefForDirectory(directory.parent.relativePath);
       const html = components.PageShell({
@@ -208,10 +264,11 @@ export function createDefaultTheme(options: DefaultThemeOptions = {}): ExplorerT
         directory,
         documentBaseHref,
         emptyState: components.EmptyState({ message: "No matching entries." }),
-        entryList: components.EntryList({ directory, parentHref, rows }),
+        entryList: components.EntryList({ directory, parentHref, rows, sorting }),
         footer: components.Footer({
           keyboardNavigation,
           parentHref,
+          project,
         }),
         parentHref,
         runtimeConfig,
@@ -219,8 +276,10 @@ export function createDefaultTheme(options: DefaultThemeOptions = {}): ExplorerT
         toolbar: components.Toolbar({
           colorScheme,
           fuzzySearch,
+          globalSearch,
           keyboardNavigation,
           searchIcon: components.Icon({ name: "search" }),
+          sorting,
         }),
         visiblePath,
       });

@@ -72,6 +72,27 @@ test("validates and resolves URL configuration", async (context) => {
   await assert.rejects(() => loadDirwellConfig(cwd, "build"), /urls must be/);
 });
 
+test("validates and resolves sorting configuration", async (context) => {
+  const cwd = await temporaryDirectory();
+  context.after(() => rm(cwd, { recursive: true, force: true }));
+  await writeFile(
+    path.join(cwd, "dirwell.config.ts"),
+    'export default { sort: { field: "modified", direction: "desc", directoriesFirst: false } };\n',
+  );
+  const loaded = await loadDirwellConfig(cwd, "build");
+  assert.deepEqual(resolveGenerateOptions(cwd, loaded.config).sort, {
+    direction: "desc",
+    directoriesFirst: false,
+    field: "modified",
+  });
+
+  await writeFile(
+    path.join(cwd, "dirwell.config.ts"),
+    'export default { sort: { nameMode: "magic" } };\n',
+  );
+  await assert.rejects(() => loadDirwellConfig(cwd, "build"), /sort.nameMode must be/);
+});
+
 test("CLI help exposes zero-config usage and primary commands", async () => {
   const usage = await renderUsage(mainCommand);
   assert.match(usage, /dirwell build\|daemon\|serve\|dev/);

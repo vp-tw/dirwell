@@ -16,6 +16,12 @@ import { createDefaultTheme, defineConfig } from "dirwell";
 
 export default defineConfig({
   theme: createDefaultTheme({
+    project: {
+      author: "Your name",
+      repositoryUrl: "https://github.com/you/project",
+      license: "MIT License",
+      licenseUrl: "https://github.com/you/project/blob/main/LICENSE",
+    },
     components: {
       Footer: ({ parentHref }) =>
         parentHref === null ? "<footer>Home</footer>" : "<footer>Nested</footer>",

@@ -22,12 +22,21 @@ import type {
   FileMetadata,
   FileSystemEntry,
   GenerateOptions,
+  NameSortMode,
   OutputNameResolver,
+  SortOptions,
   SymlinkMetadata,
 } from "./model.ts";
 import { defaultTheme } from "./theme-default.ts";
 
 const indexPattern = /^index\.html?$/i;
+
+const defaultSort = {
+  direction: "asc",
+  directoriesFirst: true,
+  field: "name",
+  nameMode: "natural",
+} as const satisfies Required<SortOptions>;
 
 export const defaultOutputName: OutputNameResolver = ({ entries }) =>
   entries.some((entry) => entry.kind === "file" && indexPattern.test(entry.name))
@@ -147,6 +156,62 @@ function encodeLogicalPath(value: string): string {
     .join("/");
 }
 
+function isDirectoryLike(entry: FileSystemEntry): boolean {
+  return entry.kind === "directory" || entry.symlink?.targetKind === "directory";
+}
+
+function compareUnicode(left: string, right: string): number {
+  const leftPoints = [...left];
+  const rightPoints = [...right];
+  const length = Math.min(leftPoints.length, rightPoints.length);
+  for (let index = 0; index < length; index += 1) {
+    const difference =
+      (leftPoints[index]?.codePointAt(0) ?? 0) - (rightPoints[index]?.codePointAt(0) ?? 0);
+    if (difference !== 0) return difference;
+  }
+  return leftPoints.length - rightPoints.length;
+}
+
+function compareNames(left: string, right: string, mode: NameSortMode): number {
+  if (mode === "unicode") return compareUnicode(left, right);
+  return left.localeCompare(right, undefined, {
+    numeric: mode === "natural",
+    sensitivity: "base",
+  });
+}
+
+export function compareEntries(
+  left: FileSystemEntry,
+  right: FileSystemEntry,
+  options: SortOptions = {},
+): number {
+  const resolved = { ...defaultSort, ...options };
+  if (resolved.directoriesFirst && isDirectoryLike(left) !== isDirectoryLike(right)) {
+    return isDirectoryLike(left) ? -1 : 1;
+  }
+  let result: number;
+  if (resolved.field === "modified") {
+    result = left.metadata.times.modifiedAt.localeCompare(right.metadata.times.modifiedAt);
+  } else if (resolved.field === "size") {
+    result =
+      (isDirectoryLike(left) ? 0 : left.metadata.size) -
+      (isDirectoryLike(right) ? 0 : right.metadata.size);
+  } else {
+    result = compareNames(left.name, right.name, resolved.nameMode);
+  }
+  if (result === 0) result = compareNames(left.name, right.name, resolved.nameMode);
+  return resolved.direction === "asc" ? result : -result;
+}
+
+function rawLinkFilename(entry: FileSystemEntry): string {
+  return `${createHash("sha256")
+    .update(entry.relativePath)
+    .update("\0")
+    .update(entry.symlink?.target ?? "")
+    .digest("hex")
+    .slice(0, 16)}.txt`;
+}
+
 export async function generateExplorer(options: GenerateOptions): Promise<void> {
   const sourceDir = path.resolve(options.sourceDir);
   const outputDir = path.resolve(options.outputDir);
@@ -229,13 +294,7 @@ export async function generateExplorer(options: GenerateOptions): Promise<void> 
         }),
       ),
     );
-    entries.sort((left, right) => {
-      const leftDirectory = left.kind === "directory" || left.symlink?.targetKind === "directory";
-      const rightDirectory =
-        right.kind === "directory" || right.symlink?.targetKind === "directory";
-      if (leftDirectory !== rightDirectory) return leftDirectory ? -1 : 1;
-      return left.name.localeCompare(right.name, "en", { numeric: true });
-    });
+    entries.sort((left, right) => compareEntries(left, right, options.sort));
 
     const describedCurrent = await describeEntry({
       absolutePath: physicalDir,
@@ -310,6 +369,60 @@ export async function generateExplorer(options: GenerateOptions): Promise<void> 
     );
     const sharedAssets = new Map<string, string | Uint8Array>();
     const rawLinkFiles = new Map<string, string>();
+    const searchEntries = new Map<
+      string,
+      {
+        href: string | null;
+        exitsExplorer: boolean;
+        isLink: boolean;
+        kind: EntryKind;
+        modifiedAt: string;
+        name: string;
+        path: string;
+        size: number;
+        target: string | null;
+        targetKind: Exclude<EntryKind, "symlink"> | null;
+      }
+    >();
+
+    for (const { directory, logicalDir } of plans) {
+      for (const entry of directory.entries) {
+        if (searchEntries.has(entry.relativePath)) continue;
+        const targetLogicalPath =
+          entry.symlink?.isBroken || entry.symlink?.isOutsideRoot
+            ? null
+            : entry.symlink?.targetRelativePath !== null && entry.symlink !== null
+              ? entry.symlink.targetRelativePath
+              : path.posix.join(logicalDir, entry.name);
+        const directoryLike = isDirectoryLike(entry);
+        let href: string | null = null;
+        if (entry.symlink?.isBroken) {
+          const filename = rawLinkFilename(entry);
+          rawLinkFiles.set(filename, entry.symlink.target);
+          href = `raw-links/${filename}`;
+        } else if (targetLogicalPath !== null) {
+          href =
+            targetLogicalPath === ""
+              ? "../"
+              : `../${encodeLogicalPath(targetLogicalPath)}${directoryLike ? "/" : ""}`;
+        }
+        searchEntries.set(entry.relativePath, {
+          exitsExplorer:
+            entry.symlink?.isBroken === true ||
+            (targetLogicalPath !== null &&
+              (!directoryLike || !generatedDirectories.has(targetLogicalPath))),
+          href,
+          isLink: entry.kind === "symlink",
+          kind: entry.kind,
+          modifiedAt: entry.metadata.times.modifiedAt,
+          name: entry.name,
+          path: entry.relativePath,
+          size: entry.metadata.size,
+          target: entry.symlink?.target ?? null,
+          targetKind: entry.symlink?.targetKind ?? null,
+        });
+      }
+    }
 
     for (const plan of plans) {
       const { directory, logicalDir, outputName: name } = plan;
@@ -345,12 +458,7 @@ export async function generateExplorer(options: GenerateOptions): Promise<void> 
       };
       const hrefFor = (entry: FileSystemEntry): string | null => {
         if (entry.symlink?.isBroken) {
-          const filename = `${createHash("sha256")
-            .update(entry.relativePath)
-            .update("\0")
-            .update(entry.symlink.target)
-            .digest("hex")
-            .slice(0, 16)}.txt`;
+          const filename = rawLinkFilename(entry);
           rawLinkFiles.set(filename, entry.symlink.target);
           return hrefForLogicalPath(path.posix.join("__dirwell", "raw-links", filename), false);
         }
@@ -365,6 +473,11 @@ export async function generateExplorer(options: GenerateOptions): Promise<void> 
         documentBaseHref: urlStrategy === "html-base" ? base : null,
         outputName: name,
         mode,
+        searchIndexHref: hrefForLogicalPath(
+          path.posix.join("__dirwell", "search-index.json"),
+          false,
+        ),
+        sort: { ...defaultSort, ...options.sort },
         assetHref: (assetName) => {
           assertSafeOutputName(assetName);
           return hrefForLogicalPath(
@@ -419,6 +532,12 @@ export async function generateExplorer(options: GenerateOptions): Promise<void> 
         await writeFile(path.join(rawLinkDirectory, filename), target);
       }
     }
+    const generatedAssetDirectory = path.join(buildOutputDir, "__dirwell");
+    await mkdir(generatedAssetDirectory, { recursive: true });
+    await writeFile(
+      path.join(generatedAssetDirectory, "search-index.json"),
+      JSON.stringify({ entries: [...searchEntries.values()], version: 1 }),
+    );
 
     await rm(outputDir, { recursive: true, force: true });
     await mkdir(path.dirname(outputDir), { recursive: true });

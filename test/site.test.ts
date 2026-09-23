@@ -35,3 +35,13 @@ test("GitHub Pages derives repository URLs and deployment base at build time", a
   assert.match(workflow, /SITE_BASE: \/\$\{\{ github\.event\.repository\.name \}\}\//);
   assert.match(workflow, /path: site/);
 });
+
+test("explorer preview build is scoped to the fixture directory", async () => {
+  const packageJson = JSON.parse(await readFile(path.join(root, "package.json"), "utf8")) as {
+    scripts: Record<string, string>;
+  };
+  assert.equal(
+    packageJson.scripts["build:explorer"],
+    "node src/bin.ts build fixture --out-dir generated",
+  );
+});

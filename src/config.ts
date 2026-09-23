@@ -1,6 +1,6 @@
 import { loadConfig } from "c12";
 import path from "node:path";
-import type { ExplorerTheme, GenerateOptions, OutputNameResolver } from "./model.ts";
+import type { ExplorerTheme, GenerateOptions, OutputNameResolver, SortOptions } from "./model.ts";
 
 export interface DirwellConfig {
   readonly base?: string;
@@ -15,6 +15,7 @@ export interface DirwellConfig {
     readonly port?: number;
   };
   readonly symlinks?: GenerateOptions["symlinks"];
+  readonly sort?: SortOptions;
   readonly theme?: ExplorerTheme;
   readonly urls?: "base" | "html-base" | "relative";
 }
@@ -97,6 +98,29 @@ export function validateConfig(value: unknown): asserts value is DirwellConfig {
       throw new TypeError("server.port must be a non-negative integer");
     }
   }
+  if (config.sort !== undefined) {
+    if (typeof config.sort !== "object" || config.sort === null) {
+      throw new TypeError("sort must be an object");
+    }
+    const sort = config.sort as Record<string, unknown>;
+    if (
+      sort.field !== undefined &&
+      (typeof sort.field !== "string" || !["name", "modified", "size"].includes(sort.field))
+    ) {
+      throw new TypeError('sort.field must be "name", "modified", or "size"');
+    }
+    if (
+      sort.nameMode !== undefined &&
+      (typeof sort.nameMode !== "string" ||
+        !["unicode", "locale", "natural"].includes(sort.nameMode))
+    ) {
+      throw new TypeError('sort.nameMode must be "unicode", "locale", or "natural"');
+    }
+    if (sort.direction !== undefined && sort.direction !== "asc" && sort.direction !== "desc") {
+      throw new TypeError('sort.direction must be "asc" or "desc"');
+    }
+    assertOptionalBoolean(sort.directoriesFirst, "sort.directoriesFirst");
+  }
 }
 
 export async function loadDirwellConfig(
@@ -137,6 +161,7 @@ export function resolveGenerateOptions(
     ...(config.mirror === undefined ? {} : { mirror: config.mirror }),
     ...(config.outputName === undefined ? {} : { outputName: config.outputName }),
     ...(config.symlinks === undefined ? {} : { symlinks: config.symlinks }),
+    ...(config.sort === undefined ? {} : { sort: config.sort }),
     ...(config.theme === undefined ? {} : { theme: config.theme }),
     ...(overrides.urls === undefined && config.urls === undefined
       ? {}
