@@ -41,6 +41,7 @@
     "lint": "vp lint",
     "site:build": "pnpm run examples:build && pnpm run docs:build",
     "test": "node --test test/*.test.ts",
+    "test:browser": "playwright test",
     "check:types": "tsc --noEmit"
   },
   "dependencies": {
@@ -52,6 +53,7 @@
   },
   "devDependencies": {
     "@astrojs/starlight": "0.42.2",
+    "@playwright/test": "1.63.0",
     "@types/node": "26.6.2",
     "astro": "7.3.3",
     "typescript": "7.0.2",

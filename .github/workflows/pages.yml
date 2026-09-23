@@ -27,6 +27,8 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm run check
       - run: pnpm test
+      - run: pnpm exec playwright install --with-deps chromium --only-shell
+      - run: pnpm test:browser
       - name: Build documentation and examples
         env:
           PUBLIC_REPOSITORY_URL: https://github.com/${{ github.repository }}
