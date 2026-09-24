@@ -138,6 +138,7 @@ async function assertFilePolicy(page: Page): Promise<void> {
   await popup.close();
   await expect(page.locator('[data-name="outside-link"] a')).toHaveCount(0);
   await expect(page.locator('[data-name="outside-link"]')).toContainText("external link");
+  expect((await page.request.get(new URL("outside-link", page.url()).href)).status()).toBe(404);
   await expect(page.locator('[data-name="broken-link"] a')).toHaveAttribute(
     "href",
     /__dirwell\/raw-links\/[a-f0-9]{16}\.txt$/,
@@ -145,6 +146,39 @@ async function assertFilePolicy(page: Page): Promise<void> {
 }
 
 for (const mode of ["ssg", "mpa"] as const) {
+  test(`${mode}: filters remove files from navigation and global search`, async ({ page }) => {
+    const sourceDir = path.join(temporary, `filtered-${mode}`);
+    const outputDir = path.join(temporary, `filtered-output-${mode}`);
+    await mkdir(path.join(sourceDir, "docs", "private"), { recursive: true });
+    await writeFile(path.join(sourceDir, "guide.md"), "Guide");
+    await writeFile(path.join(sourceDir, "secret.txt"), "Secret");
+    await writeFile(path.join(sourceDir, "docs", "private", "hidden.md"), "Hidden");
+    await generateExplorer({
+      sourceDir,
+      outputDir,
+      mode,
+      base: mount,
+      urlStrategy: "base",
+      include: ["**/*.md", "docs/**"],
+      exclude: "docs/private/**",
+    });
+    const server = await serveStatic(outputDir);
+    try {
+      await page.goto(server.url);
+      await expect(page.getByRole("link", { name: "guide.md" })).toBeVisible();
+      await expect(page.getByRole("link", { name: "secret.txt" })).toHaveCount(0);
+      expect((await page.request.get(new URL("secret.txt", server.url).href)).status()).toBe(404);
+      await page.getByRole("button", { name: "Search all files" }).click();
+      const search = page.getByRole("dialog", { name: "Search all files" }).getByRole("searchbox");
+      await search.fill("hidden.md");
+      await expect(page.locator("[data-global-results] a.name")).toHaveCount(0);
+      await search.fill("guide.md");
+      await expect(page.locator("[data-global-results] a.name")).toHaveCount(1);
+    } finally {
+      await server.close();
+    }
+  });
+
   test(`${mode}: generated fallback page remains reachable beside an existing index`, async ({
     page,
   }) => {

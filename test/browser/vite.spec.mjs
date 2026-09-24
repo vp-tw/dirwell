@@ -68,6 +68,39 @@ for (const mode of ["ssg", "mpa"]) {
   });
 }
 
+test("Vite dev excludes its previous output when the project root is the source", async ({
+  page,
+}) => {
+  const root = await mkdtemp(path.join(tmpdir(), "dirwell-vite-root-browser-"));
+  const previousOutput = path.join(root, "dist", "dirwell");
+  await mkdir(previousOutput, { recursive: true });
+  await writeFile(path.join(previousOutput, ".dirwell-vite-output"), "dirwell-vite-v1\n");
+  await writeFile(path.join(previousOutput, "old.txt"), "previous build");
+  await writeFile(path.join(root, "index.html"), "<main>Host application</main>");
+  const server = await createServer({
+    root,
+    configFile: false,
+    base: "/app/",
+    logLevel: "silent",
+    plugins: [dirwellVite({ root: ".", include: ["index.html", "dist/**"] })],
+    server: { host: "127.0.0.1", port: 0 },
+  });
+  try {
+    await server.listen();
+    const local = server.resolvedUrls?.local[0];
+    if (local === undefined) throw new Error("Vite did not expose a local URL");
+    const explorer = new URL("/app/dirwell/_dirwell.html", local).href;
+    await page.goto(explorer);
+    await expect(page.locator("[data-explorer]")).toBeVisible();
+    expect(
+      (await page.request.get(new URL("/app/dirwell/dist/dirwell/old.txt", local).href)).status(),
+    ).toBe(404);
+  } finally {
+    await server.close();
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
 test("Vite production build publishes the explorer under a non-root base", async ({ page }) => {
   const root = await mkdtemp(path.join(tmpdir(), "dirwell-vite-production-"));
   await mkdir(path.join(root, "files"));

@@ -42,6 +42,8 @@ asynchronous. A `dirwell.config.ts` file is discovered from `--cwd`.
 | `outDir`     | `dist/` for build; `.dirwell-preview/` for serve and daemon.                                                                                                     |
 | `mode`       | `"ssg"`; `"mpa"` shares runtime assets under `__dirwell/`.                                                                                                       |
 | `mirror`     | `true`; copy source files to the output.                                                                                                                         |
+| `include`    | All source entries; root-relative glob or array of globs. Matching directories include descendants.                                                              |
+| `exclude`    | No exclusions; root-relative glob or array of globs. Exclusions win over inclusions.                                                                             |
 | `base`       | `/`; root-relative path or HTTP(S) URL without query or fragment.                                                                                                |
 | `urls`       | `"relative"`; also accepts `"base"` and `"html-base"`.                                                                                                           |
 | `outputName` | `defaultOutputName`; use `_dirwell.html` when an index exists, and skip when both names exist. A function may return a filename, `null`, or a promise of either. |

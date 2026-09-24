@@ -61,6 +61,29 @@ export default defineConfig({
 });
 ```
 
+## Include and exclude
+
+By default, Dirwell includes every source entry. `include` and `exclude` accept
+a glob or an array of globs relative to `root`, using `/` separators. A pattern
+without `/` matches at the root; use `**/` to match at any depth. `**` also
+matches dotfiles. Exclusions take precedence; use `exclude` instead of negated
+`!` patterns.
+
+```ts
+export default defineConfig({
+  include: ["**/*.md", "assets/**"],
+  exclude: ["drafts/**", "**/*.secret"],
+});
+```
+
+A matching directory includes its descendants. Parent directories remain when
+needed to reach an included file. Excluding a directory removes its entire
+subtree. The same selection controls mirrored files, generated directory pages,
+and the search index in both SSG and MPA modes, including the watch server and
+Vite adapter. Empty arrays leave that side of the filter unrestricted. A
+symlink to a filtered-out target remains listed without a link and is not
+mirrored.
+
 ## URL strategy
 
 `relative` is the portable default. `base` prefixes every generated URL with
@@ -116,11 +139,12 @@ directory without its ownership marker. In development it serves a private
 temporary build under the public `base` through Vite, watches the source with
 Vite's watcher, and requests a browser reload after a successful rebuild. A
 failed rebuild leaves the previous output available and reports an error in
-Vite. When mirroring is enabled, the adapter rejects absolute symlinks and
-relative symlinks that escape the source directory; either could expose files
-outside the published explorer. Set `mirror: false` when those source links
-must remain visible as metadata without copying files. Vite is the supported
-host; other unplugin hosts have not been verified.
+Vite. When mirroring is enabled, the adapter rejects included absolute symlinks
+and relative symlinks that escape the source directory; either could expose files
+outside the published explorer. Excluded links are not mirrored. Set
+`mirror: false` when those source links must remain visible as metadata without
+copying files. Vite is the supported host; other unplugin hosts have not been
+verified.
 
 ## Sorting
 

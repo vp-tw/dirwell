@@ -35,6 +35,9 @@ importers:
       jiti:
         specifier: 2.7.0
         version: 2.7.0
+      picomatch:
+        specifier: 4.0.7
+        version: 4.0.7
       unplugin:
         specifier: 3.4.0
         version: 3.4.0(@voidzero-dev/vite-plus-core@0.3.3(@types/node@26.6.2)(esbuild@0.28.2)(jiti@2.7.0)(typescript@7.0.2))(esbuild@0.28.2)(rolldown@1.2.9)
@@ -48,6 +51,9 @@ importers:
       '@types/node':
         specifier: 26.6.2
         version: 26.6.2
+      '@types/picomatch':
+        specifier: 4.0.3
+        version: 4.0.3
       astro:
         specifier: 7.3.3
         version: 7.3.3(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.3)(@types/node@26.6.2)(jiti@2.7.0)(typescript@7.0.2)
@@ -1164,6 +1170,9 @@ packages:
 
   '@types/node@26.6.2':
     resolution: {integrity: sha512-X1P21scMv4zGKLYqjdGjaKa7COa0RKVYYZZN/NfvLQ1JegxFhdhpZG/Lyn8AXx6CDUavKAd11v6BvfpkDByK8g==}
+
+  '@types/picomatch@4.0.3':
+    resolution: {integrity: sha512-iG0T6+nYJ9FAPmx9SsUlnwcq1ZVRuCXcVEvWnntoPlrOpwtSTKNDC9uVAxTsC3PUvJ+99n4RpAcNgBbHX3JSnQ==}
 
   '@types/sax@1.2.7':
     resolution: {integrity: sha512-rO73L89PJxeYM3s3pPPjiPgVVcymqU490g0YO5n5By0k2Erzj6tay/4lr1CHAAU4JyOWd1rpQ8bCf6cZfHU96A==}
@@ -3633,6 +3642,8 @@ snapshots:
   '@types/node@26.6.2':
     dependencies:
       undici-types: 8.9.0
+
+  '@types/picomatch@4.0.3': {}
 
   '@types/sax@1.2.7':
     dependencies:

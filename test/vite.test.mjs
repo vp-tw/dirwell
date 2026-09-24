@@ -106,6 +106,33 @@ test("Vite refuses mirrored symlinks that would expose files outside Dirwell out
   }
 });
 
+test("Vite options filter generated output and ignore excluded unsafe symlinks", async () => {
+  for (const mode of ["ssg", "mpa"]) {
+    const { root, close } = await fixture();
+    try {
+      await mkdir(path.join(root, "files", "private"));
+      await writeFile(path.join(root, "files", "guide.md"), "public guide\n");
+      await writeFile(path.join(root, "files", "private", "secret.md"), "secret\n");
+      await writeFile(path.join(root, "secret.txt"), "outside\n");
+      await symlink(path.join(root, "secret.txt"), path.join(root, "files", "outside-link"));
+      await viteBuild(root, {
+        root: "files",
+        mode,
+        include: ["**/*.md", "outside-link"],
+        exclude: ["private/**", "outside-link"],
+      });
+      const output = path.join(root, "dist", "dirwell");
+      assert.match(await readFile(path.join(output, "index.html"), "utf8"), /guide\.md/);
+      assert.equal(await readFile(path.join(output, "guide.md"), "utf8"), "public guide\n");
+      await assert.rejects(lstat(path.join(output, "note.txt")), /ENOENT/);
+      await assert.rejects(lstat(path.join(output, "private")), /ENOENT/);
+      await assert.rejects(lstat(path.join(output, "outside-link")), /ENOENT/);
+    } finally {
+      await close();
+    }
+  }
+});
+
 test("Vite output root and unowned destinations are never replaced", async () => {
   const { root, close } = await fixture();
   try {
@@ -145,9 +172,9 @@ test("inline options override a project dirwell.config.ts", async () => {
   try {
     await writeFile(
       path.join(root, "dirwell.config.ts"),
-      'export default { root: "missing", mode: "ssg" };\n',
+      'export default { root: "missing", mode: "ssg", include: "**/*.md" };\n',
     );
-    await viteBuild(root, { root: "files", mode: "mpa" });
+    await viteBuild(root, { root: "files", mode: "mpa", include: "**/*.txt" });
     assert.match(
       await readFile(path.join(root, "dist", "dirwell", "index.html"), "utf8"),
       /note\.txt/,

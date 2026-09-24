@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdtemp, mkdir, readFile, rm, symlink, writeFile } from "node:fs/promises";
+import { lstat, mkdtemp, mkdir, readFile, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -270,6 +270,16 @@ test("supports a clean output directory inside the source tree", async (context)
   assert.doesNotMatch(rootIndex, />dist\/<\/a>/);
 });
 
+test("refuses an output directory that contains the source tree", async (context) => {
+  const { root } = await fixture();
+  context.after(() => rm(path.dirname(root), { recursive: true, force: true }));
+  await assert.rejects(
+    generateExplorer({ sourceDir: root, outputDir: path.dirname(root) }),
+    /outputDir must not contain the sourceDir/,
+  );
+  assert.equal(await readFile(path.join(root, "README.txt"), "utf8"), "initial\n");
+});
+
 test("output names support strings, resolver skips, and safe filename validation", async (context) => {
   const { output, root } = await fixture();
   context.after(() => rm(path.dirname(root), { recursive: true, force: true }));
@@ -294,6 +304,107 @@ test("output names support strings, resolver skips, and safe filename validation
       generateExplorer({ sourceDir: root, outputDir: output, outputName: () => "../unsafe.html" }),
     /single safe filename/,
   );
+});
+
+test("include and exclude filter mirrored files, pages, and search in both modes", async (context) => {
+  const { output, root } = await fixture();
+  context.after(() => rm(path.dirname(root), { recursive: true, force: true }));
+  await mkdir(path.join(root, "docs", "private"));
+  await writeFile(path.join(root, "intro.md"), "Public intro");
+  await writeFile(path.join(root, "docs", "guide.md"), "Public guide");
+  await writeFile(path.join(root, "docs", ".hidden.log"), "Hidden log");
+  await writeFile(path.join(root, "docs", "private", "secret.md"), "Private note");
+
+  for (const mode of ["ssg", "mpa"] as const) {
+    await generateExplorer({
+      sourceDir: root,
+      outputDir: output,
+      mode,
+      include: ["*.md", "docs/**"],
+      exclude: ["docs/private/**", "**/*.log"],
+    });
+    const rootPage = await readFile(path.join(output, "index.html"), "utf8");
+    const docsPage = await readFile(path.join(output, "docs", "_dirwell.html"), "utf8");
+    assert.match(rootPage, /intro\.md/);
+    assert.match(rootPage, /docs\/_dirwell\.html/);
+    assert.doesNotMatch(rootPage, /README\.txt|releases\//);
+    assert.match(docsPage, /guide\.md|index\.html/);
+    assert.doesNotMatch(docsPage, /private\/|\.hidden\.log/);
+    assert.equal(await readFile(path.join(output, "intro.md"), "utf8"), "Public intro");
+    assert.equal(await readFile(path.join(output, "docs", "guide.md"), "utf8"), "Public guide");
+    await assert.rejects(lstat(path.join(output, "README.txt")), /ENOENT/);
+    await assert.rejects(lstat(path.join(output, "docs", "private")), /ENOENT/);
+    await assert.rejects(lstat(path.join(output, "docs", ".hidden.log")), /ENOENT/);
+    const index = JSON.parse(
+      await readFile(path.join(output, "__dirwell", "search-00000.json"), "utf8"),
+    );
+    const paths = index.entries.map((entry: { path: string }) => entry.path);
+    assert.ok(paths.includes("docs/guide.md"));
+    assert.ok(
+      !paths.some((entry: string) => entry.includes("private") || entry.includes(".hidden.log")),
+    );
+  }
+
+  await generateExplorer({ sourceDir: root, outputDir: output, mirror: false, include: "*.md" });
+  assert.match(await readFile(path.join(output, "index.html"), "utf8"), /intro\.md/);
+  await assert.rejects(lstat(path.join(output, "intro.md")), /ENOENT/);
+  await assert.rejects(lstat(path.join(output, "docs")), /ENOENT/);
+});
+
+test("directory includes, dotfiles, and excluded symlink targets use source-relative paths", async (context) => {
+  const { output, root } = await fixture();
+  context.after(() => rm(path.dirname(root), { recursive: true, force: true }));
+  await writeFile(path.join(root, ".env"), "SECRET=value");
+  await writeFile(path.join(root, "docs", ".hidden.md"), "Hidden note");
+  await symlink("README.txt", path.join(root, "readme-link"));
+
+  await generateExplorer({ sourceDir: root, outputDir: output, include: "docs" });
+  assert.equal(await readFile(path.join(output, "docs", ".hidden.md"), "utf8"), "Hidden note");
+  await assert.rejects(lstat(path.join(output, ".env")), /ENOENT/);
+
+  await generateExplorer({
+    sourceDir: root,
+    outputDir: output,
+    include: "**",
+    exclude: [".env", "README.txt"],
+  });
+  await assert.rejects(lstat(path.join(output, ".env")), /ENOENT/);
+  await assert.rejects(lstat(path.join(output, "README.txt")), /ENOENT/);
+  await assert.rejects(lstat(path.join(output, "readme-link")), /ENOENT/);
+  const rootPage = await readFile(path.join(output, "index.html"), "utf8");
+  assert.match(rootPage, /readme-link/);
+  assert.doesNotMatch(rootPage, /href="readme-link"/);
+  const index = JSON.parse(
+    await readFile(path.join(output, "__dirwell", "search-00000.json"), "utf8"),
+  );
+  assert.equal(
+    index.entries.find((entry: { path: string }) => entry.path === "readme-link")?.href,
+    null,
+  );
+});
+
+test("excluding an existing index lets Dirwell generate the directory index", async (context) => {
+  const { output, root } = await fixture();
+  context.after(() => rm(path.dirname(root), { recursive: true, force: true }));
+  await generateExplorer({
+    sourceDir: root,
+    outputDir: output,
+    include: "docs/**",
+    exclude: "docs/index.html",
+  });
+  const docsPage = await readFile(path.join(output, "docs", "index.html"), "utf8");
+  assert.match(docsPage, /Index of|data-explorer/);
+  await assert.rejects(lstat(path.join(output, "docs", "_dirwell.html")), /ENOENT/);
+});
+
+test("CLI mirror omits symlinks that could reach outside the output", async (context) => {
+  const { output, root } = await fixture();
+  context.after(() => rm(path.dirname(root), { recursive: true, force: true }));
+  await symlink(path.join(root, "README.txt"), path.join(root, "absolute-link"));
+  await generateExplorer({ sourceDir: root, outputDir: output });
+  await assert.rejects(lstat(path.join(output, "external-link")), /ENOENT/);
+  await assert.rejects(lstat(path.join(output, "absolute-link")), /ENOENT/);
+  assert.match(await readFile(path.join(output, "index.html"), "utf8"), /external-link/);
 });
 
 test("DirectoryData exposes root, current, parent, metadata, and symlink state", async (context) => {
@@ -573,6 +684,36 @@ test("watch server rebuilds changed directory contents", async (context) => {
   assert.equal(await (await fetch(`${server.url}new-file.txt`)).text(), "watched\n");
   assert.equal((await fetch(`${server.url}missing`)).status, 404);
   assert.equal((await fetch(`${server.url}%E0%A4%A`)).status, 400);
+});
+
+test("filtered watch server serves only selected paths after rebuilds", async () => {
+  for (const mode of ["ssg", "mpa"] as const) {
+    const { output, root } = await fixture();
+    const server = await createExplorerDevServer({
+      sourceDir: root,
+      outputDir: output,
+      mode,
+      include: "*.md",
+      port: 0,
+    });
+    try {
+      assert.equal((await fetch(`${server.url}README.txt`)).status, 404);
+      assert.doesNotMatch(await (await fetch(server.url)).text(), /README\.txt|docs\//);
+      await writeFile(path.join(root, "intro.md"), "Intro\n");
+      const deadline = Date.now() + 5_000;
+      let page = "";
+      while (Date.now() < deadline) {
+        page = await (await fetch(server.url)).text();
+        if (page.includes("intro.md")) break;
+        await new Promise((resolve) => setTimeout(resolve, 50));
+      }
+      assert.match(page, /intro\.md/);
+      assert.equal(await (await fetch(`${server.url}intro.md`)).text(), "Intro\n");
+    } finally {
+      await server.close();
+      await rm(path.dirname(root), { recursive: true, force: true });
+    }
+  }
 });
 
 test("development server mounts base and html-base builds at their deployment path", async (context) => {
