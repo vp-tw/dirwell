@@ -54,6 +54,7 @@ export default defineConfig({
     sorting: true,
     project: {
       author: "Your name",
+      authorUrl: "https://github.com/you",
       repositoryUrl: "https://github.com/you/project",
       license: "MIT License",
       licenseUrl: "https://github.com/you/project/blob/main/LICENSE",
@@ -115,12 +116,16 @@ Backspace parent navigation, theme persistence, and watch-mode live reload. The
 global search index is fetched only after the user opens Search all files and types a query.
 The index is split into bounded files; the first 100 best matches render progressively.
 Search matches file names, relative paths, and symlink targets. Three independent
-checkboxes filter physical folders, physical files, and symlinks. All are on by
+type controls filter physical folders, physical files, and symlinks. All are on by
 default; any combination is available in the current folder and global search.
 
 Name sorting supports raw Unicode code-point order, locale-aware comparison,
 and natural numeric comparison. Modified time and file size are also available;
 direction and directory grouping are independent controls.
+
+The default theme shows modified times in the viewer's local time zone when
+JavaScript is available. Generated HTML displays labeled UTC times before the
+runtime loads and when JavaScript is disabled. The plain theme always displays UTC.
 
 Symlinks always remain visible and show their declared target. Broken links can
 open their raw target text; targets outside the configured root remain

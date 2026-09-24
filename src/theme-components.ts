@@ -95,7 +95,15 @@ export interface FooterProps {
   readonly project: ThemeProject;
 }
 
-export type IconName = "chevron-right" | "file" | "folder" | "link" | "moon" | "search" | "sun";
+export type IconName =
+  | "arrow-up"
+  | "chevron-right"
+  | "file"
+  | "folder"
+  | "link"
+  | "moon"
+  | "search"
+  | "sun";
 
 export interface IconProps {
   readonly label?: string;

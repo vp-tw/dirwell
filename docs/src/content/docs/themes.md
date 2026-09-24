@@ -45,7 +45,7 @@ optional map from file extensions to SVG markup. Dirwell writes the SVGs into
 the generated site and uses the same map for directory rows, global search, and
 virtualized MPA rows. When a dark set is present, it follows the theme selector
 and the system color scheme. Include an attribution notice when using third-party
-icons; the generated footer links to it. See the
+icons; the generated footer links to it as Notices. See the
 [Catppuccin configuration](https://github.com/vp-tw/dirwell/blob/main/examples/default-theme-override/dirwell.config.ts)
 for a complete example.
 
@@ -56,6 +56,7 @@ export default defineConfig({
   theme: createDefaultTheme({
     project: {
       author: "Your name",
+      authorUrl: "https://github.com/you",
       repositoryUrl: "https://github.com/you/project",
       license: "MIT License",
       licenseUrl: "https://github.com/you/project/blob/main/LICENSE",

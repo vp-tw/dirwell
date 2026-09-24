@@ -119,8 +119,8 @@ use a pill shape; file entries do not become cards.
 exposes the public `createDefaultTheme` entry point. Consumers can replace
 named components through the theme API or replace the complete theme.
 
-- **Toolbar:** native search input, a wrapping three-checkbox `fieldset` for
-  disjoint folder, file, and link types, `details` for sorting, and a compact
+- **Toolbar:** native search input, three independent checkboxes styled as
+  selected segments for folder, file, and link types, `details` for sorting, and a compact
   labeled select for the secondary theme setting. Keep visible focus and one
   control height.
 - **Breadcrumbs:** linked ancestors, plain-text current segment, and a single
@@ -134,7 +134,8 @@ named components through the theme API or replace the complete theme.
   Fetch the sharded index after input, keep results bounded, and announce
   progress and failures in the dialog.
 - **Footer:** project attribution and keyboard help remain separate groups;
-  narrow screens place shortcuts before attribution.
+  narrow screens place shortcuts before attribution. Third-party notices remain
+  linked without making icon licensing the main footer label.
 
 ## Do's and Don'ts
 

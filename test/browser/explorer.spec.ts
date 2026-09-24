@@ -217,6 +217,9 @@ for (const mode of ["ssg", "mpa"] as const) {
 
   test(`${mode}: search, type filters, IME-safe shortcuts, and persistence`, async ({ page }) => {
     await page.goto(urls[mode]);
+    const filesFilter = page.getByRole("checkbox", { name: "Files" });
+    await expect(filesFilter).toBeChecked();
+    await expect(filesFilter.locator("xpath=..")).toHaveCSS("color", "rgb(23, 78, 166)");
     const search = page.getByRole("searchbox", { name: "Search this folder" });
     await page.keyboard.press("/");
     await expect(search).toBeFocused();
@@ -230,9 +233,10 @@ for (const mode of ["ssg", "mpa"] as const) {
       element.dispatchEvent(new CompositionEvent("compositionend", { bubbles: true })),
     );
     await expect(page.locator("[data-visible-count]")).toHaveText("1");
-    await page.getByRole("checkbox", { name: "Files" }).uncheck();
+    await filesFilter.uncheck();
+    await expect(filesFilter.locator("xpath=..")).not.toHaveCSS("color", "rgb(23, 78, 166)");
     await expect(page.locator("[data-visible-count]")).toHaveText("0");
-    await page.getByRole("checkbox", { name: "Files" }).check();
+    await filesFilter.check();
     await expect(page.locator("[data-visible-count]")).toHaveText("1");
     await page.reload();
     await expect(search).toHaveValue("file10");
@@ -251,6 +255,13 @@ for (const mode of ["ssg", "mpa"] as const) {
 
   test(`${mode}: sorting, theme persistence, and global search`, async ({ page }) => {
     await page.goto(urls[mode]);
+    const nameHeading = page.locator('[data-sort-heading="name"]');
+    await expect(nameHeading).toHaveAttribute("data-direction", "asc");
+    await expect(nameHeading.locator(".sort-indicator")).toBeVisible();
+    await expect(nameHeading).toHaveAttribute("aria-label", "Sort by name, ascending");
+    await nameHeading.click();
+    await expect(nameHeading).toHaveAttribute("data-direction", "desc");
+    await expect(nameHeading).toHaveAttribute("aria-label", "Sort by name, descending");
     await page.getByText("Sort", { exact: true }).click();
     await page.locator("[data-sort-direction]").selectOption("desc");
     const names = await page
@@ -301,6 +312,30 @@ for (const mode of ["ssg", "mpa"] as const) {
       await context.close();
     }
   });
+
+  test(`${mode}: timestamps use the viewer's time zone`, async ({ browser }) => {
+    const context = await browser.newContext({ timezoneId: "Asia/Taipei" });
+    try {
+      const page = await context.newPage();
+      await page.goto(urls[mode]);
+      const first = page.locator("[data-entry] time").first();
+      const iso = await first.getAttribute("datetime");
+      expect(iso).not.toBeNull();
+      const expected = await first.evaluate((element) => {
+        const date = new Date((element as HTMLTimeElement).dateTime);
+        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")} ${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")} UTC+08:00`;
+      });
+      await expect(first).toHaveText(expected);
+      await page.getByRole("button", { name: "Search all files" }).click();
+      await page
+        .getByRole("dialog", { name: "Search all files" })
+        .getByRole("searchbox")
+        .fill("file2");
+      await expect(page.locator("[data-global-results] time").first()).toContainText("UTC+08:00");
+    } finally {
+      await context.close();
+    }
+  });
 }
 
 test("large MPA uses deferred rows, worker search, filtering, and global search", async ({
@@ -324,6 +359,39 @@ test("large MPA uses deferred rows, worker search, filtering, and global search"
     .getByRole("searchbox")
     .fill("guide.txt");
   await expect(page.locator("[data-global-results] a.name")).toHaveCount(1);
+});
+
+test("large MPA displays viewer-local time in virtual rows", async ({ browser }) => {
+  const context = await browser.newContext();
+  try {
+    const page = await context.newPage();
+    await page.goto(urls.virtual);
+    const first = page.locator("[data-entry-list] [data-entry] time").first();
+    const expected = await first.evaluate((element) => {
+      const date = new Date((element as HTMLTimeElement).dateTime);
+      const offset = -date.getTimezoneOffset();
+      const twoDigits = (number: number) => String(number).padStart(2, "0");
+      return `${date.getFullYear()}-${twoDigits(date.getMonth() + 1)}-${twoDigits(date.getDate())} ${twoDigits(date.getHours())}:${twoDigits(date.getMinutes())} UTC${offset < 0 ? "-" : "+"}${twoDigits(Math.floor(Math.abs(offset) / 60))}:${twoDigits(Math.abs(offset) % 60)}`;
+    });
+    await expect(first).toHaveText(expected);
+  } finally {
+    await context.close();
+  }
+});
+
+test("narrow nested paths keep breadcrumbs and summary inside the viewport", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 720 });
+  await page.goto(urls.ssg);
+  await page.getByRole("link", { name: "docs/" }).click();
+  await page.locator('[aria-current="page"]').evaluate((element) => {
+    element.textContent = "long-directory-name-".repeat(10);
+  });
+  const dimensions = await page.evaluate(() => ({
+    scrollWidth: document.documentElement.scrollWidth,
+    summaryRight: document.querySelector(".summary")?.getBoundingClientRect().right,
+  }));
+  expect(dimensions.scrollWidth).toBeLessThanOrEqual(320);
+  expect(dimensions.summaryRight).toBeLessThanOrEqual(320);
 });
 
 test("large MPA can search when Worker is unavailable", async ({ page }) => {

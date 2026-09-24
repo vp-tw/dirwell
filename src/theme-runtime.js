@@ -35,6 +35,16 @@ export function utcTimestamp(value) {
   return { datetime, label: `${datetime.slice(0, 16).replace("T", " ")} UTC` };
 }
 
+export function localTimestampLabel(value) {
+  const timestamp = utcTimestamp(value);
+  if (timestamp === null) return null;
+  const date = new Date(timestamp.datetime);
+  const twoDigits = (number) => String(number).padStart(2, "0");
+  const offset = -date.getTimezoneOffset();
+  const sign = offset < 0 ? "-" : "+";
+  return `${date.getFullYear()}-${twoDigits(date.getMonth() + 1)}-${twoDigits(date.getDate())} ${twoDigits(date.getHours())}:${twoDigits(date.getMinutes())} UTC${sign}${twoDigits(Math.floor(Math.abs(offset) / 60))}:${twoDigits(Math.abs(offset) % 60)}`;
+}
+
 const localeCollator = new Intl.Collator(undefined, { sensitivity: "base" });
 const naturalCollator = new Intl.Collator(undefined, { numeric: true, sensitivity: "base" });
 
@@ -176,7 +186,7 @@ function createGlobalEntry(record, indexUrl, order, icons, local = false) {
   kind.append(formatSize(record.size, directory));
   const modified = document.createElement(timestamp === null ? "span" : "time");
   if (timestamp !== null) modified.dateTime = timestamp.datetime;
-  modified.textContent = timestamp?.label ?? "Unknown";
+  modified.textContent = timestamp === null ? "Unknown" : localTimestampLabel(timestamp.datetime);
   entry.append(identity, kind, modified);
   return entry;
 }
@@ -361,6 +371,10 @@ function createVirtualList(list, icons) {
 
 function initializeExplorer(root) {
   const config = JSON.parse(root.dataset.config ?? "{}");
+  for (const time of root.querySelectorAll("time[datetime]")) {
+    const label = localTimestampLabel(time.dateTime);
+    if (label !== null) time.textContent = label;
+  }
   const stickyHeader = root.querySelector("header");
   const stickyColumns = root.querySelector(".entry-head");
   if (stickyHeader) {
@@ -493,7 +507,15 @@ function initializeExplorer(root) {
     if (directoriesFirst) directoriesFirst.checked = sort.directoriesFirst;
     if (nameModeControl) nameModeControl.hidden = sort.field !== "name";
     for (const heading of root.querySelectorAll("[data-sort-heading]")) {
-      heading.setAttribute("aria-pressed", String(heading.dataset.sortHeading === sort.field));
+      const active = heading.dataset.sortHeading === sort.field;
+      heading.setAttribute("aria-pressed", String(active));
+      heading.dataset.direction = active ? sort.direction : "";
+      heading.setAttribute(
+        "aria-label",
+        active
+          ? `Sort by ${heading.dataset.sortHeading}, ${sort.direction === "asc" ? "ascending" : "descending"}`
+          : `Sort by ${heading.dataset.sortHeading}`,
+      );
     }
   };
 
