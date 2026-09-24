@@ -9,13 +9,13 @@ copies them into the publish tree. The landing-page preview embeds the generated
 `file-icons` example, so its default-theme interface and assets are not duplicated
 in the documentation source.
 
-| Example        | What it proves                                                                      | Output                    |
-| -------------- | ----------------------------------------------------------------------------------- | ------------------------- |
-| `basic`        | The defaults produce a portable site without configuration.                         | SSG with relative URLs    |
-| `base-path`    | Shared assets and file links work below a GitHub Pages repository path.             | MPA with base URLs        |
-| `custom-theme` | Typed component overrides can change product language without forking the renderer. | SSG with a layered theme  |
-| `file-icons`   | The default theme self-hosts selected vscode-icons file-type artwork.               | SSG with bundled SVGs     |
-| `plain`        | Plain HTML listings work without icons, JavaScript, or client-side search.          | SSG without search assets |
+| Example        | What it proves                                                                      | Output                    | Live demo                                                           | Source code                                                                |
+| -------------- | ----------------------------------------------------------------------------------- | ------------------------- | ------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| `basic`        | The defaults produce a portable site without configuration.                         | SSG with relative URLs    | [Open demo](https://vp-tw.github.io/dirwell/examples/basic/)        | [GitHub](https://github.com/vp-tw/dirwell/tree/main/examples/basic)        |
+| `base`         | Shared assets and file links work below a configured base path.                     | MPA with base URLs        | [Open demo](https://vp-tw.github.io/dirwell/examples/base/)         | [GitHub](https://github.com/vp-tw/dirwell/tree/main/examples/base)         |
+| `custom-theme` | Typed component overrides can change product language without forking the renderer. | SSG with a layered theme  | [Open demo](https://vp-tw.github.io/dirwell/examples/custom-theme/) | [GitHub](https://github.com/vp-tw/dirwell/tree/main/examples/custom-theme) |
+| `file-icons`   | The default theme self-hosts selected vscode-icons file-type artwork.               | SSG with bundled SVGs     | [Open demo](https://vp-tw.github.io/dirwell/examples/file-icons/)   | [GitHub](https://github.com/vp-tw/dirwell/tree/main/examples/file-icons)   |
+| `plain`        | Plain HTML listings work without icons, JavaScript, or client-side search.          | SSG without search assets | [Open demo](https://vp-tw.github.io/dirwell/examples/plain/)        | [GitHub](https://github.com/vp-tw/dirwell/tree/main/examples/plain)        |
 
 From the repository root, build the documentation and all examples together:
 
@@ -35,7 +35,7 @@ site/
 ├── getting-started/
 ├── examples/
 │   ├── basic/
-│   ├── base-path/
+│   ├── base/
 │   ├── custom-theme/
 │   ├── file-icons/
 │   └── plain/
