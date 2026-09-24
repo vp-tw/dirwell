@@ -154,7 +154,8 @@ Its footer shows the repository, author, and license. Pass `project` to
 The default theme uses selected self-hosted `vscode-icons` artwork for common
 file types. The icons are CC BY-SA 4.0 and may include separately protected
 brand marks; Dirwell's code remains MIT-licensed. See
-[third-party notices](./THIRD_PARTY_NOTICES.md) and the
+[Ledger theme attribution](./src/theme-default/README.md),
+[third-party notices](./THIRD_PARTY_NOTICES.md), and the
 [file-icons example](./examples/file-icons).
 
 ## Development

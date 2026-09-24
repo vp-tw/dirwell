@@ -36,7 +36,7 @@ export default defineConfig({
 | `keyboardNavigation` | Boolean; default `true`. Enables explorer shortcuts. Set `false` when a custom page handles its own keys.                                                |
 | `sorting`            | Boolean; default `true`. Shows runtime sort controls. Set `false` to keep the generated `sort` order without visitor controls.                           |
 | `virtualizeAfter`    | Non-negative integer; default `500`. MPA directories above this size load rows from a data asset. Raise it to keep more rows in HTML.                    |
-| `project`            | Metadata object; default bundled Dirwell metadata. Changes footer name, author, repository, and license links.                                           |
+| `project`            | Metadata object; default bundled Dirwell metadata. Changes the footer's site name, author, and repository link.                                          |
 | `icons`              | Light SVG set and optional dark set; default bundled icons. Replaces file-type artwork in normal, search, and virtual rows.                              |
 | `components`         | Partial component object or array; default none. Replaces selected HTML parts; later layers win.                                                         |
 
@@ -55,6 +55,10 @@ when JavaScript is disabled. Time sorting uses the stored instant.
 `project` accepts `name`, `repositoryUrl`, `author`, `authorUrl`, `license`,
 and `licenseUrl` as strings. Omitted fields use the bundled Dirwell values.
 Set the related URL when the displayed name should link to your own project.
+Ledger's default footer shows `Dirwell · Ledger by VdustR`. With a custom site
+name or author, it shows the site's name and author before the `Ledger` link.
+The footer does not display `license` or `licenseUrl`; those fields remain
+available to component overrides and the plain theme.
 
 ```ts
 theme: createDefaultTheme({
@@ -77,10 +81,10 @@ without a leading dot. Missing extensions use `file`. `icons.dark` has the
 same shape; omit it to reuse the light icons in both schemes.
 
 `icons.notice` is optional attribution text. When supplied, Dirwell publishes
-it and links it from the default footer as Notices. Include the license terms
+it and links it from the default footer as **Icon licenses**. Include the license terms
 required by your icon source. The [Catppuccin example configuration](https://github.com/vp-tw/dirwell/blob/main/examples/default-theme-override/dirwell.config.ts)
 shows paired Latte and Macchiato sets. The bundled icon notices are in
-[third-party notices](https://github.com/vp-tw/dirwell/blob/main/THIRD_PARTY_NOTICES.md).
+[the Ledger README](https://github.com/vp-tw/dirwell/blob/main/src/theme-default/README.md).
 
 ### Component overrides
 

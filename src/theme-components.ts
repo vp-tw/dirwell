@@ -90,6 +90,8 @@ export interface EmptyStateProps {
 
 export interface FooterProps {
   readonly iconNoticeHref?: string;
+  /** Built-in icon attribution is linked through the Ledger README. */
+  readonly iconNoticeKind?: "built-in" | "custom";
   readonly keyboardNavigation: boolean;
   readonly parentHref: string | null;
   readonly project: ThemeProject;

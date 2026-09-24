@@ -121,8 +121,11 @@ test("default theme self-hosts vscode-icons in SSG and MPA output", async (conte
       html,
       /href="https:\/\/github\.com\/VdustR" target="_blank" rel="noopener">VdustR<\/a>/,
     );
-    assert.match(html, /vscode-icons-NOTICE\.txt" target="_blank" rel="noopener">Notices<\/a>/);
-    assert.doesNotMatch(html, /Icon credits/);
+    assert.match(
+      html,
+      /class="project-meta"><a href="https:\/\/github\.com\/VdustR\/dirwell" target="_blank" rel="noopener">Dirwell<\/a> <span class="meta-item">· <a href="https:\/\/github\.com\/vp-tw\/dirwell\/blob\/main\/src\/theme-default\/README\.md" target="_blank" rel="noopener">Ledger<\/a> by <a href="https:\/\/github\.com\/VdustR" target="_blank" rel="noopener">VdustR<\/a><\/span><\/p>/,
+    );
+    assert.doesNotMatch(html, />MIT License<\/a>|>Notices<\/a>/);
     assert.match(html, /&quot;icons&quot;:\{&quot;light&quot;:\{&quot;file&quot;:/);
     assert.match(html, /main > header \{\s*position: sticky;\s*top: 0;/);
     assert.match(
@@ -139,6 +142,31 @@ test("default theme self-hosts vscode-icons in SSG and MPA output", async (conte
     assert.match(runtime, /variant\.byExtension\[extension\]/);
     assert.match(runtime, /--dw-sticky-header-height/);
     assert.match(runtime, /scrollPaddingTop/);
+  }
+});
+
+test("default footer keeps custom site attribution separate from Ledger", async (context) => {
+  const { output, root } = await fixture();
+  context.after(() => rm(path.dirname(root), { recursive: true, force: true }));
+  const theme = createDefaultTheme({
+    project: {
+      name: "Downloads",
+      repositoryUrl: "https://example.test/downloads",
+      author: "Your name",
+      authorUrl: "https://example.test/author",
+      license: "Custom License",
+      licenseUrl: "https://example.test/license",
+    },
+  });
+
+  for (const mode of ["ssg", "mpa"] as const) {
+    await generateExplorer({ sourceDir: root, outputDir: output, mode, theme });
+    const html = await readFile(path.join(output, "index.html"), "utf8");
+    assert.match(
+      html,
+      /class="project-meta"><span class="project-credit"><a href="https:\/\/example\.test\/downloads" target="_blank" rel="noopener">Downloads<\/a> by <a href="https:\/\/example\.test\/author" target="_blank" rel="noopener">Your name<\/a><\/span> <span class="meta-item">· <a [^>]+>Ledger<\/a><\/span><\/p>/,
+    );
+    assert.doesNotMatch(html, />Custom License<\/a>|>Notices<\/a>/);
   }
 });
 
@@ -173,6 +201,10 @@ test("custom theme icons share light and dark sources across static and dynamic 
     assert.match(html, /file-icon--dark/);
     assert.match(html, /&quot;dark&quot;:\{&quot;file&quot;:/);
     assert.match(html, /theme-icons-NOTICE\.txt/);
+    assert.match(
+      html,
+      /theme-icons-NOTICE\.txt" target="_blank" rel="noopener">Icon licenses<\/a>/,
+    );
     assert.equal(assets.filter((name) => name.startsWith("theme-icon-")).length, 6);
     assert.equal(
       assets.some((name) => name.startsWith("vscode-")),
@@ -267,7 +299,7 @@ test("mirrors source files and preserves an existing index", async (context) => 
   );
   assert.match(
     rootIndex,
-    />Dirwell<\/a> by <a href="https:\/\/github\.com\/VdustR"[^>]*>VdustR<\/a>/,
+    />Dirwell<\/a> <span class="meta-item">· <a [^>]+>Ledger<\/a> by <a href="https:\/\/github\.com\/VdustR"[^>]*>VdustR<\/a><\/span>/,
   );
   assert.doesNotMatch(rootIndex, /data-parent-href/);
   assert.match(rootIndex, /href="README\.txt" target="_blank" rel="noopener">[\s\S]*README\.txt/);

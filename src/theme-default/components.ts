@@ -85,6 +85,8 @@ function safeExternalHref(value: string | undefined): string | null {
   }
 }
 
+const ledgerReadmeUrl = "https://github.com/vp-tw/dirwell/blob/main/src/theme-default/README.md";
+
 function controlIcon(name: IconName, size = 16): string {
   return `<svg class="icon" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${iconPaths[name]}</svg>`;
 }
@@ -189,7 +191,7 @@ export const defaultThemeComponents: DirwellThemeComponents = {
     return `<div class="entry-head">${headings}</div><ul class="entries" data-entry-list>${directory.depth > 0 && parentHref !== null ? `<li class="entry" data-parent><a class="name" href="${escapeHtml(parentHref)}">../</a><span class="kind">parent</span><span></span></li>` : ""}${rows}</ul>`;
   },
   EmptyState: ({ message }) => `<p class="empty" data-empty hidden>${escapeHtml(message)}</p>`,
-  Footer: ({ iconNoticeHref, keyboardNavigation, parentHref, project }) => {
+  Footer: ({ iconNoticeHref, iconNoticeKind, keyboardNavigation, parentHref, project }) => {
     const shortcuts = keyboardNavigation
       ? `<p class="shortcuts" id="keyboard-shortcuts"><kbd>/</kbd> search <kbd>↑</kbd><kbd>↓</kbd> browse <kbd>Esc</kbd> clear${parentHref === null ? "" : " <kbd>Backspace</kbd> parent"}</p>`
       : "";
@@ -198,7 +200,17 @@ export const defaultThemeComponents: DirwellThemeComponents = {
       authorHref === null
         ? escapeHtml(project.author)
         : `<a href="${escapeHtml(authorHref)}" target="_blank" rel="noopener">${escapeHtml(project.author)}</a>`;
-    return `<footer><p class="project-meta"><a href="${escapeHtml(project.repositoryUrl)}" target="_blank" rel="noopener">${escapeHtml(project.name)}</a> by ${author}<a href="${escapeHtml(project.licenseUrl)}" target="_blank" rel="noopener">${escapeHtml(project.license)}</a>${iconNoticeHref === undefined ? "" : `<a href="${escapeHtml(iconNoticeHref)}" target="_blank" rel="noopener">Notices</a>`}</p>${shortcuts}</footer>`;
+    const name = `<a href="${escapeHtml(project.repositoryUrl)}" target="_blank" rel="noopener">${escapeHtml(project.name)}</a>`;
+    const ledger = `<a href="${ledgerReadmeUrl}" target="_blank" rel="noopener">Ledger</a>`;
+    const defaultIdentity = project.name === "Dirwell" && project.author === "VdustR";
+    const attribution = defaultIdentity
+      ? `${name} <span class="meta-item">· ${ledger} by ${author}</span>`
+      : `<span class="project-credit">${name} by ${author}</span> <span class="meta-item">· ${ledger}</span>`;
+    const iconNotice =
+      iconNoticeHref !== undefined && iconNoticeKind !== "built-in"
+        ? ` <span class="meta-item">· <a href="${escapeHtml(iconNoticeHref)}" target="_blank" rel="noopener">Icon licenses</a></span>`
+        : "";
+    return `<footer><p class="project-meta">${attribution}${iconNotice}</p>${shortcuts}</footer>`;
   },
   PageShell: ({
     assets,
