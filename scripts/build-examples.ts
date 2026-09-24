@@ -5,7 +5,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const examples = ["basic", "base-path", "custom-theme", "file-icons", "plain"] as const;
+const examples = ["basic", "base", "custom-theme", "file-icons", "plain"] as const;
 
 for (const example of examples) {
   await new Promise<void>((resolve, reject) => {

@@ -14,9 +14,9 @@ const examples = [
     detail: "SSG · relative URLs",
   },
   {
-    slug: "base-path",
-    name: "GitHub Pages",
-    description: "An MPA build mounted below a repository base path with one shared runtime.",
+    slug: "base",
+    name: "Base URL",
+    description: "An MPA build mounted below a base path with one shared runtime.",
     detail: "MPA · base URLs",
   },
   {
@@ -129,8 +129,8 @@ const examples = [
                 <span class="example-detail">{example.detail}</span>
               </div>
               <div class="example-actions">
-                <a href={examplePath(example.slug)} target="_blank" rel="noopener">Open demo</a>
-                <a href={`${repositoryUrl}/tree/main/examples/${example.slug}`} target="_blank" rel="noopener">View source</a>
+                <a href={examplePath(example.slug)} target="_blank" rel="noopener">Live demo</a>
+                <a href={`${repositoryUrl}/tree/main/examples/${example.slug}`} target="_blank" rel="noopener">GitHub source</a>
               </div>
             </article>
           ))}
