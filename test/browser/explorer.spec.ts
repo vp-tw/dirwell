@@ -219,7 +219,7 @@ for (const mode of ["ssg", "mpa"] as const) {
     await page.goto(urls[mode]);
     const filesFilter = page.getByRole("checkbox", { name: "Files" });
     await expect(filesFilter).toBeChecked();
-    await expect(filesFilter.locator("xpath=..")).toHaveCSS("color", "rgb(23, 78, 166)");
+    await expect(filesFilter.locator("xpath=..")).toHaveCSS("color", "rgb(16, 57, 115)");
     const search = page.getByRole("searchbox", { name: "Search this folder" });
     await page.keyboard.press("/");
     await expect(search).toBeFocused();
@@ -234,7 +234,7 @@ for (const mode of ["ssg", "mpa"] as const) {
     );
     await expect(page.locator("[data-visible-count]")).toHaveText("1");
     await filesFilter.uncheck();
-    await expect(filesFilter.locator("xpath=..")).not.toHaveCSS("color", "rgb(23, 78, 166)");
+    await expect(filesFilter.locator("xpath=..")).not.toHaveCSS("color", "rgb(16, 57, 115)");
     await expect(page.locator("[data-visible-count]")).toHaveText("0");
     await filesFilter.check();
     await expect(page.locator("[data-visible-count]")).toHaveText("1");
@@ -359,6 +359,54 @@ test("large MPA uses deferred rows, worker search, filtering, and global search"
     .getByRole("searchbox")
     .fill("guide.txt");
   await expect(page.locator("[data-global-results] a.name")).toHaveCount(1);
+});
+
+test("type controls and symlink metadata keep a consistent row alignment", async ({ page }) => {
+  await page.goto(urls.ssg);
+  const filters = page.locator(".type-filters").first();
+  const filterLabels = filters.locator("label");
+  const filterGeometry = await filterLabels.evaluateAll((labels) =>
+    labels.map((label) => {
+      const bounds = label.getBoundingClientRect();
+      return { left: bounds.left, right: bounds.right };
+    }),
+  );
+  expect(filterGeometry[0]?.right).toBe(filterGeometry[1]?.left);
+  expect(filterGeometry[1]?.right).toBe(filterGeometry[2]?.left);
+
+  const folderFilter = page.getByRole("checkbox", { name: "Folders" }).first();
+  await folderFilter.focus();
+  await expect(folderFilter.locator("xpath=..")).not.toHaveCSS("box-shadow", "none");
+  await page.keyboard.press("Space");
+  await expect(folderFilter).not.toBeChecked();
+  await page.keyboard.press("Space");
+  await expect(folderFilter).toBeChecked();
+
+  for (const width of [1280, 390]) {
+    await page.setViewportSize({ width, height: 800 });
+    for (const name of ["good-link", "broken-link", "outside-link"]) {
+      const row = page.locator(`[data-entry][data-name="${name}"]`);
+      const positions = await row.evaluate((element) => {
+        const label = element.querySelector(".entry-name > span")?.getBoundingClientRect();
+        const targetElement = element.querySelector(".target");
+        const target = targetElement?.getBoundingClientRect();
+        const targetInset = targetElement
+          ? parseFloat(getComputedStyle(targetElement).paddingLeft)
+          : 0;
+        return {
+          labelLeft: label?.left,
+          targetLeft: (target?.left ?? 0) + targetInset,
+          labelBottom: label?.bottom,
+          targetTop: target?.top,
+        };
+      });
+      expect(positions.targetLeft).toBeCloseTo(positions.labelLeft ?? 0, 0);
+      expect(positions.targetTop).toBeGreaterThan(positions.labelBottom ?? 0);
+    }
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
+      width,
+    );
+  }
 });
 
 test("large MPA displays viewer-local time in virtual rows", async ({ browser }) => {

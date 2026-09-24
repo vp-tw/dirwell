@@ -209,39 +209,42 @@ main[data-sticky-header-disabled] > header {
 }
 .type-filters {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
   min-width: 0;
   min-height: var(--dw-control-height);
   max-width: 100%;
   margin: 0;
-  padding: 0.2rem;
+  padding: 0;
   border: 1px solid var(--rule);
   border-radius: 0.5rem;
   background: var(--control);
   color: var(--ink);
   font-size: 0.78rem;
+  overflow: hidden;
 }
 .type-filters label {
   position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.35rem;
-  min-height: var(--dw-control-height);
-  padding: 0.2rem 0.55rem;
-  border-radius: 0.35rem;
+  min-height: calc(var(--dw-control-height) - 2px);
+  padding: 0.35rem 0.7rem;
   white-space: nowrap;
   cursor: pointer;
 }
-.type-filters label:has(input:checked) {
+.type-filters label + label {
+  border-left: 1px solid var(--rule);
+}
+.type-filters label:hover {
   background: var(--hover);
-  color: var(--accent);
-  box-shadow: inset 0 0 0 1px var(--accent);
+}
+.type-filters label:has(input:checked) {
+  background: color-mix(in srgb, var(--accent) 16%, var(--control));
+  color: var(--accent-strong);
 }
 .type-filters label:has(input:focus-visible) {
-  outline: 3px solid var(--focus);
-  outline-offset: 1px;
+  box-shadow: inset 0 0 0 3px var(--focus);
 }
 .type-filters input {
   position: absolute;
@@ -477,7 +480,7 @@ a {
   display: flex;
   min-width: 0;
   flex-wrap: wrap;
-  column-gap: 0.65rem;
+  row-gap: 0.15rem;
 }
 .entry-name {
   display: inline-flex;
@@ -515,6 +518,8 @@ a {
   }
 }
 .target {
+  flex-basis: 100%;
+  padding-left: 1.8rem;
   color: var(--muted);
   font:
     500 0.8rem/1.6 ui-monospace,
