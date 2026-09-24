@@ -1,6 +1,6 @@
 import { loadConfig } from "c12";
 import path from "node:path";
-import type { ExplorerTheme, GenerateOptions, OutputNameResolver, SortOptions } from "./model.ts";
+import type { ExplorerTheme, GenerateOptions, SortOptions } from "./model.ts";
 import { normalizePathPatterns } from "./filters.ts";
 
 export interface DirwellConfig {
@@ -11,7 +11,7 @@ export interface DirwellConfig {
   readonly mode?: "mpa" | "ssg";
   readonly mirror?: boolean;
   readonly outDir?: string;
-  readonly outputName?: OutputNameResolver;
+  readonly outputName?: GenerateOptions["outputName"];
   readonly root?: string;
   readonly server?: {
     readonly host?: string;

@@ -1,19 +1,33 @@
 # Dirwell
 
-Dirwell turns a directory into a static, accessible file explorer. It supports
-zero-config builds, a live-reloading development server, safe symlink traversal,
-typed theme components, and deployable SSG or MPA output.
+Dirwell turns a directory into a static file explorer. Build files for a static
+host, or serve a changing folder locally. Choose SSG for portable output and
+MPA when many directory pages should share assets.
 
 ## Quick start
 
 ```bash
-pnpm dlx dirwell .
-pnpm dlx dirwell build . --out-dir dist
+pnpm install
+pnpm dirwell serve ./fixture
+pnpm dirwell build ./fixture -o ./generated
 ```
 
-The first command watches the current directory and serves it. `build` writes a
-static site. Existing `index.html` and `index.htm` files are preserved; Dirwell
+These commands run from a repository checkout. The first starts a watch server;
+the second writes a static tree. The installed CLI uses the same `dirwell`
+commands. Existing `index.html` and `index.htm` files are preserved; Dirwell
 uses `_dirwell.html` for those directories when that name is available.
+
+| Need                                 | Start with                                  |
+| ------------------------------------ | ------------------------------------------- |
+| Move the output tree between paths   | SSG and relative URLs, the defaults         |
+| Publish beneath a fixed path         | `base` plus `urls: "base"`                  |
+| Share assets across many pages       | `mode: "mpa"`                               |
+| Show only selected source files      | `include` and `exclude`                     |
+| Change icons or a few UI parts       | `createDefaultTheme({ icons, components })` |
+| Render basic HTML without JavaScript | `createPlainTheme()`                        |
+
+The [configuration guide](./docs/src/content/docs/configuration.md) lists
+accepted values, defaults, effects, and use cases for every field.
 
 ```text
 dirwell [directory]          # alias for serve
@@ -26,46 +40,28 @@ dirwell daemon stop
 
 ## Configuration
 
-Create `dirwell.config.ts` only when defaults are insufficient:
+Create `dirwell.config.ts` when a field has no CLI flag or you want a reusable
+setup:
 
 ```ts
-import { createDefaultTheme, defineConfig } from "dirwell";
+import { defineConfig } from "dirwell";
 
 export default defineConfig({
-  root: "./public",
-  outDir: "./dist",
   mode: "mpa",
   base: "/downloads/",
   urls: "base",
-  outputName: (directory) =>
-    directory.entries.some((entry) => entry.name === "index.html") ? null : "index.html",
-  symlinks: { follow: true, boundary: "root", onCycle: "skip" },
-  sort: {
-    field: "name",
-    nameMode: "natural",
-    direction: "asc",
-    directoriesFirst: true,
-  },
-  theme: createDefaultTheme({
-    colorScheme: true,
-    fuzzySearch: true,
-    globalSearch: true,
-    keyboardNavigation: true,
-    sorting: true,
-    project: {
-      author: "Your name",
-      authorUrl: "https://github.com/you",
-      repositoryUrl: "https://github.com/you/project",
-      license: "MIT License",
-      licenseUrl: "https://github.com/you/project/blob/main/LICENSE",
-    },
-  }),
+  include: ["**/*.md", "assets/**"],
+  exclude: ["drafts/**"],
 });
 ```
 
-`outputName` accepts a filename or receives `DirectoryData`: root, current
-directory, parent, complete entry metadata, and symlink state. Returning `null`
-skips the current directory.
+Run `pnpm dirwell build ./public -o ./dist` to use it. The CLI's positional
+directory defaults to `.` and overrides config `root`, so pass the source
+path in the command.
+
+`outputName` accepts a fixed filename or a function receiving `DirectoryData`.
+Returning `null` skips the current directory. The default uses `index.html`,
+then `_dirwell.html` when an index already exists, then skips if both exist.
 
 `include` and `exclude` accept root-relative glob patterns. They select mirrored
 files, generated directory pages, and search results; exclusions win. With no
@@ -89,15 +85,20 @@ raw views.
 
 ## Vite integration
 
-The `dirwell/vite` adapter builds the explorer alongside a Vite application and
-serves it through Vite's development server:
+The `dirwell/vite` adapter builds one or more explorers alongside a Vite
+application and serves them through Vite's development server:
 
 ```ts
 import { defineConfig } from "vite";
 import Dirwell from "dirwell/vite";
 
 export default defineConfig({
-  plugins: [Dirwell({ root: "./downloads", mode: "mpa" })],
+  plugins: [
+    Dirwell([
+      { root: "./docs", outDir: "dist/docs" },
+      { root: "./downloads", outDir: "dist/downloads", mode: "mpa" },
+    ]),
+  ],
 });
 ```
 
@@ -109,6 +110,8 @@ outside Vite's build directory needs an explicit public `base`. The adapter
 never replaces Vite's output root or an existing directory it does not own.
 See [configuration](./docs/src/content/docs/configuration.md#vite-adapter) for
 the full path and development-server behavior.
+
+## Browser behavior
 
 SSG pages and smaller MPA pages work without JavaScript. The runtime adds local and global
 fuzzy search, type filters, configurable sorting, IME-safe keyboard controls,
@@ -127,11 +130,15 @@ The default theme shows modified times in the viewer's local time zone when
 JavaScript is available. Generated HTML displays labeled UTC times before the
 runtime loads and when JavaScript is disabled. The plain theme always displays UTC.
 
+## Symlinks
+
 Symlinks always remain visible and show their declared target. Broken links can
 open their raw target text; targets outside the configured root remain
 unavailable. Broken links, outside-root targets, and cycles receive explicit states.
 Following directory links is opt-in. Ancestor cycles remain navigable but are
 never expanded recursively.
+
+## Themes
 
 Replace the complete `ExplorerTheme` or layer typed component overrides over
 the default theme. See [THEMING.md](./THEMING.md) and the Starlight site in

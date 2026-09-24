@@ -6,9 +6,18 @@ Latte link accent is darkened to stay legible on hover backgrounds. The system
 setting follows the operating system. Directory rows, global search, and
 virtualized rows use the same icon set.
 
+Use this pattern when the default explorer's search and navigation should
+remain, but the visual theme needs its own palette, icons, or components.
+`createDefaultTheme({ icons, components })` changes only those parts; a
+complete renderer would own the whole document.
+
 ```bash
-node ../../src/bin.ts build --cwd .
+node ../../src/bin.ts build files --cwd .
 ```
+
+Run it from this directory. It writes
+`docs/public/examples/default-theme-override/`. The Pages build loads the
+same config through the Vite adapter.
 
 The example copies selected [Catppuccin VS Code icons](https://github.com/catppuccin/vscode-icons)
 from revision `b6915da9f6889b683a110aa747de96c2820a537d` under the MIT

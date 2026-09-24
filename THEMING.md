@@ -1,8 +1,17 @@
 # Theme architecture
 
 Dirwell themes own the complete document, styles, icons, and optional browser
-behavior. Tokens are an implementation detail of a theme, not the customization
-boundary.
+behavior. Choose one of three paths:
+
+| Need                                                | Use                                       | Keep                            |
+| --------------------------------------------------- | ----------------------------------------- | ------------------------------- |
+| Change controls, colors, icons, or a few HTML parts | `createDefaultTheme(options)`             | Default explorer behavior       |
+| Publish a basic no-script list                      | `createPlainTheme()`                      | Prepared entries and safe links |
+| Replace the full page                               | An `ExplorerTheme` with `render(context)` | Prepared entries and safe links |
+
+The [theme guide](docs/src/content/docs/themes.md) lists every default-theme
+option, its accepted input, default, result, and use case. This file describes
+the component contract for theme authors.
 
 ## Component layers
 
@@ -11,8 +20,8 @@ to replace selected parts of the default theme: `PageShell`, `Breadcrumbs`,
 `Toolbar`, `EntryList`, `EntryRow`, `EmptyState`, `Footer`, and
 `Icon`.
 
-Each component is a typed function from props to HTML. Layers resolve from left
-to right:
+Each component is a typed function from props to HTML. Pass one override object
+or an array of layers. Later layers win when they define the same component:
 
 ```ts
 import { createDefaultTheme, defineConfig } from "dirwell";
@@ -39,6 +48,10 @@ export default defineConfig({
 Global search is progressive: the browser requests the generated JSON index
 only after the user selects `Everywhere`. Sorting and search controls can be
 disabled independently without changing the component override API.
+
+Replacing `EntryList` or `EntryRow` disables the default MPA virtual list.
+Keep those defaults for large directories unless the replacement provides its
+own row loading. `virtualizeAfter` defaults to 500 entries.
 
 Within the bundled theme, the five select controls share a private renderer,
 and `--dw-control-height` gives search, select, sort, and color-scheme controls
