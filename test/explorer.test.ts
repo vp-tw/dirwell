@@ -219,6 +219,7 @@ test("custom theme icons share light and dark sources across static and dynamic 
 test("mirrors source files and preserves an existing index", async (context) => {
   const { output, root } = await fixture();
   context.after(() => rm(path.dirname(root), { recursive: true, force: true }));
+  await symlink("README.txt", path.join(root, "readme-link"));
 
   await generateExplorer({
     sourceDir: root,
@@ -229,7 +230,7 @@ test("mirrors source files and preserves an existing index", async (context) => 
   assert.equal(await readFile(path.join(output, "README.txt"), "utf8"), "initial\n");
   assert.match(await readFile(path.join(output, "docs", "index.html"), "utf8"), /Docs/);
   assert.match(await readFile(path.join(output, "docs", "_dirwell.html"), "utf8"), /index\.html/);
-  assert.match(await readFile(path.join(output, "releases", "index.html"), "utf8"), /cycle/);
+  assert.match(await readFile(path.join(output, "releases", "index.html"), "utf8"), /Cycle/);
   assert.match(
     await readFile(path.join(output, "releases", "index.html"), "utf8"),
     /data-parent-href="\.\.\/"/,
@@ -275,14 +276,38 @@ test("mirrors source files and preserves an existing index", async (context) => 
   assert.match(rootIndex, /href="space%20name\.txt"/);
   assert.doesNotMatch(rootIndex, /href="releases\/" target="_blank"/);
   assert.match(rootIndex, /external-link/);
-  assert.match(rootIndex, /Target:<\/span> \.\.\/external/);
-  assert.match(rootIndex, /external link/);
+  assert.match(
+    rootIndex,
+    /Target unavailable<\/span> · <span class="target-unavailable">\.\.\/external<\/span>/,
+  );
   assert.doesNotMatch(rootIndex, /href="external-link\/"/);
-  const rawLinkHref = rootIndex.match(
-    /href="(__dirwell\/raw-links\/[a-f0-9]{16}\.txt)" target="_blank" rel="noopener"/,
-  )?.[1];
-  assert.ok(rawLinkHref);
-  assert.equal(await readFile(path.join(output, rawLinkHref), "utf8"), "missing");
+  for (const [name, target] of [
+    ["broken-link", "missing"],
+    ["external-link", "../external"],
+  ]) {
+    const row = rootIndex.match(
+      new RegExp(`<li class="entry"[^>]*data-name="${name}"[\\s\\S]*?<\\/li>`),
+    )?.[0];
+    assert.ok(row);
+    const rawLinkHref = row.match(
+      /href="(__dirwell\/raw-links\/[a-f0-9]{16}\.txt)" target="_blank" rel="noopener"/,
+    )?.[1];
+    assert.ok(rawLinkHref);
+    assert.equal(await readFile(path.join(output, rawLinkHref), "utf8"), target);
+    assert.match(row, /<span class="size-stack"><span>Link <b>\d+ B<\/b><\/span><\/span>/);
+  }
+  const readmeRow = rootIndex.match(
+    /<li class="entry"[^>]*data-name="README\.txt"[\s\S]*?<\/li>/,
+  )?.[0];
+  assert.ok(readmeRow);
+  assert.doesNotMatch(readmeRow, /size-stack/);
+  const availableRow = rootIndex.match(
+    /<li class="entry"[^>]*data-name="readme-link"[\s\S]*?<\/li>/,
+  )?.[0];
+  assert.ok(availableRow);
+  assert.match(availableRow, /Link <b>10 B<\/b>/);
+  assert.match(availableRow, /Target <b>8 B<\/b>/);
+  assert.doesNotMatch(availableRow, /target-unavailable/);
 });
 
 test("default page name falls back once and preserves both existing pages", async (context) => {
@@ -456,13 +481,29 @@ test("directory includes, dotfiles, and excluded symlink targets use source-rela
   const rootPage = await readFile(path.join(output, "index.html"), "utf8");
   assert.match(rootPage, /readme-link/);
   assert.doesNotMatch(rootPage, /href="readme-link"/);
+  const excludedRow = rootPage.match(
+    /<li class="entry"[^>]*data-name="readme-link"[\s\S]*?<\/li>/,
+  )?.[0];
+  assert.ok(excludedRow);
+  assert.match(excludedRow, /Target unavailable/);
+  assert.match(excludedRow, /target-unavailable/);
+  assert.match(excludedRow, /size-stack/);
+  assert.doesNotMatch(excludedRow, /Target <b>/);
+  const rawHref = excludedRow.match(/href="(__dirwell\/raw-links\/[a-f0-9]{16}\.txt)"/)?.[1];
+  assert.ok(rawHref);
+  assert.equal(await readFile(path.join(output, rawHref), "utf8"), "README.txt");
   const index = JSON.parse(
     await readFile(path.join(output, "__dirwell", "search-00000.json"), "utf8"),
   );
   assert.equal(
     index.entries.find((entry: { path: string }) => entry.path === "readme-link")?.href,
-    null,
+    `raw-links/${path.basename(rawHref)}`,
   );
+  const excludedRecord = index.entries.find(
+    (entry: { path: string }) => entry.path === "readme-link",
+  );
+  assert.equal(excludedRecord?.isTargetUnavailable, true);
+  assert.equal(excludedRecord?.targetSize, null);
 });
 
 test("excluding an existing index lets Dirwell generate the directory index", async (context) => {
@@ -553,7 +594,7 @@ test("MPA shares runtime assets from the output root", async (context) => {
   const searchIndex = JSON.parse(
     await readFile(path.join(output, "__dirwell", "search-index.json"), "utf8"),
   );
-  assert.equal(searchIndex.version, 2);
+  assert.equal(searchIndex.version, 3);
   const searchEntries = (
     await Promise.all(
       searchIndex.shards.map(async (name: string) =>
@@ -887,6 +928,34 @@ test("entry sorting supports Unicode, locale, natural numbers, metadata, and gro
       )
       .map(({ name }) => name),
     ["folder", "file10", "file2"],
+  );
+  const firstEntry = entries[0];
+  const secondEntry = entries[1];
+  assert.ok(firstEntry);
+  assert.ok(secondEntry);
+  const folderLink = {
+    ...firstEntry,
+    kind: "symlink" as const,
+    name: "folder-link",
+    metadata: metadata(4, "2025-01-04T00:00:00.000Z"),
+    symlink: {
+      target: "folder",
+      resolvedPath: "/folder",
+      targetRelativePath: "folder",
+      targetKind: "directory" as const,
+      targetSize: null,
+      isBroken: false,
+      isCycle: false,
+      isOutsideRoot: false,
+      isTargetExcluded: false,
+      wasFollowed: false,
+    },
+  };
+  assert.ok(
+    compareEntries(folderLink, secondEntry, {
+      directoriesFirst: false,
+      field: "size",
+    }) > 0,
   );
   assert.ok(
     compareEntryValues(

@@ -142,5 +142,5 @@ named components through the theme API or replace the complete theme.
 - **Do** retain native control semantics and keyboard operation.
 - **Do** test light, dark, and system appearance at narrow and wide sizes.
 - **Do** preserve readable long names and symlink targets.
-- **Don't** make unavailable symlinks look actionable.
+- **Do** keep unavailable targets distinct while letting their symlink names open the declared target text.
 - **Don't** make custom themes inherit this palette or layout.

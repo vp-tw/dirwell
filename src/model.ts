@@ -23,9 +23,11 @@ export interface SymlinkMetadata {
   readonly resolvedPath: string | null;
   readonly targetRelativePath: string | null;
   readonly targetKind: Exclude<EntryKind, "symlink"> | null;
+  readonly targetSize?: number | null;
   readonly isBroken: boolean;
   readonly isCycle: boolean;
   readonly isOutsideRoot: boolean;
+  readonly isTargetExcluded?: boolean;
   readonly wasFollowed: boolean;
 }
 

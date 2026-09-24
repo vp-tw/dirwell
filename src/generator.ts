@@ -82,12 +82,14 @@ async function describeEntry({
   rootRealPath,
   ancestors,
   followSymlinks,
+  selectedPaths,
 }: {
   absolutePath: string;
   relativePath: string;
   rootRealPath: string;
   ancestors: ReadonlySet<string>;
   followSymlinks: boolean;
+  selectedPaths: ReadonlySet<string> | null;
 }): Promise<FileSystemEntry> {
   const linkStats = await lstat(absolutePath);
   const kind = entryKind(linkStats);
@@ -97,26 +99,42 @@ async function describeEntry({
     const target = await readlink(absolutePath);
     let resolvedPath: string | null = null;
     let targetKind: Exclude<EntryKind, "symlink"> | null = null;
+    let targetSize: number | null = null;
     try {
       resolvedPath = await realpath(absolutePath);
-      targetKind = entryKind(await stat(absolutePath)) as Exclude<EntryKind, "symlink">;
+      const targetStats = await stat(absolutePath);
+      targetKind = entryKind(targetStats) as Exclude<EntryKind, "symlink">;
+      targetSize = targetStats.size;
     } catch {
       // Broken and inaccessible links are represented as data.
     }
     const isOutsideRoot = resolvedPath === null || !isInsideRoot(rootRealPath, resolvedPath);
     const isCycle = resolvedPath !== null && ancestors.has(resolvedPath);
+    const targetRelativePath =
+      resolvedPath !== null && !isOutsideRoot
+        ? path.relative(rootRealPath, resolvedPath).split(path.sep).join("/")
+        : null;
+    const isTargetExcluded =
+      targetRelativePath !== null &&
+      selectedPaths !== null &&
+      !selectedPaths.has(targetRelativePath);
     symlink = {
       target,
       resolvedPath,
-      targetRelativePath:
-        resolvedPath !== null && !isOutsideRoot
-          ? path.relative(rootRealPath, resolvedPath).split(path.sep).join("/")
-          : null,
+      targetRelativePath,
       targetKind,
+      targetSize:
+        isOutsideRoot || isTargetExcluded || targetKind === "directory" ? null : targetSize,
       isBroken: resolvedPath === null,
       isCycle,
       isOutsideRoot,
-      wasFollowed: followSymlinks && targetKind === "directory" && !isCycle && !isOutsideRoot,
+      isTargetExcluded,
+      wasFollowed:
+        followSymlinks &&
+        targetKind === "directory" &&
+        !isCycle &&
+        !isOutsideRoot &&
+        !isTargetExcluded,
     };
   }
 
@@ -163,6 +181,12 @@ function isDirectoryLike(entry: FileSystemEntry): boolean {
   return entry.kind === "directory" || entry.symlink?.targetKind === "directory";
 }
 
+function isUnavailableSymlink(entry: FileSystemEntry): boolean {
+  return Boolean(
+    entry.symlink?.isBroken || entry.symlink?.isOutsideRoot || entry.symlink?.isTargetExcluded,
+  );
+}
+
 function compareUnicode(left: string, right: string): number {
   const leftPoints = [...left];
   const rightPoints = [...right];
@@ -197,8 +221,8 @@ export function compareEntries(
     result = left.metadata.times.modifiedAt.localeCompare(right.metadata.times.modifiedAt);
   } else if (resolved.field === "size") {
     result =
-      (isDirectoryLike(left) ? 0 : left.metadata.size) -
-      (isDirectoryLike(right) ? 0 : right.metadata.size);
+      (left.kind === "directory" ? 0 : left.metadata.size) -
+      (right.kind === "directory" ? 0 : right.metadata.size);
   } else {
     result = compareNames(left.name, right.name, resolved.nameMode);
   }
@@ -324,6 +348,7 @@ export async function generateExplorerSkippingPaths(
           rootRealPath,
           ancestors: nextAncestors,
           followSymlinks,
+          selectedPaths: filtersActive ? selection.selected : null,
         }),
       ),
     );
@@ -335,6 +360,7 @@ export async function generateExplorerSkippingPaths(
       rootRealPath,
       ancestors,
       followSymlinks,
+      selectedPaths: filtersActive ? selection.selected : null,
     });
     if (describedCurrent.kind !== "directory") {
       throw new Error(`${physicalDir} is not a directory`);
@@ -350,6 +376,7 @@ export async function generateExplorerSkippingPaths(
       rootRealPath,
       ancestors: new Set(),
       followSymlinks,
+      selectedPaths: filtersActive ? selection.selected : null,
     });
     const parent =
       logicalDir === ""
@@ -361,6 +388,7 @@ export async function generateExplorerSkippingPaths(
             rootRealPath,
             ancestors,
             followSymlinks,
+            selectedPaths: filtersActive ? selection.selected : null,
           });
     const directory: DirectoryData = {
       root,
@@ -437,30 +465,27 @@ export async function generateExplorerSkippingPaths(
         size: number;
         target: string | null;
         targetKind: Exclude<EntryKind, "symlink"> | null;
+        targetSize: number | null;
+        isTargetUnavailable: boolean;
+        isCycle: boolean;
       }
     >();
 
     for (const { directory, logicalDir } of theme.searchIndex === false ? [] : plans) {
       for (const entry of directory.entries) {
         if (searchEntries.has(entry.relativePath)) continue;
-        const targetLogicalPath =
-          entry.symlink?.isBroken ||
-          entry.symlink?.isOutsideRoot ||
-          (filtersActive &&
-            entry.symlink !== null &&
-            entry.symlink.targetRelativePath !== null &&
-            !selection.selected.has(entry.symlink.targetRelativePath))
-            ? null
-            : entry.symlink?.targetRelativePath !== null && entry.symlink !== null
-              ? entry.symlink.targetRelativePath
-              : path.posix.join(logicalDir, entry.name);
+        const targetLogicalPath = isUnavailableSymlink(entry)
+          ? null
+          : entry.symlink?.targetRelativePath !== null && entry.symlink !== null
+            ? entry.symlink.targetRelativePath
+            : path.posix.join(logicalDir, entry.name);
         const directoryLike = isDirectoryLike(entry);
         const linkedPath =
           directoryLike && targetLogicalPath !== null
             ? pagePathForDirectory(targetLogicalPath)
             : targetLogicalPath;
         let href: string | null = null;
-        if (entry.symlink?.isBroken) {
+        if (entry.symlink !== null && isUnavailableSymlink(entry)) {
           const filename = rawLinkFilename(entry);
           rawLinkFiles.set(filename, entry.symlink.target);
           href = `raw-links/${filename}`;
@@ -472,7 +497,7 @@ export async function generateExplorerSkippingPaths(
         }
         searchEntries.set(entry.relativePath, {
           exitsExplorer:
-            entry.symlink?.isBroken === true ||
+            isUnavailableSymlink(entry) ||
             (targetLogicalPath !== null &&
               (!directoryLike || !generatedDirectories.has(targetLogicalPath))),
           href,
@@ -484,6 +509,9 @@ export async function generateExplorerSkippingPaths(
           size: entry.metadata.size,
           target: entry.symlink?.target ?? null,
           targetKind: entry.symlink?.targetKind ?? null,
+          targetSize: entry.symlink?.targetSize ?? null,
+          isTargetUnavailable: isUnavailableSymlink(entry),
+          isCycle: entry.symlink?.isCycle ?? false,
         });
       }
     }
@@ -493,14 +521,7 @@ export async function generateExplorerSkippingPaths(
       if (name === null) continue;
 
       const targetLogicalPathFor = (entry: FileSystemEntry): string | null => {
-        if (entry.symlink?.isBroken || entry.symlink?.isOutsideRoot) return null;
-        if (
-          filtersActive &&
-          entry.symlink !== null &&
-          entry.symlink.targetRelativePath !== null &&
-          !selection.selected.has(entry.symlink.targetRelativePath)
-        )
-          return null;
+        if (isUnavailableSymlink(entry)) return null;
         if (entry.symlink?.targetRelativePath !== null && entry.symlink !== null) {
           return entry.symlink.targetRelativePath;
         }
@@ -530,7 +551,7 @@ export async function generateExplorerSkippingPaths(
         return urlStrategy === "base" ? `${base}${suffix}` : suffix;
       };
       const hrefFor = (entry: FileSystemEntry): string | null => {
-        if (entry.symlink?.isBroken) {
+        if (entry.symlink !== null && isUnavailableSymlink(entry)) {
           const filename = rawLinkFilename(entry);
           rawLinkFiles.set(filename, entry.symlink.target);
           return hrefForLogicalPath(path.posix.join("__dirwell", "raw-links", filename), false);
@@ -563,7 +584,7 @@ export async function generateExplorerSkippingPaths(
         hrefFor,
         hrefForDirectory: (relativePath) => hrefForLogicalPath(relativePath, true),
         exitsExplorerFor: (entry) => {
-          if (entry.symlink?.isBroken) return true;
+          if (isUnavailableSymlink(entry)) return true;
           const targetLogicalPath = targetLogicalPathFor(entry);
           const directoryLike =
             entry.kind === "directory" || entry.symlink?.targetKind === "directory";
@@ -620,7 +641,7 @@ export async function generateExplorerSkippingPaths(
       }
       await writeFile(
         path.join(generatedAssetDirectory, "search-index.json"),
-        JSON.stringify({ count: indexedEntries.length, shards, version: 2 }),
+        JSON.stringify({ count: indexedEntries.length, shards, version: 3 }),
       );
     }
 

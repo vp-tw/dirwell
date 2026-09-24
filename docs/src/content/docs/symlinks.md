@@ -30,10 +30,14 @@ broken target available.
 | Link state                               | Page behavior                                                                                                                                    |
 | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
 | Internal file or directory target        | Links to the target when it is available in the generated output.                                                                                |
-| Broken target                            | Shows a broken-link state. Opening it displays the raw `readlink()` target text as plain text in a new tab.                                      |
-| Target outside the source root           | Shows an unavailable state and no resolved absolute machine path in HTML.                                                                        |
+| Broken or inaccessible target            | Shows `Target unavailable`. Opening the link displays the raw `readlink()` target text as plain text in a new tab.                               |
+| Target outside the source root           | Shows `Target unavailable`. The link opens only the declared target text; Dirwell does not publish the external file or its size.                |
 | Ancestor cycle                           | Shows a cycle state. With `skip`, generation stops at the cycle instead of recursing forever; the entry can link to an already generated target. |
-| Target removed by `include` or `exclude` | The symlink can stay listed but has no usable target link. It is not mirrored.                                                                   |
+| Target removed by `include` or `exclude` | The symlink can stay listed. Its link opens only the declared target text; the target is not mirrored and its size is not published.             |
+
+The Default theme shows each symlink's own size as `Link`. When an allowed target
+exists, it also shows its file size as `Target`, or `Target folder` for a directory.
+Size sorting uses the symlink's own size. Unavailable targets show only `Link`.
 
 Dirwell mirrors source files by default. It copies only relative symlinks
 whose target remains inside the selected output tree. The CLI omits absolute
