@@ -71,8 +71,8 @@ declared target through a raw-text view; out-of-root targets have no link. See
 
 `createDefaultTheme()` accepts `colorScheme`, `fuzzySearch`, `globalSearch`,
 `keyboardNavigation`, and `sorting` switches, all enabled by default. It also
-accepts `virtualizeAfter` (default `500`), `project` metadata, and one or more
-ordered `components` overrides. This example wraps the default footer and
+accepts `virtualizeAfter` (default `500`), `project` metadata, custom `icons`, and
+one or more ordered `components` overrides. This example wraps the default footer and
 escapes added text before writing HTML:
 
 <Code code={theme} lang="ts" />
@@ -129,6 +129,8 @@ JavaScript, or a search index. Complete replacement themes implement
 | `PlainThemeOptions`              | Optional plain-theme project metadata.                                                                                         |
 | `DirwellThemeComponents`         | The eight typed HTML component functions.                                                                                      |
 | `DirwellThemeComponentOverrides` | Partial component layer.                                                                                                       |
+| `DefaultThemeIconSet`            | Light and optional dark SVG icon sets with attribution.                                                                        |
+| `DefaultThemeIconVariant`        | File, folder, and extension-specific SVG markup for one color scheme.                                                          |
 | `ThemeComponent<Props>`          | Function that renders typed props to an HTML string; available from `dirwell/theme`.                                           |
 | `DefaultThemeRuntimeConfig`      | Serialized default-theme browser controls and asset links.                                                                     |
 | `BreadcrumbItem`                 | Label, link, and current-page state.                                                                                           |

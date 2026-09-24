@@ -1,8 +1,10 @@
-# File-type icons example
+# Default theme preview
 
-This example uses Dirwell's default theme. Its files show the bundled
-vscode-icons artwork for common extensions, with a generic fallback for other
-files. The icons are self-hosted in the generated output.
+The landing page embeds this generated build of Dirwell's unmodified default
+theme. Its sample files show the bundled vscode-icons artwork for common
+extensions, with a generic fallback for other files. The icons are self-hosted
+in the generated output. To change a theme's icons, see the
+[Catppuccin override example](../default-theme-override/).
 
 Build from the repository root with `pnpm run examples:build`.
 

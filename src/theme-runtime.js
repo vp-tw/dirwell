@@ -130,17 +130,27 @@ function createGlobalEntry(record, indexUrl, order, icons, local = false) {
   const entryName = document.createElement("span");
   entryName.className = "entry-name";
   const extension = record.name.slice(record.name.lastIndexOf(".") + 1).toLowerCase();
-  const iconName = directory ? "default_folder" : (icons.byExtension[extension] ?? "default_file");
-  const icon = document.createElement("img");
-  icon.className = "icon file-icon";
-  icon.width = 20;
-  icon.height = 20;
-  icon.alt = "";
-  icon.loading = "lazy";
-  icon.src = new URL(icons.hrefs[iconName], document.baseURI).href;
+  const createIcon = (variant, className) => {
+    const icon = document.createElement("img");
+    icon.className = className;
+    icon.width = 20;
+    icon.height = 20;
+    icon.alt = "";
+    icon.loading = "lazy";
+    const fileIcon = Object.hasOwn(variant.byExtension, extension)
+      ? variant.byExtension[extension]
+      : variant.file;
+    icon.src = new URL(directory ? variant.folder : fileIcon, document.baseURI).href;
+    return icon;
+  };
+  const icon = createIcon(icons.light, `icon file-icon${icons.dark ? " file-icon--light" : ""}`);
   const labelNode = document.createElement("span");
   labelNode.textContent = `${label}${directory ? "/" : ""}`;
-  entryName.append(icon, labelNode);
+  entryName.append(icon);
+  if (icons.dark) {
+    entryName.append(createIcon(icons.dark, "icon file-icon file-icon--dark"));
+  }
+  entryName.append(labelNode);
   name.append(entryName);
   identity.append(name);
   if (record.target !== null) {

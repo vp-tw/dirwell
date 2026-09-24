@@ -6,16 +6,19 @@ description: Compare complete Dirwell builds and inspect the source behind each 
 Each example is a real Dirwell input directory with its own configuration. The
 documentation build generates the examples in `docs/public/examples/` before Astro
 copies them into the publish tree. The landing-page preview embeds the generated
-`file-icons` example, so its default-theme interface and assets are not duplicated
-in the documentation source.
+`file-icons` preview, so its default-theme interface and assets are not duplicated
+in the documentation source. The preview remains available as a generated build.
 
-| Example        | What it proves                                                                      | Output                    | Live demo                                                           | Source code                                                                |
-| -------------- | ----------------------------------------------------------------------------------- | ------------------------- | ------------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| `basic`        | The defaults produce a portable site without configuration.                         | SSG with relative URLs    | [Open demo](https://vp-tw.github.io/dirwell/examples/basic/)        | [GitHub](https://github.com/vp-tw/dirwell/tree/main/examples/basic)        |
-| `base`         | Shared assets and file links work below a configured base path.                     | MPA with base URLs        | [Open demo](https://vp-tw.github.io/dirwell/examples/base/)         | [GitHub](https://github.com/vp-tw/dirwell/tree/main/examples/base)         |
-| `custom-theme` | Typed component overrides can change product language without forking the renderer. | SSG with a layered theme  | [Open demo](https://vp-tw.github.io/dirwell/examples/custom-theme/) | [GitHub](https://github.com/vp-tw/dirwell/tree/main/examples/custom-theme) |
-| `file-icons`   | The default theme self-hosts selected vscode-icons file-type artwork.               | SSG with bundled SVGs     | [Open demo](https://vp-tw.github.io/dirwell/examples/file-icons/)   | [GitHub](https://github.com/vp-tw/dirwell/tree/main/examples/file-icons)   |
-| `plain`        | Plain HTML listings work without icons, JavaScript, or client-side search.          | SSG without search assets | [Open demo](https://vp-tw.github.io/dirwell/examples/plain/)        | [GitHub](https://github.com/vp-tw/dirwell/tree/main/examples/plain)        |
+| Example                  | What it proves                                                                                        | Output                           | Live demo                                                                     | Source code                                                                          |
+| ------------------------ | ----------------------------------------------------------------------------------------------------- | -------------------------------- | ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| `basic`                  | The defaults produce a portable site.                                                                 | SSG with relative URLs           | [Open demo](https://vp-tw.github.io/dirwell/examples/basic/)                  | [GitHub](https://github.com/vp-tw/dirwell/tree/main/examples/basic)                  |
+| `base`                   | Shared assets and file links work below a configured base path.                                       | MPA with base URLs               | [Open demo](https://vp-tw.github.io/dirwell/examples/base/)                   | [GitHub](https://github.com/vp-tw/dirwell/tree/main/examples/base)                   |
+| `custom-theme`           | A complete theme controls its own HTML and CSS while reusing Dirwell's directory data and safe links. | SSG release catalog              | [Open demo](https://vp-tw.github.io/dirwell/examples/custom-theme/)           | [GitHub](https://github.com/vp-tw/dirwell/tree/main/examples/custom-theme)           |
+| `default-theme-override` | Catppuccin Latte and Macchiato replace colors and icons while selected components change.             | SSG with default-theme overrides | [Open demo](https://vp-tw.github.io/dirwell/examples/default-theme-override/) | [GitHub](https://github.com/vp-tw/dirwell/tree/main/examples/default-theme-override) |
+| `plain`                  | Plain HTML listings work without icons, JavaScript, or client-side search.                            | SSG without search assets        | [Open demo](https://vp-tw.github.io/dirwell/examples/plain/)                  | [GitHub](https://github.com/vp-tw/dirwell/tree/main/examples/plain)                  |
+
+The homepage's [default-theme preview](https://vp-tw.github.io/dirwell/examples/file-icons/)
+uses [icon-rich source files](https://github.com/vp-tw/dirwell/tree/main/examples/file-icons).
 
 From the repository root, build the documentation and all examples together:
 
@@ -37,6 +40,7 @@ site/
 │   ├── basic/
 │   ├── base/
 │   ├── custom-theme/
+│   ├── default-theme-override/
 │   ├── file-icons/
 │   └── plain/
 └── _astro/

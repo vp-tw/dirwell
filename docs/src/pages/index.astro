@@ -5,7 +5,7 @@ const base = import.meta.env.BASE_URL;
 const path = (value: string) => `${base}${value}`.replace(/\/+/g, "/");
 // Astro's dev router does not resolve public directory indexes; static hosts do.
 const examplePath = (slug: string) => path(`examples/${slug}/${import.meta.env.DEV ? "index.html" : ""}`);
-const repositoryUrl = import.meta.env.PUBLIC_REPOSITORY_URL ?? "https://github.com/VdustR/dirwell";
+const repositoryUrl = import.meta.env.PUBLIC_REPOSITORY_URL ?? "https://github.com/vp-tw/dirwell";
 const examples = [
   {
     slug: "basic",
@@ -21,15 +21,15 @@ const examples = [
   },
   {
     slug: "custom-theme",
-    name: "Component theme",
-    description: "The default explorer with a replaced header and entry-row component.",
-    detail: "typed overrides",
+    name: "Release catalog",
+    description: "Build a complete listing with its own HTML and CSS from the prepared directory data.",
+    detail: "custom theme · no JavaScript",
   },
   {
-    slug: "file-icons",
-    name: "File-type icons",
-    description: "The default theme identifies common formats with bundled vscode-icons artwork.",
-    detail: "self-hosted SVG · default theme",
+    slug: "default-theme-override",
+    name: "Customize the default theme",
+    description: "Catppuccin Latte and Macchiato colors and icons with a changed header.",
+    detail: "component overrides · theme icons",
   },
   {
     slug: "plain",
@@ -86,7 +86,7 @@ const examples = [
 
         <div class="explorer-sample">
           <div class="sample-caption">
-            <span>Default theme · generated from the file-icons example</span>
+            <span>Default theme · generated from the file-icons preview</span>
             <a href={examplePath("file-icons")} target="_blank" rel="noopener">Open full explorer</a>
           </div>
           <iframe
@@ -117,7 +117,7 @@ const examples = [
 
       <section class="examples" id="examples" aria-labelledby="examples-title">
         <div class="section-heading">
-          <h2 id="examples-title">Five builds. Same directory model.</h2>
+          <h2 id="examples-title">Five examples. Same directory model.</h2>
           <p>Open the generated site, then inspect the exact source that produced it.</p>
         </div>
         <div class="example-list">
