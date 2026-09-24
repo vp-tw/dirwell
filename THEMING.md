@@ -58,4 +58,10 @@ filesystem data and navigation decisions; they do not read the filesystem.
 Escape untrusted file names with the exported `escapeHtml` helper.
 
 The full `ExplorerTheme` contract can host a Svelte, Astro, React, or other SSR
-adapter that returns a complete HTML string and optional assets.
+adapter that returns a complete HTML string and optional assets. The
+[`custom-theme`](examples/custom-theme) example builds a release catalog with
+its own HTML and CSS. The [`default-theme-override`](examples/default-theme-override)
+example keeps the default explorer and changes components, Catppuccin colors,
+and file icons. `createDefaultTheme({ icons })` accepts light and optional dark
+SVG sets, including fallbacks and extension mappings. Dirwell uses the same icon
+set for static, global-search, and virtualized rows.

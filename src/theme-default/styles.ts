@@ -475,6 +475,21 @@ a {
   height: 1.25rem;
   object-fit: contain;
 }
+.file-icon--dark,
+:root[data-theme="dark"] .file-icon--light {
+  display: none;
+}
+:root[data-theme="dark"] .file-icon--dark {
+  display: inline-block;
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-theme="system"] .file-icon--light {
+    display: none;
+  }
+  :root[data-theme="system"] .file-icon--dark {
+    display: inline-block;
+  }
+}
 .target {
   color: var(--muted);
   font:

@@ -1,7 +1,9 @@
-# Component-theme example
+# Build a release catalog
 
-This example keeps the default theme and replaces typed components. It shows
-how a project can change product language and row rendering without forking the renderer.
+This example supplies its own HTML and CSS through a complete Dirwell theme. It
+uses the prepared directory data and link decisions, so it does not need to
+reimplement file scanning or safe navigation. The release files are synthetic.
+The listing intentionally has no client-side search or JavaScript.
 
 ```bash
 node ../../src/bin.ts build --cwd .

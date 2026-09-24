@@ -6,16 +6,14 @@ import type {
   SortField,
 } from "./model.ts";
 import type { ThemeProject } from "./theme-project.ts";
+import type { ResolvedIconSet } from "./theme-default/icon-set.ts";
 
 export interface DefaultThemeRuntimeConfig {
   readonly colorScheme: boolean;
   readonly fuzzySearch: boolean;
   readonly globalSearch: boolean;
   readonly keyboardNavigation: boolean;
-  readonly icons: Readonly<{
-    byExtension: Readonly<Record<string, string>>;
-    hrefs: Readonly<Record<string, string>>;
-  }>;
+  readonly icons: ResolvedIconSet;
   readonly searchIndexHref: string;
   readonly entriesHref?: string;
   readonly workerHref?: string;
@@ -91,7 +89,7 @@ export interface EmptyStateProps {
 }
 
 export interface FooterProps {
-  readonly iconNoticeHref: string;
+  readonly iconNoticeHref?: string;
   readonly keyboardNavigation: boolean;
   readonly parentHref: string | null;
   readonly project: ThemeProject;
@@ -105,6 +103,8 @@ export interface IconProps {
   readonly size?: number;
   /** Source of a file-type image. Control icons continue to use the named SVG. */
   readonly src?: string;
+  /** Image source used by the dark color scheme. */
+  readonly darkSrc?: string;
 }
 
 export interface DirwellThemeComponents {

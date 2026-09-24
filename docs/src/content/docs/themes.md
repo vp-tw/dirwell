@@ -34,6 +34,20 @@ default project URL is intentionally not linked while the repository is unpublis
 
 The default theme exposes eight stable components: `PageShell`, `Breadcrumbs`,
 `Toolbar`, `EntryList`, `EntryRow`, `EmptyState`, `Footer`, and `Icon`.
+The [Catppuccin example](../examples/) changes colors, file icons, and selected
+components while retaining the default explorer behavior.
+
+### File icons
+
+`createDefaultTheme({ icons })` accepts SVG markup for a light icon set and an
+optional dark set. Each set supplies fallback file and folder icons plus an
+optional map from file extensions to SVG markup. Dirwell writes the SVGs into
+the generated site and uses the same map for directory rows, global search, and
+virtualized MPA rows. When a dark set is present, it follows the theme selector
+and the system color scheme. Include an attribution notice when using third-party
+icons; the generated footer links to it. See the
+[Catppuccin configuration](https://github.com/vp-tw/dirwell/blob/main/examples/default-theme-override/dirwell.config.ts)
+for a complete example.
 
 ```ts
 import { createDefaultTheme, defineConfig } from "dirwell";
@@ -73,3 +87,12 @@ const components = {
 Component functions return HTML, so use the exported `escapeHtml` helper for
 untrusted text. A complete `ExplorerTheme` can use Svelte, Astro, React, or any
 other server renderer.
+
+## Build a complete theme
+
+A complete theme is an object with a name and a `render(context)` function.
+Dirwell prepares the directory entries and safe links; the function returns a
+full HTML document and any named assets. This lets a site choose its own
+markup, styles, icons, and browser behavior. The
+[release catalog example](https://github.com/vp-tw/dirwell/tree/main/examples/custom-theme)
+implements one without client-side JavaScript.

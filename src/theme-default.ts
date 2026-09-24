@@ -10,13 +10,15 @@ import { defaultThemeComponents, escapeHtml } from "./theme-default/components.t
 import { defaultStyles } from "./theme-default/styles.ts";
 import { resolveThemeProject, type ThemeProjectOptions } from "./theme-project.ts";
 import {
-  vscodeIconAssetName,
-  vscodeIconForEntry,
-  vscodeIconNames,
-  vscodeIconsByExtension,
-} from "./theme-default/vscode-icons.ts";
+  iconHrefs,
+  iconNameForEntry,
+  prepareIconSet,
+  type DefaultThemeIconSet,
+} from "./theme-default/icon-set.ts";
+import { vscodeIconAssetName, vscodeIconNames } from "./theme-default/vscode-icons.ts";
 
 export { defaultThemeComponents, escapeHtml } from "./theme-default/components.ts";
+export type { DefaultThemeIconSet, DefaultThemeIconVariant } from "./theme-default/icon-set.ts";
 
 const runtimeSource = await readFile(new URL("./theme-runtime.js", import.meta.url), "utf8");
 const workerSource = await readFile(new URL("./theme-worker.js", import.meta.url), "utf8");
@@ -42,6 +44,7 @@ export interface DefaultThemeOptions {
   readonly fuzzySearch?: boolean;
   readonly globalSearch?: boolean;
   readonly keyboardNavigation?: boolean;
+  readonly icons?: DefaultThemeIconSet;
   readonly project?: ThemeProjectOptions;
   readonly sorting?: boolean;
   /** MPA directories above this size load rows from an asset and render a measured window. */
@@ -89,6 +92,7 @@ export function createDefaultTheme(options: DefaultThemeOptions = {}): ExplorerT
         ? options.components
         : [options.components];
   const components = resolveThemeComponents(defaultThemeComponents, ...layers);
+  const iconSet = prepareIconSet(options.icons, vscodeIconAssets, vscodeIconNotice);
 
   return {
     name: "ledger",
@@ -121,7 +125,10 @@ export function createDefaultTheme(options: DefaultThemeOptions = {}): ExplorerT
               entry,
               icon: components.Icon({
                 name: iconName,
-                src: assetHref(vscodeIconAssetName(vscodeIconForEntry(entry))),
+                src: assetHref(iconNameForEntry(entry, iconSet.names.light)),
+                ...(iconSet.names.dark === undefined
+                  ? {}
+                  : { darkSrc: assetHref(iconNameForEntry(entry, iconSet.names.dark)) }),
               }),
               index,
               navigation: { exitsExplorer: exitsExplorerFor(entry), href: hrefFor(entry) },
@@ -139,12 +146,7 @@ export function createDefaultTheme(options: DefaultThemeOptions = {}): ExplorerT
         fuzzySearch,
         globalSearch,
         keyboardNavigation,
-        icons: {
-          byExtension: vscodeIconsByExtension,
-          hrefs: Object.fromEntries(
-            vscodeIconNames.map((name) => [name, assetHref(vscodeIconAssetName(name))]),
-          ),
-        },
+        icons: iconHrefs(iconSet.names, assetHref),
         searchIndexHref,
         ...(entriesAssetName === null ? {} : { entriesHref: assetHref(entriesAssetName) }),
         ...(entriesAssetName === null ? {} : { workerHref: assetHref("dirwell.worker.js") }),
@@ -163,7 +165,9 @@ export function createDefaultTheme(options: DefaultThemeOptions = {}): ExplorerT
         emptyState: components.EmptyState({ message: "No matching entries." }),
         entryList: components.EntryList({ directory, parentHref, rows, sorting }),
         footer: components.Footer({
-          iconNoticeHref: assetHref("vscode-icons-NOTICE.txt"),
+          ...(iconSet.noticeName === undefined
+            ? {}
+            : { iconNoticeHref: assetHref(iconSet.noticeName) }),
           keyboardNavigation,
           parentHref,
           project,
@@ -184,8 +188,7 @@ export function createDefaultTheme(options: DefaultThemeOptions = {}): ExplorerT
       return {
         html,
         assets: {
-          ...vscodeIconAssets,
-          "vscode-icons-NOTICE.txt": vscodeIconNotice,
+          ...iconSet.assets,
           ...(interactive ? { "dirwell.runtime.js": runtimeSource } : {}),
           ...(entriesAssetName === null ? {} : { "dirwell.worker.js": workerSource }),
           ...(entriesAssetName === null

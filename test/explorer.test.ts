@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { lstat, mkdtemp, mkdir, readFile, rm, symlink, writeFile } from "node:fs/promises";
+import { lstat, mkdtemp, mkdir, readFile, readdir, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -118,7 +118,7 @@ test("default theme self-hosts vscode-icons in SSG and MPA output", async (conte
     assert.match(html, new RegExp(`src="${assetPrefix}vscode-default_folder\\.svg"`));
     assert.match(html, new RegExp(`src="${assetPrefix}vscode-file_type_text\\.svg"`));
     assert.match(html, /Icon credits<\/a>/);
-    assert.match(html, /&quot;icons&quot;:\{&quot;byExtension&quot;:/);
+    assert.match(html, /&quot;icons&quot;:\{&quot;light&quot;:\{&quot;file&quot;:/);
     assert.match(html, /main > header \{\s*position: sticky;\s*top: 0;/);
     assert.match(
       html,
@@ -131,10 +131,84 @@ test("default theme self-hosts vscode-icons in SSG and MPA output", async (conte
       /CC BY-SA 4\.0|Creative Commons Attribution-ShareAlike 4\.0/,
     );
     const runtime = await readFile(path.join(assetDir, "dirwell.runtime.js"), "utf8");
-    assert.match(runtime, /icons\.hrefs\[iconName\]/);
+    assert.match(runtime, /variant\.byExtension\[extension\]/);
     assert.match(runtime, /--dw-sticky-header-height/);
     assert.match(runtime, /scrollPaddingTop/);
   }
+});
+
+test("custom theme icons share light and dark sources across static and dynamic rows", async (context) => {
+  const { output, root } = await fixture();
+  context.after(() => rm(path.dirname(root), { recursive: true, force: true }));
+  await writeFile(path.join(root, "prototype.constructor"), "fallback icon");
+  const svg = (color: string) =>
+    `<svg xmlns="http://www.w3.org/2000/svg"><path fill="${color}"/></svg>`;
+  const theme = createDefaultTheme({
+    icons: {
+      light: {
+        file: svg("red"),
+        folder: svg("green"),
+        byExtension: { txt: svg("blue") },
+      },
+      dark: {
+        file: svg("pink"),
+        folder: svg("yellow"),
+        byExtension: { txt: svg("purple") },
+      },
+      notice: "Example icon attribution",
+    },
+  });
+
+  for (const mode of ["ssg", "mpa"] as const) {
+    await generateExplorer({ sourceDir: root, outputDir: output, mode, theme });
+    const html = await readFile(path.join(output, "index.html"), "utf8");
+    const assetDir = path.join(output, mode === "mpa" ? "__dirwell" : "");
+    const assets = await readdir(assetDir);
+    assert.match(html, /file-icon--light/);
+    assert.match(html, /file-icon--dark/);
+    assert.match(html, /&quot;dark&quot;:\{&quot;file&quot;:/);
+    assert.match(html, /theme-icons-NOTICE\.txt/);
+    assert.equal(assets.filter((name) => name.startsWith("theme-icon-")).length, 6);
+    assert.equal(
+      assets.some((name) => name.startsWith("vscode-")),
+      false,
+    );
+    assert.equal(
+      await readFile(path.join(assetDir, "theme-icons-NOTICE.txt"), "utf8"),
+      "Example icon attribution",
+    );
+    const assetContents = await Promise.all(
+      assets
+        .filter((name) => name.startsWith("theme-icon-"))
+        .map((name) => readFile(path.join(assetDir, name), "utf8")),
+    );
+    for (const color of ["red", "green", "blue", "pink", "yellow", "purple"]) {
+      assert.ok(assetContents.some((contents) => contents.includes(`fill="${color}"`)));
+    }
+  }
+
+  await generateExplorer({
+    sourceDir: root,
+    outputDir: output,
+    theme: createDefaultTheme({ icons: { light: { file: svg("red"), folder: svg("green") } } }),
+  });
+  assert.doesNotMatch(await readFile(path.join(output, "index.html"), "utf8"), /Icon credits/);
+  await assert.rejects(readFile(path.join(output, "theme-icons-NOTICE.txt"), "utf8"));
+
+  assert.throws(
+    () =>
+      createDefaultTheme({
+        icons: { light: { file: svg("red"), folder: svg("green") }, notice: "" },
+      }),
+    /attribution notice must be non-empty/,
+  );
+  assert.throws(
+    () =>
+      createDefaultTheme({
+        icons: { light: { file: "not an svg", folder: svg("green") }, notice: "source" },
+      }),
+    /SVG markup/,
+  );
 });
 
 test("mirrors source files and preserves an existing index", async (context) => {
