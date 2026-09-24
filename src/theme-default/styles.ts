@@ -527,9 +527,13 @@ a {
     monospace;
   overflow-wrap: anywhere;
 }
-.target-label {
+.target-status {
   font-family: ui-sans-serif, system-ui, sans-serif;
   font-weight: 650;
+}
+.target-unavailable {
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
 }
 .unavailable {
   color: var(--muted);
@@ -541,16 +545,15 @@ time {
   color: var(--muted);
   font-size: 0.82rem;
 }
-.badge {
-  display: inline-block;
-  margin-right: 0.5rem;
-  padding: 0.08rem 0.4rem;
-  border: 1px solid currentColor;
-  border-radius: 999px;
-  font-size: 0.72rem;
+.size-stack {
+  display: grid;
+  gap: 0.1rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
-.warning {
-  color: var(--warning);
+.size-stack b {
+  color: var(--ink);
+  font-weight: 650;
 }
 a:focus-visible,
 button:focus-visible,

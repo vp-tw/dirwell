@@ -76,7 +76,10 @@ function isSearchRecord(record) {
     typeof record.exitsExplorer === "boolean" &&
     (record.href === null || typeof record.href === "string") &&
     (record.target === null || typeof record.target === "string") &&
-    (record.targetKind === null || typeof record.targetKind === "string")
+    (record.targetKind === null || typeof record.targetKind === "string") &&
+    (record.targetSize === null || typeof record.targetSize === "number") &&
+    typeof record.isTargetUnavailable === "boolean" &&
+    typeof record.isCycle === "boolean"
   );
 }
 
@@ -115,7 +118,7 @@ function createGlobalEntry(record, indexUrl, order, icons, local = false) {
   entry.dataset.search =
     `${record.name} ${local ? "" : record.path} ${record.target ?? ""}`.toLocaleLowerCase();
   entry.dataset.name = record.name;
-  entry.dataset.size = String(directory ? 0 : record.size);
+  entry.dataset.size = String(record.kind === "directory" ? 0 : record.size);
   const timestamp = utcTimestamp(record.modifiedAt);
   entry.dataset.modified = String(timestamp === null ? 0 : Date.parse(timestamp.datetime));
   entry.dataset.directory = String(directory);
@@ -166,24 +169,53 @@ function createGlobalEntry(record, indexUrl, order, icons, local = false) {
   if (record.target !== null) {
     const target = document.createElement("span");
     target.className = "target";
-    target.textContent = `Target: ${record.target}`;
+    if (record.isTargetUnavailable) {
+      const status = document.createElement("span");
+      status.className = "target-status";
+      status.textContent = "Target unavailable";
+      const path = document.createElement("span");
+      path.className = "target-unavailable";
+      path.textContent = record.target;
+      target.append(status, " · ", path);
+    } else if (record.isCycle) {
+      const status = document.createElement("span");
+      status.className = "target-status";
+      status.textContent = "Cycle";
+      target.append(status, ` · ${record.target}`);
+    } else {
+      target.textContent = `→ ${record.target}`;
+    }
     identity.append(target);
   }
   const kind = document.createElement("span");
   kind.className = "kind";
   if (isLink) {
-    const badge = document.createElement("span");
-    badge.className = `badge${record.isCycle || record.isBroken ? " warning" : ""}`;
-    badge.textContent = record.isCycle
-      ? "cycle"
-      : record.isBroken
-        ? "broken link"
-        : record.isOutsideRoot
-          ? "external link"
-          : "link";
-    kind.append(badge);
+    const sizes = document.createElement("span");
+    sizes.className = "size-stack";
+    const linkSize = document.createElement("span");
+    linkSize.append("Link ");
+    const linkValue = document.createElement("b");
+    linkValue.textContent = formatSize(record.size, false);
+    linkSize.append(linkValue);
+    sizes.append(linkSize);
+    const targetSize =
+      !record.isTargetUnavailable && record.targetKind === "directory"
+        ? "folder"
+        : record.targetSize === null
+          ? null
+          : formatSize(record.targetSize, false);
+    if (targetSize !== null) {
+      const targetLine = document.createElement("span");
+      targetLine.append("Target ");
+      const targetValue = document.createElement("b");
+      targetValue.textContent = targetSize;
+      targetLine.append(targetValue);
+      sizes.append(targetLine);
+    }
+    kind.append(sizes);
+  } else {
+    kind.append(formatSize(record.size, directory));
   }
-  kind.append(formatSize(record.size, directory));
   const modified = document.createElement(timestamp === null ? "span" : "time");
   if (timestamp !== null) modified.dateTime = timestamp.datetime;
   modified.textContent = timestamp === null ? "Unknown" : localTimestampLabel(timestamp.datetime);
@@ -603,7 +635,7 @@ function initializeExplorer(root) {
       manifestPromise = readJson(indexUrl)
         .then((manifest) => {
           if (
-            manifest?.version !== 2 ||
+            manifest?.version !== 3 ||
             !Array.isArray(manifest.shards) ||
             !manifest.shards.every((name) => /^search-\d{5}\.json$/.test(name))
           ) {
@@ -772,14 +804,14 @@ function initializeExplorer(root) {
     if (status) status.textContent = "Loading this folder";
     readJson(new URL(config.entriesHref, document.baseURI))
       .then((data) => {
-        if (data?.version !== 1 || !Array.isArray(data.rows))
+        if (data?.version !== 2 || !Array.isArray(data.rows))
           throw new Error("Folder data has an unsupported format");
         virtualRows = data.rows.map((row) => ({
           ...row,
           directory: row.kind === "directory" || row.targetKind === "directory",
           link: row.kind === "symlink",
           isLink: row.kind === "symlink",
-          size: row.kind === "directory" || row.targetKind === "directory" ? 0 : row.size,
+          size: row.kind === "directory" ? 0 : row.size,
           kind:
             row.kind === "directory" || row.targetKind === "directory"
               ? "directory"

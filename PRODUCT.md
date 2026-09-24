@@ -31,7 +31,7 @@ Users run Dirwell through a CLI or its TypeScript API. They may preview a direct
 - Watch mode with live reload.
 - Local and global fuzzy search, type filters, configurable sorting, IME-safe keyboard input, Backspace parent navigation, linked breadcrumbs, and system/light/dark appearance controls.
 - The default theme keeps complete HTML listings in SSG mode. With its default settings, MPA directories above 500 entries use a data asset and a virtual list when the default row components are present; those listings require JavaScript.
-- Symlinks remain visible. Cycles are navigable without recursive generation. Broken targets expose their declared text through a safe raw-file route; out-of-root targets have no link.
+- Symlinks remain visible. Cycles are navigable without recursive generation. Broken, out-of-root, and excluded targets expose only their declared text through a safe raw-file route.
 - Themes may replace typed components, add assets, wrap defaults, or replace the full document.
 - Generated sites must work as static files without a required application server.
 - The public repository is [vp-tw/dirwell](https://github.com/vp-tw/dirwell), and the documentation site is deployed at [vp-tw.github.io/dirwell](https://vp-tw.github.io/dirwell/). Generated sites remain configurable for other hosts and base paths.

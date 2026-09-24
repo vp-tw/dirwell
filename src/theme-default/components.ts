@@ -1,5 +1,5 @@
-import type { FileSystemEntry } from "../model.ts";
 import type { DirwellThemeComponents, IconName } from "../theme-components.ts";
+import type { FileSystemEntry } from "../model.ts";
 import { utcTimestamp } from "../timestamp.ts";
 
 export function escapeHtml(value: string): string {
@@ -48,12 +48,19 @@ function formatSize(bytes: number): string {
   return `${value.toFixed(unit === 0 || value >= 100 ? 0 : 1)} ${units[unit]}`;
 }
 
-function badge(entry: FileSystemEntry): string {
-  if (entry.symlink?.isCycle) return '<span class="badge warning">cycle</span>';
-  if (entry.symlink?.isBroken) return '<span class="badge warning">broken link</span>';
-  if (entry.symlink?.isOutsideRoot) return '<span class="badge">external link</span>';
-  if (entry.kind === "symlink") return '<span class="badge">link</span>';
-  return "";
+function renderSize(entry: FileSystemEntry): string {
+  if (entry.symlink === null) {
+    return entry.kind === "directory" ? "directory" : formatSize(entry.metadata.size);
+  }
+  const symlink = entry.symlink;
+  const targetUnavailable = symlink.isBroken || symlink.isOutsideRoot || symlink.isTargetExcluded;
+  const targetSize =
+    !targetUnavailable && symlink.targetKind === "directory"
+      ? "folder"
+      : symlink.targetSize === null || symlink.targetSize === undefined
+        ? null
+        : formatSize(symlink.targetSize);
+  return `<span class="size-stack"><span>Link <b>${formatSize(entry.metadata.size)}</b></span>${targetSize === null ? "" : `<span>Target <b>${targetSize}</b></span>`}</span>`;
 }
 
 const iconPaths: Record<IconName, string> = {
@@ -144,14 +151,20 @@ export const defaultThemeComponents: DirwellThemeComponents = {
   },
   EntryRow: ({ entry, icon, index, navigation }) => {
     const directoryLike = entry.kind === "directory" || entry.symlink?.targetKind === "directory";
-    const size = directoryLike ? "directory" : formatSize(entry.metadata.size);
+    const size = renderSize(entry);
     const modified = utcTimestamp(entry.metadata.times.modifiedAt);
     const linkAttributes = navigation.exitsExplorer ? ' target="_blank" rel="noopener"' : "";
     const label = `${escapeHtml(entry.name)}${directoryLike ? "/" : ""}`;
+    const unavailable =
+      entry.symlink?.isBroken || entry.symlink?.isOutsideRoot || entry.symlink?.isTargetExcluded;
     const target =
       entry.symlink === null
         ? ""
-        : `<span class="target"><span class="target-label">Target:</span> ${escapeHtml(entry.symlink.target)}</span>`;
+        : unavailable
+          ? `<span class="target"><span class="target-status">Target unavailable</span> · <span class="target-unavailable">${escapeHtml(entry.symlink.target)}</span></span>`
+          : entry.symlink.isCycle
+            ? `<span class="target"><span class="target-status">Cycle</span> · ${escapeHtml(entry.symlink.target)}</span>`
+            : `<span class="target">→ ${escapeHtml(entry.symlink.target)}</span>`;
     const searchText = escapeHtml(`${entry.name} ${entry.symlink?.target ?? ""}`.toLowerCase());
     const name = `<span class="entry-name">${icon}<span>${label}</span></span>`;
     const kind = directoryLike
@@ -159,9 +172,9 @@ export const defaultThemeComponents: DirwellThemeComponents = {
       : entry.kind === "symlink" && entry.symlink?.targetKind === null
         ? "link"
         : "file";
-    return `<li class="entry" data-entry data-order="${index}" data-search="${searchText}" data-name="${escapeHtml(entry.name)}" data-size="${directoryLike ? 0 : entry.metadata.size}" data-modified="${modified === null ? 0 : Date.parse(modified.datetime)}" data-directory="${String(directoryLike)}" data-link="${String(entry.kind === "symlink")}" data-kind="${kind}">
+    return `<li class="entry" data-entry data-order="${index}" data-search="${searchText}" data-name="${escapeHtml(entry.name)}" data-size="${entry.kind === "directory" ? 0 : entry.metadata.size}" data-modified="${modified === null ? 0 : Date.parse(modified.datetime)}" data-directory="${String(directoryLike)}" data-link="${String(entry.kind === "symlink")}" data-kind="${kind}">
       <span class="identity">${navigation.href === null ? `<span class="name unavailable">${name}</span>` : `<a class="name" href="${escapeHtml(navigation.href)}"${linkAttributes}>${name}</a>`}${target}</span>
-      <span class="kind">${badge(entry)}${size}</span>
+      <span class="kind">${size}</span>
       ${modified === null ? '<span class="modified">Unknown</span>' : `<time datetime="${modified.datetime}">${modified.label}</time>`}
     </li>`;
   },

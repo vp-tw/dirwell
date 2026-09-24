@@ -136,13 +136,23 @@ async function assertFilePolicy(page: Page): Promise<void> {
   expect(await popup.evaluate(() => window.opener)).toBeNull();
   await expect(popup.locator("body")).toContainText("readme");
   await popup.close();
-  await expect(page.locator('[data-name="outside-link"] a')).toHaveCount(0);
-  await expect(page.locator('[data-name="outside-link"]')).toContainText("external link");
+  const outsideRow = page.locator('[data-name="outside-link"]');
+  await expect(outsideRow.locator(".target-status")).toHaveText("Target unavailable");
+  await expect(outsideRow.locator(".target-unavailable")).toContainText("outside.txt");
+  await expect(outsideRow.locator(".size-stack")).toContainText("Link");
+  await expect(outsideRow.locator(".size-stack")).not.toContainText("Target");
+  const outsideLink = outsideRow.locator("a.name");
+  await expect(outsideLink).toHaveAttribute("href", /__dirwell\/raw-links\/[a-f0-9]{16}\.txt$/);
+  const declaredTarget = await outsideRow.locator(".target-unavailable").innerText();
+  const [outsidePopup] = await Promise.all([page.waitForEvent("popup"), outsideLink.click()]);
+  await expect(outsidePopup.locator("body")).toContainText(declaredTarget);
+  await outsidePopup.close();
   expect((await page.request.get(new URL("outside-link", page.url()).href)).status()).toBe(404);
   await expect(page.locator('[data-name="broken-link"] a')).toHaveAttribute(
     "href",
     /__dirwell\/raw-links\/[a-f0-9]{16}\.txt$/,
   );
+  await expect(page.locator('[data-name="good-link"] .size-stack')).toContainText("Target 7 B");
 }
 
 for (const mode of ["ssg", "mpa"] as const) {
@@ -152,6 +162,7 @@ for (const mode of ["ssg", "mpa"] as const) {
     await mkdir(path.join(sourceDir, "docs", "private"), { recursive: true });
     await writeFile(path.join(sourceDir, "guide.md"), "Guide");
     await writeFile(path.join(sourceDir, "secret.txt"), "Secret");
+    await symlink("secret.txt", path.join(sourceDir, "hidden-config"));
     await writeFile(path.join(sourceDir, "docs", "private", "hidden.md"), "Hidden");
     await generateExplorer({
       sourceDir,
@@ -159,7 +170,7 @@ for (const mode of ["ssg", "mpa"] as const) {
       mode,
       base: mount,
       urlStrategy: "base",
-      include: ["**/*.md", "docs/**"],
+      include: ["**/*.md", "docs/**", "hidden-config"],
       exclude: "docs/private/**",
     });
     const server = await serveStatic(outputDir);
@@ -168,6 +179,16 @@ for (const mode of ["ssg", "mpa"] as const) {
       await expect(page.getByRole("link", { name: "guide.md" })).toBeVisible();
       await expect(page.getByRole("link", { name: "secret.txt" })).toHaveCount(0);
       expect((await page.request.get(new URL("secret.txt", server.url).href)).status()).toBe(404);
+      const hiddenRow = page.locator('[data-name="hidden-config"]');
+      await expect(hiddenRow.locator(".target-status")).toHaveText("Target unavailable");
+      await expect(hiddenRow.locator(".target-unavailable")).toHaveText("secret.txt");
+      await expect(hiddenRow.locator(".size-stack")).not.toContainText("Target");
+      const [hiddenPopup] = await Promise.all([
+        page.waitForEvent("popup"),
+        hiddenRow.locator("a.name").click(),
+      ]);
+      await expect(hiddenPopup.locator("body")).toHaveText("secret.txt");
+      await hiddenPopup.close();
       await page.getByRole("button", { name: "Search all files" }).click();
       const search = page.getByRole("dialog", { name: "Search all files" }).getByRole("searchbox");
       await search.fill("hidden.md");
@@ -277,10 +298,21 @@ for (const mode of ["ssg", "mpa"] as const) {
       .getByRole("dialog", { name: "Search all files" })
       .getByRole("searchbox")
       .fill("guide.txt");
-    const result = page.locator("[data-global-results] a.name");
+    const result = page.locator('[data-global-results] [data-name="guide.txt"] a.name');
     await expect(result).toHaveCount(1);
     await expect(result).toHaveAttribute("href", /\/catalog\/docs\/guide\.txt$/);
     await expect(result).toHaveAttribute("target", "_blank");
+    await page
+      .getByRole("dialog", { name: "Search all files" })
+      .getByRole("searchbox")
+      .fill("outside-link");
+    const outsideResult = page.locator('[data-global-results] [data-name="outside-link"]');
+    await expect(outsideResult).toHaveCount(1);
+    await expect(outsideResult.locator(".target-status")).toHaveText("Target unavailable");
+    await expect(outsideResult.locator("a.name")).toHaveAttribute(
+      "href",
+      /__dirwell\/raw-links\/[a-f0-9]{16}\.txt$/,
+    );
   });
 
   test(`${mode}: keyboard navigation follows visible rows`, async ({ page }) => {
@@ -345,8 +377,17 @@ test("large MPA uses deferred rows, worker search, filtering, and global search"
   await expect
     .poll(async () => Number(await page.locator("[data-visible-count]").textContent()))
     .toBeGreaterThan(500);
+  const localSearch = page.getByRole("searchbox", { name: "Search this folder" });
+  await localSearch.fill("outside-link");
+  const virtualOutside = page.locator('[data-entry-list] [data-name="outside-link"]');
+  await expect(virtualOutside.locator(".target-status")).toHaveText("Target unavailable");
+  await expect(virtualOutside.locator("a.name")).toHaveAttribute(
+    "href",
+    /__dirwell\/raw-links\/[a-f0-9]{16}\.txt$/,
+  );
+  await localSearch.fill("");
   expect(await page.locator("[data-entry-list] [data-entry]").count()).toBeLessThan(100);
-  await page.getByRole("searchbox", { name: "Search this folder" }).fill("file-0519");
+  await localSearch.fill("file-0519");
   await expect(page.locator("[data-visible-count]")).toHaveText("1");
   await expect(page.locator("[data-entry-list] [data-entry]")).toHaveCount(1);
   await page.getByRole("checkbox", { name: "Files" }).uncheck();
@@ -358,7 +399,7 @@ test("large MPA uses deferred rows, worker search, filtering, and global search"
     .getByRole("dialog", { name: "Search all files" })
     .getByRole("searchbox")
     .fill("guide.txt");
-  await expect(page.locator("[data-global-results] a.name")).toHaveCount(1);
+  await expect(page.locator('[data-global-results] [data-name="guide.txt"] a.name')).toHaveCount(1);
 });
 
 test("type controls and symlink metadata keep a consistent row alignment", async ({ page }) => {

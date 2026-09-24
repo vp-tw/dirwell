@@ -201,14 +201,20 @@ export function createDefaultTheme(options: DefaultThemeOptions = {}): ExplorerT
                     modifiedAt: entry.metadata.times.modifiedAt,
                     kind: entry.kind,
                     targetKind: entry.symlink?.targetKind ?? null,
+                    targetSize: entry.symlink?.targetSize ?? null,
                     target: entry.symlink?.target ?? null,
                     isCycle: entry.symlink?.isCycle ?? false,
                     isBroken: entry.symlink?.isBroken ?? false,
                     isOutsideRoot: entry.symlink?.isOutsideRoot ?? false,
+                    isTargetUnavailable: Boolean(
+                      entry.symlink?.isBroken ||
+                      entry.symlink?.isOutsideRoot ||
+                      entry.symlink?.isTargetExcluded,
+                    ),
                     href: hrefFor(entry),
                     exitsExplorer: exitsExplorerFor(entry),
                   })),
-                  version: 1,
+                  version: 2,
                 }),
               }),
         },
