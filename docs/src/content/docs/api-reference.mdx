@@ -5,15 +5,19 @@ description: Find the exported TypeScript API, configuration defaults, and CLI o
 
 import { Code } from "@astrojs/starlight/components";
 import zeroConfig from "../../../examples/api-reference/zero-config.ts?raw";
+import fixedOutputName from "../../../examples/api-reference/fixed-output-name.ts?raw";
 import outputName from "../../../examples/api-reference/output-name.ts?raw";
 import symlinksUrl from "../../../examples/api-reference/symlinks-url.ts?raw";
 import theme from "../../../examples/api-reference/theme.ts?raw";
 
+Use this page to find the TypeScript names. For accepted config values,
+defaults, results, and use cases, start with the [configuration guide](../configuration/).
 The `dirwell` package root exports the values and types below from `src/index.ts`.
 The `dirwell/theme` subpath exposes the component contracts from
 `src/theme-components.ts`, including the generic `ThemeComponent<Props>` type.
 The `dirwell/vite` subpath exports the Vite adapter and its `DirwellViteOptions`
-type; see [Vite adapter](../configuration/#vite-adapter).
+type. `Dirwell(options)` returns one Vite plugin; `Dirwell([options, ...])`
+returns a plugin array. See [Vite adapter](../configuration/#vite-adapter).
 The command-line interface is described separately under [CLI](../cli/).
 Use the [configuration guide](../configuration/) and [theme guide](../themes/)
 for behavior and design examples. The code blocks on this page are imported from
@@ -26,9 +30,11 @@ static output to `dist/`. The TypeScript API needs only source and output paths:
 
 <Code code={zeroConfig} lang="ts" />
 
-`generateExplorer()` defaults to SSG, relative URLs, mirrored source files, the
-default theme, and no symlink traversal. It writes the complete output to a
-staging directory before replacing the previous output.
+`generateExplorer()` requires `sourceDir` and `outputDir`. It defaults to SSG,
+relative URLs, mirrored source files, the default theme, and no symlink
+traversal. It writes the complete output to a staging directory before
+replacing the previous output. In this API, `urlStrategy` is the field that
+corresponds to config `urls`.
 
 ## Configure a build
 
@@ -36,27 +42,31 @@ staging directory before replacing the previous output.
 receiving `{ command: "build" | "serve" | "daemon" }`. The function may be
 asynchronous. A `dirwell.config.ts` file is discovered from `--cwd`.
 
-| Field        | Default and effect                                                                                                                                               |
-| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `root`       | `.` for `resolveGenerateOptions()`; the CLI positional directory takes precedence and itself defaults to `.`.                                                    |
-| `outDir`     | `dist/` for build; `.dirwell-preview/` for serve and daemon.                                                                                                     |
-| `mode`       | `"ssg"`; `"mpa"` shares runtime assets under `__dirwell/`.                                                                                                       |
-| `mirror`     | `true`; copy source files to the output.                                                                                                                         |
-| `include`    | All source entries; root-relative glob or array of globs. Matching directories include descendants.                                                              |
-| `exclude`    | No exclusions; root-relative glob or array of globs. Exclusions win over inclusions.                                                                             |
-| `base`       | `/`; root-relative path or HTTP(S) URL without query or fragment.                                                                                                |
-| `urls`       | `"relative"`; also accepts `"base"` and `"html-base"`.                                                                                                           |
-| `outputName` | `defaultOutputName`; use `_dirwell.html` when an index exists, and skip when both names exist. A function may return a filename, `null`, or a promise of either. |
-| `sort`       | Name, natural comparison, ascending, directories first.                                                                                                          |
-| `symlinks`   | `{ follow: false, boundary: "root", onCycle: "skip" }`.                                                                                                          |
-| `theme`      | `defaultTheme`.                                                                                                                                                  |
-| `server`     | Serve/daemon host `127.0.0.1`, port `4173`; `HOST` and `PORT` may override these.                                                                                |
-| `extends`    | No inherited config; local path or array of local paths.                                                                                                         |
+| Field        | Accepted input; default and effect                                                                                                   |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `root`       | Directory path; `.` for `resolveGenerateOptions()`. The CLI positional directory takes precedence and itself defaults to `.`.        |
+| `outDir`     | `dist/` for build; `.dirwell-preview/` for serve and daemon.                                                                         |
+| `mode`       | `"ssg"`; `"mpa"` shares runtime assets under `__dirwell/`.                                                                           |
+| `mirror`     | `true`; copy source files to the output.                                                                                             |
+| `include`    | All source entries; root-relative glob or array of globs. Matching directories include descendants.                                  |
+| `exclude`    | No exclusions; root-relative glob or array of globs. Exclusions win over inclusions.                                                 |
+| `base`       | `/`; root-relative path or HTTP(S) URL without query or fragment.                                                                    |
+| `urls`       | `"relative"`; also accepts `"base"` and `"html-base"`.                                                                               |
+| `outputName` | Safe filename or sync/async resolver; `defaultOutputName` uses `_dirwell.html` when an index exists and skips when both names exist. |
+| `sort`       | `field`, `nameMode`, `direction`, and `directoriesFirst`; name, natural comparison, ascending, directories first.                    |
+| `symlinks`   | `follow`, `boundary`, and `onCycle`; `{ follow: false, boundary: "root", onCycle: "skip" }`.                                         |
+| `theme`      | `defaultTheme`.                                                                                                                      |
+| `server`     | Serve/daemon host `127.0.0.1`, port `4173`; `HOST` and `PORT` may override these.                                                    |
+| `extends`    | No inherited config; local path or array of local paths.                                                                             |
 
 For an index rule, inspect the typed `DirectoryData` argument. Returning `null`
 skips generation for that directory:
 
 <Code code={outputName} lang="ts" />
+
+Use a fixed name when every directory should get the same filename:
+
+<Code code={fixedOutputName} lang="ts" />
 
 To deploy under a path and follow only symlinks within the source root:
 
@@ -72,8 +82,9 @@ declared target through a raw-text view; out-of-root targets have no link. See
 `createDefaultTheme()` accepts `colorScheme`, `fuzzySearch`, `globalSearch`,
 `keyboardNavigation`, and `sorting` switches, all enabled by default. It also
 accepts `virtualizeAfter` (default `500`), `project` metadata, custom `icons`, and
-one or more ordered `components` overrides. This example wraps the default footer and
-escapes added text before writing HTML:
+one or more ordered `components` overrides. The [theme guide](../themes/)
+explains each option and its trade-off. This example wraps the default footer
+and escapes added text before writing HTML:
 
 <Code code={theme} lang="ts" />
 
@@ -107,7 +118,7 @@ JavaScript, or a search index. Complete replacement themes implement
 ## Exported types
 
 | Type                             | Contract                                                                                                                       |
-| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ | ------ |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
 | `DirwellConfig`                  | Config object fields listed above.                                                                                             |
 | `DirwellConfigContext`           | Command passed to a config function.                                                                                           |
 | `DirwellConfigInput`             | Config object or synchronous/asynchronous config function.                                                                     |
@@ -118,7 +129,7 @@ JavaScript, or a search index. Complete replacement themes implement
 | `FileTimes`                      | Access, change, creation, and modification ISO timestamps.                                                                     |
 | `EntryKind`                      | Directory, file, symlink, or other.                                                                                            |
 | `SymlinkMetadata`                | Declared target, resolved and root-relative paths, target kind, and safety flags.                                              |
-| `OutputNameResolver`             | Sync or async `(directory) => filename                                                                                         | null`. |
+| `OutputNameResolver`             | Sync or async function from `DirectoryData` to a filename or `null`.                                                           |
 | `SortField`                      | Name, modified time, or size.                                                                                                  |
 | `NameSortMode`                   | Unicode, locale-aware, or natural name comparison.                                                                             |
 | `SortDirection`                  | Ascending or descending.                                                                                                       |

@@ -1,57 +1,80 @@
 ---
 title: Configuration
-description: Configure paths, output, themes, and symlink behavior with TypeScript.
+description: Choose output, URLs, filters, sorting, themes, and server settings.
 ---
 
-Dirwell discovers `dirwell.config.ts` from `--cwd`. Configuration is loaded by
-c12 and validated at runtime before filesystem work begins.
+Start with `ssg`, relative URLs, and the default theme. Change a setting when
+you need a specific result:
+
+| Need                                             | Start with                             |
+| ------------------------------------------------ | -------------------------------------- |
+| Publish one portable folder                      | `dirwell build ./files` with no config |
+| Publish under a fixed URL prefix                 | `base` and `urls: "base"`              |
+| Share runtime assets across many directory pages | `mode: "mpa"`                          |
+| Publish only selected files                      | `include` and `exclude`                |
+| Customize the explorer interface                 | `theme: createDefaultTheme(...)`       |
+| Serve several explorers from one Vite project    | `Dirwell([...])`                       |
+
+## Where settings come from
+
+Create `dirwell.config.ts` in the directory selected by `--cwd`. The CLI loads
+it before resolving paths. The Vite adapter loads the file from the Vite project
+root and applies each plugin entry over it. The TypeScript API can pass
+`GenerateOptions` directly to `generateExplorer()`.
+
+`defineConfig()` preserves types. A config can also be a synchronous or
+asynchronous function receiving `{ command: "build" | "serve" | "daemon" }`:
 
 ```ts
 import { defineConfig } from "dirwell";
 
-export default defineConfig({
-  root: ".",
-  outDir: "dist",
-  mode: "ssg",
-  mirror: true,
-  sort: {
-    field: "name",
-    nameMode: "natural",
-    direction: "asc",
-    directoriesFirst: true,
-  },
-});
-```
-
-## Dynamic configuration
-
-The config may be a function. The command is explicit so asynchronous timing
-and command-specific behavior are predictable.
-
-```ts
 export default defineConfig(({ command }) => ({
   outDir: command === "serve" ? ".dirwell-preview" : "dist",
 }));
 ```
 
-## Extending local configuration
+For the CLI, an explicit flag overrides the corresponding config field.
+`[directory]` overrides `root`, including when the argument is omitted: the
+CLI's positional default is `.`. Pass the desired directory explicitly when
+using the CLI. Relative config paths resolve from `--cwd`; Vite plugin paths
+resolve from the Vite project root.
+
+`extends` accepts a local path or an array of local paths. Use it to share
+settings across builds, then set project-specific fields in the current config:
 
 ```ts
 export default defineConfig({
   extends: "./dirwell.base.ts",
-  root: "./downloads",
+  outDir: "./dist",
 });
 ```
 
-Remote extends are intentionally not part of the initial public contract. Local
-layers keep builds reproducible and avoid executing configuration fetched over
-the network.
+## Input and output
 
-## Output filename
+| Field        | Input and result                                                                                                                                  |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `root`       | Directory path; default `.`. Sets the source tree. The CLI positional directory, also defaulting to `.`, overrides it.                            |
+| `outDir`     | Directory path; default `dist/` for build or `.dirwell-preview/` for serve and daemon. Dirwell replaces this tree, so keep other files elsewhere. |
+| `mode`       | `"ssg"` or `"mpa"`; default `"ssg"`. Choose MPA when many pages should share assets.                                                              |
+| `mirror`     | Boolean; default `true`. Copies selected source files. Set `false` only when another publisher supplies the files that page links need.           |
+| `outputName` | Safe filename or sync/async function returning a filename or `null`; default resolver. Names each directory page; return `null` to skip one.      |
 
-`outputName` accepts a fixed filename or a function. The function receives
-complete `DirectoryData` and returns a filename or `null`. Returning `null`
-skips generation for that directory.
+`ssg` writes a directory page and its theme assets in each generated directory.
+It suits a portable tree with simple hosting. `mpa` also writes a page per
+directory but shares runtime assets in the output root's `__dirwell/` directory.
+With the default theme, MPA directories above `virtualizeAfter` entries load rows
+from a data asset and need JavaScript for the list. See [deployment](../deployment/)
+for the trade-offs.
+
+The default filename rule is:
+
+1. Write `index.html` if neither `index.html` nor `index.htm` exists.
+2. Otherwise write `_dirwell.html` if that name is free.
+3. If both names are taken, skip the generated page for that directory.
+
+Dirwell preserves the existing index. Links from other generated pages point to
+`_dirwell.html` when it was created. A fixed `outputName: "listing.html"` uses
+that name for every directory. A function can inspect `DirectoryData.entries`:
 
 ```ts
 export default defineConfig({
@@ -61,13 +84,18 @@ export default defineConfig({
 });
 ```
 
+The name must be one filename, without a directory separator. `__dirwell/` at
+the source root is reserved for generated assets. Dirwell excludes an output
+directory nested inside the source from scanning it again. A custom filename
+that matches a mirrored source file can replace that file in the output;
+choose a distinct name when source documents must stay intact.
+
 ## Include and exclude
 
-By default, Dirwell includes every source entry. `include` and `exclude` accept
-a glob or an array of globs relative to `root`, using `/` separators. A pattern
-without `/` matches at the root; use `**/` to match at any depth. `**` also
-matches dotfiles. Exclusions take precedence; use `exclude` instead of negated
-`!` patterns.
+| Field     | Accepted value; default                           | Effect                                                                                    |
+| --------- | ------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `include` | One source-relative glob or an array; all entries | Limits the source tree to matches. A matched directory includes its descendants.          |
+| `exclude` | One source-relative glob or an array; none        | Removes matches even if `include` selected them. A matched directory removes its subtree. |
 
 ```ts
 export default defineConfig({
@@ -76,36 +104,95 @@ export default defineConfig({
 });
 ```
 
-A matching directory includes its descendants. Parent directories remain when
-needed to reach an included file. Excluding a directory removes its entire
-subtree. The same selection controls mirrored files, generated directory pages,
-and the search index in both SSG and MPA modes, including the watch server and
-Vite adapter. Empty arrays leave that side of the filter unrestricted. A
-symlink to a filtered-out target remains listed without a link and is not
-mirrored.
+Patterns use `/` separators and start relative to `root`. `*.md` matches at
+the root; `**/*.md` matches at any depth. Dotfiles are included in matching.
+Absolute paths, `..` segments, backslashes, and negated `!` patterns are
+rejected. Empty arrays do not restrict that side of the filter.
 
-## URL strategy
+Parent directories stay in the explorer when they lead to a selected file.
+The same selection controls mirrored files, directory pages, and search
+results in build, serve, and Vite modes. A symlink to an excluded target may
+remain visible, but it has no usable link and is not mirrored.
 
-`relative` is the portable default. `base` prefixes every generated URL with
-a Vite-style deployment base. `html-base` emits the native HTML `<base>`
-element and makes every generated URL relative to it.
+## Public URLs
+
+`base` accepts a root-relative path such as `/downloads/` or a complete
+HTTP(S) URL. Its default is `/`. Query strings and fragments are rejected.
+`urls` chooses how Dirwell writes links; its default is `"relative"` for CLI
+and the TypeScript API.
+
+| `urls` value  | Link result and use                                                                                         |
+| ------------- | ----------------------------------------------------------------------------------------------------------- |
+| `"relative"`  | Resolves from each page's depth. Use it when the output tree may move between hosts or paths.               |
+| `"base"`      | Prefixes with `base`, for example `/downloads/file.zip`. Use it for a known deployment mount.               |
+| `"html-base"` | Adds `<base href="...">` and uses document-relative links. Check other relative links in custom theme HTML. |
 
 ```ts
 export default defineConfig({
-  base: "/repository-name/",
-  urls: "base", // "relative" | "base" | "html-base"
+  base: "/project/downloads/",
+  urls: "base",
 });
 ```
 
-`base` may be a root-relative pathname or a complete HTTP(S) URL. Query
-strings and fragments are rejected. Dirwell applies the strategy consistently
-to files, directories, breadcrumbs, parent navigation, theme assets, and
-broken-link raw views.
+The strategy applies to files, directory pages, breadcrumbs, theme assets, and
+raw views of broken symlinks. A correct `base` must match the path where the
+output is actually served. The Vite adapter defaults to `urls: "base"` and
+derives `base` for output inside Vite's build directory.
+
+## Sort order
+
+`sort` changes the generated order. The default theme also offers browser
+controls; a visitor's saved choice can change the displayed order.
+
+| `sort` field       | Input and result                                                                                                                                                                                  |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `field`            | `"name"`, `"modified"`, or `"size"`; default `"name"`. Compares names, modification instants, or file sizes.                                                                                      |
+| `nameMode`         | `"natural"`, `"locale"`, or `"unicode"`; default `"natural"`. Natural puts `file2` before `file10`; locale uses the runtime locale; Unicode compares code points. Also breaks size and time ties. |
+| `direction`        | `"asc"` or `"desc"`; default `"asc"`. Reverses the selected comparison.                                                                                                                           |
+| `directoriesFirst` | Boolean; default `true`. Keeps directory-like entries first in either direction. Set `false` for one mixed sequence.                                                                              |
+
+```ts
+export default defineConfig({
+  sort: { field: "modified", direction: "desc", directoriesFirst: true },
+});
+```
+
+Directory-like symlinks group with directories. Size sorting treats directory
+size as zero and uses names to break ties.
+
+## Symlinks and themes
+
+`symlinks` accepts `follow` (boolean, default `false`), `boundary`
+(`"root"` or `"anywhere"`, default `"root"`), and `onCycle`
+(`"skip"` or `"error"`, default `"skip"`). Start with
+`{ follow: true, boundary: "root", onCycle: "skip" }` when internal directory
+links should have browsable pages. See [symlink behavior](../symlinks/) before
+using `"anywhere"` or publishing untrusted trees.
+
+`theme` accepts an `ExplorerTheme`. The default theme includes search, sorting,
+icons, and appearance controls. `createPlainTheme()` emits no JavaScript or
+search index. `createDefaultTheme(options)` changes selected controls and
+components without replacing the whole renderer. See [theme choices](../themes/).
+
+## Server
+
+`server` configures the CLI `serve` and `daemon start` commands. Vite uses
+its own server configuration.
+
+| Field         | Value; default                      | Use                                                                                    |
+| ------------- | ----------------------------------- | -------------------------------------------------------------------------------------- |
+| `server.host` | Hostname or address; `127.0.0.1`    | Set a different interface when the server must be reachable outside the local machine. |
+| `server.port` | Integer from `0` to `65535`; `4173` | Use another port when the default is occupied; `0` asks the OS to choose one.          |
+
+`--host` and `--port` take precedence over `HOST` and `PORT`, which take
+precedence over config. See [CLI commands](../cli/) for `--cwd` and daemon
+behavior.
 
 ## Vite adapter
 
-Import `dirwell/vite` in `vite.config.ts` to build and serve the explorer from
-the same Vite project:
+Import `dirwell/vite` in a Vite config. Inline options accept the fields above
+except `extends` and `server`. Each entry inherits the project
+`dirwell.config.ts` before applying its own inline fields.
 
 ```ts
 import { defineConfig } from "vite";
@@ -113,89 +200,31 @@ import Dirwell from "dirwell/vite";
 
 export default defineConfig({
   base: "/my-app/",
-  plugins: [Dirwell({ root: "./downloads", mode: "mpa", outDir: "dist/downloads" })],
+  plugins: [
+    Dirwell([
+      { root: "./docs", outDir: "dist/docs", mode: "ssg" },
+      { root: "./releases", outDir: "dist/releases", mode: "mpa" },
+    ]),
+  ],
 });
 ```
 
-The adapter loads `dirwell.config.ts` from the Vite project root, then applies
-inline plugin options over it. The inline options use the same fields as
-`DirwellConfig`, except `server` and `extends`; `extends` remains available in
-the config file. The Vite adapter defaults to `urls: "base"` so links point to
-the published mount. An explicit `urls` value takes precedence. `base` must use
-a dedicated path; mounting over the Vite application root is rejected.
+One object returns one Vite plugin. An array returns one plugin per explorer.
+Each entry needs its own output and public mount. An empty array or overlapping
+output or mount paths fails configuration. The same entries serve through Vite
+in development and generate output after a production build.
 
-Pass an array to generate several independent explorers in one Vite project:
+Vite resolves a relative `outDir` from the Vite project root; an absolute path
+stays absolute. The default is `dirwell/` inside Vite's `build.outDir`. When the
+output is inside that build directory, Dirwell derives the public `base` from
+Vite's `base` and the output subdirectory. For output outside it, set `base`
+explicitly and publish that directory yourself; Vite will not include it in
+its artifact.
 
-```ts
-plugins: [
-  Dirwell([
-    { root: "./docs", outDir: "dist/docs", mode: "ssg" },
-    { root: "./releases", outDir: "dist/releases", mode: "mpa" },
-  ]),
-],
-```
-
-Each entry inherits the project config before its inline options are applied.
-Each explorer has its own output and public mount. Empty arrays and overlapping
-output or mount paths are rejected. The adapter returns one Vite plugin per
-entry, so both development serving and production builds cover every explorer.
-
-`outDir` is a filesystem path. A relative value resolves from the Vite project
-root; an absolute value is used as given. Its default is `dirwell/` inside the
-resolved Vite `build.outDir`. When `outDir` is inside the Vite output, Dirwell
-derives `base` from Vite's base and the output subdirectory. An output outside
-Vite's build directory is published separately and requires an explicit public
-`base`. For example, `outDir: "/srv/downloads"` with `base: "/downloads/"`
-generates files under `/srv/downloads` and uses `/downloads/` in links; Vite
-does not include those files in its own artifact.
-
-Dirwell owns the entire `outDir` subtree. The adapter refuses to replace Vite's
-output root, a parent of that root or the source directory, and an existing
-directory without its ownership marker. In development it serves a private
-temporary build under the public `base` through Vite, watches the source with
-Vite's watcher, and requests a browser reload after a successful rebuild. A
-failed rebuild leaves the previous output available and reports an error in
-Vite. When mirroring is enabled, the adapter rejects included absolute symlinks
-and relative symlinks that escape the source directory; either could expose files
-outside the published explorer. Excluded links are not mirrored. Set
-`mirror: false` when those source links must remain visible as metadata without
-copying files. Vite is the supported host; other unplugin hosts have not been
-verified.
-
-## Sorting
-
-`sort.field` accepts `name`, `modified`, or `size`. Name sorting supports
-`unicode` code-point order, locale-aware `locale` comparison, and `natural`
-comparison for names such as `file2` and `file10`. `direction` and
-`directoriesFirst` are independent, so descending order does not force folders
-to the bottom.
-
-The default theme exposes the same choices at runtime and remembers the user's
-preference locally. Set `sorting: false` in `createDefaultTheme()` to omit those
-controls while retaining the generated order.
-
-The default theme displays modified times in the viewer's local time zone after
-JavaScript loads, with the UTC offset shown beside the date. Generated HTML
-uses an explicit UTC label, so it remains readable when JavaScript is disabled.
-The plain theme always displays UTC because it has no JavaScript. The
-`<time datetime>` value preserves the instant; sorting uses that instant rather
-than the displayed text. Custom themes can format dates differently.
-
-## Global search
-
-The generated `__dirwell/search-index.json` is a manifest for smaller search
-index files. They contain paths and display metadata, not file contents. The
-default theme starts with the current directory and fetches the manifest only
-after the user opens Search all files and types a query. Results stay in the
-search panel; the current directory does not change. The best 100 matches render
-progressively while the remaining index files load. Independent type controls filter
-physical folders, physical files, and symlinks. All three are selected by default;
-any combination works in both the current folder and global search. Clearing all
-three shows a prompt to select a type and does not load the global index.
-
-In MPA mode, the default theme puts directories with more than 500 entries in a
-per-directory data asset and uses a measured virtual list. Row heights are
-remeasured when names wrap or the viewport changes. These large MPA pages need
-JavaScript; filtering and sorting run in a Web Worker when available, with a
-main-thread fallback. SSG keeps full HTML for no-JavaScript browsing. Set
-`virtualizeAfter` in `createDefaultTheme()` to change the threshold.
+Dirwell owns each complete `outDir` subtree. The adapter refuses to replace
+Vite's output root, the source directory, or an existing destination without
+its ownership marker. It serves a temporary build in development, watches
+source changes, and keeps the previous preview available after a failed
+rebuild. With `mirror: true`, it rejects included absolute symlinks and links
+that escape the source tree. Vite is the verified host; other unplugin hosts
+have not been verified.

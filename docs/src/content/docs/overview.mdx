@@ -7,14 +7,25 @@ Dirwell turns a directory into a static, accessible file explorer. Use it for
 release downloads, generated artifacts, documentation attachments, or any
 folder that needs a useful web interface without an application server.
 
-## Defaults that ship
+SSG means static site generation: it writes portable pages with assets in
+each directory. MPA means multi-page application: directory pages share
+runtime assets under one output root. Both modes write static files.
+
+## Choose a path
+
+| Your next step                                 | Open                                   |
+| ---------------------------------------------- | -------------------------------------- |
+| Browse one folder and build static output      | [Getting started](../getting-started/) |
+| Decide between SSG, MPA, and URL strategies    | [Deployment](../deployment/)           |
+| Look up an accepted value or default           | [Configuration](../configuration/)     |
+| Choose icons, controls, or a complete renderer | [Themes](../themes/)                   |
+| Compare working output with source             | [Examples](../examples/)               |
+
+## Defaults
 
 - One-command local server with file watching and live reload.
-- Deployable SSG or MPA output.
+- Deployable SSG output; choose MPA when pages should share runtime assets.
 - Fuzzy search, IME-safe keyboard input, linked breadcrumbs, and color-scheme controls.
 - Explicit broken, cyclic, and out-of-root symlink states.
 - Relative, deployment-base, and native HTML `<base>` URL strategies.
 - Typed theme components that can be wrapped or replaced.
-
-Start with the [installation and first build](../getting-started/), then open the
-[configuration reference](../configuration/) only when the defaults need to change.
