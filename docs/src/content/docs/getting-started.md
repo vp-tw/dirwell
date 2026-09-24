@@ -21,7 +21,8 @@ pnpm dlx dirwell build ./public --out-dir ./dist
 ```
 
 The output is a static directory tree suitable for any file host. Existing
-`index.html` and `index.htm` files are preserved by default.
+`index.html` and `index.htm` files are preserved by default. When either exists,
+Dirwell writes `_dirwell.html` if that name is available.
 
 ## Add configuration when needed
 

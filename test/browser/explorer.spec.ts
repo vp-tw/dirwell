@@ -145,6 +145,30 @@ async function assertFilePolicy(page: Page): Promise<void> {
 }
 
 for (const mode of ["ssg", "mpa"] as const) {
+  test(`${mode}: generated fallback page remains reachable beside an existing index`, async ({
+    page,
+  }) => {
+    const sourceDir = path.join(temporary, `fallback-${mode}`);
+    const outputDir = path.join(temporary, `fallback-output-${mode}`);
+    await mkdir(path.join(sourceDir, "docs"), { recursive: true });
+    await writeFile(path.join(sourceDir, "docs", "index.html"), "<h1>Existing document</h1>");
+    await writeFile(path.join(sourceDir, "docs", "guide.txt"), "Guide");
+    await generateExplorer({ sourceDir, outputDir, mode, base: mount, urlStrategy: "base" });
+    const server = await serveStatic(outputDir);
+    try {
+      await page.goto(server.url);
+      await page.getByRole("link", { name: "docs/" }).click();
+      await expect(page).toHaveURL(/\/catalog\/docs\/_dirwell\.html$/);
+      await expect(page.getByRole("heading", { name: "/docs/" })).toBeVisible();
+      await page.getByRole("link", { name: "Home" }).click();
+      await expect(page).toHaveURL(/\/catalog\/$/);
+      const existing = await page.request.get(new URL("docs/", server.url).href);
+      expect(await existing.text()).toContain("Existing document");
+    } finally {
+      await server.close();
+    }
+  });
+
   test(`${mode}: navigation, breadcrumbs, file tabs, and symlink boundaries`, async ({ page }) => {
     await page.goto(urls[mode]);
     await expect(page.getByRole("heading", { name: "/" })).toBeVisible();

@@ -149,6 +149,7 @@ test("mirrors source files and preserves an existing index", async (context) => 
 
   assert.equal(await readFile(path.join(output, "README.txt"), "utf8"), "initial\n");
   assert.match(await readFile(path.join(output, "docs", "index.html"), "utf8"), /Docs/);
+  assert.match(await readFile(path.join(output, "docs", "_dirwell.html"), "utf8"), /index\.html/);
   assert.match(await readFile(path.join(output, "releases", "index.html"), "utf8"), /cycle/);
   assert.match(
     await readFile(path.join(output, "releases", "index.html"), "utf8"),
@@ -187,7 +188,7 @@ test("mirrors source files and preserves an existing index", async (context) => 
   assert.match(rootIndex, />Dirwell<\/a> by VdustR/);
   assert.doesNotMatch(rootIndex, /data-parent-href/);
   assert.match(rootIndex, /href="README\.txt" target="_blank" rel="noopener">[\s\S]*README\.txt/);
-  assert.match(rootIndex, /href="docs\/" target="_blank" rel="noopener">[\s\S]*docs\//);
+  assert.match(rootIndex, /href="docs\/_dirwell\.html">[\s\S]*docs\//);
   assert.match(rootIndex, /href="releases\/">[\s\S]*releases\//);
   assert.match(rootIndex, /href="space%20name\.txt"/);
   assert.doesNotMatch(rootIndex, /href="releases\/" target="_blank"/);
@@ -200,6 +201,60 @@ test("mirrors source files and preserves an existing index", async (context) => 
   )?.[1];
   assert.ok(rawLinkHref);
   assert.equal(await readFile(path.join(output, rawLinkHref), "utf8"), "missing");
+});
+
+test("default page name falls back once and preserves both existing pages", async (context) => {
+  const { output, root } = await fixture();
+  context.after(() => rm(path.dirname(root), { recursive: true, force: true }));
+  await mkdir(path.join(root, "both"));
+  await writeFile(path.join(root, "both", "index.html"), "Original index");
+  await writeFile(path.join(root, "both", "_dirwell.html"), "Original fallback");
+  await mkdir(path.join(root, "legacy"));
+  await writeFile(path.join(root, "legacy", "index.htm"), "Legacy index");
+
+  for (const mode of ["ssg", "mpa"] as const) {
+    await generateExplorer({ sourceDir: root, outputDir: output, mode });
+    assert.equal(
+      await readFile(path.join(output, "docs", "index.html"), "utf8"),
+      "<!doctype html><title>Docs</title>",
+    );
+    assert.match(await readFile(path.join(output, "docs", "_dirwell.html"), "utf8"), /index\.html/);
+    assert.equal(await readFile(path.join(output, "both", "index.html"), "utf8"), "Original index");
+    assert.equal(
+      await readFile(path.join(output, "both", "_dirwell.html"), "utf8"),
+      "Original fallback",
+    );
+    assert.equal(await readFile(path.join(output, "legacy", "index.htm"), "utf8"), "Legacy index");
+    assert.match(
+      await readFile(path.join(output, "legacy", "_dirwell.html"), "utf8"),
+      /index\.htm/,
+    );
+    const rootHtml = await readFile(path.join(output, "index.html"), "utf8");
+    assert.match(rootHtml, /href="docs\/_dirwell\.html"/);
+    assert.match(rootHtml, /href="legacy\/_dirwell\.html"/);
+    assert.match(rootHtml, /href="both\/" target="_blank"/);
+    const index = JSON.parse(
+      await readFile(path.join(output, "__dirwell", "search-00000.json"), "utf8"),
+    );
+    assert.equal(
+      index.entries.find((entry: { path: string }) => entry.path === "docs")?.href,
+      "../docs/_dirwell.html",
+    );
+  }
+});
+
+test("a root index keeps its contents and receives a linked Explorer fallback", async (context) => {
+  const { output, root } = await fixture();
+  context.after(() => rm(path.dirname(root), { recursive: true, force: true }));
+  await writeFile(path.join(root, "index.html"), "Original root index");
+  await generateExplorer({ sourceDir: root, outputDir: output, theme: createPlainTheme() });
+
+  assert.equal(await readFile(path.join(output, "index.html"), "utf8"), "Original root index");
+  assert.match(await readFile(path.join(output, "_dirwell.html"), "utf8"), /README\.txt/);
+  assert.match(
+    await readFile(path.join(output, "releases", "index.html"), "utf8"),
+    /href="\.\.\/_dirwell\.html">Home<\/a>/,
+  );
 });
 
 test("supports a clean output directory inside the source tree", async (context) => {

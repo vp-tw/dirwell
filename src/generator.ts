@@ -40,7 +40,9 @@ const defaultSort = {
 
 export const defaultOutputName: OutputNameResolver = ({ entries }) =>
   entries.some((entry) => entry.kind === "file" && indexPattern.test(entry.name))
-    ? null
+    ? entries.some((entry) => entry.name.toLowerCase() === "_dirwell.html")
+      ? null
+      : "_dirwell.html"
     : "index.html";
 
 function entryKind(stats: Stats): EntryKind {
@@ -364,9 +366,20 @@ export async function generateExplorer(options: GenerateOptions): Promise<void> 
   try {
     await visit("", sourceDir, new Set());
 
-    const generatedDirectories = new Set(
-      plans.filter((plan) => plan.outputName !== null).map((plan) => plan.logicalDir),
+    const generatedPages = new Map(
+      plans
+        .filter(
+          (plan): plan is typeof plan & { readonly outputName: string } => plan.outputName !== null,
+        )
+        .map((plan) => [plan.logicalDir, plan.outputName]),
     );
+    const generatedDirectories = new Set(generatedPages.keys());
+    const pagePathForDirectory = (logicalPath: string): string => {
+      const pageName = generatedPages.get(logicalPath);
+      return pageName === undefined || pageName === "index.html"
+        ? logicalPath
+        : path.posix.join(logicalPath, pageName);
+    };
     const sharedAssets = new Map<string, string | Uint8Array>();
     const rawLinkFiles = new Map<string, string>();
     const searchEntries = new Map<
@@ -395,16 +408,20 @@ export async function generateExplorer(options: GenerateOptions): Promise<void> 
               ? entry.symlink.targetRelativePath
               : path.posix.join(logicalDir, entry.name);
         const directoryLike = isDirectoryLike(entry);
+        const linkedPath =
+          directoryLike && targetLogicalPath !== null
+            ? pagePathForDirectory(targetLogicalPath)
+            : targetLogicalPath;
         let href: string | null = null;
         if (entry.symlink?.isBroken) {
           const filename = rawLinkFilename(entry);
           rawLinkFiles.set(filename, entry.symlink.target);
           href = `raw-links/${filename}`;
-        } else if (targetLogicalPath !== null) {
+        } else if (linkedPath !== null) {
           href =
-            targetLogicalPath === ""
+            linkedPath === ""
               ? "../"
-              : `../${encodeLogicalPath(targetLogicalPath)}${directoryLike ? "/" : ""}`;
+              : `../${encodeLogicalPath(linkedPath)}${directoryLike && linkedPath === targetLogicalPath ? "/" : ""}`;
         }
         searchEntries.set(entry.relativePath, {
           exitsExplorer:
@@ -436,10 +453,12 @@ export async function generateExplorer(options: GenerateOptions): Promise<void> 
         return path.posix.join(logicalDir, entry.name);
       };
       const hrefForLogicalPath = (targetPath: string, directoryLike: boolean): string => {
+        const linkedPath = directoryLike ? pagePathForDirectory(targetPath) : targetPath;
+        const linkToDirectory = directoryLike && linkedPath === targetPath;
         if (urlStrategy === "relative") {
           const relativeTarget = path.posix.relative(
             logicalDir === "" ? "." : logicalDir,
-            targetPath === "" ? "." : targetPath,
+            linkedPath === "" ? "." : linkedPath,
           );
           const encodedTarget = relativeTarget
             .split("/")
@@ -447,13 +466,13 @@ export async function generateExplorer(options: GenerateOptions): Promise<void> 
               segment === "." || segment === ".." ? segment : encodeURIComponent(segment),
             )
             .join("/");
-          return `${encodedTarget || "."}${directoryLike ? "/" : ""}`;
+          return `${encodedTarget || "."}${linkToDirectory ? "/" : ""}`;
         }
-        const encodedTarget = encodeLogicalPath(targetPath);
+        const encodedTarget = encodeLogicalPath(linkedPath);
         if (encodedTarget === "") {
           return urlStrategy === "base" ? base : "./";
         }
-        const suffix = `${encodedTarget}${directoryLike ? "/" : ""}`;
+        const suffix = `${encodedTarget}${linkToDirectory ? "/" : ""}`;
         return urlStrategy === "base" ? `${base}${suffix}` : suffix;
       };
       const hrefFor = (entry: FileSystemEntry): string | null => {
