@@ -36,20 +36,20 @@ staging directory before replacing the previous output.
 receiving `{ command: "build" | "serve" | "daemon" }`. The function may be
 asynchronous. A `dirwell.config.ts` file is discovered from `--cwd`.
 
-| Field        | Default and effect                                                                                                                       |
-| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `root`       | `.` for `resolveGenerateOptions()`; the CLI positional directory takes precedence and itself defaults to `.`.                            |
-| `outDir`     | `dist/` for build; `.dirwell-preview/` for serve and daemon.                                                                             |
-| `mode`       | `"ssg"`; `"mpa"` shares runtime assets under `__dirwell/`.                                                                               |
-| `mirror`     | `true`; copy source files to the output.                                                                                                 |
-| `base`       | `/`; root-relative path or HTTP(S) URL without query or fragment.                                                                        |
-| `urls`       | `"relative"`; also accepts `"base"` and `"html-base"`.                                                                                   |
-| `outputName` | `defaultOutputName`; preserve an existing `index.html` or `index.htm`. A function may return a filename, `null`, or a promise of either. |
-| `sort`       | Name, natural comparison, ascending, directories first.                                                                                  |
-| `symlinks`   | `{ follow: false, boundary: "root", onCycle: "skip" }`.                                                                                  |
-| `theme`      | `defaultTheme`.                                                                                                                          |
-| `server`     | Serve/daemon host `127.0.0.1`, port `4173`; `HOST` and `PORT` may override these.                                                        |
-| `extends`    | No inherited config; local path or array of local paths.                                                                                 |
+| Field        | Default and effect                                                                                                                                               |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `root`       | `.` for `resolveGenerateOptions()`; the CLI positional directory takes precedence and itself defaults to `.`.                                                    |
+| `outDir`     | `dist/` for build; `.dirwell-preview/` for serve and daemon.                                                                                                     |
+| `mode`       | `"ssg"`; `"mpa"` shares runtime assets under `__dirwell/`.                                                                                                       |
+| `mirror`     | `true`; copy source files to the output.                                                                                                                         |
+| `base`       | `/`; root-relative path or HTTP(S) URL without query or fragment.                                                                                                |
+| `urls`       | `"relative"`; also accepts `"base"` and `"html-base"`.                                                                                                           |
+| `outputName` | `defaultOutputName`; use `_dirwell.html` when an index exists, and skip when both names exist. A function may return a filename, `null`, or a promise of either. |
+| `sort`       | Name, natural comparison, ascending, directories first.                                                                                                          |
+| `symlinks`   | `{ follow: false, boundary: "root", onCycle: "skip" }`.                                                                                                          |
+| `theme`      | `defaultTheme`.                                                                                                                                                  |
+| `server`     | Serve/daemon host `127.0.0.1`, port `4173`; `HOST` and `PORT` may override these.                                                                                |
+| `extends`    | No inherited config; local path or array of local paths.                                                                                                         |
 
 For an index rule, inspect the typed `DirectoryData` argument. Returning `null`
 skips generation for that directory:
@@ -89,7 +89,7 @@ JavaScript, or a search index. Complete replacement themes implement
 | `generateExplorer`        | Generate a static explorer from `GenerateOptions`.                                                |
 | `createExplorerDevServer` | Build, watch, serve, and expose a `close()` method.                                               |
 | `readGeneratedPage`       | Read a generated HTML file as text.                                                               |
-| `defaultOutputName`       | Skip generation when a directory has an existing index document.                                  |
+| `defaultOutputName`       | Use `index.html`, then `_dirwell.html` if an index exists; skip when both names exist.            |
 | `compareEntries`          | Compare two entries with optional sort settings.                                                  |
 | `createDefaultTheme`      | Create the interactive default theme.                                                             |
 | `defaultTheme`            | Ready-made instance of the default theme.                                                         |

@@ -12,7 +12,8 @@ pnpm dlx dirwell build . --out-dir dist
 ```
 
 The first command watches the current directory and serves it. `build` writes a
-static site. Existing `index.html` and `index.htm` files are preserved.
+static site. Existing `index.html` and `index.htm` files are preserved; Dirwell
+uses `_dirwell.html` for those directories when that name is available.
 
 ```text
 dirwell [directory]          # alias for serve

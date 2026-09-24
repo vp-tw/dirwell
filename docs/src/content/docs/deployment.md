@@ -22,9 +22,11 @@ HTML without JavaScript.
 
 ## Existing index documents
 
-The default resolver does not replace `index.html` or `index.htm`. A link to a
-directory with its own index opens in a new tab because it leaves the Explorer.
-Links between generated Explorer pages remain in the same tab.
+The default resolver does not replace `index.html` or `index.htm`. When either
+exists, it writes `_dirwell.html` and links to that page from other Explorer
+pages. If `_dirwell.html` also exists, generation for that directory is skipped;
+the directory link opens its existing index in a new tab. Links between generated
+Explorer pages remain in the same tab.
 
 ## Verification
 
