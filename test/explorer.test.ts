@@ -117,7 +117,12 @@ test("default theme self-hosts vscode-icons in SSG and MPA output", async (conte
     const assetPrefix = mode === "mpa" ? "__dirwell/" : "";
     assert.match(html, new RegExp(`src="${assetPrefix}vscode-default_folder\\.svg"`));
     assert.match(html, new RegExp(`src="${assetPrefix}vscode-file_type_text\\.svg"`));
-    assert.match(html, /Icon credits<\/a>/);
+    assert.match(
+      html,
+      /href="https:\/\/github\.com\/VdustR" target="_blank" rel="noopener">VdustR<\/a>/,
+    );
+    assert.match(html, /vscode-icons-NOTICE\.txt" target="_blank" rel="noopener">Notices<\/a>/);
+    assert.doesNotMatch(html, /Icon credits/);
     assert.match(html, /&quot;icons&quot;:\{&quot;light&quot;:\{&quot;file&quot;:/);
     assert.match(html, /main > header \{\s*position: sticky;\s*top: 0;/);
     assert.match(
@@ -259,7 +264,10 @@ test("mirrors source files and preserves an existing index", async (context) => 
     rootIndex,
     /<label class="scheme">Theme<select data-color-scheme><option value="system">System<\/option>/,
   );
-  assert.match(rootIndex, />Dirwell<\/a> by VdustR/);
+  assert.match(
+    rootIndex,
+    />Dirwell<\/a> by <a href="https:\/\/github\.com\/VdustR"[^>]*>VdustR<\/a>/,
+  );
   assert.doesNotMatch(rootIndex, /data-parent-href/);
   assert.match(rootIndex, /href="README\.txt" target="_blank" rel="noopener">[\s\S]*README\.txt/);
   assert.match(rootIndex, /href="docs\/_dirwell\.html">[\s\S]*docs\//);

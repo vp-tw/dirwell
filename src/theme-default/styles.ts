@@ -120,6 +120,7 @@ main[data-sticky-header-disabled] > header {
 }
 .chrome {
   display: flex;
+  flex-wrap: wrap;
   min-height: 3.4rem;
   align-items: center;
   justify-content: space-between;
@@ -139,6 +140,8 @@ main[data-sticky-header-disabled] > header {
 .breadcrumbs a,
 .breadcrumbs span {
   color: inherit;
+  overflow-wrap: anywhere;
+  min-width: 0;
 }
 .breadcrumbs a {
   color: var(--accent);
@@ -219,11 +222,12 @@ main[data-sticky-header-disabled] > header {
   font-size: 0.78rem;
 }
 .type-filters label {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.35rem;
-  min-height: calc(var(--dw-control-height) - 0.5rem);
+  min-height: var(--dw-control-height);
   padding: 0.2rem 0.55rem;
   border-radius: 0.35rem;
   white-space: nowrap;
@@ -231,14 +235,19 @@ main[data-sticky-header-disabled] > header {
 }
 .type-filters label:has(input:checked) {
   background: var(--hover);
+  color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
 }
 .type-filters label:has(input:focus-visible) {
   outline: 3px solid var(--focus);
   outline-offset: 1px;
 }
 .type-filters input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
   margin: 0;
-  accent-color: var(--accent);
+  opacity: 0;
 }
 .sort-menu select {
   min-height: var(--dw-control-height);
@@ -408,6 +417,7 @@ main[data-sticky-header-disabled] > header {
   display: inline-flex;
   min-height: var(--dw-control-height);
   align-items: center;
+  gap: 0.25rem;
   width: max-content;
   border: 0;
   background: transparent;
@@ -424,6 +434,19 @@ button.sort-heading {
 }
 .sort-heading[aria-pressed="true"] {
   color: var(--accent);
+}
+.sort-indicator {
+  display: none;
+  align-items: center;
+}
+.sort-heading[aria-pressed="true"] .sort-indicator {
+  display: inline-flex;
+}
+.sort-heading[data-direction="desc"] .sort-indicator {
+  transform: rotate(180deg);
+}
+.sort-heading .sort-indicator .icon {
+  color: currentColor;
 }
 .entries {
   list-style: none;
@@ -625,6 +648,12 @@ kbd {
   }
   .chrome {
     padding-inline: 1rem;
+  }
+  .breadcrumbs {
+    flex: 1 1 auto;
+  }
+  .summary {
+    margin-left: auto;
   }
   .toolbar {
     padding: 1rem;

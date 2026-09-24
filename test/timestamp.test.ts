@@ -3,7 +3,7 @@ import test from "node:test";
 import type { FileSystemEntry, ThemeContext } from "../src/model.ts";
 import { defaultThemeComponents } from "../src/theme-default/components.ts";
 import { createPlainTheme } from "../src/theme-plain.ts";
-import { utcTimestamp as browserTimestamp } from "../src/theme-runtime.js";
+import { localTimestampLabel, utcTimestamp as browserTimestamp } from "../src/theme-runtime.js";
 import { utcTimestamp as serverTimestamp } from "../src/timestamp.ts";
 
 const cases = [
@@ -21,6 +21,22 @@ test("server and browser timestamps show the same UTC instant across date bounda
   for (const invalid of [undefined, "", "invalid", "2026-13-01T00:00:00Z", "2026-01-01T00:00:00"]) {
     assert.equal(serverTimestamp(invalid), null);
     assert.equal(browserTimestamp(invalid), null);
+  }
+});
+
+test("browser labels use the instant's local offset across date and daylight-saving boundaries", () => {
+  const previous = process.env.TZ;
+  try {
+    process.env.TZ = "Asia/Taipei";
+    assert.equal(localTimestampLabel("2025-12-31T23:30:00Z"), "2026-01-01 07:30 UTC+08:00");
+    process.env.TZ = "America/Los_Angeles";
+    assert.equal(localTimestampLabel("2026-01-01T01:30:00Z"), "2025-12-31 17:30 UTC-08:00");
+    assert.equal(localTimestampLabel("2026-07-01T01:30:00Z"), "2026-06-30 18:30 UTC-07:00");
+    assert.equal(localTimestampLabel("invalid"), null);
+    assert.equal(localTimestampLabel(undefined), null);
+  } finally {
+    if (previous === undefined) delete process.env.TZ;
+    else process.env.TZ = previous;
   }
 });
 

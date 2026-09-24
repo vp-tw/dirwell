@@ -15,7 +15,7 @@ export interface DefaultThemeIconSet {
   readonly light: DefaultThemeIconVariant;
   /** Omit to use the light icons in both color schemes. */
   readonly dark?: DefaultThemeIconVariant;
-  /** Optional attribution included in generated sites and linked from the footer. */
+  /** Optional attribution included in generated sites and linked as Notices. */
   readonly notice?: string;
 }
 

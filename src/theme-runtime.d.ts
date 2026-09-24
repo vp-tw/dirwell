@@ -2,6 +2,7 @@ export function fuzzyScore(query: string, value: string): number | null;
 export function utcTimestamp(
   value: string | null | undefined,
 ): { readonly datetime: string; readonly label: string } | null;
+export function localTimestampLabel(value: string | null | undefined): string | null;
 export function entryType(entry: {
   readonly kind?: string;
   readonly targetKind?: string | null;

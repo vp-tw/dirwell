@@ -23,6 +23,7 @@ export default defineConfig({
     sorting: true,
     project: {
       author: "Your name",
+      authorUrl: "https://github.com/you",
       repositoryUrl: "https://github.com/you/project",
       license: "MIT License",
       licenseUrl: "https://github.com/you/project/blob/main/LICENSE",

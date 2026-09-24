@@ -158,11 +158,12 @@ The default theme exposes the same choices at runtime and remembers the user's
 preference locally. Set `sorting: false` in `createDefaultTheme()` to omit those
 controls while retaining the generated order.
 
-The built-in themes display modified times in UTC with an explicit `UTC` label.
-The generated HTML is readable without JavaScript and shows the same time in
-every viewer's time zone. The `<time datetime>` value preserves the instant;
-sorting uses that instant rather than the displayed text. Custom themes can
-format dates differently.
+The default theme displays modified times in the viewer's local time zone after
+JavaScript loads, with the UTC offset shown beside the date. Generated HTML
+uses an explicit UTC label, so it remains readable when JavaScript is disabled.
+The plain theme always displays UTC because it has no JavaScript. The
+`<time datetime>` value preserves the instant; sorting uses that instant rather
+than the displayed text. Custom themes can format dates differently.
 
 ## Global search
 
@@ -171,7 +172,7 @@ index files. They contain paths and display metadata, not file contents. The
 default theme starts with the current directory and fetches the manifest only
 after the user opens Search all files and types a query. Results stay in the
 search panel; the current directory does not change. The best 100 matches render
-progressively while the remaining index files load. Independent checkboxes filter
+progressively while the remaining index files load. Independent type controls filter
 physical folders, physical files, and symlinks. All three are selected by default;
 any combination works in both the current folder and global search. Clearing all
 three shows a prompt to select a type and does not load the global index.

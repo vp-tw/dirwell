@@ -57,6 +57,7 @@ function badge(entry: FileSystemEntry): string {
 }
 
 const iconPaths: Record<IconName, string> = {
+  "arrow-up": '<path d="M12 19V5m-7 7 7-7 7 7"/>',
   "chevron-right": '<path d="m9 18 6-6-6-6"/>',
   file: '<path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5z"/><polyline points="14 2 14 8 20 8"/>',
   folder:
@@ -67,10 +68,26 @@ const iconPaths: Record<IconName, string> = {
   sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.42"/>',
 };
 
+function safeExternalHref(value: string | undefined): string | null {
+  if (value === undefined) return null;
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" || url.protocol === "http:" ? url.href : null;
+  } catch {
+    return null;
+  }
+}
+
+function controlIcon(name: IconName, size = 16): string {
+  return `<svg class="icon" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${iconPaths[name]}</svg>`;
+}
+
 export const defaultThemeComponents: DirwellThemeComponents = {
   Icon: ({ label, name, size = 16, src, darkSrc }) =>
     src === undefined
-      ? `<svg class="icon" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"${label === undefined ? ' aria-hidden="true"' : ` role="img" aria-label="${escapeHtml(label)}"`}>${iconPaths[name]}</svg>`
+      ? label === undefined
+        ? controlIcon(name, size)
+        : `<svg class="icon" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="${escapeHtml(label)}">${iconPaths[name]}</svg>`
       : `<img class="icon file-icon${darkSrc === undefined ? "" : " file-icon--light"}" width="20" height="20" src="${escapeHtml(src)}" alt="" loading="lazy">${darkSrc === undefined ? "" : `<img class="icon file-icon file-icon--dark" width="20" height="20" src="${escapeHtml(darkSrc)}" alt="" loading="lazy">`}`,
   Breadcrumbs: ({ items }) =>
     `<nav class="breadcrumbs" aria-label="Breadcrumb">${items
@@ -152,7 +169,7 @@ export const defaultThemeComponents: DirwellThemeComponents = {
     const headings = (["name", "size", "modified"] as const)
       .map((field) =>
         sorting
-          ? `<button class="sort-heading" type="button" data-sort-heading="${field}">${field}</button>`
+          ? `<button class="sort-heading" type="button" data-sort-heading="${field}">${field}<span class="sort-indicator">${controlIcon("arrow-up", 14)}</span></button>`
           : `<span class="sort-heading">${field}</span>`,
       )
       .join("");
@@ -163,7 +180,12 @@ export const defaultThemeComponents: DirwellThemeComponents = {
     const shortcuts = keyboardNavigation
       ? `<p class="shortcuts" id="keyboard-shortcuts"><kbd>/</kbd> search <kbd>↑</kbd><kbd>↓</kbd> browse <kbd>Esc</kbd> clear${parentHref === null ? "" : " <kbd>Backspace</kbd> parent"}</p>`
       : "";
-    return `<footer><p class="project-meta"><a href="${escapeHtml(project.repositoryUrl)}" target="_blank" rel="noopener">${escapeHtml(project.name)}</a> by ${escapeHtml(project.author)}<a href="${escapeHtml(project.licenseUrl)}" target="_blank" rel="noopener">${escapeHtml(project.license)}</a>${iconNoticeHref === undefined ? "" : `<a href="${escapeHtml(iconNoticeHref)}" target="_blank" rel="noopener">Icon credits</a>`}</p>${shortcuts}</footer>`;
+    const authorHref = safeExternalHref(project.authorUrl);
+    const author =
+      authorHref === null
+        ? escapeHtml(project.author)
+        : `<a href="${escapeHtml(authorHref)}" target="_blank" rel="noopener">${escapeHtml(project.author)}</a>`;
+    return `<footer><p class="project-meta"><a href="${escapeHtml(project.repositoryUrl)}" target="_blank" rel="noopener">${escapeHtml(project.name)}</a> by ${author}<a href="${escapeHtml(project.licenseUrl)}" target="_blank" rel="noopener">${escapeHtml(project.license)}</a>${iconNoticeHref === undefined ? "" : `<a href="${escapeHtml(iconNoticeHref)}" target="_blank" rel="noopener">Notices</a>`}</p>${shortcuts}</footer>`;
   },
   PageShell: ({
     assets,
