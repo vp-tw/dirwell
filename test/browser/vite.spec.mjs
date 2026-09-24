@@ -68,6 +68,44 @@ for (const mode of ["ssg", "mpa"]) {
   });
 }
 
+test("Vite options array serves and refreshes separate mounts", async ({ page }) => {
+  const root = await mkdtemp(path.join(tmpdir(), "dirwell-vite-array-browser-"));
+  await mkdir(path.join(root, "notes"));
+  await mkdir(path.join(root, "releases"));
+  await writeFile(path.join(root, "notes", "note.txt"), "note");
+  await writeFile(path.join(root, "releases", "release.txt"), "release");
+  await writeFile(path.join(root, "index.html"), "<main>Host application</main>");
+  const server = await createServer({
+    root,
+    configFile: false,
+    base: "/app/",
+    logLevel: "silent",
+    plugins: dirwellVite([
+      { root: "notes", outDir: "dist/notes", mode: "ssg" },
+      { root: "releases", outDir: "dist/releases", mode: "mpa" },
+    ]),
+    server: { host: "127.0.0.1", port: 0 },
+  });
+  try {
+    await server.listen();
+    const local = server.resolvedUrls?.local[0];
+    if (local === undefined) throw new Error("Vite did not expose a local URL");
+    await page.goto(new URL("/app/notes/", local).href);
+    await expect(page.getByRole("link", { name: "note.txt" })).toBeVisible();
+    await page.goto(new URL("/app/releases/", local).href);
+    await expect(page.getByRole("link", { name: "release.txt" })).toBeVisible();
+    await writeFile(path.join(root, "notes", "new.txt"), "new");
+    await page.goto(new URL("/app/notes/", local).href);
+    await expect(page.getByRole("link", { name: "new.txt" })).toBeVisible();
+    expect((await page.request.get(new URL("/app/releases/new.txt", local).href)).status()).toBe(
+      404,
+    );
+  } finally {
+    await server.close();
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
 test("Vite dev excludes its previous output when the project root is the source", async ({
   page,
 }) => {

@@ -1,9 +1,15 @@
 # Unplugin integration evaluation
 
-## Decision
+> Historical evaluation. The current Vite adapter is implemented in
+> `src/vite.ts`; it serves and watches generated explorers in development and
+> supports multiple configurations in one Vite build. Other unplugin hosts
+> remain unverified.
 
-Do not add an unplugin adapter to the alpha package. Use `generateExplorer()`
-from a build script when a host owns the build, or use the `dirwell build` and
+## Historical decision
+
+At the time of this evaluation, the decision was not to add an unplugin adapter
+to the alpha package. The recommendation was to use `generateExplorer()` from a
+build script when a host owns the build, or use the `dirwell build` and
 `dirwell serve` commands when Dirwell owns it. A Vite build hook can call the
 generator, but that alone does not provide a complete development integration.
 Create a separate adapter issue when a real host integration needs its own
@@ -11,7 +17,7 @@ serving, watching, and output ownership contract.
 
 ## Evidence
 
-The repository's `scripts/build-examples.ts` calls the CLI for five independent
+At evaluation time, `scripts/build-examples.ts` called the CLI for five independent
 examples. `generateExplorer()` is also a public API. It stages output and then
 replaces the entire output directory, so sharing that directory with a host
 bundler could erase the host's files or be erased by the host. The CLI's serve

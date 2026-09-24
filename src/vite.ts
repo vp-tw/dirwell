@@ -129,8 +129,16 @@ interface RuntimeOptions {
   readonly generate: Parameters<typeof generateExplorer>[0];
 }
 
-const createDirwellPlugin = createVitePlugin<DirwellViteOptions | undefined, false>(
-  (inlineOptions) => {
+interface PluginDestination {
+  readonly outputDir: string;
+  readonly publicMount: string;
+}
+
+function createDirwellPlugin(
+  inlineOptions: DirwellViteOptions | undefined,
+  destinations?: PluginDestination[],
+): import("vite").Plugin {
+  const factory = createVitePlugin<DirwellViteOptions | undefined, false>(() => {
     let viteConfig: ResolvedConfig;
     let runtime: RuntimeOptions;
     let server: ViteDevServer | undefined;
@@ -190,6 +198,23 @@ const createDirwellPlugin = createVitePlugin<DirwellViteOptions | undefined, fal
           }
           const base = merged.base ?? defaultBase(config, relativeOutput);
           const publicMount = mountPath(base);
+          if (destinations !== undefined) {
+            for (const destination of destinations) {
+              if (
+                isWithin(destination.outputDir, canonicalOutput) ||
+                isWithin(canonicalOutput, destination.outputDir)
+              ) {
+                throw new Error("Dirwell options array has overlapping outDir paths");
+              }
+              if (
+                publicMount.startsWith(destination.publicMount) ||
+                destination.publicMount.startsWith(publicMount)
+              ) {
+                throw new Error("Dirwell options array has overlapping base paths");
+              }
+            }
+            destinations.push({ outputDir: canonicalOutput, publicMount });
+          }
           const hostMount =
             config.base.startsWith("/") || /^https?:\/\//i.test(config.base)
               ? mountPath(config.base)
@@ -323,9 +348,21 @@ const createDirwellPlugin = createVitePlugin<DirwellViteOptions | undefined, fal
         },
       },
     };
-  },
-);
+  });
+  return factory(inlineOptions) as import("vite").Plugin;
+}
 
-export default function dirwellVite(options?: DirwellViteOptions): import("vite").Plugin {
-  return createDirwellPlugin(options) as import("vite").Plugin;
+export default function dirwellVite(options?: DirwellViteOptions): import("vite").Plugin;
+export default function dirwellVite(
+  options: readonly DirwellViteOptions[],
+): import("vite").Plugin[];
+export default function dirwellVite(
+  options?: DirwellViteOptions | readonly DirwellViteOptions[],
+): import("vite").Plugin | import("vite").Plugin[] {
+  if (Array.isArray(options)) {
+    if (options.length === 0) throw new TypeError("Dirwell options array must not be empty");
+    const destinations: PluginDestination[] = [];
+    return options.map((entry) => createDirwellPlugin(entry, destinations));
+  }
+  return createDirwellPlugin(options as DirwellViteOptions | undefined);
 }

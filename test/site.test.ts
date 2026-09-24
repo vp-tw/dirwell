@@ -30,7 +30,8 @@ test("site build combines docs and examples in one publish directory", async () 
     [...exampleList.matchAll(/"([^"]+)"/g)].map((match) => match[1]),
     ["basic", "base", "custom-theme", "default-theme-override", "file-icons", "plain"],
   );
-  assert.match(buildScript, /"build",\s*"files"/);
+  assert.match(buildScript, /plugins: dirwellVite\(options\)/);
+  assert.match(buildScript, /loadDirwellConfig\(exampleRoot, "build"\)/);
   for (const slug of [
     "basic",
     "base",
@@ -42,7 +43,7 @@ test("site build combines docs and examples in one publish directory", async () 
     const config = await readFile(path.join(root, `examples/${slug}/dirwell.config.ts`), "utf8");
     assert.match(config, new RegExp(`docs/public/examples/${slug}`));
   }
-  assert.match(buildScript, /docs\/public\/examples\/\.build-id/);
+  assert.match(buildScript, /path\.join\(publishedExamples, "\.build-id"\)/);
 });
 
 test("landing preview embeds generated default theme instead of duplicate markup", async () => {
