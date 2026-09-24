@@ -28,6 +28,7 @@ import type {
   SymlinkMetadata,
 } from "./model.ts";
 import { defaultTheme } from "./theme-default.ts";
+import { selectSourcePaths } from "./filters.ts";
 
 const indexPattern = /^index\.html?$/i;
 
@@ -215,8 +216,17 @@ function rawLinkFilename(entry: FileSystemEntry): string {
 }
 
 export async function generateExplorer(options: GenerateOptions): Promise<void> {
+  return generateExplorerSkippingPaths(options, []);
+}
+
+/** Internal entry point for hosts that stage previews outside their published output. */
+export async function generateExplorerSkippingPaths(
+  options: GenerateOptions,
+  ignoredPaths: readonly string[],
+): Promise<void> {
   const sourceDir = path.resolve(options.sourceDir);
   const outputDir = path.resolve(options.outputDir);
+  const ignoredSourcePaths = ignoredPaths.map((value) => path.resolve(value));
   const rootRealPath = await realpath(sourceDir);
   const outputName = options.outputName ?? defaultOutputName;
   const resolveOutputName: OutputNameResolver =
@@ -228,13 +238,15 @@ export async function generateExplorer(options: GenerateOptions): Promise<void> 
   const followSymlinks = options.symlinks?.follow ?? false;
   const boundary = options.symlinks?.boundary ?? "root";
   const onCycle = options.symlinks?.onCycle ?? "skip";
+  const filtersActive =
+    options.include !== undefined || options.exclude !== undefined || ignoredSourcePaths.length > 0;
   const plans: Array<{
     readonly directory: DirectoryData;
     readonly logicalDir: string;
     readonly outputName: string | null;
   }> = [];
-  if (sourceDir === outputDir) {
-    throw new Error("outputDir must not be the sourceDir");
+  if (isInsideRoot(outputDir, sourceDir)) {
+    throw new Error("outputDir must not contain the sourceDir");
   }
   try {
     await lstat(path.join(sourceDir, "__dirwell"));
@@ -247,6 +259,13 @@ export async function generateExplorer(options: GenerateOptions): Promise<void> 
     }
   }
   const outputIsWithinSource = isInsideRoot(sourceDir, outputDir);
+  const selection = await selectSourcePaths(
+    sourceDir,
+    outputDir,
+    options.include,
+    options.exclude,
+    ignoredSourcePaths,
+  );
   const stageParent = outputIsWithinSource ? path.dirname(sourceDir) : path.dirname(outputDir);
   await mkdir(stageParent, { recursive: true });
   const stagedOutputDir = await mkdtemp(
@@ -262,7 +281,13 @@ export async function generateExplorer(options: GenerateOptions): Promise<void> 
         recursive: true,
         dereference: false,
         preserveTimestamps: true,
-        filter: (sourcePath) => !isInsideRoot(outputDir, path.resolve(sourcePath)),
+        filter: (sourcePath) => {
+          const relativePath = path.relative(sourceDir, sourcePath).split(path.sep).join("/");
+          return (
+            selection.selected.has(relativePath) &&
+            (!selection.symlinks.has(relativePath) || selection.mirroredSymlinks.has(relativePath))
+          );
+        },
       });
     }
   } catch (error) {
@@ -282,9 +307,15 @@ export async function generateExplorer(options: GenerateOptions): Promise<void> 
     }
 
     const nextAncestors = new Set(ancestors).add(physicalRealPath);
-    const names = (await readdir(physicalDir)).filter(
-      (name) => !outputIsWithinSource || !isInsideRoot(outputDir, path.join(physicalDir, name)),
-    );
+    const names = (await readdir(physicalDir)).filter((name) => {
+      if (outputIsWithinSource && isInsideRoot(outputDir, path.join(physicalDir, name)))
+        return false;
+      if (ignoredSourcePaths.some((value) => isInsideRoot(value, path.join(physicalDir, name))))
+        return false;
+      if (!filtersActive) return true;
+      const relativePath = path.relative(rootRealPath, path.join(physicalRealPath, name));
+      return selection.selected.has(relativePath.split(path.sep).join("/"));
+    });
     const entries = await Promise.all(
       names.map((name) =>
         describeEntry({
@@ -349,12 +380,23 @@ export async function generateExplorer(options: GenerateOptions): Promise<void> 
         continue;
       }
       if (!followSymlinks || entry.symlink?.targetKind !== "directory") continue;
+      const physicalLinkPath = path
+        .relative(rootRealPath, path.join(physicalRealPath, entry.name))
+        .split(path.sep)
+        .join("/");
+      if ((options.mirror ?? true) && !selection.mirroredSymlinks.has(physicalLinkPath)) continue;
       if (entry.symlink.isCycle) {
         if (onCycle === "error") throw new Error(`Symlink cycle at ${entry.relativePath}`);
         continue;
       }
       if (entry.symlink.resolvedPath === null) continue;
       if (boundary === "root" && entry.symlink.isOutsideRoot) continue;
+      if (
+        filtersActive &&
+        (entry.symlink.targetRelativePath === null ||
+          !selection.selected.has(entry.symlink.targetRelativePath))
+      )
+        continue;
       await visit(
         path.posix.join(logicalDir, entry.name),
         entry.symlink.resolvedPath,
@@ -402,7 +444,12 @@ export async function generateExplorer(options: GenerateOptions): Promise<void> 
       for (const entry of directory.entries) {
         if (searchEntries.has(entry.relativePath)) continue;
         const targetLogicalPath =
-          entry.symlink?.isBroken || entry.symlink?.isOutsideRoot
+          entry.symlink?.isBroken ||
+          entry.symlink?.isOutsideRoot ||
+          (filtersActive &&
+            entry.symlink !== null &&
+            entry.symlink.targetRelativePath !== null &&
+            !selection.selected.has(entry.symlink.targetRelativePath))
             ? null
             : entry.symlink?.targetRelativePath !== null && entry.symlink !== null
               ? entry.symlink.targetRelativePath
@@ -447,6 +494,13 @@ export async function generateExplorer(options: GenerateOptions): Promise<void> 
 
       const targetLogicalPathFor = (entry: FileSystemEntry): string | null => {
         if (entry.symlink?.isBroken || entry.symlink?.isOutsideRoot) return null;
+        if (
+          filtersActive &&
+          entry.symlink !== null &&
+          entry.symlink.targetRelativePath !== null &&
+          !selection.selected.has(entry.symlink.targetRelativePath)
+        )
+          return null;
         if (entry.symlink?.targetRelativePath !== null && entry.symlink !== null) {
           return entry.symlink.targetRelativePath;
         }

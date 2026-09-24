@@ -33,3 +33,7 @@ new tab. It does not attempt to navigate to the missing target.
 
 With `boundary: "root"`, an outside target is visible but unavailable. Dirwell
 does not expose the resolved absolute machine path in generated HTML.
+The CLI does not mirror absolute symlinks or relative symlinks that would point
+outside the copied output. The Vite adapter rejects included links of those
+types when mirroring is enabled. Filters never copy a symlink whose target was
+excluded.

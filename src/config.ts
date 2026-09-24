@@ -1,9 +1,12 @@
 import { loadConfig } from "c12";
 import path from "node:path";
 import type { ExplorerTheme, GenerateOptions, OutputNameResolver, SortOptions } from "./model.ts";
+import { normalizePathPatterns } from "./filters.ts";
 
 export interface DirwellConfig {
   readonly base?: string;
+  readonly include?: GenerateOptions["include"];
+  readonly exclude?: GenerateOptions["exclude"];
   readonly extends?: string | readonly string[];
   readonly mode?: "mpa" | "ssg";
   readonly mirror?: boolean;
@@ -52,6 +55,8 @@ export function validateConfig(value: unknown): asserts value is DirwellConfig {
   assertOptionalString(config.root, "root");
   assertOptionalString(config.outDir, "outDir");
   assertOptionalString(config.base, "base");
+  normalizePathPatterns(config.include, "include");
+  normalizePathPatterns(config.exclude, "exclude");
   if (
     config.extends !== undefined &&
     typeof config.extends !== "string" &&
@@ -159,6 +164,8 @@ export function resolveGenerateOptions(
       ? {}
       : { mode: overrides.mode ?? config.mode }),
     ...(config.mirror === undefined ? {} : { mirror: config.mirror }),
+    ...(config.include === undefined ? {} : { include: config.include }),
+    ...(config.exclude === undefined ? {} : { exclude: config.exclude }),
     ...(config.outputName === undefined ? {} : { outputName: config.outputName }),
     ...(config.symlinks === undefined ? {} : { symlinks: config.symlinks }),
     ...(config.sort === undefined ? {} : { sort: config.sort }),

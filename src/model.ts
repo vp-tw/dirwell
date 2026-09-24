@@ -88,6 +88,8 @@ export interface ExplorerTheme {
 
 export interface GenerateOptions {
   readonly base?: string;
+  readonly include?: string | readonly string[];
+  readonly exclude?: string | readonly string[];
   readonly sourceDir: string;
   readonly outputDir: string;
   readonly mode?: "mpa" | "ssg";

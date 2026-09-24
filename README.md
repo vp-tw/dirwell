@@ -66,6 +66,10 @@ export default defineConfig({
 directory, parent, complete entry metadata, and symlink state. Returning `null`
 skips the current directory.
 
+`include` and `exclude` accept root-relative glob patterns. They select mirrored
+files, generated directory pages, and search results; exclusions win. With no
+patterns, every source entry is included.
+
 URL generation supports portable depth-aware `relative` links, Vite-style
 `base` prefixes for deployments such as GitHub Pages, and native
 `html-base` documents using `<base href>`.
