@@ -65,6 +65,7 @@ test("Catppuccin icons follow light, dark, system, search, and virtual rows", as
       const server = await serve(outputDir);
       try {
         await page.goto(server.url);
+        await expect(page.locator("main > header")).toHaveCSS("border-top-left-radius", "13px");
         const selector = page.getByRole("combobox", { name: "Theme" });
         await selector.selectOption("light");
         await expect(page.locator('[data-name="guide.md"] .file-icon--light')).toBeVisible();
@@ -88,6 +89,7 @@ test("Catppuccin icons follow light, dark, system, search, and virtual rows", as
         ).toBeVisible();
         await page.getByRole("button", { name: "Close search" }).click();
         await page.setViewportSize({ width: 320, height: 720 });
+        await expect(page.locator("main > header")).toHaveCSS("border-top-left-radius", "0px");
         expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
           320,
         );

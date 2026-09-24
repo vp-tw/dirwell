@@ -114,6 +114,7 @@ main > header {
   top: 0;
   z-index: 3;
   background: var(--surface);
+  border-radius: calc(0.875rem - 1px) calc(0.875rem - 1px) 0 0;
 }
 main[data-sticky-header-disabled] > header {
   position: static;
@@ -645,6 +646,9 @@ kbd {
     border: 0;
     border-radius: 0;
     box-shadow: none;
+  }
+  main > header {
+    border-radius: 0;
   }
   .chrome {
     padding-inline: 1rem;

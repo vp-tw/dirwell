@@ -394,6 +394,37 @@ test("narrow nested paths keep breadcrumbs and summary inside the viewport", asy
   expect(dimensions.summaryRight).toBeLessThanOrEqual(320);
 });
 
+test("rounded header keeps sticky columns and sort menu working", async ({ page }) => {
+  await page.goto(urls.virtual);
+  await expect
+    .poll(async () => Number(await page.locator("[data-visible-count]").textContent()))
+    .toBeGreaterThan(500);
+  const shell = page.locator("main[data-explorer]");
+  const header = shell.locator(":scope > header");
+  const columns = shell.locator(".entry-head");
+  await expect(header).toHaveCSS("border-top-left-radius", "13px");
+  await expect(shell).toHaveCSS("overflow", "visible");
+  await page.locator(".sort-panel > summary").click();
+  await expect(page.locator(".sort-menu")).toBeVisible();
+  await page.locator(".sort-panel > summary").click();
+  await page.mouse.wheel(0, 900);
+  await expect.poll(async () => page.evaluate(() => scrollY)).toBeGreaterThan(200);
+  await expect
+    .poll(async () => header.evaluate((element) => element.getBoundingClientRect().top))
+    .toBe(0);
+  await expect
+    .poll(async () => columns.evaluate((element) => element.getBoundingClientRect().top))
+    .toBe(await header.evaluate((element) => element.getBoundingClientRect().height));
+
+  await page.setViewportSize({ width: 320, height: 720 });
+  await expect(header).toHaveCSS("border-top-left-radius", "0px");
+  await page.locator('[aria-current="page"]').evaluate((element) => {
+    element.textContent = "long-directory-name-".repeat(100);
+  });
+  await expect(shell).toHaveAttribute("data-sticky-header-disabled", "");
+  await expect(header).toHaveCSS("position", "static");
+});
+
 test("large MPA can search when Worker is unavailable", async ({ page }) => {
   await page.addInitScript(() => {
     Object.defineProperty(window, "Worker", { value: undefined });
