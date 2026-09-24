@@ -119,10 +119,10 @@ use a pill shape; file entries do not become cards.
 exposes the public `createDefaultTheme` entry point. Consumers can replace
 named components through the theme API or replace the complete theme.
 
-- **Toolbar:** native search input, three independent checkboxes styled as
-  selected segments for folder, file, and link types, `details` for sorting, and a compact
-  labeled select for the secondary theme setting. Keep visible focus and one
-  control height.
+- **Toolbar:** native search input, three independent checkboxes presented as
+  one joined toggle group for folder, file, and link types. `details` handles
+  sorting; a labeled select handles the theme setting. Keep visible focus and
+  one control height.
 - **Breadcrumbs:** linked ancestors, plain-text current segment, and a single
   separator between segments.
 - **Entry list:** linked names, explicit symlink targets and availability,

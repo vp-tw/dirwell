@@ -94,9 +94,9 @@ test("Catppuccin icons follow light, dark, system, search, and virtual rows", as
           320,
         );
         const folderFilter = page.getByRole("checkbox", { name: "Folders" });
-        await expect(folderFilter.locator("xpath=..")).not.toHaveCSS("box-shadow", "none");
+        await expect(folderFilter.locator("xpath=..")).toHaveCSS("color", "rgb(183, 189, 248)");
         await folderFilter.uncheck();
-        await expect(folderFilter.locator("xpath=..")).toHaveCSS("box-shadow", "none");
+        await expect(folderFilter.locator("xpath=..")).not.toHaveCSS("color", "rgb(183, 189, 248)");
         await page.setViewportSize({ width: 1280, height: 800 });
       } finally {
         await server.close();
