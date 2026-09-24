@@ -27,6 +27,74 @@ async function viteBuild(root, options, emptyOutDir = true) {
   });
 }
 
+test("Vite options array builds independent SSG and MPA explorers", async () => {
+  const { root, close } = await fixture();
+  try {
+    await mkdir(path.join(root, "other"));
+    await writeFile(path.join(root, "other", "release.txt"), "second explorer\n");
+    await viteBuild(root, [
+      { root: "files", mode: "ssg", outDir: "dist/notes" },
+      { root: "other", mode: "mpa", outDir: "dist/releases" },
+    ]);
+    const notes = await readFile(path.join(root, "dist/notes/index.html"), "utf8");
+    const releases = await readFile(path.join(root, "dist/releases/index.html"), "utf8");
+    assert.match(notes, /note\.txt/);
+    assert.match(notes, /\/app\/notes\//);
+    assert.doesNotMatch(notes, /release\.txt/);
+    assert.match(releases, /release\.txt/);
+    assert.match(releases, /\/app\/releases\/__dirwell\/dirwell\.runtime\.js/);
+    assert.doesNotMatch(releases, /note\.txt/);
+    assert.equal(await readFile(path.join(root, "dist/notes/note.txt"), "utf8"), "explorer file\n");
+    assert.equal(
+      await readFile(path.join(root, "dist/releases/release.txt"), "utf8"),
+      "second explorer\n",
+    );
+  } finally {
+    await close();
+  }
+});
+
+test("Vite options array rejects empty, overlapping output and overlapping mounts", async () => {
+  assert.throws(() => dirwellVite([]), /must not be empty/);
+  const { root, close } = await fixture();
+  try {
+    await assert.rejects(
+      viteBuild(root, [
+        { root: "files", outDir: "dist/catalog" },
+        { root: "files", outDir: "dist/catalog/nested" },
+      ]),
+      /overlapping outDir/,
+    );
+    await assert.rejects(
+      viteBuild(root, [
+        { root: "files", outDir: "dist/catalog" },
+        { root: "files", outDir: "dist/other", base: "/app/catalog/" },
+      ]),
+      /overlapping base/,
+    );
+  } finally {
+    await close();
+  }
+});
+
+test("each Vite array entry inherits project config and applies its own overrides", async () => {
+  const { root, close } = await fixture();
+  try {
+    await writeFile(
+      path.join(root, "dirwell.config.ts"),
+      'export default { root: "files", mode: "ssg", include: "**/*.txt" };\n',
+    );
+    await viteBuild(root, [{ outDir: "dist/notes" }, { outDir: "dist/empty", include: "**/*.md" }]);
+    assert.match(await readFile(path.join(root, "dist/notes/index.html"), "utf8"), /note\.txt/);
+    assert.doesNotMatch(
+      await readFile(path.join(root, "dist/empty/index.html"), "utf8"),
+      /note\.txt/,
+    );
+  } finally {
+    await close();
+  }
+});
+
 test("Vite builds SSG and MPA into a dedicated output subdirectory", async () => {
   for (const mode of ["ssg", "mpa"]) {
     const { root, close } = await fixture();

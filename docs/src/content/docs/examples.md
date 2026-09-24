@@ -3,9 +3,10 @@ title: Examples
 description: Compare complete Dirwell builds and inspect the source behind each one.
 ---
 
-Each example is a real Dirwell input directory with its own configuration. The
-documentation build generates the examples in `docs/public/examples/` before Astro
-copies them into the publish tree. The landing-page preview embeds the generated
+Each example is a real Dirwell input directory with its own configuration. One
+Vite build passes those configurations as an array to `Dirwell()` and generates
+the explorers in `docs/public/examples/` before Astro copies them into the
+publish tree. The landing-page preview embeds the generated
 `file-icons` preview, so its default-theme interface and assets are not duplicated
 in the documentation source. The preview remains available as a generated build.
 
@@ -26,9 +27,9 @@ From the repository root, build the documentation and all examples together:
 SITE_BASE=/repository-name/ pnpm run site:build
 ```
 
-For local iteration, run `pnpm run docs:dev`. It builds the examples before
-starting Astro, watches the Dirwell source and example inputs, and reloads the
-embedded preview after a successful rebuild.
+For local iteration, run `pnpm run docs:dev`. It builds all explorers through
+the Vite adapter before starting Astro, watches the Dirwell source and example
+inputs, and reloads the embedded preview after a successful rebuild.
 
 The command writes one publishable tree:
 

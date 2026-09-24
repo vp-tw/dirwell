@@ -124,6 +124,22 @@ the config file. The Vite adapter defaults to `urls: "base"` so links point to
 the published mount. An explicit `urls` value takes precedence. `base` must use
 a dedicated path; mounting over the Vite application root is rejected.
 
+Pass an array to generate several independent explorers in one Vite project:
+
+```ts
+plugins: [
+  Dirwell([
+    { root: "./docs", outDir: "dist/docs", mode: "ssg" },
+    { root: "./releases", outDir: "dist/releases", mode: "mpa" },
+  ]),
+],
+```
+
+Each entry inherits the project config before its inline options are applied.
+Each explorer has its own output and public mount. Empty arrays and overlapping
+output or mount paths are rejected. The adapter returns one Vite plugin per
+entry, so both development serving and production builds cover every explorer.
+
 `outDir` is a filesystem path. A relative value resolves from the Vite project
 root; an absolute value is used as given. Its default is `dirwell/` inside the
 resolved Vite `build.outDir`. When `outDir` is inside the Vite output, Dirwell
