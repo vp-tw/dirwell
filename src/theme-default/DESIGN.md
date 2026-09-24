@@ -134,8 +134,10 @@ named components through the theme API or replace the complete theme.
   Fetch the sharded index after input, keep results bounded, and announce
   progress and failures in the dialog.
 - **Footer:** project attribution and keyboard help remain separate groups;
-  narrow screens place shortcuts before attribution. Third-party notices remain
-  linked without making icon licensing the main footer label.
+  narrow screens place shortcuts before attribution. The compact footer links
+  to the Ledger README for bundled icon attribution. Custom icon notices get a
+  separate local link. File names lose their resting underline; footer links
+  keep theirs to distinguish them from surrounding text.
 
 ## Do's and Don'ts
 

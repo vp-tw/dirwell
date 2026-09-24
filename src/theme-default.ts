@@ -167,7 +167,10 @@ export function createDefaultTheme(options: DefaultThemeOptions = {}): ExplorerT
         footer: components.Footer({
           ...(iconSet.noticeName === undefined
             ? {}
-            : { iconNoticeHref: assetHref(iconSet.noticeName) }),
+            : {
+                iconNoticeHref: assetHref(iconSet.noticeName),
+                iconNoticeKind: options.icons === undefined ? "built-in" : "custom",
+              }),
           keyboardNavigation,
           parentHref,
           project,

@@ -155,6 +155,49 @@ async function assertFilePolicy(page: Page): Promise<void> {
   await expect(page.locator('[data-name="good-link"] .size-stack')).toContainText("Target 7 B");
 }
 
+for (const mode of ["ssg", "mpa", "serveSsg", "serveMpa"] as const) {
+  test(`${mode}: Ledger footer and file links stay compact and identifiable`, async ({ page }) => {
+    await page.goto(urls[mode]);
+    const footer = page.locator("main > footer");
+    await expect(footer.locator(".project-meta")).toHaveText("Dirwell · Ledger by VdustR");
+    await expect(footer.getByRole("link", { name: "Ledger" })).toHaveAttribute(
+      "href",
+      "https://github.com/vp-tw/dirwell/blob/main/src/theme-default/README.md",
+    );
+    await expect(footer.getByRole("link", { name: "VdustR" })).toHaveAttribute(
+      "href",
+      "https://github.com/VdustR",
+    );
+    await expect(footer.getByRole("link", { name: "Icon licenses" })).toHaveCount(0);
+    const name = page.locator('[data-name="README.txt"] a.name');
+    await expect(name).toHaveCSS("text-decoration-line", "none");
+    await expect(footer.getByRole("link", { name: "Ledger" })).toHaveCSS(
+      "text-decoration-line",
+      "underline",
+    );
+    await name.hover();
+    await expect(name).toHaveCSS("text-decoration-line", "underline");
+    await name.focus();
+    await expect(name).toHaveCSS("text-decoration-line", "underline");
+    expect(await footer.evaluate((element) => element.getBoundingClientRect().height)).toBeLessThan(
+      60,
+    );
+
+    await page.setViewportSize({ width: 320, height: 800 });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
+      320,
+    );
+    expect(
+      await footer
+        .getByRole("link", { name: "Ledger" })
+        .evaluate((element) => element.getBoundingClientRect().height),
+    ).toBeGreaterThanOrEqual(44);
+    expect(await footer.evaluate((element) => element.getBoundingClientRect().height)).toBeLessThan(
+      85,
+    );
+  });
+}
+
 for (const mode of ["ssg", "mpa"] as const) {
   test(`${mode}: filters remove files from navigation and global search`, async ({ page }) => {
     const sourceDir = path.join(temporary, `filtered-${mode}`);

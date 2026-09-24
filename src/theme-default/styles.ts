@@ -491,6 +491,13 @@ a {
   font-weight: 650;
   overflow-wrap: anywhere;
 }
+.entry .name {
+  text-decoration: none;
+}
+.entry .name:hover,
+.entry .name:focus-visible {
+  text-decoration: underline;
+}
 .icon {
   display: inline-block;
   flex: none;
@@ -579,9 +586,10 @@ summary:focus-visible {
 }
 footer {
   display: flex;
+  align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding: 1.5rem 1.4rem;
+  padding: 0.7rem 1.4rem;
   color: var(--muted);
   font-size: 0.78rem;
 }
@@ -589,8 +597,12 @@ footer {
 .shortcuts {
   margin: 0;
 }
-.project-meta a {
-  margin-left: 0.55rem;
+.project-meta {
+  line-height: 1.9;
+}
+.meta-item,
+.project-credit {
+  white-space: nowrap;
 }
 .shortcuts {
   text-align: right;
@@ -705,20 +717,13 @@ kbd {
     display: flex;
     flex-direction: column-reverse;
     align-items: flex-start;
-    gap: 0.4rem;
-    padding: 1.1rem 1rem;
-  }
-  .project-meta {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 0.55rem;
+    gap: 0.25rem;
+    padding: 0.3rem 1rem;
   }
   .project-meta a {
     display: inline-flex;
     min-height: 2.75rem;
     align-items: center;
-    margin-left: 0;
   }
   .shortcuts {
     margin: 0;
