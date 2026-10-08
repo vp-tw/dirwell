@@ -28,6 +28,7 @@ import type {
   SymlinkMetadata,
 } from "./model.ts";
 import { defaultTheme } from "./theme-default.ts";
+import { selectSourcePaths } from "./filters.ts";
 
 const indexPattern = /^index\.html?$/i;
 
@@ -40,7 +41,9 @@ const defaultSort = {
 
 export const defaultOutputName: OutputNameResolver = ({ entries }) =>
   entries.some((entry) => entry.kind === "file" && indexPattern.test(entry.name))
-    ? null
+    ? entries.some((entry) => entry.name.toLowerCase() === "_dirwell.html")
+      ? null
+      : "_dirwell.html"
     : "index.html";
 
 function entryKind(stats: Stats): EntryKind {
@@ -79,12 +82,14 @@ async function describeEntry({
   rootRealPath,
   ancestors,
   followSymlinks,
+  selectedPaths,
 }: {
   absolutePath: string;
   relativePath: string;
   rootRealPath: string;
   ancestors: ReadonlySet<string>;
   followSymlinks: boolean;
+  selectedPaths: ReadonlySet<string> | null;
 }): Promise<FileSystemEntry> {
   const linkStats = await lstat(absolutePath);
   const kind = entryKind(linkStats);
@@ -94,26 +99,42 @@ async function describeEntry({
     const target = await readlink(absolutePath);
     let resolvedPath: string | null = null;
     let targetKind: Exclude<EntryKind, "symlink"> | null = null;
+    let targetSize: number | null = null;
     try {
       resolvedPath = await realpath(absolutePath);
-      targetKind = entryKind(await stat(absolutePath)) as Exclude<EntryKind, "symlink">;
+      const targetStats = await stat(absolutePath);
+      targetKind = entryKind(targetStats) as Exclude<EntryKind, "symlink">;
+      targetSize = targetStats.size;
     } catch {
       // Broken and inaccessible links are represented as data.
     }
     const isOutsideRoot = resolvedPath === null || !isInsideRoot(rootRealPath, resolvedPath);
     const isCycle = resolvedPath !== null && ancestors.has(resolvedPath);
+    const targetRelativePath =
+      resolvedPath !== null && !isOutsideRoot
+        ? path.relative(rootRealPath, resolvedPath).split(path.sep).join("/")
+        : null;
+    const isTargetExcluded =
+      targetRelativePath !== null &&
+      selectedPaths !== null &&
+      !selectedPaths.has(targetRelativePath);
     symlink = {
       target,
       resolvedPath,
-      targetRelativePath:
-        resolvedPath !== null && !isOutsideRoot
-          ? path.relative(rootRealPath, resolvedPath).split(path.sep).join("/")
-          : null,
+      targetRelativePath,
       targetKind,
+      targetSize:
+        isOutsideRoot || isTargetExcluded || targetKind === "directory" ? null : targetSize,
       isBroken: resolvedPath === null,
       isCycle,
       isOutsideRoot,
-      wasFollowed: followSymlinks && targetKind === "directory" && !isCycle && !isOutsideRoot,
+      isTargetExcluded,
+      wasFollowed:
+        followSymlinks &&
+        targetKind === "directory" &&
+        !isCycle &&
+        !isOutsideRoot &&
+        !isTargetExcluded,
     };
   }
 
@@ -160,6 +181,12 @@ function isDirectoryLike(entry: FileSystemEntry): boolean {
   return entry.kind === "directory" || entry.symlink?.targetKind === "directory";
 }
 
+function isUnavailableSymlink(entry: FileSystemEntry): boolean {
+  return Boolean(
+    entry.symlink?.isBroken || entry.symlink?.isOutsideRoot || entry.symlink?.isTargetExcluded,
+  );
+}
+
 function compareUnicode(left: string, right: string): number {
   const leftPoints = [...left];
   const rightPoints = [...right];
@@ -194,8 +221,8 @@ export function compareEntries(
     result = left.metadata.times.modifiedAt.localeCompare(right.metadata.times.modifiedAt);
   } else if (resolved.field === "size") {
     result =
-      (isDirectoryLike(left) ? 0 : left.metadata.size) -
-      (isDirectoryLike(right) ? 0 : right.metadata.size);
+      (left.kind === "directory" ? 0 : left.metadata.size) -
+      (right.kind === "directory" ? 0 : right.metadata.size);
   } else {
     result = compareNames(left.name, right.name, resolved.nameMode);
   }
@@ -213,8 +240,17 @@ function rawLinkFilename(entry: FileSystemEntry): string {
 }
 
 export async function generateExplorer(options: GenerateOptions): Promise<void> {
+  return generateExplorerSkippingPaths(options, []);
+}
+
+/** Internal entry point for hosts that stage previews outside their published output. */
+export async function generateExplorerSkippingPaths(
+  options: GenerateOptions,
+  ignoredPaths: readonly string[],
+): Promise<void> {
   const sourceDir = path.resolve(options.sourceDir);
   const outputDir = path.resolve(options.outputDir);
+  const ignoredSourcePaths = ignoredPaths.map((value) => path.resolve(value));
   const rootRealPath = await realpath(sourceDir);
   const outputName = options.outputName ?? defaultOutputName;
   const resolveOutputName: OutputNameResolver =
@@ -226,13 +262,15 @@ export async function generateExplorer(options: GenerateOptions): Promise<void> 
   const followSymlinks = options.symlinks?.follow ?? false;
   const boundary = options.symlinks?.boundary ?? "root";
   const onCycle = options.symlinks?.onCycle ?? "skip";
+  const filtersActive =
+    options.include !== undefined || options.exclude !== undefined || ignoredSourcePaths.length > 0;
   const plans: Array<{
     readonly directory: DirectoryData;
     readonly logicalDir: string;
     readonly outputName: string | null;
   }> = [];
-  if (sourceDir === outputDir) {
-    throw new Error("outputDir must not be the sourceDir");
+  if (isInsideRoot(outputDir, sourceDir)) {
+    throw new Error("outputDir must not contain the sourceDir");
   }
   try {
     await lstat(path.join(sourceDir, "__dirwell"));
@@ -245,6 +283,13 @@ export async function generateExplorer(options: GenerateOptions): Promise<void> 
     }
   }
   const outputIsWithinSource = isInsideRoot(sourceDir, outputDir);
+  const selection = await selectSourcePaths(
+    sourceDir,
+    outputDir,
+    options.include,
+    options.exclude,
+    ignoredSourcePaths,
+  );
   const stageParent = outputIsWithinSource ? path.dirname(sourceDir) : path.dirname(outputDir);
   await mkdir(stageParent, { recursive: true });
   const stagedOutputDir = await mkdtemp(
@@ -260,7 +305,13 @@ export async function generateExplorer(options: GenerateOptions): Promise<void> 
         recursive: true,
         dereference: false,
         preserveTimestamps: true,
-        filter: (sourcePath) => !isInsideRoot(outputDir, path.resolve(sourcePath)),
+        filter: (sourcePath) => {
+          const relativePath = path.relative(sourceDir, sourcePath).split(path.sep).join("/");
+          return (
+            selection.selected.has(relativePath) &&
+            (!selection.symlinks.has(relativePath) || selection.mirroredSymlinks.has(relativePath))
+          );
+        },
       });
     }
   } catch (error) {
@@ -280,9 +331,15 @@ export async function generateExplorer(options: GenerateOptions): Promise<void> 
     }
 
     const nextAncestors = new Set(ancestors).add(physicalRealPath);
-    const names = (await readdir(physicalDir)).filter(
-      (name) => !outputIsWithinSource || !isInsideRoot(outputDir, path.join(physicalDir, name)),
-    );
+    const names = (await readdir(physicalDir)).filter((name) => {
+      if (outputIsWithinSource && isInsideRoot(outputDir, path.join(physicalDir, name)))
+        return false;
+      if (ignoredSourcePaths.some((value) => isInsideRoot(value, path.join(physicalDir, name))))
+        return false;
+      if (!filtersActive) return true;
+      const relativePath = path.relative(rootRealPath, path.join(physicalRealPath, name));
+      return selection.selected.has(relativePath.split(path.sep).join("/"));
+    });
     const entries = await Promise.all(
       names.map((name) =>
         describeEntry({
@@ -291,6 +348,7 @@ export async function generateExplorer(options: GenerateOptions): Promise<void> 
           rootRealPath,
           ancestors: nextAncestors,
           followSymlinks,
+          selectedPaths: filtersActive ? selection.selected : null,
         }),
       ),
     );
@@ -302,6 +360,7 @@ export async function generateExplorer(options: GenerateOptions): Promise<void> 
       rootRealPath,
       ancestors,
       followSymlinks,
+      selectedPaths: filtersActive ? selection.selected : null,
     });
     if (describedCurrent.kind !== "directory") {
       throw new Error(`${physicalDir} is not a directory`);
@@ -317,6 +376,7 @@ export async function generateExplorer(options: GenerateOptions): Promise<void> 
       rootRealPath,
       ancestors: new Set(),
       followSymlinks,
+      selectedPaths: filtersActive ? selection.selected : null,
     });
     const parent =
       logicalDir === ""
@@ -328,6 +388,7 @@ export async function generateExplorer(options: GenerateOptions): Promise<void> 
             rootRealPath,
             ancestors,
             followSymlinks,
+            selectedPaths: filtersActive ? selection.selected : null,
           });
     const directory: DirectoryData = {
       root,
@@ -347,12 +408,23 @@ export async function generateExplorer(options: GenerateOptions): Promise<void> 
         continue;
       }
       if (!followSymlinks || entry.symlink?.targetKind !== "directory") continue;
+      const physicalLinkPath = path
+        .relative(rootRealPath, path.join(physicalRealPath, entry.name))
+        .split(path.sep)
+        .join("/");
+      if ((options.mirror ?? true) && !selection.mirroredSymlinks.has(physicalLinkPath)) continue;
       if (entry.symlink.isCycle) {
         if (onCycle === "error") throw new Error(`Symlink cycle at ${entry.relativePath}`);
         continue;
       }
       if (entry.symlink.resolvedPath === null) continue;
       if (boundary === "root" && entry.symlink.isOutsideRoot) continue;
+      if (
+        filtersActive &&
+        (entry.symlink.targetRelativePath === null ||
+          !selection.selected.has(entry.symlink.targetRelativePath))
+      )
+        continue;
       await visit(
         path.posix.join(logicalDir, entry.name),
         entry.symlink.resolvedPath,
@@ -364,9 +436,20 @@ export async function generateExplorer(options: GenerateOptions): Promise<void> 
   try {
     await visit("", sourceDir, new Set());
 
-    const generatedDirectories = new Set(
-      plans.filter((plan) => plan.outputName !== null).map((plan) => plan.logicalDir),
+    const generatedPages = new Map(
+      plans
+        .filter(
+          (plan): plan is typeof plan & { readonly outputName: string } => plan.outputName !== null,
+        )
+        .map((plan) => [plan.logicalDir, plan.outputName]),
     );
+    const generatedDirectories = new Set(generatedPages.keys());
+    const pagePathForDirectory = (logicalPath: string): string => {
+      const pageName = generatedPages.get(logicalPath);
+      return pageName === undefined || pageName === "index.html"
+        ? logicalPath
+        : path.posix.join(logicalPath, pageName);
+    };
     const sharedAssets = new Map<string, string | Uint8Array>();
     const rawLinkFiles = new Map<string, string>();
     const searchEntries = new Map<
@@ -382,33 +465,39 @@ export async function generateExplorer(options: GenerateOptions): Promise<void> 
         size: number;
         target: string | null;
         targetKind: Exclude<EntryKind, "symlink"> | null;
+        targetSize: number | null;
+        isTargetUnavailable: boolean;
+        isCycle: boolean;
       }
     >();
 
     for (const { directory, logicalDir } of theme.searchIndex === false ? [] : plans) {
       for (const entry of directory.entries) {
         if (searchEntries.has(entry.relativePath)) continue;
-        const targetLogicalPath =
-          entry.symlink?.isBroken || entry.symlink?.isOutsideRoot
-            ? null
-            : entry.symlink?.targetRelativePath !== null && entry.symlink !== null
-              ? entry.symlink.targetRelativePath
-              : path.posix.join(logicalDir, entry.name);
+        const targetLogicalPath = isUnavailableSymlink(entry)
+          ? null
+          : entry.symlink?.targetRelativePath !== null && entry.symlink !== null
+            ? entry.symlink.targetRelativePath
+            : path.posix.join(logicalDir, entry.name);
         const directoryLike = isDirectoryLike(entry);
+        const linkedPath =
+          directoryLike && targetLogicalPath !== null
+            ? pagePathForDirectory(targetLogicalPath)
+            : targetLogicalPath;
         let href: string | null = null;
-        if (entry.symlink?.isBroken) {
+        if (entry.symlink !== null && isUnavailableSymlink(entry)) {
           const filename = rawLinkFilename(entry);
           rawLinkFiles.set(filename, entry.symlink.target);
           href = `raw-links/${filename}`;
-        } else if (targetLogicalPath !== null) {
+        } else if (linkedPath !== null) {
           href =
-            targetLogicalPath === ""
+            linkedPath === ""
               ? "../"
-              : `../${encodeLogicalPath(targetLogicalPath)}${directoryLike ? "/" : ""}`;
+              : `../${encodeLogicalPath(linkedPath)}${directoryLike && linkedPath === targetLogicalPath ? "/" : ""}`;
         }
         searchEntries.set(entry.relativePath, {
           exitsExplorer:
-            entry.symlink?.isBroken === true ||
+            isUnavailableSymlink(entry) ||
             (targetLogicalPath !== null &&
               (!directoryLike || !generatedDirectories.has(targetLogicalPath))),
           href,
@@ -420,6 +509,9 @@ export async function generateExplorer(options: GenerateOptions): Promise<void> 
           size: entry.metadata.size,
           target: entry.symlink?.target ?? null,
           targetKind: entry.symlink?.targetKind ?? null,
+          targetSize: entry.symlink?.targetSize ?? null,
+          isTargetUnavailable: isUnavailableSymlink(entry),
+          isCycle: entry.symlink?.isCycle ?? false,
         });
       }
     }
@@ -429,17 +521,19 @@ export async function generateExplorer(options: GenerateOptions): Promise<void> 
       if (name === null) continue;
 
       const targetLogicalPathFor = (entry: FileSystemEntry): string | null => {
-        if (entry.symlink?.isBroken || entry.symlink?.isOutsideRoot) return null;
+        if (isUnavailableSymlink(entry)) return null;
         if (entry.symlink?.targetRelativePath !== null && entry.symlink !== null) {
           return entry.symlink.targetRelativePath;
         }
         return path.posix.join(logicalDir, entry.name);
       };
       const hrefForLogicalPath = (targetPath: string, directoryLike: boolean): string => {
+        const linkedPath = directoryLike ? pagePathForDirectory(targetPath) : targetPath;
+        const linkToDirectory = directoryLike && linkedPath === targetPath;
         if (urlStrategy === "relative") {
           const relativeTarget = path.posix.relative(
             logicalDir === "" ? "." : logicalDir,
-            targetPath === "" ? "." : targetPath,
+            linkedPath === "" ? "." : linkedPath,
           );
           const encodedTarget = relativeTarget
             .split("/")
@@ -447,17 +541,17 @@ export async function generateExplorer(options: GenerateOptions): Promise<void> 
               segment === "." || segment === ".." ? segment : encodeURIComponent(segment),
             )
             .join("/");
-          return `${encodedTarget || "."}${directoryLike ? "/" : ""}`;
+          return `${encodedTarget || "."}${linkToDirectory ? "/" : ""}`;
         }
-        const encodedTarget = encodeLogicalPath(targetPath);
+        const encodedTarget = encodeLogicalPath(linkedPath);
         if (encodedTarget === "") {
           return urlStrategy === "base" ? base : "./";
         }
-        const suffix = `${encodedTarget}${directoryLike ? "/" : ""}`;
+        const suffix = `${encodedTarget}${linkToDirectory ? "/" : ""}`;
         return urlStrategy === "base" ? `${base}${suffix}` : suffix;
       };
       const hrefFor = (entry: FileSystemEntry): string | null => {
-        if (entry.symlink?.isBroken) {
+        if (entry.symlink !== null && isUnavailableSymlink(entry)) {
           const filename = rawLinkFilename(entry);
           rawLinkFiles.set(filename, entry.symlink.target);
           return hrefForLogicalPath(path.posix.join("__dirwell", "raw-links", filename), false);
@@ -490,7 +584,7 @@ export async function generateExplorer(options: GenerateOptions): Promise<void> 
         hrefFor,
         hrefForDirectory: (relativePath) => hrefForLogicalPath(relativePath, true),
         exitsExplorerFor: (entry) => {
-          if (entry.symlink?.isBroken) return true;
+          if (isUnavailableSymlink(entry)) return true;
           const targetLogicalPath = targetLogicalPathFor(entry);
           const directoryLike =
             entry.kind === "directory" || entry.symlink?.targetKind === "directory";
@@ -547,7 +641,7 @@ export async function generateExplorer(options: GenerateOptions): Promise<void> 
       }
       await writeFile(
         path.join(generatedAssetDirectory, "search-index.json"),
-        JSON.stringify({ count: indexedEntries.length, shards, version: 2 }),
+        JSON.stringify({ count: indexedEntries.length, shards, version: 3 }),
       );
     }
 

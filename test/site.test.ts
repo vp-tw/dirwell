@@ -7,11 +7,12 @@ const root = path.resolve(import.meta.dirname, "..");
 
 test("landing page exposes every live example and source directory", async () => {
   const source = await readFile(path.join(root, "docs/src/pages/index.astro"), "utf8");
-  for (const slug of ["basic", "base-path", "custom-theme", "file-icons", "plain"]) {
+  for (const slug of ["basic", "base", "custom-theme", "default-theme-override", "plain", "i18n"]) {
     assert.match(source, new RegExp(`slug: "${slug}"`));
     assert.match(source, /examplePath\(example\.slug\)/);
   }
   assert.match(source, /PUBLIC_REPOSITORY_URL/);
+  assert.match(source, /https:\/\/github\.com\/vp-tw\/dirwell/);
   assert.match(source, /tree\/main\/examples/);
 });
 
@@ -23,13 +24,27 @@ test("site build combines docs and examples in one publish directory", async () 
   assert.equal(packageJson.scripts["docs:dev"], "node scripts/dev-docs.ts");
 
   const buildScript = await readFile(path.join(root, "scripts/build-examples.ts"), "utf8");
-  assert.match(buildScript, /\["basic", "base-path", "custom-theme", "file-icons", "plain"\]/);
-  assert.match(buildScript, /"build",\s*"files"/);
-  for (const slug of ["basic", "base-path", "custom-theme", "file-icons", "plain"]) {
+  const exampleList = buildScript.match(/const examples = \[([\s\S]*?)\] as const;/)?.[1];
+  assert.ok(exampleList);
+  assert.deepEqual(
+    [...exampleList.matchAll(/"([^"]+)"/g)].map((match) => match[1]),
+    ["basic", "base", "custom-theme", "default-theme-override", "file-icons", "plain", "i18n"],
+  );
+  assert.match(buildScript, /plugins: dirwellVite\(options\)/);
+  assert.match(buildScript, /loadDirwellConfig\(exampleRoot, "build"\)/);
+  for (const slug of [
+    "basic",
+    "base",
+    "custom-theme",
+    "default-theme-override",
+    "file-icons",
+    "plain",
+    "i18n",
+  ]) {
     const config = await readFile(path.join(root, `examples/${slug}/dirwell.config.ts`), "utf8");
     assert.match(config, new RegExp(`docs/public/examples/${slug}`));
   }
-  assert.match(buildScript, /docs\/public\/examples\/\.build-id/);
+  assert.match(buildScript, /path\.join\(publishedExamples, "\.build-id"\)/);
 });
 
 test("landing preview embeds generated default theme instead of duplicate markup", async () => {

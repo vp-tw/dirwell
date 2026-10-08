@@ -19,10 +19,18 @@ A failed render leaves the last successful output intact.
 
 ## Output modes
 
-SSG copies the small runtime beside every generated page. MPA emits the same
-directly addressable HTML pages but shares runtime assets through the reserved
-output-root `__dirwell/` directory. Both modes use that reserved directory for
-generated raw-link artifacts, so a source collision with the path is an error.
+SSG places any theme runtime assets beside every generated page and keeps
+complete listing HTML. MPA emits directly addressable HTML pages but shares
+runtime assets through the reserved output-root `__dirwell/` directory. With
+the interactive default theme and default row components, an MPA directory
+above the default threshold of 500 entries stores its rows in a per-directory
+data asset and renders a measured virtual list. The threshold is configurable.
+These rows require JavaScript; filtering and sorting use a Web Worker when
+available, with a main-thread fallback. Smaller MPA listings and SSG listings
+retain their entries in HTML and support browsing without JavaScript.
+
+Both modes use `__dirwell/` for generated raw-link artifacts and, when enabled,
+the global search index. A source collision with that path is an error.
 
 Both modes mirror source files by default and preserve an existing
 `index.html` or `index.htm`.

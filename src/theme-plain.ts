@@ -1,5 +1,6 @@
 import type { ExplorerTheme, FileSystemEntry, ThemeContext } from "./model.ts";
 import { resolveThemeProject, type ThemeProjectOptions } from "./theme-project.ts";
+import { utcTimestamp } from "./timestamp.ts";
 
 export interface PlainThemeOptions {
   readonly project?: ThemeProjectOptions;
@@ -61,8 +62,8 @@ function renderEntry(entry: FileSystemEntry, context: ThemeContext): string {
   if (!directoryLike) details.push(`${entry.metadata.size} B`);
   if (entry.symlink !== null) details.push(`Target: ${entry.symlink.target}`);
   if (exitsExplorer) details.push("opens in a new tab");
-  const modifiedAt = entry.metadata.times.modifiedAt;
-  return `<li>${link}<small>${escapeHtml(details.join(" · "))} · <time datetime="${escapeHtml(modifiedAt)}">${escapeHtml(modifiedAt.slice(0, 16).replace("T", " "))} UTC</time></small></li>`;
+  const modified = utcTimestamp(entry.metadata.times.modifiedAt);
+  return `<li>${link}<small>${escapeHtml(details.join(" · "))} · ${modified === null ? "Unknown" : `<time datetime="${modified.datetime}">${modified.label}</time>`}</small></li>`;
 }
 
 /** A no-icon, no-script theme that leaves navigation and controls to the browser. */

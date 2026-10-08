@@ -32,10 +32,51 @@
     "./theme": {
       "types": "./dist/theme-components.d.mts",
       "import": "./dist/theme-components.mjs"
+    },
+    "./vite": {
+      "types": "./dist/vite.d.mts",
+      "import": "./dist/vite.mjs"
+    },
+    "./unplugin": {
+      "types": "./dist/unplugin.d.mts",
+      "import": "./dist/unplugin.mjs"
+    },
+    "./rollup": {
+      "types": "./dist/rollup.d.mts",
+      "import": "./dist/rollup.mjs"
+    },
+    "./rolldown": {
+      "types": "./dist/rolldown.d.mts",
+      "import": "./dist/rolldown.mjs"
+    },
+    "./webpack": {
+      "types": "./dist/webpack.d.mts",
+      "import": "./dist/webpack.mjs"
+    },
+    "./rspack": {
+      "types": "./dist/rspack.d.mts",
+      "import": "./dist/rspack.mjs"
+    },
+    "./rsbuild": {
+      "types": "./dist/rsbuild.d.mts",
+      "import": "./dist/rsbuild.mjs"
+    },
+    "./esbuild": {
+      "types": "./dist/esbuild.d.mts",
+      "import": "./dist/esbuild.mjs"
+    },
+    "./farm": {
+      "types": "./dist/farm.d.mts",
+      "import": "./dist/farm.mjs"
+    },
+    "./bun": {
+      "types": "./dist/bun.d.mts",
+      "import": "./dist/bun.mjs"
     }
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "tag": "alpha"
   },
   "scripts": {
     "build": "vp pack && node scripts/copy-static-assets.ts",
@@ -50,7 +91,8 @@
     "lint": "vp lint",
     "release:status": "changeset status",
     "site:build": "pnpm run examples:build && pnpm run docs:build",
-    "test": "node --test test/*.test.ts",
+    "test": "node --test test/*.test.ts test/*.test.mjs",
+    "test:browser": "playwright test",
     "check:types": "tsc --noEmit"
   },
   "dependencies": {
@@ -58,15 +100,27 @@
     "chokidar": "5.0.0",
     "citty": "0.2.2",
     "giget": "3.3.1",
-    "jiti": "2.7.0"
+    "jiti": "2.7.0",
+    "picomatch": "4.0.7",
+    "unplugin": "3.4.0"
   },
   "devDependencies": {
     "@astrojs/starlight": "0.42.2",
+    "@farmfe/core": "1.7.11",
+    "@playwright/test": "1.63.0",
+    "@rsbuild/core": "2.2.12",
+    "@rspack/core": "2.2.8",
     "@types/node": "26.6.2",
+    "@types/picomatch": "4.0.3",
     "astro": "7.3.3",
+    "esbuild": "0.28.2",
+    "rolldown": "1.2.13",
+    "rollup": "4.64.2",
     "typescript": "7.0.2",
     "vite": "catalog:",
-    "vite-plus": "catalog:"
+    "vite-plus": "catalog:",
+    "vite-upstream": "npm:vite@8.3.0",
+    "webpack": "5.111.1"
   },
   "engines": {
     "node": ">=26"

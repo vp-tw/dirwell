@@ -1,6 +1,7 @@
 .dirwell/
 .dirwell-preview/
 .impeccable/review/
+.playwright-results/
 .DS_Store
 coverage/
 dist/

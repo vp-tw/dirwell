@@ -119,10 +119,10 @@ use a pill shape; file entries do not become cards.
 exposes the public `createDefaultTheme` entry point. Consumers can replace
 named components through the theme API or replace the complete theme.
 
-- **Toolbar:** native search input, a wrapping three-checkbox `fieldset` for
-  disjoint folder, file, and link types, `details` for sorting, and a compact
-  labeled select for the secondary theme setting. Keep visible focus and one
-  control height.
+- **Toolbar:** native search input, three independent checkboxes presented as
+  one joined toggle group for folder, file, and link types. `details` handles
+  sorting; a labeled select handles the theme setting. Keep visible focus and
+  one control height.
 - **Breadcrumbs:** linked ancestors, plain-text current segment, and a single
   separator between segments.
 - **Entry list:** linked names, explicit symlink targets and availability,
@@ -134,12 +134,15 @@ named components through the theme API or replace the complete theme.
   Fetch the sharded index after input, keep results bounded, and announce
   progress and failures in the dialog.
 - **Footer:** project attribution and keyboard help remain separate groups;
-  narrow screens place shortcuts before attribution.
+  narrow screens place shortcuts before attribution. The compact footer links
+  to the Ledger README for bundled icon attribution. Custom icon notices get a
+  separate local link. File names lose their resting underline; footer links
+  keep theirs to distinguish them from surrounding text.
 
 ## Do's and Don'ts
 
 - **Do** retain native control semantics and keyboard operation.
 - **Do** test light, dark, and system appearance at narrow and wide sizes.
 - **Do** preserve readable long names and symlink targets.
-- **Don't** make unavailable symlinks look actionable.
+- **Do** keep unavailable targets distinct while letting their symlink names open the declared target text.
 - **Don't** make custom themes inherit this palette or layout.

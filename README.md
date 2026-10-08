@@ -1,18 +1,33 @@
 # Dirwell
 
-Dirwell turns a directory into a static, accessible file explorer. It supports
-zero-config builds, a live-reloading development server, safe symlink traversal,
-typed theme components, and deployable SSG or MPA output.
+Dirwell turns a directory into a static file explorer. Build files for a static
+host, or serve a changing folder locally. Choose SSG for portable output and
+MPA when many directory pages should share assets.
 
 ## Quick start
 
 ```bash
-pnpm dlx @vp-tw/dirwell .
-pnpm dlx @vp-tw/dirwell build . --out-dir dist
+pnpm install
+pnpm dirwell serve ./fixture
+pnpm dirwell build ./fixture -o ./generated
 ```
 
-The first command watches the current directory and serves it. `build` writes a
-static site. Existing `index.html` and `index.htm` files are preserved.
+These commands run from a repository checkout. The first starts a watch server;
+the second writes a static tree. The installed CLI uses the same `dirwell`
+commands. Existing `index.html` and `index.htm` files are preserved; Dirwell
+uses `_dirwell.html` for those directories when that name is available.
+
+| Need                                 | Start with                                  |
+| ------------------------------------ | ------------------------------------------- |
+| Move the output tree between paths   | SSG and relative URLs, the defaults         |
+| Publish beneath a fixed path         | `base` plus `urls: "base"`                  |
+| Share assets across many pages       | `mode: "mpa"`                               |
+| Show only selected source files      | `include` and `exclude`                     |
+| Change icons or a few UI parts       | `createDefaultTheme({ icons, components })` |
+| Render basic HTML without JavaScript | `createPlainTheme()`                        |
+
+The [configuration guide](./docs/src/content/docs/configuration.md) lists
+accepted values, defaults, effects, and use cases for every field.
 
 ```text
 dirwell [directory]          # alias for serve
@@ -25,45 +40,32 @@ dirwell daemon stop
 
 ## Configuration
 
-Create `dirwell.config.ts` only when defaults are insufficient:
+Create `dirwell.config.ts` when a field has no CLI flag or you want a reusable
+setup:
 
 ```ts
-import { createDefaultTheme, defineConfig } from "@vp-tw/dirwell";
+import { defineConfig } from "@vp-tw/dirwell";
 
 export default defineConfig({
-  root: "./public",
-  outDir: "./dist",
   mode: "mpa",
   base: "/downloads/",
   urls: "base",
-  outputName: (directory) =>
-    directory.entries.some((entry) => entry.name === "index.html") ? null : "index.html",
-  symlinks: { follow: true, boundary: "root", onCycle: "skip" },
-  sort: {
-    field: "name",
-    nameMode: "natural",
-    direction: "asc",
-    directoriesFirst: true,
-  },
-  theme: createDefaultTheme({
-    colorScheme: true,
-    fuzzySearch: true,
-    globalSearch: true,
-    keyboardNavigation: true,
-    sorting: true,
-    project: {
-      author: "Your name",
-      repositoryUrl: "https://github.com/you/project",
-      license: "MIT License",
-      licenseUrl: "https://github.com/you/project/blob/main/LICENSE",
-    },
-  }),
+  include: ["**/*.md", "assets/**"],
+  exclude: ["drafts/**"],
 });
 ```
 
-`outputName` accepts a filename or receives `DirectoryData`: root, current
-directory, parent, complete entry metadata, and symlink state. Returning `null`
-skips the current directory.
+Run `pnpm dirwell build ./public -o ./dist` to use it. The CLI's positional
+directory defaults to `.` and overrides config `root`, so pass the source
+path in the command.
+
+`outputName` accepts a fixed filename or a function receiving `DirectoryData`.
+Returning `null` skips the current directory. The default uses `index.html`,
+then `_dirwell.html` when an index already exists, then skips if both exist.
+
+`include` and `exclude` accept root-relative glob patterns. They select mirrored
+files, generated directory pages, and search results; exclusions win. With no
+patterns, every source entry is included.
 
 URL generation supports portable depth-aware `relative` links, Vite-style
 `base` prefixes for deployments such as GitHub Pages, and native
@@ -81,24 +83,72 @@ URL generation supports portable depth-aware `relative` links, Vite-style
 `__dirwell/` is reserved in both modes for generated assets such as broken-link
 raw views.
 
+## Vite integration
+
+The `@vp-tw/dirwell/vite` adapter builds one or more explorers alongside a Vite
+application and serves them through Vite's development server:
+
+```ts
+import { defineConfig } from "vite";
+import Dirwell from "@vp-tw/dirwell/vite";
+
+export default defineConfig({
+  plugins: [
+    Dirwell([
+      { root: "./docs", outDir: "dist/docs" },
+      { root: "./downloads", outDir: "dist/downloads", mode: "mpa" },
+    ]),
+  ],
+});
+```
+
+By default, Dirwell writes to a dedicated `dirwell/` subdirectory of Vite's
+`build.outDir` and derives its public `base` from Vite's base path. Set
+`outDir: "dist/downloads"` for another path relative to the Vite project root,
+or set an absolute `outDir` for an independent publish directory. An output
+outside Vite's build directory needs an explicit public `base`. The adapter
+never replaces Vite's output root or an existing directory it does not own.
+See [configuration](./docs/src/content/docs/configuration.md#vite-adapter) for
+the full path and development-server behavior.
+
+## Other build tools
+
+Adapters are available for Rollup, Rolldown, webpack, Rspack, Rsbuild, esbuild,
+Farm, and Bun. Import `@vp-tw/dirwell/<host>` or use the factories from
+`@vp-tw/dirwell/unplugin`. Each generates a dedicated explorer path alongside the host
+output. See [build tool adapters](./docs/src/content/docs/build-tools.md) for
+options, watch behavior, and verification boundaries.
+
+## Browser behavior
+
 SSG pages and smaller MPA pages work without JavaScript. The runtime adds local and global
 fuzzy search, type filters, configurable sorting, IME-safe keyboard controls,
 Backspace parent navigation, theme persistence, and watch-mode live reload. The
 global search index is fetched only after the user opens Search all files and types a query.
 The index is split into bounded files; the first 100 best matches render progressively.
 Search matches file names, relative paths, and symlink targets. Three independent
-checkboxes filter physical folders, physical files, and symlinks. All are on by
+type controls filter physical folders, physical files, and symlinks. All are on by
 default; any combination is available in the current folder and global search.
 
 Name sorting supports raw Unicode code-point order, locale-aware comparison,
 and natural numeric comparison. Modified time and file size are also available;
 direction and directory grouping are independent controls.
 
+The default theme shows modified times in the viewer's local time zone when
+JavaScript is available, without repeating the offset in every row. Activate a
+date with touch, pointer, or keyboard to see its exact local time and UTC instant.
+Generated HTML displays labeled UTC times before the
+runtime loads and when JavaScript is disabled. The plain theme always displays UTC.
+
+## Symlinks
+
 Symlinks always remain visible and show their declared target. Broken links can
 open their raw target text; targets outside the configured root remain
 unavailable. Broken links, outside-root targets, and cycles receive explicit states.
 Following directory links is opt-in. Ancestor cycles remain navigable but are
 never expanded recursively.
+
+## Themes
 
 Replace the complete `ExplorerTheme` or layer typed component overrides over
 the default theme. See [THEMING.md](./THEMING.md) and the Starlight site in
@@ -114,7 +164,8 @@ Its footer shows the repository, author, and license. Pass `project` to
 The default theme uses selected self-hosted `vscode-icons` artwork for common
 file types. The icons are CC BY-SA 4.0 and may include separately protected
 brand marks; Dirwell's code remains MIT-licensed. See
-[third-party notices](./THIRD_PARTY_NOTICES.md) and the
+[Ledger theme attribution](./src/theme-default/README.md),
+[third-party notices](./THIRD_PARTY_NOTICES.md), and the
 [file-icons example](./examples/file-icons).
 
 ## Development
@@ -122,13 +173,11 @@ brand marks; Dirwell's code remains MIT-licensed. See
 ```bash
 pnpm install
 pnpm test
+pnpm exec playwright install chromium --only-shell
+pnpm test:browser
 pnpm run check
 pnpm run build
 pnpm run docs:build
 ```
-
-Release notes use Changesets. This repository remains in `alpha` prerelease
-mode until a stable release is explicitly chosen. See [RELEASING.md](./RELEASING.md)
-for the release procedure.
 
 Dirwell is MIT licensed.

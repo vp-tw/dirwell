@@ -5,7 +5,7 @@ import path from "node:path";
 import test from "node:test";
 import { renderUsage } from "citty";
 import { buildCommand, mainCommand } from "../src/cli.ts";
-import { loadDirwellConfig, resolveGenerateOptions } from "../src/config.ts";
+import { loadDirwellConfig, resolveGenerateOptions, validateConfig } from "../src/config.ts";
 
 async function temporaryDirectory(): Promise<string> {
   return mkdtemp(path.join(tmpdir(), "dirwell-config-"));
@@ -91,6 +91,28 @@ test("validates and resolves sorting configuration", async (context) => {
     'export default { sort: { nameMode: "magic" } };\n',
   );
   await assert.rejects(() => loadDirwellConfig(cwd, "build"), /sort.nameMode must be/);
+});
+
+test("include and exclude accept source-relative globs and reject ambiguous patterns", async () => {
+  const config = { include: ["**/*.md", "docs/**"], exclude: ".env" };
+  validateConfig(config);
+  assert.deepEqual(resolveGenerateOptions("/project", config).include, config.include);
+  assert.equal(resolveGenerateOptions("/project", config).exclude, ".env");
+  for (const invalid of [
+    "",
+    "/absolute/**",
+    "C:/secret/**",
+    "../secret",
+    "docs\\**",
+    "!private/**",
+    42,
+  ]) {
+    assert.throws(() => validateConfig({ include: invalid }), /root-relative glob patterns/);
+  }
+  assert.throws(
+    () => validateConfig({ exclude: ["*.md", "../private/**"] }),
+    /root-relative glob patterns/,
+  );
 });
 
 test("CLI help exposes zero-config usage and primary commands", async () => {

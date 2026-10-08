@@ -12,6 +12,7 @@ export {
   defaultThemeComponents,
   escapeHtml,
 } from "./theme-default.ts";
+export type { DefaultThemeIconSet, DefaultThemeIconVariant } from "./theme-default.ts";
 export { createPlainTheme } from "./theme-plain.ts";
 export type { PlainThemeOptions } from "./theme-plain.ts";
 export { resolveThemeComponents } from "./theme-components.ts";

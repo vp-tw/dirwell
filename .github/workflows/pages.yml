@@ -24,9 +24,14 @@ jobs:
         with:
           node-version: 26
           cache: pnpm
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
       - run: pnpm install --frozen-lockfile
       - run: pnpm run check
       - run: pnpm test
+      - run: pnpm exec playwright install --with-deps chromium --only-shell
+      - run: pnpm test:browser
       - name: Build documentation and examples
         env:
           PUBLIC_REPOSITORY_URL: https://github.com/${{ github.repository }}

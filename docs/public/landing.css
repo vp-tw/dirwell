@@ -181,10 +181,13 @@ h1 {
   line-height: 1.75;
   overflow: auto;
 }
-.prompt {
+.syntax-prompt {
   color: #8ed0ad;
 }
-.muted {
+.syntax-shell-package {
+  color: #b9d8ff;
+}
+.syntax-output {
   color: #aeb4a8;
 }
 .explorer-sample {
@@ -395,6 +398,16 @@ h2 {
 }
 .code-panel pre[hidden] {
   display: none;
+}
+.code-panel .syntax-call,
+.code-panel .syntax-key {
+  color: #174ea6;
+}
+.code-panel .syntax-string {
+  color: #22624d;
+}
+.code-panel .syntax-keyword {
+  color: #804b2f;
 }
 .depth-links {
   grid-column: 2;

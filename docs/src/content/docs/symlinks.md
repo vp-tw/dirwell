@@ -1,10 +1,10 @@
 ---
 title: Symlinks
-description: Follow symlinks without hiding cycles, broken targets, or root boundaries.
+description: Decide whether directory links are listed, followed, or rejected.
 ---
 
-Symlink traversal is opt-in. Every symlink remains visible and shows its declared
-target.
+Dirwell always lists a selected symlink and shows its declared target.
+Following directory symlinks is optional.
 
 ```ts
 export default defineConfig({
@@ -16,20 +16,38 @@ export default defineConfig({
 });
 ```
 
-## Cycles
+| Setting    | Input and result                                                                                                                                                |
+| ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `follow`   | Boolean; default `false`. Set `true` to generate pages through eligible directory links, such as internal aliases.                                              |
+| `boundary` | `"root"` or `"anywhere"`; default `"root"`. Root keeps traversal in the source tree. Anywhere relaxes that boundary; review the source and output policy first. |
+| `onCycle`  | `"skip"` or `"error"`; default `"skip"`. Skip stops recursion at an ancestor cycle. Error fails the build so you can fix the link.                              |
 
-Dirwell identifies cycles from the real paths of the current ancestor chain. It
-stops recursive generation at the cycle but links the entry to its canonical,
-already generated target. The cycle is therefore supported navigation rather
-than a dead item.
+`follow: false` still shows a symlink entry. It does not make an outside or
+broken target available.
 
-## Broken links
+## What visitors see
 
-Broken targets stay in the list with a status badge and their raw target text.
-Selecting one opens that raw `readlink()` text as a plain-text document in a
-new tab. It does not attempt to navigate to the missing target.
+| Link state                               | Page behavior                                                                                                                                    |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Internal file or directory target        | Links to the target when it is available in the generated output.                                                                                |
+| Broken or inaccessible target            | Shows `Target unavailable`. Opening the link displays the raw `readlink()` target text as plain text in a new tab.                               |
+| Target outside the source root           | Shows `Target unavailable`. The link opens only the declared target text; Dirwell does not publish the external file or its size.                |
+| Ancestor cycle                           | Shows a cycle state. With `skip`, generation stops at the cycle instead of recursing forever; the entry can link to an already generated target. |
+| Target removed by `include` or `exclude` | The symlink can stay listed. Its link opens only the declared target text; the target is not mirrored and its size is not published.             |
 
-## Outside the root
+The Default theme shows each symlink's own size as `Link`. When an allowed target
+exists, it also shows its file size as `Target`, or `Target folder` for a directory.
+Size sorting uses the symlink's own size. Unavailable targets show only `Link`.
 
-With `boundary: "root"`, an outside target is visible but unavailable. Dirwell
-does not expose the resolved absolute machine path in generated HTML.
+Dirwell mirrors source files by default. It copies only relative symlinks
+whose target remains inside the selected output tree. The CLI omits absolute
+and escaping symlinks from the mirrored tree. The Vite adapter rejects an
+included absolute or escaping symlink when mirroring is enabled, because it
+could expose files outside its output. Exclude the link or set `mirror: false`
+when another publisher controls the source files and Dirwell should
+generate pages only.
+
+Use `onCycle: "error"` for a build that should fail on accidental loops.
+Use `skip` for a browsable tree with intentional internal aliases. Test the
+published output after changing `boundary`, `follow`, or `mirror`; these
+settings affect which links can be followed and which files are present.

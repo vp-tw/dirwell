@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdtemp, mkdir, readFile, rm, symlink, writeFile } from "node:fs/promises";
+import { lstat, mkdtemp, mkdir, readFile, readdir, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -119,8 +119,16 @@ test("default theme self-hosts vscode-icons in SSG and MPA output", async (conte
     const assetPrefix = mode === "mpa" ? "__dirwell/" : "";
     assert.match(html, new RegExp(`src="${assetPrefix}vscode-default_folder\\.svg"`));
     assert.match(html, new RegExp(`src="${assetPrefix}vscode-file_type_text\\.svg"`));
-    assert.match(html, /Icon credits<\/a>/);
-    assert.match(html, /&quot;icons&quot;:\{&quot;byExtension&quot;:/);
+    assert.match(
+      html,
+      /href="https:\/\/github\.com\/VdustR" target="_blank" rel="noopener">VdustR<\/a>/,
+    );
+    assert.match(
+      html,
+      /class="project-meta"><a href="https:\/\/github\.com\/VdustR\/dirwell" target="_blank" rel="noopener">Dirwell<\/a> <span class="meta-item">· <a href="https:\/\/github\.com\/vp-tw\/dirwell\/blob\/main\/src\/theme-default\/README\.md" target="_blank" rel="noopener">Ledger<\/a> by <a href="https:\/\/github\.com\/VdustR" target="_blank" rel="noopener">VdustR<\/a><\/span><\/p>/,
+    );
+    assert.doesNotMatch(html, />MIT License<\/a>|>Notices<\/a>/);
+    assert.match(html, /&quot;icons&quot;:\{&quot;light&quot;:\{&quot;file&quot;:/);
     assert.match(html, /main > header \{\s*position: sticky;\s*top: 0;/);
     assert.match(
       html,
@@ -133,15 +141,119 @@ test("default theme self-hosts vscode-icons in SSG and MPA output", async (conte
       /CC BY-SA 4\.0|Creative Commons Attribution-ShareAlike 4\.0/,
     );
     const runtime = await readFile(path.join(assetDir, "dirwell.runtime.js"), "utf8");
-    assert.match(runtime, /icons\.hrefs\[iconName\]/);
+    assert.match(runtime, /variant\.byExtension\[extension\]/);
     assert.match(runtime, /--dw-sticky-header-height/);
     assert.match(runtime, /scrollPaddingTop/);
   }
 });
 
+test("default footer keeps custom site attribution separate from Ledger", async (context) => {
+  const { output, root } = await fixture();
+  context.after(() => rm(path.dirname(root), { recursive: true, force: true }));
+  const theme = createDefaultTheme({
+    project: {
+      name: "Downloads",
+      repositoryUrl: "https://example.test/downloads",
+      author: "Your name",
+      authorUrl: "https://example.test/author",
+      license: "Custom License",
+      licenseUrl: "https://example.test/license",
+    },
+  });
+
+  for (const mode of ["ssg", "mpa"] as const) {
+    await generateExplorer({ sourceDir: root, outputDir: output, mode, theme });
+    const html = await readFile(path.join(output, "index.html"), "utf8");
+    assert.match(
+      html,
+      /class="project-meta"><span class="project-credit"><a href="https:\/\/example\.test\/downloads" target="_blank" rel="noopener">Downloads<\/a> by <a href="https:\/\/example\.test\/author" target="_blank" rel="noopener">Your name<\/a><\/span> <span class="meta-item">· <a [^>]+>Ledger<\/a><\/span><\/p>/,
+    );
+    assert.doesNotMatch(html, />Custom License<\/a>|>Notices<\/a>/);
+  }
+});
+
+test("custom theme icons share light and dark sources across static and dynamic rows", async (context) => {
+  const { output, root } = await fixture();
+  context.after(() => rm(path.dirname(root), { recursive: true, force: true }));
+  await writeFile(path.join(root, "prototype.constructor"), "fallback icon");
+  const svg = (color: string) =>
+    `<svg xmlns="http://www.w3.org/2000/svg"><path fill="${color}"/></svg>`;
+  const theme = createDefaultTheme({
+    icons: {
+      light: {
+        file: svg("red"),
+        folder: svg("green"),
+        byExtension: { txt: svg("blue") },
+      },
+      dark: {
+        file: svg("pink"),
+        folder: svg("yellow"),
+        byExtension: { txt: svg("purple") },
+      },
+      notice: "Example icon attribution",
+    },
+  });
+
+  for (const mode of ["ssg", "mpa"] as const) {
+    await generateExplorer({ sourceDir: root, outputDir: output, mode, theme });
+    const html = await readFile(path.join(output, "index.html"), "utf8");
+    const assetDir = path.join(output, mode === "mpa" ? "__dirwell" : "");
+    const assets = await readdir(assetDir);
+    assert.match(html, /file-icon--light/);
+    assert.match(html, /file-icon--dark/);
+    assert.match(html, /&quot;dark&quot;:\{&quot;file&quot;:/);
+    assert.match(html, /theme-icons-NOTICE\.txt/);
+    assert.match(
+      html,
+      /theme-icons-NOTICE\.txt" target="_blank" rel="noopener">Icon licenses<\/a>/,
+    );
+    assert.equal(assets.filter((name) => name.startsWith("theme-icon-")).length, 6);
+    assert.equal(
+      assets.some((name) => name.startsWith("vscode-")),
+      false,
+    );
+    assert.equal(
+      await readFile(path.join(assetDir, "theme-icons-NOTICE.txt"), "utf8"),
+      "Example icon attribution",
+    );
+    const assetContents = await Promise.all(
+      assets
+        .filter((name) => name.startsWith("theme-icon-"))
+        .map((name) => readFile(path.join(assetDir, name), "utf8")),
+    );
+    for (const color of ["red", "green", "blue", "pink", "yellow", "purple"]) {
+      assert.ok(assetContents.some((contents) => contents.includes(`fill="${color}"`)));
+    }
+  }
+
+  await generateExplorer({
+    sourceDir: root,
+    outputDir: output,
+    theme: createDefaultTheme({ icons: { light: { file: svg("red"), folder: svg("green") } } }),
+  });
+  assert.doesNotMatch(await readFile(path.join(output, "index.html"), "utf8"), /Icon credits/);
+  await assert.rejects(readFile(path.join(output, "theme-icons-NOTICE.txt"), "utf8"));
+
+  assert.throws(
+    () =>
+      createDefaultTheme({
+        icons: { light: { file: svg("red"), folder: svg("green") }, notice: "" },
+      }),
+    /attribution notice must be non-empty/,
+  );
+  assert.throws(
+    () =>
+      createDefaultTheme({
+        icons: { light: { file: "not an svg", folder: svg("green") }, notice: "source" },
+      }),
+    /SVG markup/,
+  );
+});
+
 test("mirrors source files and preserves an existing index", async (context) => {
   const { output, root } = await fixture();
   context.after(() => rm(path.dirname(root), { recursive: true, force: true }));
+  await symlink("README.txt", path.join(root, "readme-link"));
 
   await generateExplorer({
     sourceDir: root,
@@ -151,7 +263,8 @@ test("mirrors source files and preserves an existing index", async (context) => 
 
   assert.equal(await readFile(path.join(output, "README.txt"), "utf8"), "initial\n");
   assert.match(await readFile(path.join(output, "docs", "index.html"), "utf8"), /Docs/);
-  assert.match(await readFile(path.join(output, "releases", "index.html"), "utf8"), /cycle/);
+  assert.match(await readFile(path.join(output, "docs", "_dirwell.html"), "utf8"), /index\.html/);
+  assert.match(await readFile(path.join(output, "releases", "index.html"), "utf8"), /Cycle/);
   assert.match(
     await readFile(path.join(output, "releases", "index.html"), "utf8"),
     /data-parent-href="\.\.\/"/,
@@ -186,22 +299,103 @@ test("mirrors source files and preserves an existing index", async (context) => 
     rootIndex,
     /<label class="scheme">Theme<select data-color-scheme><option value="system">System<\/option>/,
   );
-  assert.match(rootIndex, />Dirwell<\/a> by VdustR/);
+  assert.match(
+    rootIndex,
+    />Dirwell<\/a> <span class="meta-item">· <a [^>]+>Ledger<\/a> by <a href="https:\/\/github\.com\/VdustR"[^>]*>VdustR<\/a><\/span>/,
+  );
   assert.doesNotMatch(rootIndex, /data-parent-href/);
   assert.match(rootIndex, /href="README\.txt" target="_blank" rel="noopener">[\s\S]*README\.txt/);
-  assert.match(rootIndex, /href="docs\/" target="_blank" rel="noopener">[\s\S]*docs\//);
+  assert.match(rootIndex, /href="docs\/_dirwell\.html">[\s\S]*docs\//);
   assert.match(rootIndex, /href="releases\/">[\s\S]*releases\//);
   assert.match(rootIndex, /href="space%20name\.txt"/);
   assert.doesNotMatch(rootIndex, /href="releases\/" target="_blank"/);
   assert.match(rootIndex, /external-link/);
-  assert.match(rootIndex, /Target:<\/span> \.\.\/external/);
-  assert.match(rootIndex, /external link/);
+  assert.match(
+    rootIndex,
+    /Target unavailable<\/span> · <span class="target-unavailable">\.\.\/external<\/span>/,
+  );
   assert.doesNotMatch(rootIndex, /href="external-link\/"/);
-  const rawLinkHref = rootIndex.match(
-    /href="(__dirwell\/raw-links\/[a-f0-9]{16}\.txt)" target="_blank" rel="noopener"/,
-  )?.[1];
-  assert.ok(rawLinkHref);
-  assert.equal(await readFile(path.join(output, rawLinkHref), "utf8"), "missing");
+  for (const [name, target] of [
+    ["broken-link", "missing"],
+    ["external-link", "../external"],
+  ]) {
+    const row = rootIndex.match(
+      new RegExp(`<li class="entry"[^>]*data-name="${name}"[\\s\\S]*?<\\/li>`),
+    )?.[0];
+    assert.ok(row);
+    const rawLinkHref = row.match(
+      /href="(__dirwell\/raw-links\/[a-f0-9]{16}\.txt)" target="_blank" rel="noopener"/,
+    )?.[1];
+    assert.ok(rawLinkHref);
+    assert.equal(await readFile(path.join(output, rawLinkHref), "utf8"), target);
+    assert.match(row, /<span class="size-stack"><span>Link <b>\d+ B<\/b><\/span><\/span>/);
+  }
+  const readmeRow = rootIndex.match(
+    /<li class="entry"[^>]*data-name="README\.txt"[\s\S]*?<\/li>/,
+  )?.[0];
+  assert.ok(readmeRow);
+  assert.doesNotMatch(readmeRow, /size-stack/);
+  const availableRow = rootIndex.match(
+    /<li class="entry"[^>]*data-name="readme-link"[\s\S]*?<\/li>/,
+  )?.[0];
+  assert.ok(availableRow);
+  assert.match(availableRow, /Link <b>10 B<\/b>/);
+  assert.match(availableRow, /Target <b>8 B<\/b>/);
+  assert.doesNotMatch(availableRow, /target-unavailable/);
+});
+
+test("default page name falls back once and preserves both existing pages", async (context) => {
+  const { output, root } = await fixture();
+  context.after(() => rm(path.dirname(root), { recursive: true, force: true }));
+  await mkdir(path.join(root, "both"));
+  await writeFile(path.join(root, "both", "index.html"), "Original index");
+  await writeFile(path.join(root, "both", "_dirwell.html"), "Original fallback");
+  await mkdir(path.join(root, "legacy"));
+  await writeFile(path.join(root, "legacy", "index.htm"), "Legacy index");
+
+  for (const mode of ["ssg", "mpa"] as const) {
+    await generateExplorer({ sourceDir: root, outputDir: output, mode });
+    assert.equal(
+      await readFile(path.join(output, "docs", "index.html"), "utf8"),
+      "<!doctype html><title>Docs</title>",
+    );
+    assert.match(await readFile(path.join(output, "docs", "_dirwell.html"), "utf8"), /index\.html/);
+    assert.equal(await readFile(path.join(output, "both", "index.html"), "utf8"), "Original index");
+    assert.equal(
+      await readFile(path.join(output, "both", "_dirwell.html"), "utf8"),
+      "Original fallback",
+    );
+    assert.equal(await readFile(path.join(output, "legacy", "index.htm"), "utf8"), "Legacy index");
+    assert.match(
+      await readFile(path.join(output, "legacy", "_dirwell.html"), "utf8"),
+      /index\.htm/,
+    );
+    const rootHtml = await readFile(path.join(output, "index.html"), "utf8");
+    assert.match(rootHtml, /href="docs\/_dirwell\.html"/);
+    assert.match(rootHtml, /href="legacy\/_dirwell\.html"/);
+    assert.match(rootHtml, /href="both\/" target="_blank"/);
+    const index = JSON.parse(
+      await readFile(path.join(output, "__dirwell", "search-00000.json"), "utf8"),
+    );
+    assert.equal(
+      index.entries.find((entry: { path: string }) => entry.path === "docs")?.href,
+      "../docs/_dirwell.html",
+    );
+  }
+});
+
+test("a root index keeps its contents and receives a linked Explorer fallback", async (context) => {
+  const { output, root } = await fixture();
+  context.after(() => rm(path.dirname(root), { recursive: true, force: true }));
+  await writeFile(path.join(root, "index.html"), "Original root index");
+  await generateExplorer({ sourceDir: root, outputDir: output, theme: createPlainTheme() });
+
+  assert.equal(await readFile(path.join(output, "index.html"), "utf8"), "Original root index");
+  assert.match(await readFile(path.join(output, "_dirwell.html"), "utf8"), /README\.txt/);
+  assert.match(
+    await readFile(path.join(output, "releases", "index.html"), "utf8"),
+    /href="\.\.\/_dirwell\.html">Home<\/a>/,
+  );
 });
 
 test("supports a clean output directory inside the source tree", async (context) => {
@@ -215,6 +409,16 @@ test("supports a clean output directory inside the source tree", async (context)
   assert.equal(await readFile(path.join(output, "README.txt"), "utf8"), "initial\n");
   const rootIndex = await readFile(path.join(output, "index.html"), "utf8");
   assert.doesNotMatch(rootIndex, />dist\/<\/a>/);
+});
+
+test("refuses an output directory that contains the source tree", async (context) => {
+  const { root } = await fixture();
+  context.after(() => rm(path.dirname(root), { recursive: true, force: true }));
+  await assert.rejects(
+    generateExplorer({ sourceDir: root, outputDir: path.dirname(root) }),
+    /outputDir must not contain the sourceDir/,
+  );
+  assert.equal(await readFile(path.join(root, "README.txt"), "utf8"), "initial\n");
 });
 
 test("output names support strings, resolver skips, and safe filename validation", async (context) => {
@@ -241,6 +445,123 @@ test("output names support strings, resolver skips, and safe filename validation
       generateExplorer({ sourceDir: root, outputDir: output, outputName: () => "../unsafe.html" }),
     /single safe filename/,
   );
+});
+
+test("include and exclude filter mirrored files, pages, and search in both modes", async (context) => {
+  const { output, root } = await fixture();
+  context.after(() => rm(path.dirname(root), { recursive: true, force: true }));
+  await mkdir(path.join(root, "docs", "private"));
+  await writeFile(path.join(root, "intro.md"), "Public intro");
+  await writeFile(path.join(root, "docs", "guide.md"), "Public guide");
+  await writeFile(path.join(root, "docs", ".hidden.log"), "Hidden log");
+  await writeFile(path.join(root, "docs", "private", "secret.md"), "Private note");
+
+  for (const mode of ["ssg", "mpa"] as const) {
+    await generateExplorer({
+      sourceDir: root,
+      outputDir: output,
+      mode,
+      include: ["*.md", "docs/**"],
+      exclude: ["docs/private/**", "**/*.log"],
+    });
+    const rootPage = await readFile(path.join(output, "index.html"), "utf8");
+    const docsPage = await readFile(path.join(output, "docs", "_dirwell.html"), "utf8");
+    assert.match(rootPage, /intro\.md/);
+    assert.match(rootPage, /docs\/_dirwell\.html/);
+    assert.doesNotMatch(rootPage, /README\.txt|releases\//);
+    assert.match(docsPage, /guide\.md|index\.html/);
+    assert.doesNotMatch(docsPage, /private\/|\.hidden\.log/);
+    assert.equal(await readFile(path.join(output, "intro.md"), "utf8"), "Public intro");
+    assert.equal(await readFile(path.join(output, "docs", "guide.md"), "utf8"), "Public guide");
+    await assert.rejects(lstat(path.join(output, "README.txt")), /ENOENT/);
+    await assert.rejects(lstat(path.join(output, "docs", "private")), /ENOENT/);
+    await assert.rejects(lstat(path.join(output, "docs", ".hidden.log")), /ENOENT/);
+    const index = JSON.parse(
+      await readFile(path.join(output, "__dirwell", "search-00000.json"), "utf8"),
+    );
+    const paths = index.entries.map((entry: { path: string }) => entry.path);
+    assert.ok(paths.includes("docs/guide.md"));
+    assert.ok(
+      !paths.some((entry: string) => entry.includes("private") || entry.includes(".hidden.log")),
+    );
+  }
+
+  await generateExplorer({ sourceDir: root, outputDir: output, mirror: false, include: "*.md" });
+  assert.match(await readFile(path.join(output, "index.html"), "utf8"), /intro\.md/);
+  await assert.rejects(lstat(path.join(output, "intro.md")), /ENOENT/);
+  await assert.rejects(lstat(path.join(output, "docs")), /ENOENT/);
+});
+
+test("directory includes, dotfiles, and excluded symlink targets use source-relative paths", async (context) => {
+  const { output, root } = await fixture();
+  context.after(() => rm(path.dirname(root), { recursive: true, force: true }));
+  await writeFile(path.join(root, ".env"), "SECRET=value");
+  await writeFile(path.join(root, "docs", ".hidden.md"), "Hidden note");
+  await symlink("README.txt", path.join(root, "readme-link"));
+
+  await generateExplorer({ sourceDir: root, outputDir: output, include: "docs" });
+  assert.equal(await readFile(path.join(output, "docs", ".hidden.md"), "utf8"), "Hidden note");
+  await assert.rejects(lstat(path.join(output, ".env")), /ENOENT/);
+
+  await generateExplorer({
+    sourceDir: root,
+    outputDir: output,
+    include: "**",
+    exclude: [".env", "README.txt"],
+  });
+  await assert.rejects(lstat(path.join(output, ".env")), /ENOENT/);
+  await assert.rejects(lstat(path.join(output, "README.txt")), /ENOENT/);
+  await assert.rejects(lstat(path.join(output, "readme-link")), /ENOENT/);
+  const rootPage = await readFile(path.join(output, "index.html"), "utf8");
+  assert.match(rootPage, /readme-link/);
+  assert.doesNotMatch(rootPage, /href="readme-link"/);
+  const excludedRow = rootPage.match(
+    /<li class="entry"[^>]*data-name="readme-link"[\s\S]*?<\/li>/,
+  )?.[0];
+  assert.ok(excludedRow);
+  assert.match(excludedRow, /Target unavailable/);
+  assert.match(excludedRow, /target-unavailable/);
+  assert.match(excludedRow, /size-stack/);
+  assert.doesNotMatch(excludedRow, /Target <b>/);
+  const rawHref = excludedRow.match(/href="(__dirwell\/raw-links\/[a-f0-9]{16}\.txt)"/)?.[1];
+  assert.ok(rawHref);
+  assert.equal(await readFile(path.join(output, rawHref), "utf8"), "README.txt");
+  const index = JSON.parse(
+    await readFile(path.join(output, "__dirwell", "search-00000.json"), "utf8"),
+  );
+  assert.equal(
+    index.entries.find((entry: { path: string }) => entry.path === "readme-link")?.href,
+    `raw-links/${path.basename(rawHref)}`,
+  );
+  const excludedRecord = index.entries.find(
+    (entry: { path: string }) => entry.path === "readme-link",
+  );
+  assert.equal(excludedRecord?.isTargetUnavailable, true);
+  assert.equal(excludedRecord?.targetSize, null);
+});
+
+test("excluding an existing index lets Dirwell generate the directory index", async (context) => {
+  const { output, root } = await fixture();
+  context.after(() => rm(path.dirname(root), { recursive: true, force: true }));
+  await generateExplorer({
+    sourceDir: root,
+    outputDir: output,
+    include: "docs/**",
+    exclude: "docs/index.html",
+  });
+  const docsPage = await readFile(path.join(output, "docs", "index.html"), "utf8");
+  assert.match(docsPage, /Index of|data-explorer/);
+  await assert.rejects(lstat(path.join(output, "docs", "_dirwell.html")), /ENOENT/);
+});
+
+test("CLI mirror omits symlinks that could reach outside the output", async (context) => {
+  const { output, root } = await fixture();
+  context.after(() => rm(path.dirname(root), { recursive: true, force: true }));
+  await symlink(path.join(root, "README.txt"), path.join(root, "absolute-link"));
+  await generateExplorer({ sourceDir: root, outputDir: output });
+  await assert.rejects(lstat(path.join(output, "external-link")), /ENOENT/);
+  await assert.rejects(lstat(path.join(output, "absolute-link")), /ENOENT/);
+  assert.match(await readFile(path.join(output, "index.html"), "utf8"), /external-link/);
 });
 
 test("DirectoryData exposes root, current, parent, metadata, and symlink state", async (context) => {
@@ -307,7 +628,7 @@ test("MPA shares runtime assets from the output root", async (context) => {
   const searchIndex = JSON.parse(
     await readFile(path.join(output, "__dirwell", "search-index.json"), "utf8"),
   );
-  assert.equal(searchIndex.version, 2);
+  assert.equal(searchIndex.version, 3);
   const searchEntries = (
     await Promise.all(
       searchIndex.shards.map(async (name: string) =>
@@ -522,6 +843,36 @@ test("watch server rebuilds changed directory contents", async (context) => {
   assert.equal((await fetch(`${server.url}%E0%A4%A`)).status, 400);
 });
 
+test("filtered watch server serves only selected paths after rebuilds", async () => {
+  for (const mode of ["ssg", "mpa"] as const) {
+    const { output, root } = await fixture();
+    const server = await createExplorerDevServer({
+      sourceDir: root,
+      outputDir: output,
+      mode,
+      include: "*.md",
+      port: 0,
+    });
+    try {
+      assert.equal((await fetch(`${server.url}README.txt`)).status, 404);
+      assert.doesNotMatch(await (await fetch(server.url)).text(), /README\.txt|docs\//);
+      await writeFile(path.join(root, "intro.md"), "Intro\n");
+      const deadline = Date.now() + 5_000;
+      let page = "";
+      while (Date.now() < deadline) {
+        page = await (await fetch(server.url)).text();
+        if (page.includes("intro.md")) break;
+        await new Promise((resolve) => setTimeout(resolve, 50));
+      }
+      assert.match(page, /intro\.md/);
+      assert.equal(await (await fetch(`${server.url}intro.md`)).text(), "Intro\n");
+    } finally {
+      await server.close();
+      await rm(path.dirname(root), { recursive: true, force: true });
+    }
+  }
+});
+
 test("development server mounts base and html-base builds at their deployment path", async (context) => {
   const { output, root } = await fixture();
   const server = await createExplorerDevServer({
@@ -611,6 +962,34 @@ test("entry sorting supports Unicode, locale, natural numbers, metadata, and gro
       )
       .map(({ name }) => name),
     ["folder", "file10", "file2"],
+  );
+  const firstEntry = entries[0];
+  const secondEntry = entries[1];
+  assert.ok(firstEntry);
+  assert.ok(secondEntry);
+  const folderLink = {
+    ...firstEntry,
+    kind: "symlink" as const,
+    name: "folder-link",
+    metadata: metadata(4, "2025-01-04T00:00:00.000Z"),
+    symlink: {
+      target: "folder",
+      resolvedPath: "/folder",
+      targetRelativePath: "folder",
+      targetKind: "directory" as const,
+      targetSize: null,
+      isBroken: false,
+      isCycle: false,
+      isOutsideRoot: false,
+      isTargetExcluded: false,
+      wasFollowed: false,
+    },
+  };
+  assert.ok(
+    compareEntries(folderLink, secondEntry, {
+      directoriesFirst: false,
+      field: "size",
+    }) > 0,
   );
   assert.ok(
     compareEntryValues(

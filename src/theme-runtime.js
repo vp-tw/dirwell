@@ -23,6 +23,159 @@ export function entryType(entry) {
   return link ? "link" : kind === "directory" ? "directory" : "file";
 }
 
+export function utcTimestamp(value) {
+  if (
+    typeof value !== "string" ||
+    !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/.test(value)
+  )
+    return null;
+  const instant = new Date(value);
+  if (Number.isNaN(instant.getTime())) return null;
+  const datetime = instant.toISOString();
+  return { datetime, label: `${datetime.slice(0, 16).replace("T", " ")} UTC` };
+}
+
+export function localTimestampLabel(value) {
+  const timestamp = utcTimestamp(value);
+  if (timestamp === null) return null;
+  const date = new Date(timestamp.datetime);
+  const twoDigits = (number) => String(number).padStart(2, "0");
+  const offset = -date.getTimezoneOffset();
+  const sign = offset < 0 ? "-" : "+";
+  return `${date.getFullYear()}-${twoDigits(date.getMonth() + 1)}-${twoDigits(date.getDate())} ${twoDigits(date.getHours())}:${twoDigits(date.getMinutes())} UTC${sign}${twoDigits(Math.floor(Math.abs(offset) / 60))}:${twoDigits(Math.abs(offset) % 60)}`;
+}
+
+export function localTimestampDetails(value) {
+  const timestamp = utcTimestamp(value);
+  if (timestamp === null) return null;
+  const date = new Date(timestamp.datetime);
+  const full = localTimestampLabel(timestamp.datetime);
+  const seconds = `:${String(date.getSeconds()).padStart(2, "0")}${date.getMilliseconds() ? `.${String(date.getMilliseconds()).padStart(3, "0")}` : ""}`;
+  return {
+    datetime: timestamp.datetime,
+    label: full.split(" UTC")[0],
+    local: full.replace(" UTC", `${seconds} UTC`),
+    zone: new Intl.DateTimeFormat().resolvedOptions().timeZone,
+  };
+}
+
+function timestampControl(time) {
+  const full = localTimestampLabel(time.dateTime);
+  if (full === null) return time;
+  time.textContent = full.split(" UTC")[0];
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "timestamp-button";
+  button.dataset.timestamp = time.dateTime;
+  button.setAttribute("aria-label", `${full}. Show exact modified time.`);
+  button.setAttribute("aria-haspopup", "dialog");
+  button.setAttribute("aria-expanded", "false");
+  if (time.isConnected) time.replaceWith(button);
+  button.append(time);
+  return button;
+}
+
+let timestampPanelId = 0;
+function installTimestampDetails(root, globalDialog) {
+  let panel = null;
+  let trigger = null;
+  let anchorPosition = null;
+  const observer = new MutationObserver(() => {
+    if (panel && (!trigger?.isConnected || !trigger.getClientRects().length)) close();
+  });
+  function close(restore = true) {
+    observer.disconnect();
+    panel?.remove();
+    panel = null;
+    trigger?.setAttribute("aria-expanded", "false");
+    trigger?.removeAttribute("aria-controls");
+    if (restore && trigger?.isConnected) trigger.focus({ preventScroll: true });
+    trigger = null;
+  }
+  function open(button) {
+    const details = localTimestampDetails(button.dataset.timestamp);
+    if (details === null) return;
+    if (trigger === button) {
+      close();
+      return;
+    }
+    close(false);
+    trigger = button;
+    panel = document.createElement("div");
+    panel.className = "timestamp-details";
+    panel.id = `timestamp-details-${++timestampPanelId}`;
+    panel.setAttribute("role", "dialog");
+    panel.setAttribute("aria-label", "Exact modified time");
+    panel.innerHTML =
+      '<div class="timestamp-details-head"><strong>Exact modified time</strong><button type="button" class="dialog-close" aria-label="Close exact time">Close</button></div><dl><dt data-time-zone></dt><dd data-time-local></dd><dt>UTC</dt><dd data-time-utc></dd></dl>';
+    panel.querySelector("[data-time-zone]").textContent = `Local · ${details.zone}`;
+    panel.querySelector("[data-time-local]").textContent = details.local;
+    panel.querySelector("[data-time-utc]").textContent = details.datetime;
+    panel.querySelector("button").addEventListener("click", () => close());
+    (button.closest("dialog") ?? root).append(panel);
+    button.setAttribute("aria-controls", panel.id);
+    button.setAttribute("aria-expanded", "true");
+    const anchor = button.getBoundingClientRect();
+    anchorPosition = { top: anchor.top, left: anchor.left };
+    const bounds = panel.getBoundingClientRect();
+    panel.style.left = `${Math.max(8, Math.min(anchor.left, innerWidth - bounds.width - 8))}px`;
+    panel.style.top = `${Math.max(8, Math.min(anchor.bottom + 8, innerHeight - bounds.height - 8))}px`;
+    panel.querySelector("button").focus({ preventScroll: true });
+    observer.observe(root, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["hidden", "open"],
+    });
+    if (globalDialog)
+      observer.observe(globalDialog, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ["hidden", "open"],
+      });
+  }
+  const clicked = (event) => {
+    const button = event.target.closest("[data-timestamp]");
+    if (button) open(button);
+  };
+  root.addEventListener("click", clicked);
+  globalDialog?.addEventListener("click", clicked);
+  document.addEventListener("click", (event) => {
+    if (panel && !panel.contains(event.target) && !trigger?.contains(event.target)) close(false);
+  });
+  document.addEventListener(
+    "keydown",
+    (event) => {
+      if (panel && event.key === "Escape") {
+        event.preventDefault();
+        event.stopPropagation();
+        close();
+      }
+    },
+    true,
+  );
+  document.addEventListener(
+    "scroll",
+    (event) => {
+      if (panel && !panel.contains(event.target)) {
+        const position = trigger?.getBoundingClientRect();
+        // A queued scroll from revealing the trigger does not move an already placed panel.
+        if (
+          !position ||
+          Math.abs(position.top - anchorPosition.top) > 0.5 ||
+          Math.abs(position.left - anchorPosition.left) > 0.5
+        )
+          close();
+      }
+    },
+    true,
+  );
+  window.addEventListener("resize", () => {
+    if (panel) close();
+  });
+}
+
 const localeCollator = new Intl.Collator(undefined, { sensitivity: "base" });
 const naturalCollator = new Intl.Collator(undefined, { numeric: true, sensitivity: "base" });
 
@@ -54,7 +207,10 @@ function isSearchRecord(record) {
     typeof record.exitsExplorer === "boolean" &&
     (record.href === null || typeof record.href === "string") &&
     (record.target === null || typeof record.target === "string") &&
-    (record.targetKind === null || typeof record.targetKind === "string")
+    (record.targetKind === null || typeof record.targetKind === "string") &&
+    (record.targetSize === null || typeof record.targetSize === "number") &&
+    typeof record.isTargetUnavailable === "boolean" &&
+    typeof record.isCycle === "boolean"
   );
 }
 
@@ -93,8 +249,9 @@ function createGlobalEntry(record, indexUrl, order, icons, local = false) {
   entry.dataset.search =
     `${record.name} ${local ? "" : record.path} ${record.target ?? ""}`.toLocaleLowerCase();
   entry.dataset.name = record.name;
-  entry.dataset.size = String(directory ? 0 : record.size);
-  entry.dataset.modified = String(Date.parse(record.modifiedAt));
+  entry.dataset.size = String(record.kind === "directory" ? 0 : record.size);
+  const timestamp = utcTimestamp(record.modifiedAt);
+  entry.dataset.modified = String(timestamp === null ? 0 : Date.parse(timestamp.datetime));
   entry.dataset.directory = String(directory);
   entry.dataset.link = String(isLink);
   entry.dataset.kind = directory
@@ -117,43 +274,83 @@ function createGlobalEntry(record, indexUrl, order, icons, local = false) {
   const entryName = document.createElement("span");
   entryName.className = "entry-name";
   const extension = record.name.slice(record.name.lastIndexOf(".") + 1).toLowerCase();
-  const iconName = directory ? "default_folder" : (icons.byExtension[extension] ?? "default_file");
-  const icon = document.createElement("img");
-  icon.className = "icon file-icon";
-  icon.width = 20;
-  icon.height = 20;
-  icon.alt = "";
-  icon.loading = "lazy";
-  icon.src = new URL(icons.hrefs[iconName], document.baseURI).href;
+  const createIcon = (variant, className) => {
+    const icon = document.createElement("img");
+    icon.className = className;
+    icon.width = 20;
+    icon.height = 20;
+    icon.alt = "";
+    icon.loading = "lazy";
+    const fileIcon = Object.hasOwn(variant.byExtension, extension)
+      ? variant.byExtension[extension]
+      : variant.file;
+    icon.src = new URL(directory ? variant.folder : fileIcon, document.baseURI).href;
+    return icon;
+  };
+  const icon = createIcon(icons.light, `icon file-icon${icons.dark ? " file-icon--light" : ""}`);
   const labelNode = document.createElement("span");
   labelNode.textContent = `${label}${directory ? "/" : ""}`;
-  entryName.append(icon, labelNode);
+  entryName.append(icon);
+  if (icons.dark) {
+    entryName.append(createIcon(icons.dark, "icon file-icon file-icon--dark"));
+  }
+  entryName.append(labelNode);
   name.append(entryName);
   identity.append(name);
   if (record.target !== null) {
     const target = document.createElement("span");
     target.className = "target";
-    target.textContent = `Target: ${record.target}`;
+    if (record.isTargetUnavailable) {
+      const status = document.createElement("span");
+      status.className = "target-status";
+      status.textContent = "Target unavailable";
+      const path = document.createElement("span");
+      path.className = "target-unavailable";
+      path.textContent = record.target;
+      target.append(status, " · ", path);
+    } else if (record.isCycle) {
+      const status = document.createElement("span");
+      status.className = "target-status";
+      status.textContent = "Cycle";
+      target.append(status, ` · ${record.target}`);
+    } else {
+      target.textContent = `→ ${record.target}`;
+    }
     identity.append(target);
   }
   const kind = document.createElement("span");
   kind.className = "kind";
   if (isLink) {
-    const badge = document.createElement("span");
-    badge.className = `badge${record.isCycle || record.isBroken ? " warning" : ""}`;
-    badge.textContent = record.isCycle
-      ? "cycle"
-      : record.isBroken
-        ? "broken link"
-        : record.isOutsideRoot
-          ? "external link"
-          : "link";
-    kind.append(badge);
+    const sizes = document.createElement("span");
+    sizes.className = "size-stack";
+    const linkSize = document.createElement("span");
+    linkSize.append("Link ");
+    const linkValue = document.createElement("b");
+    linkValue.textContent = formatSize(record.size, false);
+    linkSize.append(linkValue);
+    sizes.append(linkSize);
+    const targetSize =
+      !record.isTargetUnavailable && record.targetKind === "directory"
+        ? "folder"
+        : record.targetSize === null
+          ? null
+          : formatSize(record.targetSize, false);
+    if (targetSize !== null) {
+      const targetLine = document.createElement("span");
+      targetLine.append("Target ");
+      const targetValue = document.createElement("b");
+      targetValue.textContent = targetSize;
+      targetLine.append(targetValue);
+      sizes.append(targetLine);
+    }
+    kind.append(sizes);
+  } else {
+    kind.append(formatSize(record.size, directory));
   }
-  kind.append(formatSize(record.size, directory));
-  const modified = document.createElement("time");
-  modified.dateTime = record.modifiedAt;
-  modified.textContent = `${record.modifiedAt.slice(0, 16).replace("T", " ")} UTC`;
+  let modified = document.createElement(timestamp === null ? "span" : "time");
+  if (timestamp !== null) modified.dateTime = timestamp.datetime;
+  modified.textContent = timestamp === null ? "Unknown" : timestamp.label;
+  if (timestamp !== null) modified = timestampControl(modified);
   entry.append(identity, kind, modified);
   return entry;
 }
@@ -204,6 +401,7 @@ function createVirtualList(list, icons) {
   let activeIndex = -1;
   let top = null;
   let bottom = null;
+  const rowRecords = new WeakMap();
   const spacer = (height) => {
     const node = document.createElement("li");
     node.className = "virtual-spacer";
@@ -245,6 +443,13 @@ function createVirtualList(list, icons) {
       const focusedIndex = Number(
         document.activeElement?.closest("[data-virtual-index]")?.dataset.virtualIndex,
       );
+      const timestampFocused = document.activeElement?.matches("[data-timestamp]");
+      const existingRows = new Map(
+        [...list.querySelectorAll("[data-virtual-index]")].map((row) => [
+          Number(row.dataset.virtualIndex),
+          row,
+        ]),
+      );
       observer.disconnect();
       const fragment = document.createDocumentFragment();
       const nextParent = parent?.cloneNode(true) ?? null;
@@ -253,7 +458,12 @@ function createVirtualList(list, icons) {
       if (nextParent) fragment.append(nextParent);
       fragment.append(nextTop);
       for (let index = start; index < end; index += 1) {
-        const row = createGlobalEntry(records[index], document.baseURI, index, icons, true);
+        const candidate = existingRows.get(index);
+        const row =
+          candidate && rowRecords.get(candidate) === records[index]
+            ? candidate
+            : createGlobalEntry(records[index], document.baseURI, index, icons, true);
+        rowRecords.set(row, records[index]);
         row.dataset.virtualIndex = String(index);
         row.setAttribute("aria-posinset", String(index + 1));
         row.setAttribute("aria-setsize", String(records.length));
@@ -267,7 +477,9 @@ function createVirtualList(list, icons) {
       bottom = nextBottom;
       if (Number.isInteger(focusedIndex) && focusedIndex >= start && focusedIndex < end) {
         list
-          .querySelector(`[data-virtual-index="${focusedIndex}"] a`)
+          .querySelector(
+            `[data-virtual-index="${focusedIndex}"] ${timestampFocused ? "[data-timestamp]" : "a"}`,
+          )
           ?.focus({ preventScroll: true });
       }
       for (const row of list.querySelectorAll("[data-virtual-index]")) observer.observe(row);
@@ -298,6 +510,7 @@ function createVirtualList(list, icons) {
       const focusedIndex = Number(
         document.activeElement?.closest("[data-virtual-index]")?.dataset.virtualIndex,
       );
+      const timestampFocused = document.activeElement?.matches("[data-timestamp]");
       const focusedRecord = Number.isInteger(focusedIndex) ? records[focusedIndex] : undefined;
       if (focusedRecord) document.activeElement.blur();
       records = next;
@@ -305,12 +518,12 @@ function createVirtualList(list, icons) {
       range = [-1, -1];
       activeIndex = focusedRecord ? next.indexOf(focusedRecord) : -1;
       render();
-      if (activeIndex >= 0) this.focus(activeIndex);
+      if (activeIndex >= 0) this.focus(activeIndex, 1, timestampFocused ? "[data-timestamp]" : "a");
     },
-    focus(index, direction = 1) {
+    focus(index, direction = 1, control = "a") {
       if (records.length === 0) return;
       let next = Math.max(0, Math.min(index, records.length - 1));
-      while (next >= 0 && next < records.length && records[next].href === null) {
+      while (control === "a" && next >= 0 && next < records.length && records[next].href === null) {
         next += direction;
       }
       if (next < 0 || next >= records.length) return;
@@ -320,7 +533,7 @@ function createVirtualList(list, icons) {
         Number.parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0;
       window.scrollTo(0, listTop + heights.prefix(activeIndex) - stickyInset);
       render();
-      const link = list.querySelector(`[data-virtual-index="${activeIndex}"] a`);
+      const link = list.querySelector(`[data-virtual-index="${activeIndex}"] ${control}`);
       for (const row of list.querySelectorAll("[data-virtual-index]")) {
         if (Number(row.dataset.virtualIndex) === activeIndex) row.dataset.active = "true";
         else delete row.dataset.active;
@@ -338,6 +551,9 @@ function createVirtualList(list, icons) {
 
 function initializeExplorer(root) {
   const config = JSON.parse(root.dataset.config ?? "{}");
+  for (const time of root.querySelectorAll("time[datetime]")) {
+    timestampControl(time);
+  }
   const stickyHeader = root.querySelector("header");
   const stickyColumns = root.querySelector(".entry-head");
   if (stickyHeader) {
@@ -368,6 +584,14 @@ function initializeExplorer(root) {
   const localEntries = [...root.querySelectorAll("[data-entry]")];
   const input = root.querySelector("[data-search-input]");
   const globalDialog = document.querySelector("[data-global-dialog]");
+  installTimestampDetails(root, globalDialog);
+  const modifiedHeading = root.querySelector(".entry-head .sort-heading:last-child");
+  if (modifiedHeading) {
+    const zone = document.createElement("span");
+    zone.className = "timestamp-zone";
+    zone.textContent = "local";
+    modifiedHeading.append(zone);
+  }
   const globalInput = globalDialog?.querySelector("[data-global-input]");
   const globalTypeFilters = globalDialog?.querySelector("[data-type-filters]");
   const globalResults = globalDialog?.querySelector("[data-global-results]");
@@ -470,7 +694,15 @@ function initializeExplorer(root) {
     if (directoriesFirst) directoriesFirst.checked = sort.directoriesFirst;
     if (nameModeControl) nameModeControl.hidden = sort.field !== "name";
     for (const heading of root.querySelectorAll("[data-sort-heading]")) {
-      heading.setAttribute("aria-pressed", String(heading.dataset.sortHeading === sort.field));
+      const active = heading.dataset.sortHeading === sort.field;
+      heading.setAttribute("aria-pressed", String(active));
+      heading.dataset.direction = active ? sort.direction : "";
+      heading.setAttribute(
+        "aria-label",
+        active
+          ? `Sort by ${heading.dataset.sortHeading}, ${sort.direction === "asc" ? "ascending" : "descending"}`
+          : `Sort by ${heading.dataset.sortHeading}`,
+      );
     }
   };
 
@@ -558,7 +790,7 @@ function initializeExplorer(root) {
       manifestPromise = readJson(indexUrl)
         .then((manifest) => {
           if (
-            manifest?.version !== 2 ||
+            manifest?.version !== 3 ||
             !Array.isArray(manifest.shards) ||
             !manifest.shards.every((name) => /^search-\d{5}\.json$/.test(name))
           ) {
@@ -727,14 +959,14 @@ function initializeExplorer(root) {
     if (status) status.textContent = "Loading this folder";
     readJson(new URL(config.entriesHref, document.baseURI))
       .then((data) => {
-        if (data?.version !== 1 || !Array.isArray(data.rows))
+        if (data?.version !== 2 || !Array.isArray(data.rows))
           throw new Error("Folder data has an unsupported format");
         virtualRows = data.rows.map((row) => ({
           ...row,
           directory: row.kind === "directory" || row.targetKind === "directory",
           link: row.kind === "symlink",
           isLink: row.kind === "symlink",
-          size: row.kind === "directory" || row.targetKind === "directory" ? 0 : row.size,
+          size: row.kind === "directory" ? 0 : row.size,
           kind:
             row.kind === "directory" || row.targetKind === "directory"
               ? "directory"
@@ -742,7 +974,7 @@ function initializeExplorer(root) {
                 ? "link"
                 : "file",
           search: `${row.name} ${row.target ?? ""}`.toLocaleLowerCase(),
-          modified: Date.parse(row.modifiedAt),
+          modified: Date.parse(row.modifiedAt) || 0,
         }));
         virtualList = createVirtualList(list, config.icons);
         if (config.workerHref && typeof Worker !== "undefined") {
@@ -823,6 +1055,7 @@ function initializeExplorer(root) {
         return;
       }
       if (globalDialog?.open) return;
+      if (event.target.closest(".timestamp-details,[data-timestamp]")) return;
       const editable = event.target.matches("input,textarea,select,[contenteditable='true']");
       if (event.key === "/" && !editable && input) {
         event.preventDefault();

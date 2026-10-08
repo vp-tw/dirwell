@@ -23,9 +23,11 @@ export interface SymlinkMetadata {
   readonly resolvedPath: string | null;
   readonly targetRelativePath: string | null;
   readonly targetKind: Exclude<EntryKind, "symlink"> | null;
+  readonly targetSize?: number | null;
   readonly isBroken: boolean;
   readonly isCycle: boolean;
   readonly isOutsideRoot: boolean;
+  readonly isTargetExcluded?: boolean;
   readonly wasFollowed: boolean;
 }
 
@@ -88,6 +90,8 @@ export interface ExplorerTheme {
 
 export interface GenerateOptions {
   readonly base?: string;
+  readonly include?: string | readonly string[];
+  readonly exclude?: string | readonly string[];
   readonly sourceDir: string;
   readonly outputDir: string;
   readonly mode?: "mpa" | "ssg";
