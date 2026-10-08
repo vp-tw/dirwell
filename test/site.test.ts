@@ -7,7 +7,7 @@ const root = path.resolve(import.meta.dirname, "..");
 
 test("landing page exposes every live example and source directory", async () => {
   const source = await readFile(path.join(root, "docs/src/pages/index.astro"), "utf8");
-  for (const slug of ["basic", "base", "custom-theme", "default-theme-override", "plain"]) {
+  for (const slug of ["basic", "base", "custom-theme", "default-theme-override", "plain", "i18n"]) {
     assert.match(source, new RegExp(`slug: "${slug}"`));
     assert.match(source, /examplePath\(example\.slug\)/);
   }
@@ -28,7 +28,7 @@ test("site build combines docs and examples in one publish directory", async () 
   assert.ok(exampleList);
   assert.deepEqual(
     [...exampleList.matchAll(/"([^"]+)"/g)].map((match) => match[1]),
-    ["basic", "base", "custom-theme", "default-theme-override", "file-icons", "plain"],
+    ["basic", "base", "custom-theme", "default-theme-override", "file-icons", "plain", "i18n"],
   );
   assert.match(buildScript, /plugins: dirwellVite\(options\)/);
   assert.match(buildScript, /loadDirwellConfig\(exampleRoot, "build"\)/);
@@ -39,6 +39,7 @@ test("site build combines docs and examples in one publish directory", async () 
     "default-theme-override",
     "file-icons",
     "plain",
+    "i18n",
   ]) {
     const config = await readFile(path.join(root, `examples/${slug}/dirwell.config.ts`), "utf8");
     assert.match(config, new RegExp(`docs/public/examples/${slug}`));

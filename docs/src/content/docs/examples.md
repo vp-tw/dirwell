@@ -23,6 +23,10 @@ and the source directory that generates it.
 - Bundled file-type artwork: `file-icons` shows the unmodified default
   theme used on the homepage. [Live page](https://vp-tw.github.io/dirwell/examples/file-icons/) ·
   [Source](https://github.com/vp-tw/dirwell/tree/main/examples/file-icons)
+- Theme-owned localization: `i18n` switches English, Traditional Chinese, and
+  Japanese, including interface labels, counts, and date/size formatting.
+  [Live page](https://vp-tw.github.io/dirwell/examples/i18n/) ·
+  [Source](https://github.com/vp-tw/dirwell/tree/main/examples/i18n)
 - No-script list: `plain` uses `createPlainTheme()` and renders complete HTML.
   [Live page](https://vp-tw.github.io/dirwell/examples/plain/) ·
   [Source](https://github.com/vp-tw/dirwell/tree/main/examples/plain)

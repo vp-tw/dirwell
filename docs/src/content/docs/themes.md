@@ -149,3 +149,15 @@ Set `searchIndex: false` if the theme has no global search. This avoids
 generating an unused index. The [release catalog example](https://github.com/vp-tw/dirwell/tree/main/examples/custom-theme)
 uses a complete renderer without client-side JavaScript. See the
 [API reference](../api-reference/) for `ExplorerTheme` and `ThemeContext`.
+
+## Localization belongs to the theme
+
+Dirwell does not provide a core locale setting. Ledger and Plain keep their
+English interface. A renderer may own its dictionaries, language controls,
+plural rules, and date/size formatting.
+
+The [i18n example](https://github.com/vp-tw/dirwell/tree/main/examples/i18n)
+provides English, Traditional Chinese, and Japanese switching. It updates
+`html.lang`, accessible names, and the document title; stores the optional
+preference across directories; and keeps an English listing with UTC dates
+when JavaScript is unavailable. File names and link targets remain unchanged.
