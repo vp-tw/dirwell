@@ -38,6 +38,10 @@ within the provider's validation period (currently two days). Configure it only
 when the reviewed release is ready. An unvalidated configuration, skipped job,
 or green source CI is not publication/provenance evidence.
 
-This file is a plan. Trusted publisher configuration and a real OIDC alpha
-release remain pending until the bootstrap package and authentication exist.
+The bootstrap package now exists. `publish-alpha.yml` implements the manual
+dispatch path with separate verification, OIDC publishing, registry consumer,
+and GitHub prerelease jobs. The initial candidate is `0.1.0-alpha.1`.
+Configuration readback and a successful OIDC run remain required before closing
+the tracking issue. The later Changesets version-PR bot is optional; versioning
+currently uses a reviewed contributor PR.
 Primary source: [npm trusted publishing](https://docs.npmjs.com/trusted-publishers/).

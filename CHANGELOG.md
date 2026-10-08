@@ -1,5 +1,11 @@
 # @vp-tw/dirwell
 
+## 0.1.0-alpha.1
+
+### Patch Changes
+
+- Add a main-only alpha release workflow with npm trusted publishing, artifact integrity and provenance readback, registry consumer verification, and GitHub prerelease creation.
+
 ## 0.1.0-alpha.0
 
 ### Minor Changes

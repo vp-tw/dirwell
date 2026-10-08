@@ -1,7 +1,7 @@
 # Releasing Dirwell alpha
 
 The package is `@vp-tw/dirwell`; the installed executable remains `dirwell`.
-This phase prepares `0.1.0-alpha.0`. Keep Changesets in `alpha` prerelease mode
+The bootstrap release was `0.1.0-alpha.0`. Keep Changesets in `alpha` prerelease mode
 and publish with the explicit `alpha` dist-tag. A stable version requires a
 separate release decision.
 
@@ -88,10 +88,43 @@ Only after registry/consumer readback succeeds, create and push the package tag
 commit. Keep the Git tag, npm version, package integrity, and release notes
 aligned. Do not claim provenance for a manual local publish.
 
-## Later alpha automation
+## Trusted alpha publishing
 
-After the package exists and permissions are verified, use the scoped plan in
-[trusted publishing](TRUSTED_PUBLISHING_PLAN.md). Configure the reviewed workflow
-on npm and exercise one alpha release before treating OIDC/provenance as
-verified. [npm trusted publisher documentation](https://docs.npmjs.com/trusted-publishers/)
-defines the provider identity and configuration requirements.
+The reviewed `.github/workflows/publish-alpha.yml` workflow publishes only a
+merged alpha version from `main`. Its manual dispatch requires the exact version
+as input. Version and review the changes through a PR first; update the private
+theme example's exact peer dependency alongside the core version.
+
+Configure the package publisher after the workflow is merged:
+
+```sh
+npm whoami
+npm trust github @vp-tw/dirwell --repository vp-tw/dirwell --file publish-alpha.yml --allow-publish --yes
+npm trust list @vp-tw/dirwell
+gh workflow run publish-alpha.yml --ref main -f version=0.1.0-alpha.1
+```
+
+Complete npm's MFA flow when requested. The publisher grants direct publishing
+to this workflow; it does not use a long-lived npm token or grant dist-tag
+management. No GitHub environment is configured, so leave that publisher field
+empty. This scope does not change account-wide token restrictions.
+
+The workflow verifies source, Node/browser tests, builds, and tarball consumers
+before uploading an artifact. Only the publish job has `id-token: write`. It
+publishes those exact bytes with `alpha`, then retries registry readback for up
+to ten minutes. Readback checks the integrity, alpha tag, and provenance payload
+against the workflow path and source commit. A separate job installs from npm
+and verifies signatures/provenance with `npm audit signatures`. Only then does
+the final job create a package tag and GitHub prerelease.
+
+If upload succeeds but later readback fails, rerun the failed jobs. An existing
+version is accepted only when its bytes match; it is never republished. A
+different existing artifact fails the workflow. Repair a faulty release through
+a new changeset and alpha version. `latest` remains on the bootstrap alpha by
+the maintainer's decision; subsequent releases advance `alpha` only.
+
+The implementation is not proof of a configured or validated publisher.
+Record the npm configuration readback, successful workflow, registry consumer,
+provenance, and release links in the tracking issue after the first OIDC run.
+See [the trust and rollback gates](TRUSTED_PUBLISHING_PLAN.md) and
+[npm trusted publishing](https://docs.npmjs.com/trusted-publishers/).
