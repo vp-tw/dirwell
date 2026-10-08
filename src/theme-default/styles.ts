@@ -552,6 +552,56 @@ time {
   color: var(--muted);
   font-size: 0.82rem;
 }
+.timestamp-button {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  min-height: 2.75rem;
+  width: fit-content;
+  font: inherit;
+}
+.timestamp-button:hover time {
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+.timestamp-zone {
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.timestamp-details {
+  position: fixed;
+  z-index: 10;
+  width: min(26rem, calc(100vw - 1rem));
+  max-height: calc(100vh - 1rem);
+  overflow: auto;
+  padding: 1rem;
+  border: 1px solid var(--rule);
+  border-radius: 0.75rem;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 0.85rem;
+}
+.timestamp-details-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+.timestamp-details dl {
+  margin: 0.75rem 0 0;
+}
+.timestamp-details dt {
+  margin-top: 0.75rem;
+  color: var(--muted);
+}
+.timestamp-details dd {
+  margin: 0.25rem 0 0;
+  overflow-wrap: anywhere;
+  font-variant-numeric: tabular-nums;
+}
 .size-stack {
   display: grid;
   gap: 0.1rem;
@@ -707,7 +757,8 @@ kbd {
     min-height: 2.75rem;
     align-items: center;
   }
-  .entry time {
+  .entry time,
+  .entry .timestamp-button {
     grid-column: 1/-1;
   }
   .kind {

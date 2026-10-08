@@ -29,3 +29,12 @@ status. Generated sites also include that notice as
 If you supply custom icons, their licensing depends on the artwork you choose.
 Set `icons.notice` to publish attribution with the generated site. Ledger then
 shows a separate **Icon licenses** link to that local notice.
+
+## Modified times
+
+Ledger keeps numeric absolute dates, including the year. Its runtime shows local
+dates and marks the column as local; a date button reveals the exact local time
+with the instant's UTC offset and the UTC ISO instant. The control works with
+keyboard, touch, and pointer, and Escape returns focus to the date. Static HTML
+and no-JavaScript listings remain labeled UTC. Plain keeps UTC throughout.
+See [the presentation decision](../../TIMESTAMP_PRESENTATION.md).

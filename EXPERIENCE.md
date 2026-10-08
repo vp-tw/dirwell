@@ -29,11 +29,11 @@
 - Directory grouping is independent of sort direction. The chosen controls
   persist across directories and reloads; the configured sort sets the initial
   order.
-- Modified times display in UTC with an explicit `UTC` label in the default
-  theme, plain theme, virtualized rows, and global search. Sorting uses the
-  underlying instant. This preserves the same readable date in static HTML
-  when JavaScript is disabled, regardless of the viewer's time zone. Themes
-  may choose their own date presentation.
+- Ledger shows concise absolute dates in the viewer's local time zone after
+  its runtime loads, consistently in static rows, virtualized rows, and global
+  search. Activate a date to see the exact local offset and UTC instant.
+  Generated HTML and no-JavaScript output explicitly show UTC; Plain stays UTC.
+  Sorting uses the underlying instant. Themes own their date presentation.
 
 ### Large directories
 

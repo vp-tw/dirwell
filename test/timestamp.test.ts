@@ -3,7 +3,11 @@ import test from "node:test";
 import type { FileSystemEntry, ThemeContext } from "../src/model.ts";
 import { defaultThemeComponents } from "../src/theme-default/components.ts";
 import { createPlainTheme } from "../src/theme-plain.ts";
-import { localTimestampLabel, utcTimestamp as browserTimestamp } from "../src/theme-runtime.js";
+import {
+  localTimestampDetails,
+  localTimestampLabel,
+  utcTimestamp as browserTimestamp,
+} from "../src/theme-runtime.js";
 import { utcTimestamp as serverTimestamp } from "../src/timestamp.ts";
 
 const cases = [
@@ -99,4 +103,23 @@ test("default and plain static rows preserve the instant without JavaScript", as
   assert.match(unknown, /data-modified="0"/);
   assert.match(unknown, /<span class="modified">Unknown<\/span>/);
   assert.doesNotMatch(unknown, /<time/);
+});
+
+test("concise local labels keep exact instants distinct in the repeated daylight-saving hour", () => {
+  const previous = process.env.TZ;
+  try {
+    process.env.TZ = "America/Los_Angeles";
+    const before = localTimestampDetails("2026-11-01T08:30:12.123Z");
+    const after = localTimestampDetails("2026-11-01T09:30:12.123Z");
+    assert.equal(before?.label, "2026-11-01 01:30");
+    assert.equal(after?.label, before?.label);
+    assert.equal(before?.local, "2026-11-01 01:30:12.123 UTC-07:00");
+    assert.equal(after?.local, "2026-11-01 01:30:12.123 UTC-08:00");
+    assert.notEqual(before?.datetime, after?.datetime);
+    assert.equal(localTimestampDetails("invalid"), null);
+    assert.equal(localTimestampDetails(undefined), null);
+  } finally {
+    if (previous === undefined) delete process.env.TZ;
+    else process.env.TZ = previous;
+  }
 });
