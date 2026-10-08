@@ -45,6 +45,137 @@ export function localTimestampLabel(value) {
   return `${date.getFullYear()}-${twoDigits(date.getMonth() + 1)}-${twoDigits(date.getDate())} ${twoDigits(date.getHours())}:${twoDigits(date.getMinutes())} UTC${sign}${twoDigits(Math.floor(Math.abs(offset) / 60))}:${twoDigits(Math.abs(offset) % 60)}`;
 }
 
+export function localTimestampDetails(value) {
+  const timestamp = utcTimestamp(value);
+  if (timestamp === null) return null;
+  const date = new Date(timestamp.datetime);
+  const full = localTimestampLabel(timestamp.datetime);
+  const seconds = `:${String(date.getSeconds()).padStart(2, "0")}${date.getMilliseconds() ? `.${String(date.getMilliseconds()).padStart(3, "0")}` : ""}`;
+  return {
+    datetime: timestamp.datetime,
+    label: full.split(" UTC")[0],
+    local: full.replace(" UTC", `${seconds} UTC`),
+    zone: new Intl.DateTimeFormat().resolvedOptions().timeZone,
+  };
+}
+
+function timestampControl(time) {
+  const full = localTimestampLabel(time.dateTime);
+  if (full === null) return time;
+  time.textContent = full.split(" UTC")[0];
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "timestamp-button";
+  button.dataset.timestamp = time.dateTime;
+  button.setAttribute("aria-label", `${full}. Show exact modified time.`);
+  button.setAttribute("aria-haspopup", "dialog");
+  button.setAttribute("aria-expanded", "false");
+  if (time.isConnected) time.replaceWith(button);
+  button.append(time);
+  return button;
+}
+
+let timestampPanelId = 0;
+function installTimestampDetails(root, globalDialog) {
+  let panel = null;
+  let trigger = null;
+  let anchorPosition = null;
+  const observer = new MutationObserver(() => {
+    if (panel && (!trigger?.isConnected || !trigger.getClientRects().length)) close();
+  });
+  function close(restore = true) {
+    observer.disconnect();
+    panel?.remove();
+    panel = null;
+    trigger?.setAttribute("aria-expanded", "false");
+    trigger?.removeAttribute("aria-controls");
+    if (restore && trigger?.isConnected) trigger.focus({ preventScroll: true });
+    trigger = null;
+  }
+  function open(button) {
+    const details = localTimestampDetails(button.dataset.timestamp);
+    if (details === null) return;
+    if (trigger === button) {
+      close();
+      return;
+    }
+    close(false);
+    trigger = button;
+    panel = document.createElement("div");
+    panel.className = "timestamp-details";
+    panel.id = `timestamp-details-${++timestampPanelId}`;
+    panel.setAttribute("role", "dialog");
+    panel.setAttribute("aria-label", "Exact modified time");
+    panel.innerHTML =
+      '<div class="timestamp-details-head"><strong>Exact modified time</strong><button type="button" class="dialog-close" aria-label="Close exact time">Close</button></div><dl><dt data-time-zone></dt><dd data-time-local></dd><dt>UTC</dt><dd data-time-utc></dd></dl>';
+    panel.querySelector("[data-time-zone]").textContent = `Local · ${details.zone}`;
+    panel.querySelector("[data-time-local]").textContent = details.local;
+    panel.querySelector("[data-time-utc]").textContent = details.datetime;
+    panel.querySelector("button").addEventListener("click", () => close());
+    (button.closest("dialog") ?? root).append(panel);
+    button.setAttribute("aria-controls", panel.id);
+    button.setAttribute("aria-expanded", "true");
+    const anchor = button.getBoundingClientRect();
+    anchorPosition = { top: anchor.top, left: anchor.left };
+    const bounds = panel.getBoundingClientRect();
+    panel.style.left = `${Math.max(8, Math.min(anchor.left, innerWidth - bounds.width - 8))}px`;
+    panel.style.top = `${Math.max(8, Math.min(anchor.bottom + 8, innerHeight - bounds.height - 8))}px`;
+    panel.querySelector("button").focus({ preventScroll: true });
+    observer.observe(root, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["hidden", "open"],
+    });
+    if (globalDialog)
+      observer.observe(globalDialog, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ["hidden", "open"],
+      });
+  }
+  const clicked = (event) => {
+    const button = event.target.closest("[data-timestamp]");
+    if (button) open(button);
+  };
+  root.addEventListener("click", clicked);
+  globalDialog?.addEventListener("click", clicked);
+  document.addEventListener("click", (event) => {
+    if (panel && !panel.contains(event.target) && !trigger?.contains(event.target)) close(false);
+  });
+  document.addEventListener(
+    "keydown",
+    (event) => {
+      if (panel && event.key === "Escape") {
+        event.preventDefault();
+        event.stopPropagation();
+        close();
+      }
+    },
+    true,
+  );
+  document.addEventListener(
+    "scroll",
+    (event) => {
+      if (panel && !panel.contains(event.target)) {
+        const position = trigger?.getBoundingClientRect();
+        // A queued scroll from revealing the trigger does not move an already placed panel.
+        if (
+          !position ||
+          Math.abs(position.top - anchorPosition.top) > 0.5 ||
+          Math.abs(position.left - anchorPosition.left) > 0.5
+        )
+          close();
+      }
+    },
+    true,
+  );
+  window.addEventListener("resize", () => {
+    if (panel) close();
+  });
+}
+
 const localeCollator = new Intl.Collator(undefined, { sensitivity: "base" });
 const naturalCollator = new Intl.Collator(undefined, { numeric: true, sensitivity: "base" });
 
@@ -216,9 +347,10 @@ function createGlobalEntry(record, indexUrl, order, icons, local = false) {
   } else {
     kind.append(formatSize(record.size, directory));
   }
-  const modified = document.createElement(timestamp === null ? "span" : "time");
+  let modified = document.createElement(timestamp === null ? "span" : "time");
   if (timestamp !== null) modified.dateTime = timestamp.datetime;
-  modified.textContent = timestamp === null ? "Unknown" : localTimestampLabel(timestamp.datetime);
+  modified.textContent = timestamp === null ? "Unknown" : timestamp.label;
+  if (timestamp !== null) modified = timestampControl(modified);
   entry.append(identity, kind, modified);
   return entry;
 }
@@ -269,6 +401,7 @@ function createVirtualList(list, icons) {
   let activeIndex = -1;
   let top = null;
   let bottom = null;
+  const rowRecords = new WeakMap();
   const spacer = (height) => {
     const node = document.createElement("li");
     node.className = "virtual-spacer";
@@ -310,6 +443,13 @@ function createVirtualList(list, icons) {
       const focusedIndex = Number(
         document.activeElement?.closest("[data-virtual-index]")?.dataset.virtualIndex,
       );
+      const timestampFocused = document.activeElement?.matches("[data-timestamp]");
+      const existingRows = new Map(
+        [...list.querySelectorAll("[data-virtual-index]")].map((row) => [
+          Number(row.dataset.virtualIndex),
+          row,
+        ]),
+      );
       observer.disconnect();
       const fragment = document.createDocumentFragment();
       const nextParent = parent?.cloneNode(true) ?? null;
@@ -318,7 +458,12 @@ function createVirtualList(list, icons) {
       if (nextParent) fragment.append(nextParent);
       fragment.append(nextTop);
       for (let index = start; index < end; index += 1) {
-        const row = createGlobalEntry(records[index], document.baseURI, index, icons, true);
+        const candidate = existingRows.get(index);
+        const row =
+          candidate && rowRecords.get(candidate) === records[index]
+            ? candidate
+            : createGlobalEntry(records[index], document.baseURI, index, icons, true);
+        rowRecords.set(row, records[index]);
         row.dataset.virtualIndex = String(index);
         row.setAttribute("aria-posinset", String(index + 1));
         row.setAttribute("aria-setsize", String(records.length));
@@ -332,7 +477,9 @@ function createVirtualList(list, icons) {
       bottom = nextBottom;
       if (Number.isInteger(focusedIndex) && focusedIndex >= start && focusedIndex < end) {
         list
-          .querySelector(`[data-virtual-index="${focusedIndex}"] a`)
+          .querySelector(
+            `[data-virtual-index="${focusedIndex}"] ${timestampFocused ? "[data-timestamp]" : "a"}`,
+          )
           ?.focus({ preventScroll: true });
       }
       for (const row of list.querySelectorAll("[data-virtual-index]")) observer.observe(row);
@@ -363,6 +510,7 @@ function createVirtualList(list, icons) {
       const focusedIndex = Number(
         document.activeElement?.closest("[data-virtual-index]")?.dataset.virtualIndex,
       );
+      const timestampFocused = document.activeElement?.matches("[data-timestamp]");
       const focusedRecord = Number.isInteger(focusedIndex) ? records[focusedIndex] : undefined;
       if (focusedRecord) document.activeElement.blur();
       records = next;
@@ -370,12 +518,12 @@ function createVirtualList(list, icons) {
       range = [-1, -1];
       activeIndex = focusedRecord ? next.indexOf(focusedRecord) : -1;
       render();
-      if (activeIndex >= 0) this.focus(activeIndex);
+      if (activeIndex >= 0) this.focus(activeIndex, 1, timestampFocused ? "[data-timestamp]" : "a");
     },
-    focus(index, direction = 1) {
+    focus(index, direction = 1, control = "a") {
       if (records.length === 0) return;
       let next = Math.max(0, Math.min(index, records.length - 1));
-      while (next >= 0 && next < records.length && records[next].href === null) {
+      while (control === "a" && next >= 0 && next < records.length && records[next].href === null) {
         next += direction;
       }
       if (next < 0 || next >= records.length) return;
@@ -385,7 +533,7 @@ function createVirtualList(list, icons) {
         Number.parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0;
       window.scrollTo(0, listTop + heights.prefix(activeIndex) - stickyInset);
       render();
-      const link = list.querySelector(`[data-virtual-index="${activeIndex}"] a`);
+      const link = list.querySelector(`[data-virtual-index="${activeIndex}"] ${control}`);
       for (const row of list.querySelectorAll("[data-virtual-index]")) {
         if (Number(row.dataset.virtualIndex) === activeIndex) row.dataset.active = "true";
         else delete row.dataset.active;
@@ -404,8 +552,7 @@ function createVirtualList(list, icons) {
 function initializeExplorer(root) {
   const config = JSON.parse(root.dataset.config ?? "{}");
   for (const time of root.querySelectorAll("time[datetime]")) {
-    const label = localTimestampLabel(time.dateTime);
-    if (label !== null) time.textContent = label;
+    timestampControl(time);
   }
   const stickyHeader = root.querySelector("header");
   const stickyColumns = root.querySelector(".entry-head");
@@ -437,6 +584,14 @@ function initializeExplorer(root) {
   const localEntries = [...root.querySelectorAll("[data-entry]")];
   const input = root.querySelector("[data-search-input]");
   const globalDialog = document.querySelector("[data-global-dialog]");
+  installTimestampDetails(root, globalDialog);
+  const modifiedHeading = root.querySelector(".entry-head .sort-heading:last-child");
+  if (modifiedHeading) {
+    const zone = document.createElement("span");
+    zone.className = "timestamp-zone";
+    zone.textContent = "local";
+    modifiedHeading.append(zone);
+  }
   const globalInput = globalDialog?.querySelector("[data-global-input]");
   const globalTypeFilters = globalDialog?.querySelector("[data-type-filters]");
   const globalResults = globalDialog?.querySelector("[data-global-results]");
@@ -900,6 +1055,7 @@ function initializeExplorer(root) {
         return;
       }
       if (globalDialog?.open) return;
+      if (event.target.closest(".timestamp-details,[data-timestamp]")) return;
       const editable = event.target.matches("input,textarea,select,[contenteditable='true']");
       if (event.key === "/" && !editable && input) {
         event.preventDefault();

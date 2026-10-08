@@ -27,8 +27,11 @@ test("Rsbuild serves rebuilt explorer assets through its native dev server", asy
     await expect(page.getByRole("link", { name: "note.txt" })).toBeVisible();
     await writeFile(path.join(root, "files/created.txt"), "new");
     await expect
-      .poll(async () => (await page.request.get(`${local}created.txt`)).status())
-      .toBe(200);
+      .poll(async () => await (await page.request.get(`${local}created.txt`)).text())
+      .toBe("new");
+    await expect
+      .poll(async () => (await (await page.request.get(local)).text()).includes("created.txt"))
+      .toBe(true);
     await page.reload();
     await expect(page.getByRole("link", { name: "created.txt" })).toBeVisible();
     await rm(path.join(root, "files/created.txt"));

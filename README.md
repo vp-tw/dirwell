@@ -135,7 +135,9 @@ and natural numeric comparison. Modified time and file size are also available;
 direction and directory grouping are independent controls.
 
 The default theme shows modified times in the viewer's local time zone when
-JavaScript is available. Generated HTML displays labeled UTC times before the
+JavaScript is available, without repeating the offset in every row. Activate a
+date with touch, pointer, or keyboard to see its exact local time and UTC instant.
+Generated HTML displays labeled UTC times before the
 runtime loads and when JavaScript is disabled. The plain theme always displays UTC.
 
 ## Symlinks

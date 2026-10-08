@@ -3,6 +3,12 @@ export function utcTimestamp(
   value: string | null | undefined,
 ): { readonly datetime: string; readonly label: string } | null;
 export function localTimestampLabel(value: string | null | undefined): string | null;
+export function localTimestampDetails(value: string | null | undefined): {
+  readonly datetime: string;
+  readonly label: string;
+  readonly local: string;
+  readonly zone: string;
+} | null;
 export function entryType(entry: {
   readonly kind?: string;
   readonly targetKind?: string | null;

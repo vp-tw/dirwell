@@ -398,7 +398,7 @@ for (const mode of ["ssg", "mpa"] as const) {
       expect(iso).not.toBeNull();
       const expected = await first.evaluate((element) => {
         const date = new Date((element as HTMLTimeElement).dateTime);
-        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")} ${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")} UTC+08:00`;
+        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")} ${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
       });
       await expect(first).toHaveText(expected);
       await page.getByRole("button", { name: "Search all files" }).click();
@@ -406,7 +406,10 @@ for (const mode of ["ssg", "mpa"] as const) {
         .getByRole("dialog", { name: "Search all files" })
         .getByRole("searchbox")
         .fill("file2");
-      await expect(page.locator("[data-global-results] time").first()).toContainText("UTC+08:00");
+      await expect(page.locator("[data-global-results] [data-timestamp]").first()).toHaveAttribute(
+        "aria-label",
+        /UTC\+08:00/,
+      );
     } finally {
       await context.close();
     }
@@ -505,10 +508,115 @@ test("large MPA displays viewer-local time in virtual rows", async ({ browser })
       const twoDigits = (number: number) => String(number).padStart(2, "0");
       return `${date.getFullYear()}-${twoDigits(date.getMonth() + 1)}-${twoDigits(date.getDate())} ${twoDigits(date.getHours())}:${twoDigits(date.getMinutes())} UTC${offset < 0 ? "-" : "+"}${twoDigits(Math.floor(Math.abs(offset) / 60))}:${twoDigits(Math.abs(offset) % 60)}`;
     });
-    await expect(first).toHaveText(expected);
+    await expect(first).toHaveText(expected.split(" UTC")[0]!);
   } finally {
     await context.close();
   }
+});
+
+for (const mode of ["ssg", "mpa", "virtual"] as const) {
+  test(`${mode}: exact timestamp details support keyboard, Escape, and global search`, async ({
+    page,
+  }) => {
+    await page.goto(urls[mode]);
+    const first = page.locator("[data-entry-list] [data-timestamp]").first();
+    const instant = await first.getAttribute("data-timestamp");
+    await expect(first.locator("time")).not.toContainText("UTC");
+    await first.focus();
+    await page.keyboard.press("Enter");
+    const details = page.getByRole("dialog", { name: "Exact modified time", exact: true });
+    await expect(details).toBeVisible();
+    await expect(details.locator("[data-time-utc]")).toHaveText(instant!);
+    await expect(details.locator("[data-time-local]")).toContainText("UTC");
+    await expect(page.getByRole("button", { name: "Close exact time" })).toBeFocused();
+    await page.keyboard.press("Escape");
+    await expect(details).toHaveCount(0);
+    await expect(first).toBeFocused();
+    await expect(first).toHaveAttribute("aria-expanded", "false");
+    await page.getByRole("button", { name: "Search all files" }).click();
+    const search = page.getByRole("dialog", { name: "Search all files", exact: true });
+    await search.getByRole("searchbox").fill(mode === "virtual" ? "large" : "file2");
+    const global = search.locator("[data-timestamp]").first();
+    await expect(global).toBeVisible();
+    await global.click();
+    await expect(details).toBeVisible();
+    await expect(details.locator("[data-time-utc]")).toHaveText(
+      (await global.getAttribute("data-timestamp"))!,
+    );
+    await page.keyboard.press("Escape");
+    await expect(search).toBeVisible();
+    await expect(global).toBeFocused();
+  });
+}
+
+test("narrow exact-time panel stays inside the viewport and closes when a virtual row leaves", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto(urls.virtual);
+  const first = page.locator("[data-entry-list] [data-timestamp]").first();
+  await first.click();
+  const details = page.getByRole("dialog", { name: "Exact modified time", exact: true });
+  await expect(details).toBeVisible();
+  const bounds = await details.boundingBox();
+  expect(bounds!.x).toBeGreaterThanOrEqual(0);
+  expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(390);
+  expect(bounds!.y + bounds!.height).toBeLessThanOrEqual(844);
+  if (process.env.CAPTURE_TIMESTAMPS) {
+    await page.getByRole("button", { name: "Close exact time" }).click();
+    await page.getByRole("searchbox", { name: "Search this folder" }).fill("file-");
+    await expect(first.locator("..")).toHaveAttribute("data-name", /^file-/);
+    await first.click();
+    await page.screenshot({
+      path: path.resolve(".impeccable/review/timestamp-mobile.png"),
+      fullPage: false,
+    });
+    await page.getByRole("button", { name: "Close exact time" }).click();
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await first.click();
+    await page.screenshot({
+      path: path.resolve(".impeccable/review/timestamp-desktop.png"),
+      fullPage: false,
+    });
+  }
+  await page.mouse.wheel(0, 2000);
+  await expect(details).toHaveCount(0);
+});
+
+test("exact-time details remain open when the panel itself must scroll", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 160 });
+  await page.goto(urls.ssg);
+  await page.locator("[data-entry-list] [data-timestamp]").first().click();
+  const details = page.getByRole("dialog", { name: "Exact modified time", exact: true });
+  await expect(details).toBeVisible();
+  expect(await details.evaluate((element) => element.scrollHeight > element.clientHeight)).toBe(
+    true,
+  );
+  await details.evaluate((element) => {
+    element.scrollTop = element.scrollHeight;
+  });
+  await expect(details).toBeVisible();
+  await expect(details.locator("[data-time-utc]")).toBeInViewport();
+  await page.keyboard.press("Escape");
+  await expect(details).toHaveCount(0);
+});
+
+test("virtual filtering preserves focus on a surviving date control", async ({ page }) => {
+  await page.goto(urls.virtual);
+  const first = page.locator("[data-entry-list] [data-timestamp]").first();
+  await first.focus();
+  for (const name of ["Files", "Links"]) {
+    await page.getByRole("checkbox", { name, exact: true }).evaluate((element) => {
+      (element as HTMLInputElement).checked = false;
+      element.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+  }
+  await expect(page.locator("[data-visible-count]")).toHaveText("1");
+  await expect(first).toBeFocused();
+  await page.keyboard.press("Space");
+  await expect(
+    page.getByRole("dialog", { name: "Exact modified time", exact: true }),
+  ).toBeVisible();
 });
 
 test("narrow nested paths keep breadcrumbs and summary inside the viewport", async ({ page }) => {
