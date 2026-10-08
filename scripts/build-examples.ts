@@ -15,6 +15,7 @@ const examples = [
   "default-theme-override",
   "file-icons",
   "plain",
+  "i18n",
 ] as const;
 const siteBase = process.env.SITE_BASE ?? "/";
 process.env.DIRWELL_SITE_BASE = siteBase;

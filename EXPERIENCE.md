@@ -73,13 +73,17 @@
 - The development-only live-reload client is injected by the dev server and is
   absent from deployable output.
 
+### Localization
+
+Localization belongs to each renderer. Built-in themes stay English; the
+`examples/i18n` theme demonstrates language switching, plural messages, and
+date/size formatting without adding a core localization setting.
+
 ## Candidate follow-up
 
 1. Add copy-path and copy-link actions with success feedback and secure-context
    fallback behavior.
-2. Add localization as a renderer concern, including plural rules and date/size
-   formatting.
-3. File previews remain deferred. See [the preview evaluation](FILE_PREVIEW_EVALUATION.md)
+2. File previews remain deferred. See [the preview evaluation](FILE_PREVIEW_EVALUATION.md)
    for the product decision and size, MIME, privacy, and security boundaries.
 
 ## Decisions for production
