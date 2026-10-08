@@ -63,16 +63,16 @@ files beneath the same `outputPath`.
 
 ## Development and verification
 
-| Host             | Verified behavior                                                                                                                                                          |
-| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Vite             | Build, multiple explorers, base paths, watch, development serving, and browser reload.                                                                                     |
-| Rollup           | Build and native watch, including source creation and deletion. No native development server.                                                                              |
-| Rolldown         | Build and watch, with a managed filesystem-to-module watch bridge for source creation and deletion. The bridge closes with the watcher.                                    |
-| webpack / Rspack | Build and native watch with directory dependencies. Explorer files are compilation assets.                                                                                 |
-| Rsbuild          | Build through its Rspack compilation.                                                                                                                                      |
-| esbuild          | Build and `context().watch()` using a tracked injected module. `write: false` returns explorer assets in `outputFiles`.                                                    |
-| Farm             | Build and development serving with an adapter-owned directory watcher and reload stream. Standalone Farm watch has not been verified for raw-file additions and deletions. |
-| Bun              | `Bun.build()` and repeated builds after source changes. The adapter requires Bun 1.3 or later for end-of-build hooks; it does not create a development server.             |
+| Host             | Verified behavior                                                                                                                                                                                                                                             |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Vite             | Build, multiple explorers, base paths, watch, development serving, and browser reload.                                                                                                                                                                        |
+| Rollup           | Build and native watch, including source creation and deletion. No native development server.                                                                                                                                                                 |
+| Rolldown         | Build and watch, with a managed filesystem-to-module watch bridge for source creation and deletion. The bridge closes with the watcher.                                                                                                                       |
+| webpack / Rspack | Build and native watch with directory dependencies. Explorer files are compilation assets.                                                                                                                                                                    |
+| Rsbuild          | Build through its Rspack compilation.                                                                                                                                                                                                                         |
+| esbuild          | Build and `context().watch()` using a tracked injected module. `write: false` returns explorer assets in `outputFiles`.                                                                                                                                       |
+| Farm             | Build and development serving with an adapter-owned directory watcher and reload stream. Native standalone watch does not refresh explorer source additions, changes, or deletions. See [the tracked limitation](https://github.com/vp-tw/dirwell/issues/43). |
+| Bun              | `Bun.build()` and repeated builds after source changes. The adapter requires Bun 1.3 or later for end-of-build hooks; it does not create a development server.                                                                                                |
 
 The build suite exercises SSG and MPA output, original file contents, multiple
 explorers, and stale-file removal with real host builds. Watch and browser tests
