@@ -79,13 +79,6 @@ Localization belongs to each renderer. Built-in themes stay English; the
 `examples/i18n` theme demonstrates language switching, plural messages, and
 date/size formatting without adding a core localization setting.
 
-## Candidate follow-up
-
-1. Add copy-path and copy-link actions with success feedback and secure-context
-   fallback behavior.
-2. File previews remain deferred. See [the preview evaluation](FILE_PREVIEW_EVALUATION.md)
-   for the product decision and size, MIME, privacy, and security boundaries.
-
 ## Decisions for production
 
 - Confirm the supported browser floor before choosing normalization and
