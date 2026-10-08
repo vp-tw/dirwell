@@ -2,6 +2,7 @@
 .dirwell-preview/
 .impeccable/review/
 .playwright-results/
+.release-artifact/
 .DS_Store
 coverage/
 dist/

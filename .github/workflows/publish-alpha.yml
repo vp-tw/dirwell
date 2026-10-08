@@ -1,0 +1,127 @@
+name: Publish verified alpha with OIDC
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Exact alpha version already merged into main
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-alpha
+  cancel-in-progress: false
+
+env:
+  RELEASE_VERSION: ${{ inputs.version }}
+
+jobs:
+  verify:
+    if: github.ref == 'refs/heads/main' && github.repository == 'vp-tw/dirwell'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.sha }}
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 26
+          package-manager-cache: false
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm check
+      - run: pnpm test
+      - run: pnpm exec playwright install --with-deps chromium --only-shell
+      - run: pnpm test:browser
+      - run: pnpm build
+      - run: pnpm site:build
+      - run: pnpm verify:package
+      - run: node scripts/alpha-release.mjs prepare
+      - uses: actions/upload-artifact@v4
+        with:
+          name: alpha-package
+          path: .release-artifact/
+          if-no-files-found: error
+          include-hidden-files: true
+
+  publish:
+    needs: verify
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 26
+          package-manager-cache: false
+      - uses: actions/download-artifact@v4
+        with:
+          name: alpha-package
+          path: .release-artifact/
+      - run: node scripts/alpha-release.mjs publish
+      - uses: actions/upload-artifact@v4
+        with:
+          name: alpha-registry-proof
+          path: .release-artifact/registry-proof.json
+          include-hidden-files: true
+
+  verify-published:
+    needs: publish
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.sha }}
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 26
+          package-manager-cache: false
+      - uses: actions/download-artifact@v4
+        with:
+          name: alpha-package
+          path: .release-artifact/
+      - run: node scripts/alpha-release.mjs readback
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: pnpm verify:package --registry
+      - name: Verify registry signatures and provenance cryptographically
+        run: |
+          consumer=$(mktemp -d)
+          trap 'rm -rf "$consumer"' EXIT
+          cd "$consumer"
+          npm init --yes
+          npm install --ignore-scripts "@vp-tw/dirwell@$RELEASE_VERSION"
+          npm audit signatures
+
+  prerelease:
+    needs: verify-published
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.sha }}
+      - name: Create verified Git tag and GitHub prerelease
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag="@vp-tw/dirwell@$RELEASE_VERSION"
+          if ! gh release view "$tag"; then
+            gh release create "$tag" --target "$GITHUB_SHA" --prerelease \
+              --title "Dirwell $RELEASE_VERSION" --notes-file CHANGELOG.md
+          fi
+          test "$(gh release view "$tag" --json isPrerelease --jq .isPrerelease)" = true
+          git fetch origin "refs/tags/$tag:refs/tags/$tag"
+          test "$(git rev-parse "$tag^{commit}")" = "$GITHUB_SHA"
