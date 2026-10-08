@@ -1,6 +1,11 @@
 name: Publish verified alpha with OIDC
 
 on:
+  pull_request:
+    paths:
+      - .github/workflows/publish-alpha.yml
+      - scripts/alpha-release.mjs
+      - test/alpha-release.test.mjs
   workflow_dispatch:
     inputs:
       version:
@@ -12,15 +17,26 @@ permissions:
   contents: read
 
 concurrency:
-  group: publish-alpha
+  group: publish-alpha-${{ github.event_name == 'workflow_dispatch' && 'release' || github.ref }}
   cancel-in-progress: false
 
 env:
   RELEASE_VERSION: ${{ inputs.version }}
 
 jobs:
+  validate-release:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 26
+          package-manager-cache: false
+      - run: node --test test/alpha-release.test.mjs
+
   verify:
-    if: github.ref == 'refs/heads/main' && github.repository == 'vp-tw/dirwell'
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && github.repository == 'vp-tw/dirwell'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
