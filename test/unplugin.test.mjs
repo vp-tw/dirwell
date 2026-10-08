@@ -177,12 +177,13 @@ for (const host of ["rollup", "rolldown", "webpack", "rspack", "esbuild"]) {
           plugins: unplugin[host](options),
         });
         context.after(() => watcher.close());
-        watcher.on("event", (event) => {
+        watcher.on("event", async (event) => {
           if (event.code === "ERROR") changed(event.error);
           if (event.code === "BUNDLE_END") {
-            event.result.close();
-            changed();
+            await event.result.close();
+            if (host !== "rolldown") changed();
           }
+          if (host === "rolldown" && event.code === "END") changed();
         });
       } else if (host === "webpack" || host === "rspack") {
         const api = await import(host === "webpack" ? "webpack" : "@rspack/core");
@@ -223,23 +224,25 @@ for (const host of ["rollup", "rolldown", "webpack", "rspack", "esbuild"]) {
         await build.watch();
       }
       await ready;
-      ready = next();
-      await writeFile(path.join(root, "files", "created.txt"), "watch addition\n");
-      await ready;
-      assert.match(
-        await readFile(path.join(root, "dist/dirwell/index.html"), "utf8"),
-        /created\.txt/,
-      );
-      ready = next();
-      await rm(path.join(root, "files", "created.txt"));
-      await ready;
-      assert.doesNotMatch(
-        await readFile(path.join(root, "dist/dirwell/index.html"), "utf8"),
-        /created\.txt/,
-      );
-      await assert.rejects(readFile(path.join(root, "dist/dirwell/created.txt")), {
-        code: "ENOENT",
-      });
+      for (let cycle = 0; cycle < (host === "rolldown" ? 3 : 1); cycle++) {
+        ready = next();
+        await writeFile(path.join(root, "files", "created.txt"), "watch addition\n");
+        await ready;
+        assert.match(
+          await readFile(path.join(root, "dist/dirwell/index.html"), "utf8"),
+          /created\.txt/,
+        );
+        ready = next();
+        await rm(path.join(root, "files", "created.txt"));
+        await ready;
+        assert.doesNotMatch(
+          await readFile(path.join(root, "dist/dirwell/index.html"), "utf8"),
+          /created\.txt/,
+        );
+        await assert.rejects(readFile(path.join(root, "dist/dirwell/created.txt")), {
+          code: "ENOENT",
+        });
+      }
     },
   );
 }

@@ -111,6 +111,7 @@ const core = createUnplugin<DirwellPluginInput, true>((options, meta) => {
     let sentinel: string | undefined;
     let revision = 0;
     let sentinelWrites = Promise.resolve();
+    let sentinelTimer: ReturnType<typeof setTimeout> | undefined;
     const virtual = `dirwell-watch:${index}:${prefix}`;
 
     async function prepare(): Promise<void> {
@@ -230,10 +231,37 @@ const core = createUnplugin<DirwellPluginInput, true>((options, meta) => {
               sourceWatcher!.once("ready", resolve);
               sourceWatcher!.once("error", reject);
             });
-            sourceWatcher.on("all", () => {
-              sentinelWrites = sentinelWrites
-                .then(() => writeFile(sentinel!, `// ${++revision}\nexport {};\n`))
-                .catch((error) => console.error("Dirwell watch failed", error));
+            const notify = () => {
+              clearTimeout(sentinelTimer);
+              sentinelTimer = setTimeout(() => {
+                sentinelWrites = sentinelWrites
+                  .then(() => writeFile(sentinel!, `// ${++revision}\nexport {};\n`))
+                  .catch((error) => console.error("Dirwell watch failed", error));
+              }, 50);
+            };
+            sourceWatcher.on("all", notify);
+            // A rapid add/unlink can precede Chokidar's per-file watcher registration.
+            // Parent-directory rename events still identify that tree change.
+            sourceWatcher.on("raw", (event: string, name: string, details: unknown) => {
+              if (
+                event !== "rename" ||
+                typeof name !== "string" ||
+                typeof details !== "object" ||
+                details === null ||
+                !("watchedPath" in details) ||
+                typeof details.watchedPath !== "string"
+              )
+                return;
+              const changed = path.isAbsolute(name)
+                ? name
+                : path.basename(details.watchedPath) === name
+                  ? details.watchedPath
+                  : path.resolve(details.watchedPath, name);
+              if (
+                isWithin(source, changed) &&
+                (hostOutput === undefined || !isWithin(hostOutput, changed))
+              )
+                notify();
             });
           }
           this.addWatchFile(sentinel!);
@@ -295,6 +323,7 @@ const core = createUnplugin<DirwellPluginInput, true>((options, meta) => {
         },
         async closeWatcher() {
           await sourceWatcher?.close();
+          clearTimeout(sentinelTimer);
           await sentinelWrites;
           sourceWatcher = undefined;
           if (watchDirectory !== undefined)
