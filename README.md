@@ -111,6 +111,14 @@ never replaces Vite's output root or an existing directory it does not own.
 See [configuration](./docs/src/content/docs/configuration.md#vite-adapter) for
 the full path and development-server behavior.
 
+## Other build tools
+
+Adapters are available for Rollup, Rolldown, webpack, Rspack, Rsbuild, esbuild,
+Farm, and Bun. Import `dirwell/<host>` or use the factories from
+`dirwell/unplugin`. Each generates a dedicated explorer path alongside the host
+output. See [build tool adapters](./docs/src/content/docs/build-tools.md) for
+options, watch behavior, and verification boundaries.
+
 ## Browser behavior
 
 SSG pages and smaller MPA pages work without JavaScript. The runtime adds local and global

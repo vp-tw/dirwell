@@ -1,14 +1,4 @@
-import {
-  lstat,
-  mkdtemp,
-  readFile,
-  readdir,
-  readlink,
-  realpath,
-  rm,
-  stat,
-  writeFile,
-} from "node:fs/promises";
+import { lstat, mkdtemp, readFile, realpath, rm, stat, writeFile } from "node:fs/promises";
 import { createReadStream } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -21,11 +11,13 @@ import {
   type DirwellConfig,
 } from "./config.ts";
 import { generateExplorer, generateExplorerSkippingPaths } from "./generator.ts";
-import { selectSourcePaths } from "./filters.ts";
-import type { GenerateOptions } from "./model.ts";
+import { assertSafeMirroredSymlinks, canonicalPath, isWithin } from "./plugin-safety.ts";
 
 /** Dirwell configuration with an output path relative to the Vite project root or absolute. */
-export type DirwellViteOptions = Omit<DirwellConfig, "extends" | "server">;
+export type DirwellViteOptions = Omit<DirwellConfig, "extends" | "server"> & {
+  readonly cwd?: string;
+  readonly outputPath?: string;
+};
 
 const ownershipMarker = ".dirwell-vite-output";
 const contentTypes: Readonly<Record<string, string>> = {
@@ -36,30 +28,6 @@ const contentTypes: Readonly<Record<string, string>> = {
   ".svg": "image/svg+xml",
   ".txt": "text/plain; charset=utf-8",
 };
-
-function isWithin(parent: string, candidate: string): boolean {
-  const relative = path.relative(parent, candidate);
-  return (
-    relative === "" ||
-    (relative !== ".." && !relative.startsWith(`..${path.sep}`) && !path.isAbsolute(relative))
-  );
-}
-
-async function canonicalPath(candidate: string): Promise<string> {
-  const missing: string[] = [];
-  let existing = candidate;
-  while (true) {
-    try {
-      return path.join(await realpath(existing), ...missing.reverse());
-    } catch (error) {
-      if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
-      const parent = path.dirname(existing);
-      if (parent === existing) throw error;
-      missing.push(path.basename(existing));
-      existing = parent;
-    }
-  }
-}
 
 function mountPath(base: string): string {
   const pathname = /^https?:\/\//i.test(base) ? new URL(base).pathname : base;
@@ -96,29 +64,6 @@ async function assertOwnedDestination(outputDir: string): Promise<void> {
   if (marker !== "dirwell-vite-v1\n") {
     throw new Error(`Dirwell refuses to replace an unowned outDir: ${outputDir}`);
   }
-}
-
-async function assertSafeMirroredSymlinks(options: GenerateOptions): Promise<void> {
-  const sourceDir = path.resolve(options.sourceDir);
-  const outputDir = path.resolve(options.outputDir);
-  const selection = await selectSourcePaths(sourceDir, outputDir, options.include, options.exclude);
-  async function visit(directory: string): Promise<void> {
-    for (const entry of await readdir(directory, { withFileTypes: true })) {
-      const entryPath = path.join(directory, entry.name);
-      if (isWithin(outputDir, entryPath)) continue;
-      const relativePath = path.relative(sourceDir, entryPath).split(path.sep).join("/");
-      if (!selection.selected.has(relativePath)) continue;
-      if (entry.isSymbolicLink()) {
-        const target = await readlink(entryPath);
-        if (path.isAbsolute(target) || !isWithin(sourceDir, path.resolve(directory, target))) {
-          throw new Error(`Dirwell cannot mirror a symlink outside its output: ${entryPath}`);
-        }
-      } else if (entry.isDirectory()) {
-        await visit(entryPath);
-      }
-    }
-  }
-  await visit(sourceDir);
 }
 
 interface RuntimeOptions {
@@ -174,8 +119,8 @@ function createDirwellPlugin(
       vite: {
         async configResolved(config) {
           viteConfig = config;
-          const projectRoot = path.resolve(config.root);
-          const viteOutput = path.resolve(projectRoot, config.build.outDir);
+          const projectRoot = path.resolve(inlineOptions?.cwd ?? config.root);
+          const viteOutput = path.resolve(config.root, config.build.outDir);
           const { config: fileConfig } = await loadDirwellConfig(
             projectRoot,
             config.command === "build" ? "build" : "serve",
@@ -184,7 +129,7 @@ function createDirwellPlugin(
           validateConfig(merged);
           const outputDir = path.resolve(
             projectRoot,
-            merged.outDir ?? path.join(config.build.outDir, "dirwell"),
+            merged.outDir ?? path.join(viteOutput, inlineOptions?.outputPath ?? "dirwell"),
           );
           const canonicalOutput = await canonicalPath(outputDir);
           const canonicalViteOutput = await canonicalPath(viteOutput);
