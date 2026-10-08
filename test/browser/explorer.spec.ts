@@ -535,7 +535,7 @@ for (const mode of ["ssg", "mpa", "virtual"] as const) {
     await expect(first).toHaveAttribute("aria-expanded", "false");
     await page.getByRole("button", { name: "Search all files" }).click();
     const search = page.getByRole("dialog", { name: "Search all files", exact: true });
-    await search.getByRole("searchbox").fill(mode === "virtual" ? "large" : "file2");
+    await search.getByRole("searchbox").fill(mode === "virtual" ? "file-0000" : "file2");
     const global = search.locator("[data-timestamp]").first();
     await expect(global).toBeVisible();
     await global.click();
