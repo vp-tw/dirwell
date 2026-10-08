@@ -54,6 +54,18 @@ async function registryMetadata(version) {
   return response.json();
 }
 
+export async function readProvenance(url, request = fetch) {
+  const response = await request(url);
+  if (response.status === 404) return null;
+  assert.ok(response.ok, `Provenance endpoint returned ${response.status}`);
+  const attestations = await response.json();
+  const provenance = attestations.attestations.find(
+    (entry) => entry.predicateType === "https://slsa.dev/provenance/v1",
+  );
+  assert.ok(provenance, "Missing SLSA provenance");
+  return JSON.parse(Buffer.from(provenance.bundle.dsseEnvelope.payload, "base64").toString("utf8"));
+}
+
 async function main(mode) {
   const metadata = JSON.parse(await readFile("package.json", "utf8"));
   validateRelease(metadata, process.env);
@@ -128,19 +140,15 @@ async function main(mode) {
     const published = await registryMetadata(metadata.version);
     if (published?.dist?.attestations?.url) {
       assert.equal(published.dist.integrity, manifest.integrity);
+      const statement = await readProvenance(published.dist.attestations.url);
+      if (!statement) {
+        console.log("Provenance endpoint is not available yet; retrying readback.");
+        await new Promise((resolve) => setTimeout(resolve, 30_000));
+        continue;
+      }
       const tags = await fetch("https://registry.npmjs.org/-/package/@vp-tw%2fdirwell/dist-tags");
       assert.ok(tags.ok);
       assert.equal((await tags.json()).alpha, metadata.version);
-      const response = await fetch(published.dist.attestations.url);
-      assert.ok(response.ok);
-      const attestations = await response.json();
-      const provenance = attestations.attestations.find(
-        (entry) => entry.predicateType === "https://slsa.dev/provenance/v1",
-      );
-      assert.ok(provenance, "Missing SLSA provenance");
-      const statement = JSON.parse(
-        Buffer.from(provenance.bundle.dsseEnvelope.payload, "base64").toString("utf8"),
-      );
       validateProvenance(statement, manifest);
       await writeFile(
         `${artifactDirectory}/registry-proof.json`,

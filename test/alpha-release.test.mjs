@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { validateProvenance, validateRelease } from "../scripts/alpha-release.mjs";
+import { readProvenance, validateProvenance, validateRelease } from "../scripts/alpha-release.mjs";
 
 const metadata = {
   name: "@vp-tw/dirwell",
@@ -15,6 +15,37 @@ const environment = {
   GITHUB_SHA: "a".repeat(40),
   RELEASE_VERSION: metadata.version,
 };
+
+test("provenance readback tolerates delayed availability but rejects other errors", async () => {
+  const responses = [
+    new Response("Not found", { status: 404 }),
+    Response.json({
+      attestations: [
+        {
+          predicateType: "https://slsa.dev/provenance/v1",
+          bundle: {
+            dsseEnvelope: {
+              payload: Buffer.from(JSON.stringify({ subject: "fixture" })).toString("base64"),
+            },
+          },
+        },
+      ],
+    }),
+  ];
+  const request = async () => responses.shift();
+  assert.equal(await readProvenance("https://registry.npmjs.org/fixture", request), null);
+  assert.deepEqual(await readProvenance("https://registry.npmjs.org/fixture", request), {
+    subject: "fixture",
+  });
+  await assert.rejects(
+    () =>
+      readProvenance(
+        "https://registry.npmjs.org/fixture",
+        async () => new Response("Forbidden", { status: 403 }),
+      ),
+    /403/,
+  );
+});
 
 test("alpha release accepts the exact main version and rejects unsafe dispatches", () => {
   validateRelease(metadata, environment);
