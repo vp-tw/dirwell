@@ -1,9 +1,9 @@
 # Unplugin integration evaluation
 
-> Historical evaluation. The current Vite adapter is implemented in
-> `src/vite.ts`; it serves and watches generated explorers in development and
-> supports multiple configurations in one Vite build. Other unplugin hosts
-> remain unverified.
+> Historical evaluation. All nine Unplugin build hosts now have adapters.
+> See [the current build-tool guide](docs/src/content/docs/build-tools.md) for
+> verified build, watch, and development behavior. The evaluation below records
+> the earlier Vite-first decision, not the current support matrix.
 
 ## Historical decision
 
