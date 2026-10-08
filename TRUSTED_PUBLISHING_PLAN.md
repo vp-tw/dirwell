@@ -41,7 +41,24 @@ or green source CI is not publication/provenance evidence.
 The bootstrap package now exists. `publish-alpha.yml` implements the manual
 dispatch path with separate verification, OIDC publishing, registry consumer,
 and GitHub prerelease jobs. The initial candidate is `0.1.0-alpha.1`.
-Configuration readback and a successful OIDC run remain required before closing
-the tracking issue. The later Changesets version-PR bot is optional; versioning
-currently uses a reviewed contributor PR.
+Configuration readback and the first successful OIDC run are recorded below.
+Future releases follow the same gates. The later Changesets version-PR bot is
+optional; versioning currently uses a reviewed contributor PR.
+
+## First OIDC release evidence
+
+The npm publisher configuration was created and read back for `vp-tw/dirwell`,
+`publish-alpha.yml`, with publish and stage-publish permissions and no
+environment. [The first OIDC run](https://github.com/vp-tw/dirwell/actions/runs/37800608707)
+published `0.1.0-alpha.1`, verified the registry artifact and source-bound SLSA
+provenance, installed the registry consumer, and passed `npm audit signatures`.
+[The GitHub prerelease](https://github.com/vp-tw/dirwell/releases/tag/%40vp-tw/dirwell%400.1.0-alpha.1)
+and package tag reference the verified source commit. `alpha` advanced to this
+release while `latest` remained `0.1.0-alpha.0`.
+
+The initial upload succeeded before the provenance endpoint became available.
+Rerunning the failed jobs verified identical existing bytes without republishing.
+Readback now retries a temporary provenance `404` within its bounded wait.
+Rerun the original workflow's failed jobs to preserve its artifact and commit;
+do not start a fresh dispatch of an existing version from a changed main commit.
 Primary source: [npm trusted publishing](https://docs.npmjs.com/trusted-publishers/).
