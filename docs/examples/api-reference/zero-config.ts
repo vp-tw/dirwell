@@ -1,3 +1,3 @@
-import { generateExplorer } from "dirwell";
+import { generateExplorer } from "@vp-tw/dirwell";
 
 await generateExplorer({ sourceDir: "./public", outputDir: "./dist" });

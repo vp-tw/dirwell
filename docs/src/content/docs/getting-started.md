@@ -46,7 +46,7 @@ explorer page for that directory.
 Use `dirwell.config.ts` for settings that do not have CLI flags:
 
 ```ts
-import { defineConfig } from "dirwell";
+import { defineConfig } from "@vp-tw/dirwell";
 
 export default defineConfig({
   include: ["**/*.md", "assets/**"],

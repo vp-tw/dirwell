@@ -44,7 +44,7 @@ Create `dirwell.config.ts` when a field has no CLI flag or you want a reusable
 setup:
 
 ```ts
-import { defineConfig } from "dirwell";
+import { defineConfig } from "@vp-tw/dirwell";
 
 export default defineConfig({
   mode: "mpa",
@@ -85,12 +85,12 @@ raw views.
 
 ## Vite integration
 
-The `dirwell/vite` adapter builds one or more explorers alongside a Vite
+The `@vp-tw/dirwell/vite` adapter builds one or more explorers alongside a Vite
 application and serves them through Vite's development server:
 
 ```ts
 import { defineConfig } from "vite";
-import Dirwell from "dirwell/vite";
+import Dirwell from "@vp-tw/dirwell/vite";
 
 export default defineConfig({
   plugins: [
@@ -114,8 +114,8 @@ the full path and development-server behavior.
 ## Other build tools
 
 Adapters are available for Rollup, Rolldown, webpack, Rspack, Rsbuild, esbuild,
-Farm, and Bun. Import `dirwell/<host>` or use the factories from
-`dirwell/unplugin`. Each generates a dedicated explorer path alongside the host
+Farm, and Bun. Import `@vp-tw/dirwell/<host>` or use the factories from
+`@vp-tw/dirwell/unplugin`. Each generates a dedicated explorer path alongside the host
 output. See [build tool adapters](./docs/src/content/docs/build-tools.md) for
 options, watch behavior, and verification boundaries.
 

@@ -59,12 +59,14 @@ test("plain theme emits complete HTML without icons, scripts, or search assets",
     assert.doesNotMatch(html, /<svg|<script|<img|data-theme|search-index|prefers-color-scheme/);
     assert.match(html, /<meta name="color-scheme" content="light">/);
     assert.match(html, /<time datetime="[^"]+">/);
-    assert.match(html, /<footer><hr><p>Repository: Dirwell by VdustR/);
+    assert.match(
+      html,
+      /<footer><hr><p>Repository: <a href="https:\/\/github\.com\/vp-tw\/dirwell" target="_blank" rel="noopener">Dirwell<\/a> by VdustR/,
+    );
     assert.match(
       html,
       /<a href="https:\/\/opensource\.org\/license\/mit" target="_blank" rel="noopener">MIT License<\/a>/,
     );
-    assert.doesNotMatch(html, /href="https:\/\/github\.com\/VdustR\/dirwell/);
     await assert.rejects(readFile(path.join(output, "__dirwell", "search-index.json"), "utf8"));
     const nested = await readFile(path.join(output, "releases", "index.html"), "utf8");
     assert.match(
@@ -123,7 +125,7 @@ test("default theme self-hosts vscode-icons in SSG and MPA output", async (conte
     );
     assert.match(
       html,
-      /class="project-meta"><a href="https:\/\/github\.com\/VdustR\/dirwell" target="_blank" rel="noopener">Dirwell<\/a> <span class="meta-item">· <a href="https:\/\/github\.com\/vp-tw\/dirwell\/blob\/main\/src\/theme-default\/README\.md" target="_blank" rel="noopener">Ledger<\/a> by <a href="https:\/\/github\.com\/VdustR" target="_blank" rel="noopener">VdustR<\/a><\/span><\/p>/,
+      /class="project-meta"><a href="https:\/\/github\.com\/vp-tw\/dirwell" target="_blank" rel="noopener">Dirwell<\/a> <span class="meta-item">· <a href="https:\/\/github\.com\/vp-tw\/dirwell\/blob\/main\/src\/theme-default\/README\.md" target="_blank" rel="noopener">Ledger<\/a> by <a href="https:\/\/github\.com\/VdustR" target="_blank" rel="noopener">VdustR<\/a><\/span><\/p>/,
     );
     assert.doesNotMatch(html, />MIT License<\/a>|>Notices<\/a>/);
     assert.match(html, /&quot;icons&quot;:\{&quot;light&quot;:\{&quot;file&quot;:/);

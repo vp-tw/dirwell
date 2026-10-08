@@ -26,7 +26,7 @@ root and applies each plugin entry over it. The TypeScript API can pass
 asynchronous function receiving `{ command: "build" | "serve" | "daemon" }`:
 
 ```ts
-import { defineConfig } from "dirwell";
+import { defineConfig } from "@vp-tw/dirwell";
 
 export default defineConfig(({ command }) => ({
   outDir: command === "serve" ? ".dirwell-preview" : "dist",
@@ -190,13 +190,13 @@ behavior.
 
 ## Vite adapter
 
-Import `dirwell/vite` in a Vite config. Inline options accept the fields above
+Import `@vp-tw/dirwell/vite` in a Vite config. Inline options accept the fields above
 except `extends` and `server`. Each entry inherits the project
 `dirwell.config.ts` before applying its own inline fields.
 
 ```ts
 import { defineConfig } from "vite";
-import Dirwell from "dirwell/vite";
+import Dirwell from "@vp-tw/dirwell/vite";
 
 export default defineConfig({
   base: "/my-app/",

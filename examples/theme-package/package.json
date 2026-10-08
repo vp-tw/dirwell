@@ -1,0 +1,20 @@
+{
+  "name": "dirwell-example-theme",
+  "version": "0.0.0",
+  "private": true,
+  "files": [
+    "index.mjs",
+    "index.d.mts",
+    "README.md"
+  ],
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./index.d.mts",
+      "import": "./index.mjs"
+    }
+  },
+  "peerDependencies": {
+    "@vp-tw/dirwell": "0.1.0-alpha.0"
+  }
+}

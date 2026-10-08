@@ -2,6 +2,7 @@ allowBuilds:
   core-js: false
   esbuild: true
 packages:
+  - "."
   - docs
 minimumReleaseAgeExclude:
   - "@oxfmt/binding-android-arm-eabi@0.70.0"

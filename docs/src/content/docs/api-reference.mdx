@@ -13,9 +13,9 @@ import theme from "../../../examples/api-reference/theme.ts?raw";
 Use this page to find the TypeScript names. For accepted config values,
 defaults, results, and use cases, start with the [configuration guide](../configuration/).
 The `dirwell` package root exports the values and types below from `src/index.ts`.
-The `dirwell/theme` subpath exposes the component contracts from
+The `@vp-tw/dirwell/theme` subpath exposes the component contracts from
 `src/theme-components.ts`, including the generic `ThemeComponent<Props>` type.
-The `dirwell/vite` subpath exports the Vite adapter and its `DirwellViteOptions`
+The `@vp-tw/dirwell/vite` subpath exports the Vite adapter and its `DirwellViteOptions`
 type. `Dirwell(options)` returns one Vite plugin; `Dirwell([options, ...])`
 returns a plugin array. See [Vite adapter](../configuration/#vite-adapter).
 The command-line interface is described separately under [CLI](../cli/).
@@ -142,7 +142,7 @@ JavaScript, or a search index. Complete replacement themes implement
 | `DirwellThemeComponentOverrides` | Partial component layer.                                                                                                       |
 | `DefaultThemeIconSet`            | Light and optional dark SVG icon sets with attribution.                                                                        |
 | `DefaultThemeIconVariant`        | File, folder, and extension-specific SVG markup for one color scheme.                                                          |
-| `ThemeComponent<Props>`          | Function that renders typed props to an HTML string; available from `dirwell/theme`.                                           |
+| `ThemeComponent<Props>`          | Function that renders typed props to an HTML string; available from `@vp-tw/dirwell/theme`.                                    |
 | `DefaultThemeRuntimeConfig`      | Serialized default-theme browser controls and asset links.                                                                     |
 | `BreadcrumbItem`                 | Label, link, and current-page state.                                                                                           |
 | `EntryNavigation`                | Link and whether navigation leaves the explorer.                                                                               |

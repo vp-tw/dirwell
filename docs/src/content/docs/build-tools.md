@@ -9,7 +9,7 @@ files alongside the host application's output. The host remains responsible for
 its own output directory and deployment.
 
 ```ts
-import Dirwell from "dirwell/rollup";
+import Dirwell from "@vp-tw/dirwell/rollup";
 
 export default {
   input: "src/main.js",
@@ -24,7 +24,7 @@ to `build()` or `context()`. Bun runs the adapter inside `Bun.build()`.
 
 ```ts
 import { build } from "esbuild";
-import Dirwell from "dirwell/esbuild";
+import Dirwell from "@vp-tw/dirwell/esbuild";
 
 await build({
   entryPoints: ["src/main.js"],
@@ -34,7 +34,7 @@ await build({
 });
 ```
 
-The `dirwell/unplugin` entry exports the same adapters as properties, such as
+The `@vp-tw/dirwell/unplugin` entry exports the same adapters as properties, such as
 `Dirwell.rollup(options)` and `Dirwell.webpack(options)`. An options array builds
 separate explorers; their `outputPath` values must not overlap.
 
@@ -51,7 +51,7 @@ separate explorers; their `outputPath` values must not overlap.
 The non-Vite adapters use the host's output directory rather than the config's
 `outDir`; CLI server settings do not apply. URLs default to portable relative
 links. Set `base` and `urls` together when the deployment requires a fixed base.
-The existing `dirwell/vite` adapter also supports an independent `outDir` and
+The existing `@vp-tw/dirwell/vite` adapter also supports an independent `outDir` and
 derives its base from Vite; see [configuration](./configuration.md#vite-adapter).
 
 Dirwell never replaces the host output root. Existing files in its dedicated
@@ -78,3 +78,20 @@ The build suite exercises SSG and MPA output, original file contents, multiple
 explorers, and stale-file removal with real host builds. Watch and browser tests
 cover the capabilities listed above. A compatible adapter does not give a host
 server features that its build API does not expose.
+
+## CommonJS configuration
+
+Dirwell is an ES module package. CommonJS configurations can use an async
+configuration factory and dynamic import; this webpack form is exercised by
+`pnpm verify:package`:
+
+```js
+// webpack.config.cjs
+module.exports = async () => {
+  const { default: Dirwell } = await import("@vp-tw/dirwell/webpack");
+  return {
+    entry: "./src/main.js",
+    plugins: [Dirwell({ root: "downloads" })],
+  };
+};
+```

@@ -1,4 +1,4 @@
-import { defineConfig } from "dirwell";
+import { defineConfig } from "@vp-tw/dirwell";
 
 export default defineConfig({
   outputName(directory) {

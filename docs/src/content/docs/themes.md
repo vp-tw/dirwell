@@ -18,7 +18,7 @@ Choose the smallest level of customization that gives you the page you need:
 Pass the result of `createDefaultTheme()` as the config's `theme`:
 
 ```ts
-import { createDefaultTheme, defineConfig } from "dirwell";
+import { createDefaultTheme, defineConfig } from "@vp-tw/dirwell";
 
 export default defineConfig({
   theme: createDefaultTheme({
@@ -94,7 +94,12 @@ props and returns HTML. Replace one part when the existing explorer behavior
 is still useful:
 
 ```ts
-import { createDefaultTheme, defaultThemeComponents, defineConfig, escapeHtml } from "dirwell";
+import {
+  createDefaultTheme,
+  defaultThemeComponents,
+  defineConfig,
+  escapeHtml,
+} from "@vp-tw/dirwell";
 
 export default defineConfig({
   theme: createDefaultTheme({
@@ -123,7 +128,7 @@ list. Use it when the folder is small enough to render fully and a basic list
 meets the need.
 
 ```ts
-import { createPlainTheme, defineConfig } from "dirwell";
+import { createPlainTheme, defineConfig } from "@vp-tw/dirwell";
 
 export default defineConfig({
   theme: createPlainTheme({
@@ -161,3 +166,11 @@ provides English, Traditional Chinese, and Japanese switching. It updates
 `html.lang`, accessible names, and the document title; stores the optional
 preference across directories; and keeps an English listing with UTC dates
 when JavaScript is unavailable. File names and link targets remain unchanged.
+
+## Independent alpha packages
+
+Use a peer dependency pinned to the Dirwell alpha that the theme has tested.
+The [package contract](https://github.com/vp-tw/dirwell/blob/main/THEME_PACKAGE_CONTRACT.md)
+describes rendering, navigation, assets, trust, and compatibility. The
+[external package proof](https://github.com/vp-tw/dirwell/tree/main/examples/theme-package)
+is packed and consumed separately from Dirwell by `pnpm verify:package`.

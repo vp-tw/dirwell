@@ -5,7 +5,8 @@ filesystem as the content and uses semantic HTML: a heading, linked breadcrumbs,
 an unordered list, links, small metadata, and machine-readable timestamps.
 The footer uses a native horizontal rule and plain text to identify the
 repository, author, and license. External links open in a new tab.
-An unpublished repository stays plain text until a URL is configured.
+The default repository name links to the published Dirwell repository. An
+invalid custom URL remains plain text.
 
 It has no icons, JavaScript, client-side search, sorting controls, color-scheme
 switch, or generated search index. The only CSS sets a readable maximum width,

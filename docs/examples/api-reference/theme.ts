@@ -1,4 +1,9 @@
-import { createDefaultTheme, defaultThemeComponents, defineConfig, escapeHtml } from "dirwell";
+import {
+  createDefaultTheme,
+  defaultThemeComponents,
+  defineConfig,
+  escapeHtml,
+} from "@vp-tw/dirwell";
 
 const label = "Downloads & releases";
 
