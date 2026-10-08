@@ -4,6 +4,9 @@
   "commit": false,
   "access": "public",
   "baseBranch": "main",
-  "format": "oxfmt",
-  "privatePackages": { "version": false, "tag": false }
+  "format": false,
+  "privatePackages": {
+    "version": false,
+    "tag": false
+  }
 }

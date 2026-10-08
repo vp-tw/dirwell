@@ -78,3 +78,20 @@ The build suite exercises SSG and MPA output, original file contents, multiple
 explorers, and stale-file removal with real host builds. Watch and browser tests
 cover the capabilities listed above. A compatible adapter does not give a host
 server features that its build API does not expose.
+
+## CommonJS configuration
+
+Dirwell is an ES module package. CommonJS configurations can use an async
+configuration factory and dynamic import; this webpack form is exercised by
+`pnpm verify:package`:
+
+```js
+// webpack.config.cjs
+module.exports = async () => {
+  const { default: Dirwell } = await import("@vp-tw/dirwell/webpack");
+  return {
+    entry: "./src/main.js",
+    plugins: [Dirwell({ root: "downloads" })],
+  };
+};
+```

@@ -602,11 +602,12 @@ export async function generateExplorerSkippingPaths(
         if (mode === "ssg") {
           await writeFile(path.join(targetDir, assetName), contents);
         } else {
+          const bytes = Buffer.from(contents);
           const existing = sharedAssets.get(assetName);
-          if (existing !== undefined && existing.toString() !== contents.toString()) {
+          if (existing !== undefined && !Buffer.from(existing).equals(bytes)) {
             throw new Error(`Theme emitted conflicting shared asset: ${assetName}`);
           }
-          sharedAssets.set(assetName, contents);
+          sharedAssets.set(assetName, bytes);
         }
       }
     }

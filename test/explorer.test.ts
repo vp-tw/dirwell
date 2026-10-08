@@ -125,7 +125,7 @@ test("default theme self-hosts vscode-icons in SSG and MPA output", async (conte
     );
     assert.match(
       html,
-      /class="project-meta"><a href="https:\/\/github\.com\/VdustR\/dirwell" target="_blank" rel="noopener">Dirwell<\/a> <span class="meta-item">· <a href="https:\/\/github\.com\/vp-tw\/dirwell\/blob\/main\/src\/theme-default\/README\.md" target="_blank" rel="noopener">Ledger<\/a> by <a href="https:\/\/github\.com\/VdustR" target="_blank" rel="noopener">VdustR<\/a><\/span><\/p>/,
+      /class="project-meta"><a href="https:\/\/github\.com\/vp-tw\/dirwell" target="_blank" rel="noopener">Dirwell<\/a> <span class="meta-item">· <a href="https:\/\/github\.com\/vp-tw\/dirwell\/blob\/main\/src\/theme-default\/README\.md" target="_blank" rel="noopener">Ledger<\/a> by <a href="https:\/\/github\.com\/VdustR" target="_blank" rel="noopener">VdustR<\/a><\/span><\/p>/,
     );
     assert.doesNotMatch(html, />MIT License<\/a>|>Notices<\/a>/);
     assert.match(html, /&quot;icons&quot;:\{&quot;light&quot;:\{&quot;file&quot;:/);

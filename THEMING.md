@@ -79,3 +79,10 @@ example keeps the default explorer and changes components, Catppuccin colors,
 and file icons. `createDefaultTheme({ icons })` accepts light and optional dark
 SVG sets, including fallbacks and extension mappings. Dirwell uses the same icon
 set for static, global-search, and virtualized rows.
+
+## Independent alpha packages
+
+An external package can return `ExplorerTheme` through its own factory and own
+its HTML, assets, styles, options, and localization. Pin the tested Dirwell alpha
+in its peer dependency. See [the package contract](THEME_PACKAGE_CONTRACT.md)
+and [the separately packed example](examples/theme-package).
