@@ -41,6 +41,9 @@ test("MIME classification covers maintained formats and safely falls back for ex
     ["notes.docx", "document"],
     ["photo.avif", "image"],
     ["README", "other"],
+    ["png", "other"],
+    ["json", "other"],
+    [".txt", "other"],
     ["unknown.zzzzzz", "other"],
   ]) {
     const file = entry(name!);

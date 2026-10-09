@@ -184,13 +184,13 @@ export function matchesMimeType(pattern: string, type: string): boolean {
 export function entryMimeType(entry: FileSystemEntry): string | null {
   if (entry.kind === "directory" || entry.symlink?.targetKind === "directory") return null;
   return (
-    mime.getType(entry.name) ??
+    mime.getType(`./${entry.name}`) ??
     (entry.symlink?.targetKind === "file" &&
     !entry.symlink.isBroken &&
     !entry.symlink.isOutsideRoot &&
     !entry.symlink.isTargetExcluded &&
     entry.symlink.targetRelativePath
-      ? mime.getType(entry.symlink.targetRelativePath)
+      ? mime.getType(`./${entry.symlink.targetRelativePath}`)
       : null)
   );
 }
