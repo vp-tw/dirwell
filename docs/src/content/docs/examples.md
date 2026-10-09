@@ -31,12 +31,13 @@ and the source directory that generates it.
 - Completely different page: `custom-theme` renders a release catalog with
   its own HTML and CSS. [Live page](https://vp-tw.github.io/dirwell/examples/custom-theme/) ·
   [Source](https://github.com/vp-tw/dirwell/tree/main/examples/custom-theme)
-  The source directories include their own `dirwell.config.ts` and input
-  `files/` trees. The documentation build reads those configs and passes them
-  as one array to `Dirwell([...])` in a Vite build. It writes each explorer to
-  `docs/public/examples/` before Astro copies them into the publish tree. The
-  homepage embeds the generated `file-icons` page, so its preview uses the same
-  HTML and assets as the live example.
+
+The source directories include their own `dirwell.config.ts` and input
+`files/` trees. The documentation build reads those configs and passes them
+as one array to `Dirwell([...])` in a Vite build. It writes each explorer to
+`docs/public/examples/` before Astro copies them into the publish tree. The
+homepage embeds the generated `file-icons` page, so its preview uses the same
+HTML and assets as the live example.
 
 ## Build and inspect locally
 
