@@ -17,6 +17,7 @@ const examples = [
   "plain",
   "i18n",
   "crosswave",
+  "crosswave-categories",
 ] as const;
 const siteBase = process.env.SITE_BASE ?? "/";
 process.env.DIRWELL_SITE_BASE = siteBase;

@@ -60,7 +60,7 @@ try {
     `
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-import {generateExplorer,createCrosswaveTheme} from ${JSON.stringify(metadata.name)};
+import {generateExplorer,createCrosswaveTheme,defaultCrosswaveCategories} from ${JSON.stringify(metadata.name)};
 import {createExampleTheme} from 'dirwell-example-theme';
 import {rollup} from 'rollup';
 import Dirwell from ${JSON.stringify(`${metadata.name}/rollup`)};
@@ -74,8 +74,9 @@ for (const mode of ['ssg','mpa']) {
  assert.ok((await readFile(mode+(mode==='mpa'?'/__dirwell':'')+'/package-theme.css')).length>0);
 }
 for(const mode of ['ssg','mpa']){
- await generateExplorer({sourceDir:'files',outputDir:'crosswave-'+mode,mode,theme:createCrosswaveTheme({color:'jade'})});
+ await generateExplorer({sourceDir:'files',outputDir:'crosswave-'+mode,mode,theme:createCrosswaveTheme({color:'jade',categories:[...defaultCrosswaveCategories,{id:'texts',label:'Text files',icon:'document',match:{extensions:['txt']}}]})});
  const output='crosswave-'+mode;
+ assert.match(await readFile(output+'/index.html','utf8'),/data-cw-categories="all document texts"/);
  assert.match(await readFile(output+'/index.html','utf8'),/Crosswave/);
  assert.match(await readFile(output+(mode==='mpa'?'/__dirwell':'')+'/crosswave.js','utf8'),/getGamepads/);
  assert.ok((await readFile(output+(mode==='mpa'?'/__dirwell':'')+'/crosswave.css')).length>0);
@@ -105,7 +106,7 @@ console.log('Public imports, external SSG/MPA theme assets, encoded names, and R
   );
   await writeFile(
     path.join(project, "verify.ts"),
-    `import {defineConfig,type ExplorerTheme} from ${JSON.stringify(metadata.name)};import type {DirwellPluginOptions} from ${JSON.stringify(`${metadata.name}/unplugin`)};import {createExampleTheme} from 'dirwell-example-theme';const theme:ExplorerTheme=createExampleTheme({title:'Downloads'});const config=defineConfig({theme});const plugin:DirwellPluginOptions={root:'files',theme:config.theme!};void plugin;`,
+    `import {createCrosswaveTheme,defaultCrosswaveCategories,type CrosswaveCategory,type CrosswaveCategoryMatch,type CrosswaveCategoryIcon,defineConfig,type ExplorerTheme} from ${JSON.stringify(metadata.name)};import type {DirwellPluginOptions} from ${JSON.stringify(`${metadata.name}/unplugin`)};import {createExampleTheme} from 'dirwell-example-theme';const matcher:CrosswaveCategoryMatch={mimeTypes:['text/*']};const icon:CrosswaveCategoryIcon={svg:'<svg viewBox="0 0 24 24"><path d="M2 12h20"/></svg>'};const categories:readonly CrosswaveCategory[]=[...defaultCrosswaveCategories,{id:'texts',label:'Texts',icon,match:matcher}];const crosswave:ExplorerTheme=createCrosswaveTheme({categories});void crosswave;const theme:ExplorerTheme=createExampleTheme({title:'Downloads'});const config=defineConfig({theme});const plugin:DirwellPluginOptions={root:'files',theme:config.theme!};void plugin;`,
   );
   run("pnpm", [
     "exec",

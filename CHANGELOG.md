@@ -1,5 +1,11 @@
 # @vp-tw/dirwell
 
+## 0.1.0-alpha.7
+
+### Minor Changes
+
+- Make Crosswave categories configurable with ordered labels, decorative icons, overlapping extension/MIME filters, and exported default definitions. Infer filename types with the pinned Node-only MIME database; generated browser assets contain membership IDs without the database. Add a runnable custom-category example and configuration documentation.
+
 ## 0.1.0-alpha.6
 
 ### Minor Changes

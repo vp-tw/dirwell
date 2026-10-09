@@ -12,3 +12,11 @@ in the published package, and in `src/vscode-icons/NOTICE.txt` in the source tre
 Generated sites include this notice as `vscode-icons-NOTICE.txt`. The default
 theme footer links to the [Ledger theme README](https://github.com/vp-tw/dirwell/blob/main/src/theme-default/README.md),
 which links to the source notice.
+
+## MIME classification
+
+Crosswave uses [`mime` 4.1.0](https://github.com/broofa/mime), MIT-licensed,
+Copyright (c) 2023 Robert Kieffer, for filename-based classification during Node
+generation. It uses optimized MIME database mappings; no MIME database is emitted
+to generated browser assets. The installed dependency includes its full MIT
+license. MIME estimates do not validate file contents or change serving headers.

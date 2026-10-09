@@ -164,13 +164,51 @@ export default defineConfig({
 });
 ```
 
-| Option             | Default          | Effect                                                                                                                         |
-| ------------------ | ---------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `color`            | `"azure"`        | Initial palette: `azure`, `violet`, `amber`, `rose`, `jade`, or `graphite`. Visitors can save another color.                   |
-| `backgroundMotion` | `true`           | Enables animated light. Visitors can pause it; reduced motion and WebGL fallback keep a static background.                     |
-| `pageTransitions`  | `true`           | Animates folder exchanges inside a persistent page. Set `false` for immediate exchanges; native navigation remains a fallback. |
-| `gamepad`          | `true`           | Enables standard-mapped Gamepad API navigation where available. Keyboard and touch remain usable independently.                |
-| `project`          | Dirwell metadata | Sets the displayed project name using the same metadata type as the other themes.                                              |
+| Option             | Default                     | Effect                                                                                                                         |
+| ------------------ | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `categories`       | Default seven-category rail | Replaces the rail with ordered labels, icons, and extension/MIME filters; see Custom categories.                               |
+| `color`            | `"azure"`                   | Initial palette: `azure`, `violet`, `amber`, `rose`, `jade`, or `graphite`. Visitors can save another color.                   |
+| `backgroundMotion` | `true`                      | Enables animated light. Visitors can pause it; reduced motion and WebGL fallback keep a static background.                     |
+| `pageTransitions`  | `true`                      | Animates folder exchanges inside a persistent page. Set `false` for immediate exchanges; native navigation remains a fallback. |
+| `gamepad`          | `true`                      | Enables standard-mapped Gamepad API navigation where available. Keyboard and touch remain usable independently.                |
+| `project`          | Dirwell metadata            | Sets the displayed project name using the same metadata type as the other themes.                                              |
+
+### Custom categories
+
+`categories` replaces the whole rail. Keep at least one category; the first is selected on a fresh folder visit. To rename, reorder, or hide defaults, map or filter `defaultCrosswaveCategories`:
+
+```ts
+import { createCrosswaveTheme, defaultCrosswaveCategories } from "@vp-tw/dirwell";
+
+const theme = createCrosswaveTheme({
+  categories: [
+    ...defaultCrosswaveCategories.filter(({ id }) => id === "all" || id === "folder"),
+    {
+      id: "code",
+      label: "Source code",
+      icon: "document",
+      match: { extensions: ["ts", "tsx", "js"] },
+    },
+    { id: "pictures", label: "Artwork", icon: "image", match: { mimeTypes: ["image/*"] } },
+    { id: "remaining", label: "Unsorted", icon: "other", match: "other" },
+  ],
+});
+```
+
+| Field   | Contract                                                                                                                                                                                                                                                                                   |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `id`    | Unique lowercase identifier, starting with a letter; up to 64 characters, using letters, digits, `_`, or `-`. IDs remain stable in history.                                                                                                                                                |
+| `label` | Nonempty text for the category button. Text is escaped; changing it does not localize the rest of the theme.                                                                                                                                                                               |
+| `icon`  | Optional built-in name (`all`, `folder`, `image`, `audio`, `video`, `document`, `other`, `link`, `back`, `search`, `pause`, `play`, `controller`) or `{ svg: "<svg>…</svg>" }`. Custom SVG is trusted configuration markup and decorative. File-row icons remain inferred file-type icons. |
+| `match` | `"all"` includes all entries; `"folders"` includes folders/directory links; `"other"` includes non-folder entries unmatched by any configured extension/MIME rule. Otherwise supply `{ extensions?, mimeTypes? }` with at least one rule.                                                  |
+
+Extension and MIME rules are combined with OR, and categories can overlap. Extension rules ignore case, accept an optional leading dot, and support compound endings such as `tar.gz`. MIME rules accept exact types, a top-level wildcard such as `image/*`, or structured suffixes such as `application/*+json`. They do not accept charset parameters or arbitrary glob expressions. Include an All or Folders category when visitors should be able to enter folders.
+
+MIME inference uses the pinned, MIT-licensed [`mime` database](https://github.com/broofa/mime) in Node during generation. The browser receives category IDs, not the database or matching rules. This is a filename estimate: no content sniffing, HTTP-header override, or safety verdict. Extensionless and unknown files fall back to Other unless a custom extension rule matches. For an available internal file symlink, an unknown alias name may use the target's extension. Ambiguities remain: `.ts` can mean MPEG transport stream, so the source-code example matches it explicitly by extension.
+
+Categories filter the current folder; they do not navigate to named destinations. Rebuild and reload after changing configuration. A mixed/stale folder-data configuration offers Open normally rather than applying a mismatched rail. [Live custom-category example](https://vp-tw.github.io/dirwell/examples/crosswave-categories/) · [Source](https://github.com/vp-tw/dirwell/tree/main/examples/crosswave-categories)
+
+### Controls and navigation
 
 Use left/right to choose a category, up/down to select a file, Enter to open,
 Backspace for the parent folder, and `/` for local search. Escape clears search.

@@ -15,6 +15,7 @@ test("landing page exposes every live example and source directory", async () =>
     "plain",
     "i18n",
     "crosswave",
+    "crosswave-categories",
   ]) {
     assert.match(source, new RegExp(`slug: "${slug}"`));
     assert.match(source, /examplePath\(example\.slug\)/);
@@ -45,6 +46,7 @@ test("site build combines docs and examples in one publish directory", async () 
       "plain",
       "i18n",
       "crosswave",
+      "crosswave-categories",
     ],
   );
   assert.match(buildScript, /plugins: dirwellVite\(options\)/);
@@ -58,6 +60,7 @@ test("site build combines docs and examples in one publish directory", async () 
     "plain",
     "i18n",
     "crosswave",
+    "crosswave-categories",
   ]) {
     const config = await readFile(path.join(root, `examples/${slug}/dirwell.config.ts`), "utf8");
     assert.match(config, new RegExp(`docs/public/examples/${slug}`));

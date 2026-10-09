@@ -7,6 +7,7 @@ const path = (value: string) => `${base}${value}`.replace(/\/+/g, "/");
 const examplePath = (slug: string) => path(`examples/${slug}/${import.meta.env.DEV ? "index.html" : ""}`);
 const repositoryUrl = import.meta.env.PUBLIC_REPOSITORY_URL ?? "https://github.com/vp-tw/dirwell";
 const examples = [
+  { slug: "crosswave-categories", name: "Your own categories", description: "Rename the Crosswave rail, add source and archive filters, and choose custom SVG icons.", detail: "MIME inference at build time · overlapping filters" },
   {
     slug: "crosswave",
     name: "Crosswave",
