@@ -153,6 +153,11 @@
               reject(new Error("Folder data is incomplete"));
               return;
             }
+            if (
+              doc.querySelector("[data-cw-root]").dataset.cwCategoryConfig !==
+              main.dataset.cwCategoryConfig
+            )
+              throw new Error("Folder category configuration changed; open normally to reload");
             const url = new URL(route.url);
             if (local && url.pathname.endsWith("/")) url.pathname += payload.outputName;
             const base = new URL(payload.baseHref ?? ".", url);
@@ -478,10 +483,8 @@
     const empty = document.querySelector("[data-cw-empty]");
     const status = document.querySelector("[data-cw-status]");
     const detail = document.querySelector(".cw-detail");
-    const icons = new Map(tabs.map((tab) => [tab.dataset.cwCategory, tab.querySelector("svg")]));
-    const linkIcon = rows.find((row) => row.dataset.icon === "link")?.querySelector("svg");
-    if (linkIcon) icons.set("link", linkIcon);
-    let category = "all",
+    const belongs = (row, id) => row.dataset.cwCategories.split(" ").includes(id);
+    let category = tabs[0].dataset.cwCategory,
       selected = null,
       composing = false,
       searchTimer;
@@ -505,7 +508,7 @@
         document.querySelector(`[data-cw-detail-${field}]`).textContent = row.dataset[data];
       const host = document.querySelector("[data-cw-detail-icon]");
       host.replaceChildren();
-      const icon = icons.get(row.dataset.icon);
+      const icon = row.querySelector(".cw-entry-icon svg");
       if (icon) host.append(icon.cloneNode(true));
       const link = row.querySelector("a");
       const open = document.querySelector("[data-cw-open]");
@@ -546,7 +549,7 @@
       let count = 0;
       for (const row of rows) {
         row.hidden =
-          (category !== "all" && row.dataset.category !== category) ||
+          !belongs(row, category) ||
           !`${row.dataset.name} ${row.dataset.path}`.toLocaleLowerCase().includes(query);
         if (!row.hidden) count++;
       }
@@ -604,10 +607,7 @@
     };
     for (const tab of tabs) {
       tab.addEventListener("click", () => setCategory(tab.dataset.cwCategory));
-      const count =
-        tab.dataset.cwCategory === "all"
-          ? rows.length
-          : rows.filter((row) => row.dataset.category === tab.dataset.cwCategory).length;
+      const count = rows.filter((row) => belongs(row, tab.dataset.cwCategory)).length;
       tab.querySelector("small").textContent = String(count);
     }
     main.addEventListener("pointerover", (event) => {
@@ -763,7 +763,7 @@
     document.querySelector("#cw-wave").addEventListener("cw-wave-fallback", updateMotion);
     reduced.addEventListener("change", updateMotion);
     updateMotion();
-    setCategory("all");
+    setCategory(tabs[0].dataset.cwCategory);
     const scroll = document.querySelector(".cw-list-scroll");
     const fitList = () => {
       const footer = document.querySelector(".cw-bottom");
@@ -814,17 +814,15 @@
           .replaceChildren(...doc.querySelector(".cw-files").childNodes);
         main.dataset.cwPath = doc.querySelector("[data-cw-root]").dataset.cwPath;
         rows = [...main.querySelectorAll("[data-cw-entry]")];
-        const nextLinkIcon = rows.find((row) => row.dataset.icon === "link")?.querySelector("svg");
-        if (nextLinkIcon) icons.set("link", nextLinkIcon);
         for (const tab of tabs)
           tab.querySelector("small").textContent = String(
-            tab.dataset.cwCategory === "all"
-              ? rows.length
-              : rows.filter((row) => row.dataset.category === tab.dataset.cwCategory).length,
+            rows.filter((row) => belongs(row, tab.dataset.cwCategory)).length,
           );
         search.value = view?.query ?? "";
         setCategory(
-          tabs.some((tab) => tab.dataset.cwCategory === view?.category) ? view.category : "all",
+          tabs.some((tab) => tab.dataset.cwCategory === view?.category)
+            ? view.category
+            : tabs[0].dataset.cwCategory,
           false,
           false,
         );

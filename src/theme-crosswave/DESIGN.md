@@ -179,7 +179,7 @@ Depth comes from the dark directional ground, procedural translucent folds, spar
 
 ## Shapes
 
-Thin original SVG icons use a 24-unit viewBox, rounded strokes, and a 1.45 stroke width. Category icons are 40px, row icons 34px, and the detail symbol 110px with a lighter .8 stroke width. The active category mark is a short line (24px by 2px). Controls have gently rounded corners; the file selection wash uses the file-row radius. The search and open action use a bottom line instead of a boxed button.
+Built-in thin original SVG icons use a 24-unit viewBox, rounded strokes, and a 1.45 stroke width. Category icons are 40px, row icons 34px, and the detail symbol 110px with a lighter .8 stroke width. Configured rail icons may use trusted decorative SVG markup within the same category dimensions. The active category mark is a short line (24px by 2px). Controls have gently rounded corners; the file selection wash uses the file-row radius. The search and open action use a bottom line instead of a boxed button.
 
 ## Components
 
@@ -187,9 +187,13 @@ Thin original SVG icons use a 24-unit viewBox, rounded strokes, and a 1.45 strok
 
 Transparent icon-and-label buttons with small count labels. Inactive foreground uses Muted. Hover brightens and moves up 3px; selection brightens, scales to 1.1, and adds the luminous underline. Color changes take 200ms, spatial changes 300ms with the theme easing. The tablist uses roving focus and exposes selection through `aria-selected`.
 
+The default rail remains All files, Folders, Photos, Music, Videos, Documents, and Other. A configured category array replaces the rail; its order, labels, included categories, built-in or trusted decorative SVG icons, and extension/MIME matching rules are caller-controlled. The first configured category is initially selected, and history restores a category only when its identifier exists in the mounted rail. Matching rules may overlap, so an entry may contribute to multiple counts; Other collects non-folder entries unmatched by the configured specific rules. Generation computes membership with Node-side `mime` (4.1.0); the browser filters generated membership identifiers without loading a MIME database.
+
 ### File rows and details
 
 Native links remain the activation surface. Each row has an icon, wrapping name, status, optional size/declared target, and compact-layout modified date. Selection adds the translucent gradient, moves the row right 5px, and scales the icon to 1.22. Hover uses the independent hover wash. The detail panel repeats actual selected metadata; its open action is a lined text link with a geometric arrow. Unavailable entries remain visible as text.
+
+Rail customization does not change row or detail icons: directories use folder geometry, symlinks use link geometry, and file icons follow filename-based MIME estimates. For example, the custom Source code rule includes `.ts` explicitly even though the MIME lookup estimates that suffix as `video/mp2t`. Category membership does not inspect file contents or alter served content headers.
 
 ### Search
 
@@ -204,6 +208,8 @@ A small dark translucent select switches among six palettes. The adjacent transp
 Generated classic-script page data supplies each folder on demand in SSG, MPA, and relative local-file output. Enhanced folder links, parent links, breadcrumbs, and Home update the title, location, file list, counts, and selected details inside the mounted shell. Native file actions and modified/new-tab activations retain ordinary link behavior. Category, search query, selected path, and list scroll restore from browser history; recent folder revisits also restore their view state. Local-file navigation keeps the launch document address and records its destination in the hash so history and reload can recover it.
 
 A new request cancels the previous request; an eight-second timeout bounds loading. After 120ms, a fixed status banner above the footer offers Cancel. Escape outside editable controls and the controller back action cancel a pending request. Ordinary loading failures retain the current file list and offer Retry and Open normally; history-load failures recover through native navigation to the requested destination. The banner uses the existing lower-ground color, bright text, control radius, 13px type, and wrapping flex layout, with 44px bordered actions. It remains above the motion layers and uses a polite status role.
+
+A folder whose generated category configuration differs from the mounted rail is rejected by enhanced navigation. The retained-list failure feedback offers Open normally so native navigation can reload that folder's configuration; history failures recover through the same native-navigation path.
 
 ### Motion and progressive fallback
 
@@ -233,4 +239,4 @@ Without JavaScript, the complete native file listing remains available; category
 
 Not canonized or repaired: no implementation defect is promoted into a token. The theme's intentional system-sans and ambient-color boundary does not redefine the root system. Hardware controller activation remains a verification limit.
 
-Source of truth: `styles.ts`, `icons.ts`, `../theme-crosswave.ts`, and `../crosswave-runtime.js`. Original review captures and contrast artifacts are in `../../.impeccable/review/crosswave/`. Persistent-shell desktop, portrait, short-landscape, error, and entry/return motion captures are in `../../.impeccable/review/seamless/`; the independent follow-up review resolved the bounded-overlays finding and returned ship. These captures do not establish physical-controller behavior.
+Source of truth: `styles.ts`, `icons.ts`, `categories.ts`, `../theme-crosswave.ts`, and `../crosswave-runtime.js`. Original review captures and contrast artifacts are in `../../.impeccable/review/crosswave/`. Persistent-shell desktop, portrait, short-landscape, error, and entry/return motion captures are in `../../.impeccable/review/seamless/`; the independent follow-up review resolved the bounded-overlays finding and returned ship. Custom-category desktop, portrait, and short-landscape captures are in `../../.impeccable/review/categories/`; they retain the existing Jade palette and both navigation axes. These captures do not establish physical-controller behavior or content-based MIME detection.

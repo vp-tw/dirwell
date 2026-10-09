@@ -32,6 +32,7 @@ and the source directory that generates it.
   file list, ribbon lighting, keyboard/controller input, and directory transitions.
   [Live page](https://vp-tw.github.io/dirwell/examples/crosswave/) ·
   [Source](https://github.com/vp-tw/dirwell/tree/main/examples/crosswave)
+- Your own Crosswave rail: `crosswave-categories` shows reordered/renamed filters, custom SVG, overlapping source-code/document rules, and MIME inference without shipping the database to visitors. [Live page](https://vp-tw.github.io/dirwell/examples/crosswave-categories/) · [Source](https://github.com/vp-tw/dirwell/tree/main/examples/crosswave-categories)
 - Completely different page: `custom-theme` renders a release catalog with
   its own HTML and CSS. [Live page](https://vp-tw.github.io/dirwell/examples/custom-theme/) ·
   [Source](https://github.com/vp-tw/dirwell/tree/main/examples/custom-theme)
