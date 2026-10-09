@@ -96,7 +96,8 @@ To deploy under a path and follow only symlinks within the source root:
 
 `"relative"` uses depth-aware links, `"base"` prefixes the deployment base,
 and `"html-base"` emits an HTML `<base>` element. Broken symlinks expose their
-declared target through a raw-text view; out-of-root targets have no link. See
+declared target through a raw-text view. Out-of-root and excluded targets also
+open only their declared text; the target file is not published. See
 [symlink behavior](../symlinks/) and [deployment](../deployment/).
 
 ## Compose a theme
