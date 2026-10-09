@@ -1,0 +1,455 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-09T08:36:20.989514+00:00",
+  "title": "Design System: Dirwell Crosswave",
+  "extensions": {
+    "colorMeta": {
+      "azure-top": {
+        "role": "primary",
+        "displayName": "Azure Top",
+        "tonalRamp": [
+          "oklch(15% 0.0992 258.34)",
+          "oklch(26% 0.0992 258.34)",
+          "oklch(38% 0.0992 258.34)",
+          "oklch(49% 0.0992 258.34)",
+          "oklch(61% 0.0992 258.34)",
+          "oklch(72% 0.0992 258.34)",
+          "oklch(84% 0.0992 258.34)",
+          "oklch(95% 0.0992 258.34)"
+        ],
+        "rampPurpose": "Synthesized panel inspection ramp; not production theme tokens."
+      },
+      "azure-bottom": {
+        "role": "primary",
+        "displayName": "Azure Bottom",
+        "tonalRamp": [
+          "oklch(15% 0.0661 261.61)",
+          "oklch(26% 0.0661 261.61)",
+          "oklch(38% 0.0661 261.61)",
+          "oklch(49% 0.0661 261.61)",
+          "oklch(61% 0.0661 261.61)",
+          "oklch(72% 0.0661 261.61)",
+          "oklch(84% 0.0661 261.61)",
+          "oklch(95% 0.0661 261.61)"
+        ],
+        "rampPurpose": "Synthesized panel inspection ramp; not production theme tokens."
+      },
+      "violet-top": {
+        "role": "primary",
+        "displayName": "Violet Top",
+        "tonalRamp": [
+          "oklch(15% 0.1016 303.61)",
+          "oklch(26% 0.1016 303.61)",
+          "oklch(38% 0.1016 303.61)",
+          "oklch(49% 0.1016 303.61)",
+          "oklch(61% 0.1016 303.61)",
+          "oklch(72% 0.1016 303.61)",
+          "oklch(84% 0.1016 303.61)",
+          "oklch(95% 0.1016 303.61)"
+        ],
+        "rampPurpose": "Synthesized panel inspection ramp; not production theme tokens."
+      },
+      "violet-bottom": {
+        "role": "primary",
+        "displayName": "Violet Bottom",
+        "tonalRamp": [
+          "oklch(15% 0.0570 306.33)",
+          "oklch(26% 0.0570 306.33)",
+          "oklch(38% 0.0570 306.33)",
+          "oklch(49% 0.0570 306.33)",
+          "oklch(61% 0.0570 306.33)",
+          "oklch(72% 0.0570 306.33)",
+          "oklch(84% 0.0570 306.33)",
+          "oklch(95% 0.0570 306.33)"
+        ],
+        "rampPurpose": "Synthesized panel inspection ramp; not production theme tokens."
+      },
+      "amber-top": {
+        "role": "primary",
+        "displayName": "Amber Top",
+        "tonalRamp": [
+          "oklch(15% 0.0809 72.83)",
+          "oklch(26% 0.0809 72.83)",
+          "oklch(38% 0.0809 72.83)",
+          "oklch(49% 0.0809 72.83)",
+          "oklch(61% 0.0809 72.83)",
+          "oklch(72% 0.0809 72.83)",
+          "oklch(84% 0.0809 72.83)",
+          "oklch(95% 0.0809 72.83)"
+        ],
+        "rampPurpose": "Synthesized panel inspection ramp; not production theme tokens."
+      },
+      "amber-bottom": {
+        "role": "primary",
+        "displayName": "Amber Bottom",
+        "tonalRamp": [
+          "oklch(15% 0.0414 71.54)",
+          "oklch(26% 0.0414 71.54)",
+          "oklch(38% 0.0414 71.54)",
+          "oklch(49% 0.0414 71.54)",
+          "oklch(61% 0.0414 71.54)",
+          "oklch(72% 0.0414 71.54)",
+          "oklch(84% 0.0414 71.54)",
+          "oklch(95% 0.0414 71.54)"
+        ],
+        "rampPurpose": "Synthesized panel inspection ramp; not production theme tokens."
+      },
+      "rose-top": {
+        "role": "primary",
+        "displayName": "Rose Top",
+        "tonalRamp": [
+          "oklch(15% 0.0723 352.79)",
+          "oklch(26% 0.0723 352.79)",
+          "oklch(38% 0.0723 352.79)",
+          "oklch(49% 0.0723 352.79)",
+          "oklch(61% 0.0723 352.79)",
+          "oklch(72% 0.0723 352.79)",
+          "oklch(84% 0.0723 352.79)",
+          "oklch(95% 0.0723 352.79)"
+        ],
+        "rampPurpose": "Synthesized panel inspection ramp; not production theme tokens."
+      },
+      "rose-bottom": {
+        "role": "primary",
+        "displayName": "Rose Bottom",
+        "tonalRamp": [
+          "oklch(15% 0.0464 347.26)",
+          "oklch(26% 0.0464 347.26)",
+          "oklch(38% 0.0464 347.26)",
+          "oklch(49% 0.0464 347.26)",
+          "oklch(61% 0.0464 347.26)",
+          "oklch(72% 0.0464 347.26)",
+          "oklch(84% 0.0464 347.26)",
+          "oklch(95% 0.0464 347.26)"
+        ],
+        "rampPurpose": "Synthesized panel inspection ramp; not production theme tokens."
+      },
+      "jade-top": {
+        "role": "primary",
+        "displayName": "Jade Top",
+        "tonalRamp": [
+          "oklch(15% 0.0656 177.80)",
+          "oklch(26% 0.0656 177.80)",
+          "oklch(38% 0.0656 177.80)",
+          "oklch(49% 0.0656 177.80)",
+          "oklch(61% 0.0656 177.80)",
+          "oklch(72% 0.0656 177.80)",
+          "oklch(84% 0.0656 177.80)",
+          "oklch(95% 0.0656 177.80)"
+        ],
+        "rampPurpose": "Synthesized panel inspection ramp; not production theme tokens."
+      },
+      "jade-bottom": {
+        "role": "primary",
+        "displayName": "Jade Bottom",
+        "tonalRamp": [
+          "oklch(15% 0.0364 189.28)",
+          "oklch(26% 0.0364 189.28)",
+          "oklch(38% 0.0364 189.28)",
+          "oklch(49% 0.0364 189.28)",
+          "oklch(61% 0.0364 189.28)",
+          "oklch(72% 0.0364 189.28)",
+          "oklch(84% 0.0364 189.28)",
+          "oklch(95% 0.0364 189.28)"
+        ],
+        "rampPurpose": "Synthesized panel inspection ramp; not production theme tokens."
+      },
+      "graphite-top": {
+        "role": "primary",
+        "displayName": "Graphite Top",
+        "tonalRamp": [
+          "oklch(15% 0.0364 262.28)",
+          "oklch(26% 0.0364 262.28)",
+          "oklch(38% 0.0364 262.28)",
+          "oklch(49% 0.0364 262.28)",
+          "oklch(61% 0.0364 262.28)",
+          "oklch(72% 0.0364 262.28)",
+          "oklch(84% 0.0364 262.28)",
+          "oklch(95% 0.0364 262.28)"
+        ],
+        "rampPurpose": "Synthesized panel inspection ramp; not production theme tokens."
+      },
+      "graphite-bottom": {
+        "role": "primary",
+        "displayName": "Graphite Bottom",
+        "tonalRamp": [
+          "oklch(15% 0.0227 265.62)",
+          "oklch(26% 0.0227 265.62)",
+          "oklch(38% 0.0227 265.62)",
+          "oklch(49% 0.0227 265.62)",
+          "oklch(61% 0.0227 265.62)",
+          "oklch(72% 0.0227 265.62)",
+          "oklch(84% 0.0227 265.62)",
+          "oklch(95% 0.0227 265.62)"
+        ],
+        "rampPurpose": "Synthesized panel inspection ramp; not production theme tokens."
+      },
+      "text": {
+        "role": "neutral",
+        "displayName": "Text",
+        "tonalRamp": [
+          "oklch(15% 0.0068 247.89)",
+          "oklch(26% 0.0068 247.89)",
+          "oklch(38% 0.0068 247.89)",
+          "oklch(49% 0.0068 247.89)",
+          "oklch(61% 0.0068 247.89)",
+          "oklch(72% 0.0068 247.89)",
+          "oklch(84% 0.0068 247.89)",
+          "oklch(95% 0.0068 247.89)"
+        ],
+        "rampPurpose": "Synthesized panel inspection ramp; not production theme tokens."
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Muted",
+        "tonalRamp": [
+          "oklch(15% 0.0131 251.56)",
+          "oklch(26% 0.0131 251.56)",
+          "oklch(38% 0.0131 251.56)",
+          "oklch(49% 0.0131 251.56)",
+          "oklch(61% 0.0131 251.56)",
+          "oklch(72% 0.0131 251.56)",
+          "oklch(84% 0.0131 251.56)",
+          "oklch(95% 0.0131 251.56)"
+        ],
+        "rampPurpose": "Synthesized panel inspection ramp; not production theme tokens."
+      },
+      "focus": {
+        "role": "neutral",
+        "displayName": "Focus",
+        "tonalRamp": [
+          "oklch(15% 0.0000 89.88)",
+          "oklch(26% 0.0000 89.88)",
+          "oklch(38% 0.0000 89.88)",
+          "oklch(49% 0.0000 89.88)",
+          "oklch(61% 0.0000 89.88)",
+          "oklch(72% 0.0000 89.88)",
+          "oklch(84% 0.0000 89.88)",
+          "oklch(95% 0.0000 89.88)"
+        ],
+        "rampPurpose": "Synthesized panel inspection ramp; not production theme tokens."
+      },
+      "active-mark": {
+        "role": "neutral",
+        "displayName": "Active Mark",
+        "tonalRamp": [
+          "oklch(15% 0.0217 250.21)",
+          "oklch(26% 0.0217 250.21)",
+          "oklch(38% 0.0217 250.21)",
+          "oklch(49% 0.0217 250.21)",
+          "oklch(61% 0.0217 250.21)",
+          "oklch(72% 0.0217 250.21)",
+          "oklch(84% 0.0217 250.21)",
+          "oklch(95% 0.0217 250.21)"
+        ],
+        "rampPurpose": "Synthesized panel inspection ramp; not production theme tokens."
+      }
+    },
+    "typographyMeta": {
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Selected-file detail title."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Wrapping filename."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Page baseline."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Category and action labels."
+      },
+      "metadata": {
+        "displayName": "Metadata",
+        "purpose": "Status, size, date, and keyboard hints."
+      },
+      "brand": {
+        "displayName": "Brand",
+        "purpose": "Project identity."
+      }
+    },
+    "shadows": [
+      {
+        "name": "category-icon",
+        "value": "drop-shadow(0 3px 2px #07182a55)",
+        "purpose": "Soft icon depth."
+      },
+      {
+        "name": "file-icon",
+        "value": "drop-shadow(0 3px 2px #08192c66)",
+        "purpose": "File geometry depth."
+      },
+      {
+        "name": "file-name",
+        "value": "0 2px 3px #07192b66",
+        "purpose": "Filename text shadow."
+      },
+      {
+        "name": "detail-symbol",
+        "value": "drop-shadow(0 12px 12px #04152e44)",
+        "purpose": "Selected symbol depth."
+      },
+      {
+        "name": "category-mark",
+        "value": "0 3px 10px #bddaff55",
+        "purpose": "Luminous active underline."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease",
+        "value": "cubic-bezier(.16,1,.3,1)",
+        "purpose": "Category, selection, and content entry."
+      },
+      {
+        "name": "state",
+        "value": "200ms",
+        "purpose": "Foreground and wash changes."
+      },
+      {
+        "name": "selection",
+        "value": "300ms",
+        "purpose": "Category and row transforms."
+      },
+      {
+        "name": "category-enter",
+        "value": "260ms",
+        "purpose": "12px right, .35 opacity to rest."
+      },
+      {
+        "name": "directory-exit",
+        "value": "180ms ease-in",
+        "purpose": "22px left and 3px blur."
+      },
+      {
+        "name": "directory-enter",
+        "value": "420ms",
+        "purpose": "32px right and 5px blur to rest."
+      },
+      {
+        "name": "background-exchange",
+        "value": "420ms",
+        "purpose": "Background snapshots."
+      },
+      {
+        "name": "header-exchange",
+        "value": "240ms",
+        "purpose": "Header snapshots."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "wide",
+        "value": "(min-width:1500px)"
+      },
+      {
+        "name": "medium",
+        "value": "(max-width:1000px)"
+      },
+      {
+        "name": "portrait",
+        "value": "(max-width:680px)"
+      },
+      {
+        "name": "short-landscape",
+        "value": "(max-height:520px)"
+      },
+      {
+        "name": "reduced-motion",
+        "value": "(prefers-reduced-motion:reduce)"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Category",
+      "kind": "nav",
+      "refersTo": "category",
+      "description": "Horizontal category with selected underline.",
+      "html": "<button class=\"ds-category\" role=\"tab\" aria-selected=\"true\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.45\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M3 7V5a1 1 0 0 1 1-1h5l2 3h9a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1Z\"/><path d=\"M3 9h18\"/></svg><span>Folders</span></button>",
+      "css": ".ds-category{font-family:\"Segoe UI\",Helvetica,Arial,sans-serif;color:#f7fbff;display:flex;flex-direction:column;align-items:center;gap:12px;position:relative;min-width:94px;min-height:96px;padding:10px 4px;background:none;border:0;font-size:14px;transition:color .2s,transform .3s cubic-bezier(.16,1,.3,1)}.ds-category svg{width:40px;height:40px;filter:drop-shadow(0 3px 2px #07182a55)}.ds-category:hover{color:#fff;transform:translateY(-3px)}.ds-category[aria-selected=true]{color:#fff;transform:scale(1.1)}.ds-category[aria-selected=true]:after{content:\"\";position:absolute;left:calc(50% - 12px);bottom:-8px;width:24px;height:2px;background:#e6f2ff;box-shadow:0 3px 10px #bddaff55}.ds-category:focus-visible{outline:2px solid #fff;outline-offset:6px;border-radius:3px}@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}.ds-category,.ds-category:hover,.ds-category[aria-selected=true],.ds-row{transform:none}}"
+    },
+    {
+      "name": "Selected file row",
+      "kind": "custom",
+      "refersTo": "file-row",
+      "description": "Native link with faint selected wash.",
+      "html": "<a class=\"ds-row\" href=\"#files\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.45\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M3 7V5a1 1 0 0 1 1-1h5l2 3h9a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1Z\"/><path d=\"M3 9h18\"/></svg><span><span class=\"ds-name\">Albums/</span><span class=\"ds-meta\">Folder</span></span></a>",
+      "css": ".ds-row{font-family:\"Segoe UI\",Helvetica,Arial,sans-serif;color:#f7fbff;display:flex;align-items:center;gap:25px;min-height:76px;padding:14px 18px;border-radius:7px;text-decoration:none;background:linear-gradient(90deg,#f4f9ff08,#f4f9ff04);transform:translateX(5px);transition:background .2s,transform .3s cubic-bezier(.16,1,.3,1)}.ds-row svg{width:34px;height:34px;transform:scale(1.22);filter:drop-shadow(0 3px 2px #08192c66)}.ds-name{display:block;font-size:18px;font-weight:400;line-height:1.4;overflow-wrap:anywhere;text-shadow:0 2px 3px #07192b66}.ds-meta{display:block;font-size:11px;color:#edf4fc;margin-top:3px}.ds-row:hover{background:#eef7ff08}.ds-row:focus-visible{outline:2px solid #fff;outline-offset:6px;border-radius:3px}@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}.ds-category,.ds-category:hover,.ds-category[aria-selected=true],.ds-row{transform:none}}"
+    },
+    {
+      "name": "Folder search",
+      "kind": "input",
+      "refersTo": "search",
+      "description": "Local transparent search field.",
+      "html": "<label class=\"ds-search\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.45\" aria-hidden=\"true\"><circle cx=\"10.5\" cy=\"10.5\" r=\"6.5\"/><path d=\"m16 16 5 5\"/></svg><input aria-label=\"Search this folder\" placeholder=\"Search this folder\" type=\"search\"></label>",
+      "css": ".ds-search{font-family:\"Segoe UI\",Helvetica,Arial,sans-serif;color:#f7fbff;display:flex;align-items:center;gap:8px;border-bottom:1px solid #d5e7ff55;width:220px;padding:6px 0}.ds-search svg{width:17px;height:17px;color:#edf4fc}.ds-search input{font-family:\"Segoe UI\",Helvetica,Arial,sans-serif;color:#f7fbff;background:none;border:0;min-width:0;width:100%;font-size:13px;caret-color:#fff}.ds-search input::placeholder{color:#edf4fc;opacity:1}.ds-search input:focus-visible{outline:2px solid #fff;outline-offset:3px;border-radius:3px}@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}.ds-category,.ds-category:hover,.ds-category[aria-selected=true],.ds-row{transform:none}}"
+    },
+    {
+      "name": "Palette selector",
+      "kind": "input",
+      "refersTo": "appearance-select",
+      "description": "Six ambient ground alternatives.",
+      "html": "<select class=\"ds-select\" aria-label=\"Background color\"><option>Azure</option><option>Violet</option><option>Amber</option><option>Rose</option><option>Jade</option><option>Graphite</option></select>",
+      "css": ".ds-select{font-family:\"Segoe UI\",Helvetica,Arial,sans-serif;color:#f7fbff;background:#0b193b70;border:1px solid #d7e9ff33;padding:7px 24px 7px 10px;border-radius:4px;max-width:116px;font-size:12px;min-height:36px;cursor:pointer}.ds-select:focus-visible{outline:2px solid #fff;outline-offset:6px;border-radius:3px}@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}.ds-category,.ds-category:hover,.ds-category[aria-selected=true],.ds-row{transform:none}}"
+    },
+    {
+      "name": "Wave motion button",
+      "kind": "button",
+      "refersTo": "motion-button",
+      "description": "Transparent pause/resume control.",
+      "html": "<button class=\"ds-motion\" type=\"button\" aria-pressed=\"false\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.45\" aria-hidden=\"true\"><path d=\"M8 5v14M16 5v14\"/></svg><span>Pause waves</span></button>",
+      "css": ".ds-motion{font-family:\"Segoe UI\",Helvetica,Arial,sans-serif;color:#f7fbff;display:flex;align-items:center;gap:8px;background:transparent;border:0;font-size:12px;min-height:40px;padding:6px 0;cursor:pointer}.ds-motion svg{width:16px;height:16px}.ds-motion:focus-visible{outline:2px solid #fff;outline-offset:6px;border-radius:3px}@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}.ds-category,.ds-category:hover,.ds-category[aria-selected=true],.ds-row{transform:none}}"
+    },
+    {
+      "name": "Open file link",
+      "kind": "button",
+      "refersTo": "open-link",
+      "description": "Lined native selected-entry action.",
+      "html": "<a class=\"ds-open\" href=\"#files\">Open folder</a>",
+      "css": ".ds-open{font-family:\"Segoe UI\",Helvetica,Arial,sans-serif;color:#f7fbff;display:inline-flex;min-height:44px;align-items:center;font-size:14px;border-bottom:1px solid #e8f1ff88;gap:12px;text-decoration:none}.ds-open:after{content:\"\";display:block;width:7px;height:7px;border-top:1px solid currentColor;border-right:1px solid currentColor;transform:rotate(45deg)}.ds-open:hover{border-bottom-color:#fff}.ds-open:focus-visible{outline:2px solid #fff;outline-offset:6px;border-radius:3px}@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}.ds-category,.ds-category:hover,.ds-category[aria-selected=true],.ds-row{transform:none}}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Midnight Media Shelf",
+    "overview": "Crosswave is an independent, opt-in packaged theme. Its midnight ground, thin white geometric icons, satin light ribbons, and quiet sans labels make a directory read as a media shelf. The user-pinned PSP crossbar interaction places categories on the horizontal axis and files on the vertical axis.\n\nNative file links, source names, link states, and actual metadata remain the content. Broad space separates the selected row from its detail panel. This document records the implemented Crosswave world only; the documentation site, Ledger, and Plain retain their own systems.",
+    "keyCharacteristics": [
+      "Horizontal category rail and vertical file list.",
+      "Six dark ambient palettes with bright text.",
+      "Original inline SVG geometry and procedural light; no shipped raster artwork.",
+      "Visible focus, IME-safe search, reduced motion, and static fallbacks."
+    ],
+    "rules": [
+      {
+        "name": "The Light Ground Rule",
+        "body": "Keep the foreground bright across every palette and its selected-row wash. Atmospheric ribbons remain behind readable file content.",
+        "section": "colors"
+      },
+      {
+        "name": "The Two Axes Rule",
+        "body": "Categories move horizontally; file selection moves vertically. Narrow layouts retain both axes.",
+        "section": "layout"
+      },
+      {
+        "name": "The Shared Background Rule",
+        "body": "Directory exchanges move file content while the background and header retain their own view-transition identities.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do preserve native links, real filenames, and explicit symlink states.",
+      "Do use the horizontal rail and vertical file column at every screen size.",
+      "Do preserve the white focus outline and the reduced-motion/static fallbacks.",
+      "Do keep this palette, type stack, and motion vocabulary scoped to Crosswave."
+    ],
+    "donts": [
+      "Don't add copied console artwork, simulated system indicators, or autoplay audio.",
+      "Don't replace the procedural ribbon with a shipping raster asset.",
+      "Don't hide file reachability behind the detail panel or controller support.",
+      "Don't claim physical controller support was verified by synthetic handler tests."
+    ]
+  }
+}

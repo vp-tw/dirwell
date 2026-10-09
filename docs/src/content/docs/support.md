@@ -66,7 +66,7 @@ browsers when those environments matter.
 
 ## Themes and language
 
-Themes own presentation, browser behavior, and localization. Ledger and Plain
+Themes own presentation, browser behavior, and localization. Ledger, Plain, and Crosswave
 use English. The [i18n example](../examples/) demonstrates English, Traditional
 Chinese, and Japanese in an independent theme. Copy controls and file previews
 are optional theme features, not promised basic-theme functionality.

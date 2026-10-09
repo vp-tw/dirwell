@@ -130,6 +130,7 @@ JavaScript, or a search index. Complete replacement themes implement
 | `createDefaultTheme`      | Create the interactive default theme.                                                             |
 | `defaultTheme`            | Ready-made instance of the default theme.                                                         |
 | `defaultThemeComponents`  | The eight replaceable default HTML component functions.                                           |
+| `createCrosswaveTheme`    | Create the optional crossbar renderer with wave lighting and keyboard/gamepad navigation.         |
 | `createPlainTheme`        | Create a browser-native, no-script theme.                                                         |
 | `resolveThemeComponents`  | Apply ordered component override layers to a base set.                                            |
 | `escapeHtml`              | Escape untrusted text before inserting it into theme HTML.                                        |
@@ -137,6 +138,9 @@ JavaScript, or a search index. Complete replacement themes implement
 `src/index.ts` is the source of truth for this list. `src/config.ts`,
 `src/generator.ts`, `src/dev-server.ts`, `src/theme-default.ts`,
 `src/theme-components.ts`, and `src/theme-plain.ts` define the behavior.
+
+The Crosswave factory also exports `CrosswaveThemeOptions` and `CrosswaveColor`.
+See [Crosswave options](../themes/#crosswave).
 
 ## Exported types
 
