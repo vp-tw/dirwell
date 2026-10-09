@@ -12,6 +12,437 @@
       if (reduced.matches || root.dataset.cwTransitions === "false") transition.skipTransition();
     });
   }
+  // Included in the theme's private runtime closure, never installed as a global API.
+  function createCrosswaveNavigator({ main, reduced, getState, commit }) {
+    const rootUrl = new URL(main.dataset.cwRoot, document.baseURI);
+    const initialUrl = new URL(location.href);
+    initialUrl.hash = "";
+    const local = initialUrl.protocol === "file:";
+    const owner = rootUrl.href;
+    const scopePath = rootUrl.pathname.endsWith("/")
+      ? rootUrl.pathname
+      : new URL(".", rootUrl).pathname;
+    let current = {
+      url: initialUrl.href,
+      asset: new URL(main.dataset.cwPage, document.baseURI).href,
+      path: main.dataset.cwPath,
+    };
+    const recent = new Map();
+    const historyViews = new Map();
+    const savedEntry = history.state?.dirwellCrosswave;
+    let index =
+        savedEntry?.owner === owner && Number.isInteger(savedEntry.index) ? savedEntry.index : 0,
+      request = 0,
+      pending,
+      animations = [];
+    const notice = document.createElement("div");
+    notice.className = "cw-navigation-notice";
+    notice.setAttribute("role", "status");
+    notice.hidden = true;
+    document.body.append(notice);
+    const allowed = (url) =>
+      url.protocol === rootUrl.protocol &&
+      url.host === rootUrl.host &&
+      url.pathname.startsWith(scopePath);
+    const absoluteLinks = (scope, base) => {
+      for (const link of scope.querySelectorAll("a[href]")) {
+        const url = new URL(link.getAttribute("href"), base);
+        if (local && url.pathname.endsWith("/")) url.pathname += "index.html";
+        link.href = url.href;
+      }
+      for (const link of scope.querySelectorAll("[data-cw-page]"))
+        link.dataset.cwPage = new URL(link.dataset.cwPage, base).href;
+    };
+    absoluteLinks(document, document.baseURI);
+    const ownsCurrentEntry = () => {
+      const entry = history.state?.dirwellCrosswave;
+      return entry?.owner === owner && entry.index === index && entry.route.path === current.path;
+    };
+    const state = (route = current, position = index, view = getState()) => ({
+      ...history.state,
+      dirwellCrosswave: { owner, route, index: position, view },
+    });
+    try {
+      history.replaceState(state(), "");
+    } catch {
+      return;
+    } // Restricted hosts retain ordinary links and native transitions.
+
+    const stopAnimations = () => {
+      for (const { animation, layer } of animations) {
+        animation.cancel();
+        layer?.remove();
+      }
+      animations = [];
+    };
+    const show = (text, actions = []) => {
+      notice.replaceChildren(document.createTextNode(text));
+      for (const { label, run, href } of actions) {
+        const action = document.createElement(href ? "a" : "button");
+        action.textContent = label;
+        if (href) action.href = href;
+        else {
+          action.type = "button";
+          action.addEventListener("click", run);
+        }
+        notice.append(action);
+      }
+      notice.hidden = false;
+    };
+    const load = (route, signal) =>
+      new Promise((resolve, reject) => {
+        const asset = new URL(route.asset);
+        if (
+          !allowed(asset) ||
+          !/^crosswave-page-[a-f0-9]{24}\.js$/.test(asset.pathname.split("/").at(-1))
+        ) {
+          reject(new Error("Unsupported folder data"));
+          return;
+        }
+        const script = document.createElement("script");
+        script.async = true;
+        // Revalidate on every visit: a watcher may have rebuilt this directory.
+        asset.searchParams.set("cw-visit", String(Date.now()));
+        script.src = asset.href;
+        let payload;
+        const received = (event) => {
+          if (document.currentScript !== script) return;
+          const data = event.detail;
+          if (
+            data?.version === 1 &&
+            data.id === asset.pathname.split("/").at(-1) &&
+            data.path === route.path &&
+            typeof data.html === "string" &&
+            typeof data.outputName === "string" &&
+            (data.baseHref === null || typeof data.baseHref === "string")
+          )
+            payload = data;
+        };
+        const cleanup = () => {
+          clearTimeout(timer);
+          removeEventListener("dirwell:crosswave-page", received);
+          signal.removeEventListener("abort", aborted);
+          script.remove();
+          script.onload = script.onerror = null;
+        };
+        const fail = (error) => {
+          cleanup();
+          reject(error);
+        };
+        const aborted = () => fail(new DOMException("Navigation superseded", "AbortError"));
+        const timer = setTimeout(() => fail(new Error("Folder loading timed out")), 8000);
+        script.onerror = () => fail(new Error("Folder data is unavailable"));
+        script.onload = () => {
+          cleanup();
+          try {
+            if (!payload) {
+              reject(new Error("Folder data is incompatible"));
+              return;
+            }
+            const doc = new DOMParser().parseFromString(payload.html, "text/html");
+            const required = [
+              "[data-cw-root]",
+              ".cw-files",
+              ".cw-directory",
+              ".cw-location",
+              ".cw-stage > h1",
+              ".cw-directory > :first-child",
+              ".cw-empty",
+            ];
+            if (required.some((selector) => !doc.querySelector(selector))) {
+              reject(new Error("Folder data is incomplete"));
+              return;
+            }
+            const url = new URL(route.url);
+            if (local && url.pathname.endsWith("/")) url.pathname += payload.outputName;
+            const base = new URL(payload.baseHref ?? ".", url);
+            absoluteLinks(doc, base);
+            resolve({ doc, route: { ...route, url: url.href } });
+          } catch (error) {
+            reject(error);
+          }
+        };
+        addEventListener("dirwell:crosswave-page", received);
+        signal.addEventListener("abort", aborted, { once: true });
+        try {
+          document.head.append(script);
+        } catch (error) {
+          fail(error);
+        }
+      });
+    const address = (route) => {
+      if (!local) return route.url;
+      const url = new URL(initialUrl);
+      const relative = (value) => new URL(value).pathname.slice(scopePath.length);
+      url.hash = `cw=${encodeURIComponent(relative(route.url))}&cw-data=${encodeURIComponent(relative(route.asset))}&cw-path=${encodeURIComponent(route.path)}`;
+      return url.href;
+    };
+    const snapshot = (element) => {
+      const rect = element.getBoundingClientRect();
+      const viewportBottom = Math.min(
+        innerHeight,
+        document.querySelector(".cw-bottom").getBoundingClientRect().top,
+      );
+      const clone = element.cloneNode(false);
+      if (element.matches(".cw-browser")) {
+        clone.append(element.querySelector(".cw-list-head").cloneNode(true));
+        const source = element.querySelector(".cw-list-scroll");
+        const scroll = source.cloneNode(false),
+          list = element.querySelector(".cw-files").cloneNode(false);
+        const filesRect = element.querySelector(".cw-files").getBoundingClientRect();
+        const sourceRect = source.getBoundingClientRect();
+        const visibleTop = Math.max(0, sourceRect.top);
+        const visibleBottom = Math.min(viewportBottom, sourceRect.bottom);
+        list.style.cssText = `position:relative;height:${source.scrollHeight}px`;
+        // Clone visible rows only; large directories must not duplicate their entire DOM for motion.
+        for (const row of element.querySelectorAll(".cw-row:not([hidden])")) {
+          const rowRect = row.getBoundingClientRect();
+          if (rowRect.bottom < visibleTop) continue;
+          if (rowRect.top > visibleBottom) break;
+          const copy = row.cloneNode(true);
+          copy.style.cssText = `position:absolute;left:0;right:0;top:${rowRect.top - filesRect.top}px;width:100%`;
+          list.append(copy);
+        }
+        scroll.append(list, element.querySelector(".cw-empty").cloneNode(true));
+        clone.append(scroll);
+        clone._scroll = { element: scroll, top: source.scrollTop };
+      } else clone.replaceChildren(...[...element.childNodes].map((node) => node.cloneNode(true)));
+      for (const node of [clone, ...clone.querySelectorAll("*")]) {
+        for (const name of node.getAttributeNames())
+          if (name.startsWith("data-cw-")) node.removeAttribute(name);
+      }
+      clone.removeAttribute("id");
+      clone.querySelectorAll("[id]").forEach((node) => node.removeAttribute("id"));
+      clone.setAttribute("aria-hidden", "true");
+      clone.inert = true;
+      clone.classList.add("cw-transition-layer");
+      clone.style.cssText = `position:fixed;left:${rect.left}px;top:${rect.top}px;width:${rect.width}px;height:${rect.height}px;margin:0;z-index:3;pointer-events:none;view-transition-name:none`;
+      clone.style.overflow = "hidden";
+      clone.style.clipPath = `inset(${Math.max(0, -rect.top)}px 0 ${Math.max(0, rect.bottom - viewportBottom)}px 0)`;
+      document.body.append(clone);
+      if (clone._scroll) clone._scroll.element.scrollTop = clone._scroll.top;
+      return clone;
+    };
+    const exchange = (loaded, view, direction, writeHistory, position) => {
+      const moving =
+        !reduced.matches &&
+        document.documentElement.dataset.cwTransitions !== "false" &&
+        typeof main.animate === "function";
+      stopAnimations();
+      const elements = [
+        document.querySelector(".cw-browser"),
+        document.querySelector(".cw-detail"),
+      ];
+      const layers = moving
+        ? elements.map((element) =>
+            element.hidden || !element.getBoundingClientRect().height ? null : snapshot(element),
+          )
+        : [];
+      try {
+        if (writeHistory) {
+          // Save the view at departure, including edits made while a request was pending.
+          if (ownsCurrentEntry()) history.replaceState(state(), "");
+          history.pushState(state(loaded.route, position, view ?? {}), "", address(loaded.route));
+          for (const key of historyViews.keys())
+            if (key > position || key < position - history.length + 1) historyViews.delete(key);
+        }
+        commit(loaded.doc, view);
+        current = loaded.route;
+        index = position;
+        historyViews.set(index, { path: current.path, view: getState() });
+        try {
+          history.replaceState(state(), "");
+        } catch {}
+      } catch (error) {
+        layers.forEach((layer) => layer?.remove());
+        throw error;
+      }
+      if (!moving) return;
+      try {
+        elements.forEach((element, i) => {
+          const layer = layers[i];
+          if (layer) {
+            const animation = layer.animate(
+              [
+                { opacity: 1, transform: "translateX(0)" },
+                { opacity: 0, transform: `translateX(${-direction * 24}px)` },
+              ],
+              { duration: 140, easing: "ease-out" },
+            );
+            animations.push({ animation, layer });
+            animation.finished.then(
+              () => layer.remove(),
+              () => layer.remove(),
+            );
+          }
+          if (!element.hidden) {
+            const animation = element.animate(
+              [
+                { opacity: 0.25, transform: `translateX(${direction * 28}px)` },
+                { opacity: 1, transform: "translateX(0)" },
+              ],
+              { duration: 240, easing: "cubic-bezier(.16,1,.3,1)" },
+            );
+            animations.push({ animation });
+            animation.finished.catch(() => {});
+          }
+        });
+      } catch {
+        stopAnimations();
+        layers.forEach((layer) => layer?.remove());
+      }
+    };
+    const navigate = async (route, { view, pop = false, position = index + 1 } = {}) => {
+      historyViews.set(index, { path: current.path, view: getState() });
+      if (pop && historyViews.get(position)?.path === route.path)
+        view = historyViews.get(position).view;
+      const ticket = ++request;
+      pending?.abort();
+      const controller = new AbortController();
+      pending = controller;
+      if (!pop) {
+        const entry = history.state?.dirwellCrosswave;
+        position =
+          (entry?.owner === owner && Number.isInteger(entry.index) ? entry.index : index) + 1;
+        recent.delete(current.path);
+        recent.set(current.path, getState());
+        if (recent.size > 32) recent.delete(recent.keys().next().value);
+        if (view === undefined) view = recent.get(route.path);
+        try {
+          if (ownsCurrentEntry()) history.replaceState(state(), "");
+        } catch {
+          location.assign(route.url);
+          return;
+        }
+      }
+      const direction = pop
+        ? Math.sign(position - index) || 1
+        : current.path && (current.path.startsWith(`${route.path}/`) || route.path === "")
+          ? -1
+          : 1;
+      main.setAttribute("aria-busy", "true");
+      const delay = setTimeout(() => {
+        if (ticket === request)
+          show("Loading folder…", [{ label: "Cancel", run: () => controller.abort() }]);
+      }, 120);
+      try {
+        const loaded = await load(route, controller.signal);
+        if (ticket !== request || controller.signal.aborted) return;
+        exchange(loaded, view, direction, !pop, position);
+        notice.hidden = true;
+      } catch (error) {
+        if (ticket !== request) return;
+        if (pop || !ownsCurrentEntry()) {
+          // The browser has already changed its address: reload that exact destination on failure.
+          if (local) location.replace(route.url);
+          else location.reload();
+          return;
+        }
+        if (error.name === "AbortError") {
+          notice.hidden = true;
+          return;
+        }
+        show("Could not open this folder. Your current files are still available.", [
+          { label: "Retry", run: () => navigate(route, { view }) },
+          { label: "Open normally", href: route.url },
+        ]);
+      } finally {
+        clearTimeout(delay);
+        if (ticket === request) {
+          main.removeAttribute("aria-busy");
+          pending = null;
+        }
+      }
+    };
+    document.addEventListener("click", (event) => {
+      if (event.target.closest?.(".cw-skip")) {
+        event.preventDefault();
+        const panel = document.querySelector("#cw-panel");
+        panel.tabIndex = -1;
+        panel.focus({ preventScroll: true });
+        return;
+      }
+      const link = event.target.closest?.("a[data-cw-navigation][data-cw-page]");
+      if (
+        !link ||
+        event.defaultPrevented ||
+        event.button !== 0 ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.shiftKey ||
+        event.altKey ||
+        link.target ||
+        link.hasAttribute("download")
+      )
+        return;
+      const url = new URL(link.href),
+        asset = new URL(link.dataset.cwPage);
+      if (!allowed(url) || !allowed(asset) || url.hash) return;
+      event.preventDefault();
+      if (link.dataset.cwPath === current.path) {
+        pending?.abort();
+        notice.hidden = true;
+        return;
+      }
+      navigate({ url: url.href, asset: asset.href, path: link.dataset.cwPath });
+    });
+    document.addEventListener("keydown", (event) => {
+      if (
+        event.key === "Escape" &&
+        !event.isComposing &&
+        !event.altKey &&
+        !event.ctrlKey &&
+        !event.metaKey &&
+        !event.target.matches?.("input,textarea,select,[contenteditable]")
+      ) {
+        pending?.abort();
+        notice.hidden = true;
+      }
+    });
+    addEventListener("popstate", (event) => {
+      const entry = event.state?.dirwellCrosswave;
+      if (entry?.owner !== owner || !allowed(new URL(entry.route.url))) {
+        location.reload();
+        return;
+      }
+      navigate(entry.route, { view: entry.view, pop: true, position: entry.index });
+    });
+    addEventListener("pagehide", () => {
+      ++request;
+      pending?.abort();
+      main.removeAttribute("aria-busy");
+      notice.hidden = true;
+      stopAnimations();
+    });
+    reduced.addEventListener("change", () => {
+      if (reduced.matches) stopAnimations();
+    });
+    if (local && initialUrl.href !== location.href) {
+      const hash = new URLSearchParams(location.hash.slice(1));
+      if (hash.has("cw") && hash.has("cw-data") && hash.has("cw-path")) {
+        const url = new URL(hash.get("cw"), rootUrl),
+          asset = new URL(hash.get("cw-data"), rootUrl);
+        if (allowed(url) && allowed(asset))
+          navigate(
+            { url: url.href, asset: asset.href, path: hash.get("cw-path") },
+            {
+              pop: true,
+              position: index,
+              view: savedEntry?.owner === owner ? savedEntry.view : undefined,
+            },
+          );
+      }
+    }
+    return {
+      cancel() {
+        if (!pending) return false;
+        pending.abort();
+        notice.hidden = true;
+        return true;
+      },
+    };
+  }
+
   document.addEventListener("DOMContentLoaded", () => {
     const main = document.querySelector("[data-cw-root]");
     if (!main) return;
@@ -40,7 +471,7 @@
     const savedColor = read("color");
     if (Object.hasOwn(colors, savedColor)) root.dataset.cwColor = savedColor;
     let paused = root.dataset.cwMotion === "false" || read("paused") === "true";
-    const rows = [...document.querySelectorAll("[data-cw-entry]")];
+    let rows = [...document.querySelectorAll("[data-cw-entry]")];
     const tabs = [...document.querySelectorAll("[data-cw-category]")];
     const search = document.querySelector("#cw-search");
     const clear = document.querySelector("[data-cw-clear]");
@@ -55,7 +486,7 @@
       composing = false,
       searchTimer;
     const visible = () => rows.filter((row) => !row.hidden);
-    const select = (row, focus = false) => {
+    const select = (row, focus = false, reveal = true) => {
       if (selected) selected.classList.remove("cw-selected");
       selected = row;
       if (!row) {
@@ -90,16 +521,24 @@
           open.target = "_blank";
           open.rel = "noopener";
           open.removeAttribute("data-cw-navigation");
+          delete open.dataset.cwPage;
+          delete open.dataset.cwPath;
         } else {
           open.removeAttribute("target");
           open.removeAttribute("rel");
           open.setAttribute("data-cw-navigation", "");
+          open.dataset.cwPage = link.dataset.cwPage;
+          open.dataset.cwPath = link.dataset.cwPath;
         }
       }
       detail.hidden = false;
       if (focus) {
         link?.focus({ preventScroll: true });
-        row.scrollIntoView({ block: "nearest", behavior: reduced.matches ? "instant" : "smooth" });
+        if (reveal)
+          row.scrollIntoView({
+            block: "nearest",
+            behavior: reduced.matches ? "instant" : "smooth",
+          });
       }
     };
     const applyFilter = () => {
@@ -123,7 +562,7 @@
       clear.hidden = !search.value;
       if (!selected || selected.hidden) select(visible()[0] ?? null);
     };
-    const setCategory = (next, focus = false) => {
+    const setCategory = (next, focus = false, animate = true) => {
       category = next;
       for (const tab of tabs) {
         const active = tab.dataset.cwCategory === next;
@@ -146,9 +585,11 @@
       selected = null;
       rows.forEach((row) => row.classList.remove("cw-selected"));
       applyFilter();
-      main.classList.remove("cw-category-changing");
-      void main.offsetWidth;
-      main.classList.add("cw-category-changing");
+      if (animate) {
+        main.classList.remove("cw-category-changing");
+        void main.offsetWidth;
+        main.classList.add("cw-category-changing");
+      }
     };
     const moveCategory = (direction) => {
       const index = tabs.findIndex((tab) => tab.dataset.cwCategory === category);
@@ -169,12 +610,14 @@
           : rows.filter((row) => row.dataset.category === tab.dataset.cwCategory).length;
       tab.querySelector("small").textContent = String(count);
     }
-    for (const row of rows) {
-      row.addEventListener("pointerenter", (event) => {
-        if (event.pointerType !== "touch") select(row);
-      });
-      row.addEventListener("focusin", () => select(row));
-    }
+    main.addEventListener("pointerover", (event) => {
+      const row = event.target.closest?.("[data-cw-entry]");
+      if (row && event.pointerType !== "touch") select(row);
+    });
+    main.addEventListener("focusin", (event) => {
+      const row = event.target.closest?.("[data-cw-entry]");
+      if (row) select(row);
+    });
     search.addEventListener("compositionstart", () => {
       composing = true;
       clearTimeout(searchTimer);
@@ -215,7 +658,10 @@
           "Your browser blocked the new tab. Press Enter or click the file to open it.";
       }
     };
-    const back = () => document.querySelector("[data-cw-parent]")?.click();
+    let navigation;
+    const back = () => {
+      if (!navigation?.cancel()) document.querySelector("[data-cw-parent]")?.click();
+    };
     const editing = () =>
       document.activeElement?.matches("input,textarea,select,[contenteditable=true]");
     document.addEventListener("keydown", (event) => {
@@ -341,6 +787,60 @@
       layoutObserver.observe(element);
     addEventListener("resize", fitList);
     fitList();
+
+    navigation = createCrosswaveNavigator({
+      main,
+      reduced,
+      getState: () => ({
+        category,
+        query: search.value,
+        selected: selected?.dataset.path,
+        scroll: scroll.scrollTop,
+      }),
+      commit: (doc, view) => {
+        clearTimeout(searchTimer);
+        composing = false;
+        document.title = doc.title;
+        document
+          .querySelector(".cw-location")
+          .replaceChildren(...doc.querySelector(".cw-location").childNodes);
+        document.querySelector(".cw-stage > h1").textContent =
+          doc.querySelector(".cw-stage > h1").textContent;
+        document
+          .querySelector(".cw-directory")
+          .firstElementChild.replaceWith(doc.querySelector(".cw-directory").firstElementChild);
+        document
+          .querySelector(".cw-files")
+          .replaceChildren(...doc.querySelector(".cw-files").childNodes);
+        main.dataset.cwPath = doc.querySelector("[data-cw-root]").dataset.cwPath;
+        rows = [...main.querySelectorAll("[data-cw-entry]")];
+        const nextLinkIcon = rows.find((row) => row.dataset.icon === "link")?.querySelector("svg");
+        if (nextLinkIcon) icons.set("link", nextLinkIcon);
+        for (const tab of tabs)
+          tab.querySelector("small").textContent = String(
+            tab.dataset.cwCategory === "all"
+              ? rows.length
+              : rows.filter((row) => row.dataset.category === tab.dataset.cwCategory).length,
+          );
+        search.value = view?.query ?? "";
+        setCategory(
+          tabs.some((tab) => tab.dataset.cwCategory === view?.category) ? view.category : "all",
+          false,
+          false,
+        );
+        main.classList.remove("cw-category-changing");
+        const row = rows.find((row) => !row.hidden && row.dataset.path === view?.selected);
+        select(row ?? visible()[0] ?? null, true, false);
+        if (!selected?.querySelector("a")) {
+          document.querySelector("#cw-panel").tabIndex = -1;
+          document.querySelector("#cw-panel").focus({ preventScroll: true });
+        }
+        scroll.scrollTop = view?.scroll ?? 0;
+        status.className = "cw-sr";
+        document.querySelector(".cw-skip").href = `${location.href.split("#")[0]}#cw-panel`;
+        // Persistent ResizeObservers update geometry after the browser lays out the new content.
+      },
+    });
 
     // VueUse's useGamepad demonstrates event-driven connection and rAF polling.
     // Read fresh standard-mapping snapshots; controls here are original and framework-free.

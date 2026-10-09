@@ -24,3 +24,5 @@ FORM: User-pinned PSP XMB, code-led; no concept seed or generated comp. Research
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
 
 Acceptance: packaged factory; actual SSG/MPA/URL navigation; search and empty/error/link states; IME-safe keyboard and touch; optional wave pause and reduced motion; hidden-page and WebGL failure fallbacks; cross-document transitions; virtual gamepad connect/hold/release/confirm/back/disconnect; no hardware gamepad claim. Browser captures: desktop, 390px portrait, and narrow landscape. The background is code-native and ships no raster assets.
+
+Approved extension: persistent directory shell with opposite entry/parent directions, native history restoration, bounded visible-row animation snapshots, on-demand generated script data for SSG/MPA and relative local files, cancellable latest-request navigation, eight-second timeout, retained-list retry/native-link errors. No new palette, icons, shader, or backend.

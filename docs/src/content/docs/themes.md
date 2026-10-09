@@ -164,18 +164,18 @@ export default defineConfig({
 });
 ```
 
-| Option             | Default          | Effect                                                                                                                        |
-| ------------------ | ---------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| `color`            | `"azure"`        | Initial palette: `azure`, `violet`, `amber`, `rose`, `jade`, or `graphite`. Visitors can save another color.                  |
-| `backgroundMotion` | `true`           | Enables animated light. Visitors can pause it; reduced motion and WebGL fallback keep a static background.                    |
-| `pageTransitions`  | `true`           | Enables same-origin directory transitions in browsers with cross-document View Transitions. Other browsers navigate normally. |
-| `gamepad`          | `true`           | Enables standard-mapped Gamepad API navigation where available. Keyboard and touch remain usable independently.               |
-| `project`          | Dirwell metadata | Sets the displayed project name using the same metadata type as the other themes.                                             |
+| Option             | Default          | Effect                                                                                                                         |
+| ------------------ | ---------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `color`            | `"azure"`        | Initial palette: `azure`, `violet`, `amber`, `rose`, `jade`, or `graphite`. Visitors can save another color.                   |
+| `backgroundMotion` | `true`           | Enables animated light. Visitors can pause it; reduced motion and WebGL fallback keep a static background.                     |
+| `pageTransitions`  | `true`           | Animates folder exchanges inside a persistent page. Set `false` for immediate exchanges; native navigation remains a fallback. |
+| `gamepad`          | `true`           | Enables standard-mapped Gamepad API navigation where available. Keyboard and touch remain usable independently.                |
+| `project`          | Dirwell metadata | Sets the displayed project name using the same metadata type as the other themes.                                              |
 
 Use left/right to choose a category, up/down to select a file, Enter to open,
 Backspace for the parent folder, and `/` for local search. Escape clears search.
-The horizontal rail scrolls on narrow screens; long names wrap. All entries remain
-HTML links in SSG and MPA, with no deferred list. Crosswave searches the current
+Directory links load generated folder data while the background, clock, appearance controls, and controller loop remain alive. Entering and returning use opposite animation directions. Browser Back/Forward restores the prior category, search, selection, and list position. The horizontal rail scrolls on narrow screens; long names wrap. All entries remain
+HTML links in SSG and MPA, with no deferred list. Each rendered folder also emits a `crosswave-page-*.js` navigation asset; deploy it with the generated HTML. Folder data loads only on demand and is revalidated on each visit. No whole-tree prefetch or HTML cache is retained. Crosswave searches the current
 folder and does not generate a global index. Use Ledger when global search or
 large-directory virtualization is required.
 
@@ -185,6 +185,10 @@ connection until released. Browser tests inject controllable Gamepad API data;
 physical controllers, browser device activation, and USB/Bluetooth are unverified.
 If a browser blocks a controller-initiated file tab, the focused link remains
 available with an explicit Enter/click recovery message.
+
+Slow loads keep the current listing visible and show Cancel after 120ms. A newer navigation replaces an older pending request; cancelled or late responses cannot overwrite the current folder. A load that fails or takes more than eight seconds shows Retry and Open normally. Restricted scripting or history APIs retain native navigation. Reductions in motion and unavailable animation APIs keep exchanges usable.
+
+CLI build/serve, daemon, TypeScript generation, static HTTP hosting, and existing build adapters share the same generated assets. Relative-link output can also be opened directly through `file://`: classic navigation scripts avoid a fetch/CORS dependency, and a hash route preserves the folder across reloads because browsers prohibit rewriting file paths through History. Deployment-root `base` and `html-base` URLs require a matching HTTP host. File links and preserved/skipped source pages retain their ordinary navigation.
 
 [Live Crosswave example](https://vp-tw.github.io/dirwell/examples/crosswave/) ·
 [Source and research notes](https://github.com/vp-tw/dirwell/tree/main/examples/crosswave)

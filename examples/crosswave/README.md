@@ -34,8 +34,7 @@ controller or USB/Bluetooth stack is claimed verified. Hold-at-connect is ignore
 until release to prevent accidental opening across document navigation. A blocked
 controller-initiated file tab shows a keyboard/click recovery message.
 
-Same-origin directory changes use cross-document View Transitions where the
-browser supports them. Other browsers navigate normally. Reduced motion disables
+Directory changes load generated page data and replace the file area inside a persistent shell. The canvas and controller loop keep running; entering and returning slide in opposite directions. Browser history restores folder state. Classic page-data scripts also work with relative-link local HTML, using a hash route when file paths cannot be rewritten. Failed, cancelled, superseded, or timed-out loads retain a usable listing and provide retry/native-link recovery. Native cross-document View Transitions remain a fallback for ordinary full-page navigation. Reduced motion disables
 spatial transitions and animated light; the waves can also be paused manually.
 WebGL failure retains a static ribbon background. Animation and controller
 polling stop while the page is hidden or suspended.

@@ -5,6 +5,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { promisify } from "node:util";
 import test from "node:test";
+import { createCrosswaveTheme } from "../src/theme-crosswave.ts";
 import unplugin from "../src/unplugin.ts";
 
 async function fixture(context) {
@@ -94,8 +95,12 @@ async function compile(host, root, options) {
     await compiler.compile();
     compiler.writeResourcesToDisk();
   } else if (host === "bun") {
-    const source = `import unplugin from ${JSON.stringify(new URL("../src/unplugin.ts", import.meta.url).pathname)};
-      const result = await Bun.build({entrypoints: [${JSON.stringify(entry)}], outdir: ${JSON.stringify(out)}, plugins: [unplugin.bun(${JSON.stringify(options)})]});
+    const serialized = JSON.stringify(options, (key, value) =>
+      key === "theme" && value?.name === "crosswave" ? "__crosswave__" : value,
+    );
+    const source = `import { createCrosswaveTheme } from ${JSON.stringify(new URL("../src/theme-crosswave.ts", import.meta.url).pathname)};
+      import unplugin from ${JSON.stringify(new URL("../src/unplugin.ts", import.meta.url).pathname)};
+      const result = await Bun.build({entrypoints: [${JSON.stringify(entry)}], outdir: ${JSON.stringify(out)}, plugins: [unplugin.bun(JSON.parse(${JSON.stringify(serialized)}, (key, value) => value === "__crosswave__" ? createCrosswaveTheme() : value))]});
       if (!result.success) throw new Error(result.logs.join("\\n"));`;
     await promisify(execFile)("bun", ["--eval", source]);
   }
@@ -113,7 +118,23 @@ for (const host of [
 ]) {
   test(`${host}: real build publishes SSG/MPA assets alongside the host bundle`, async (context) => {
     const root = await fixture(context);
+    await mkdir(path.join(root, "files", "nested"));
+    await writeFile(path.join(root, "files", "nested", "inside.txt"), "nested");
     await compile(host, root, [
+      {
+        cwd: root,
+        root: "files",
+        outputPath: "wave-ssg",
+        mode: "ssg",
+        theme: createCrosswaveTheme(),
+      },
+      {
+        cwd: root,
+        root: "files",
+        outputPath: "wave-mpa",
+        mode: "mpa",
+        theme: createCrosswaveTheme(),
+      },
       { cwd: root, root: "files", outputPath: "catalog", mode: "ssg" },
       { cwd: root, root: "files", outputPath: "downloads", mode: "mpa" },
     ]);
@@ -124,6 +145,22 @@ for (const host of [
     assert.ok(
       (await readFile(path.join(root, "dist/downloads/__dirwell/dirwell.runtime.js"))).length > 0,
     );
+    for (const mode of ["ssg", "mpa"]) {
+      const wave = path.join(root, `dist/wave-${mode}`);
+      const html = await readFile(path.join(wave, "nested/index.html"), "utf8");
+      assert.match(html, /data-cw-page=/);
+      const attribute = html.match(/<main[^>]*data-cw-page=(?:"([^"]+)"|'([^']+)'|([^\s>]+))/);
+      const asset = attribute?.[1] ?? attribute?.[2] ?? attribute?.[3];
+      assert.ok(asset);
+      const assetPath =
+        mode === "ssg"
+          ? path.join(wave, "nested", path.basename(asset))
+          : path.join(wave, "__dirwell", path.basename(asset));
+      const data = await readFile(assetPath, "utf8");
+      assert.match(data, /dirwell:crosswave-page/);
+      assert.match(data, /inside\.txt/);
+      assert.equal(data.includes(root), false);
+    }
     await writeFile(path.join(root, "files", "added.txt"), "new file\n");
     await rm(path.join(root, "files", "note.txt"));
     await compile(host, root, { cwd: root, root: "files", outputPath: "catalog" });

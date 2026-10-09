@@ -132,7 +132,7 @@ The primary color is an ambient ground rather than a button accent; six paired d
 
 **The Light Ground Rule.** Keep the foreground bright across every palette and its selected-row wash. Atmospheric ribbons remain behind readable file content.
 
-The review artifacts provide a six-palette all-time composited contrast lower bound of 5.279:1, a fallback lower bound of 4.850:1, and sampled WebGL framebuffer contrast of at least 6.512:1. These are evidence for the shipped palette and compositing, not permission to brighten future ribbons without checking contrast again. Axe reported no violations but could not resolve the canvas background; the separate bounds and framebuffer samples address that gap.
+The review artifacts provide a six-palette all-time composited contrast lower bound of 5.279:1, a fallback lower bound of 4.850:1, and sampled WebGL framebuffer contrast of at least 6.512:1. These bounds describe full-opacity, settled foreground over the shipped palette and compositing; transient transform/opacity exchanges are outside that contrast claim. They are not permission to brighten future ribbons without checking contrast again. Axe reported no violations but could not resolve the canvas background; the separate bounds and framebuffer samples address that gap.
 
 ## Typography
 
@@ -175,7 +175,7 @@ Depth comes from the dark directional ground, procedural translucent folds, spar
 - **Detail symbol:** `drop-shadow(0 12px 12px #04152e44)`.
 - **Active category mark:** `box-shadow: 0 3px 10px #bddaff55`.
 
-**The Shared Background Rule.** Directory exchanges move file content while the background and header retain their own view-transition identities.
+**The Shared Background Rule.** Enhanced directory exchanges move file content inside the persistent shell while the shader canvas, category rail, footer, and controller loop remain mounted. Full-document fallback retains separate background and header view-transition identities.
 
 ## Shapes
 
@@ -199,9 +199,17 @@ A transparent search field with an inline geometric search icon and bottom strok
 
 A small dark translucent select switches among six palettes. The adjacent transparent motion button reports Pause waves, Resume waves, Reduced motion, or Static background. Color and pause preferences are scoped to the explorer root in local storage. Visible focus is a 2px white outline, offset 6px, with the focus radius; search uses a 3px outline offset.
 
+### Persistent directory navigation and feedback
+
+Generated classic-script page data supplies each folder on demand in SSG, MPA, and relative local-file output. Enhanced folder links, parent links, breadcrumbs, and Home update the title, location, file list, counts, and selected details inside the mounted shell. Native file actions and modified/new-tab activations retain ordinary link behavior. Category, search query, selected path, and list scroll restore from browser history; recent folder revisits also restore their view state. Local-file navigation keeps the launch document address and records its destination in the hash so history and reload can recover it.
+
+A new request cancels the previous request; an eight-second timeout bounds loading. After 120ms, a fixed status banner above the footer offers Cancel. Escape outside editable controls and the controller back action cancel a pending request. Ordinary loading failures retain the current file list and offer Retry and Open normally; history-load failures recover through native navigation to the requested destination. The banner uses the existing lower-ground color, bright text, control radius, 13px type, and wrapping flex layout, with 44px bordered actions. It remains above the motion layers and uses a polite status role.
+
 ### Motion and progressive fallback
 
-Category exchanges enter over 260ms from 12px to the right at .35 opacity. Directory content exits over 180ms with a 22px left move and 3px blur, then enters over 420ms from 32px right with 5px blur and theme easing. Background snapshots use 420ms and header snapshots 240ms. Cross-document transitions depend on browser support and same-origin navigation; native navigation remains the fallback.
+Category exchanges enter over 260ms from 12px to the right at .35 opacity. Enhanced directory exchanges overlap a 140ms outgoing snapshot (ease-out, full opacity to zero, 24px opposite the entry direction) with 240ms incoming content (theme easing, .25 opacity to full opacity, 28px to rest). Entering a folder moves incoming content from the right; returning to a parent reverses both movements. Browser history direction follows the history position. These exchanges use transform and opacity without blur. Outgoing browser snapshots clone only visible rows, preserve their scroll positions, and clip to the viewport above the footer. Snapshots are inert, hidden from assistive technology, and removed on completion or cancellation.
+
+Full-document fallback retains the native 180ms exit (22px left, 3px blur) and 420ms entry (32px right, 5px blur). Its background snapshots use 420ms and header snapshots 240ms. Cross-document transitions depend on browser support and same-origin navigation; ordinary links remain available when the persistent navigator cannot handle a route or history is restricted.
 
 Reduced motion removes animations/transitions, smooth scrolling, and selected/hover transforms. Pausing freezes the existing procedural frame. Hidden pages stop wave and controller polling; pagehide stops them, and BFCache pageshow resumes them. Wave drawing is capped near 30fps; backing resolution is capped by device ratio 1.5 and 1600 by 1000. WebGL failure or context loss reveals the static gradient and SVG wave.
 
@@ -225,4 +233,4 @@ Without JavaScript, the complete native file listing remains available; category
 
 Not canonized or repaired: no implementation defect is promoted into a token. The theme's intentional system-sans and ambient-color boundary does not redefine the root system. Hardware controller activation remains a verification limit.
 
-Source of truth: `styles.ts`, `icons.ts`, `../theme-crosswave.ts`, and `../crosswave-runtime.js`. Review captures and contrast artifacts are in `../../.impeccable/review/crosswave/`.
+Source of truth: `styles.ts`, `icons.ts`, `../theme-crosswave.ts`, and `../crosswave-runtime.js`. Original review captures and contrast artifacts are in `../../.impeccable/review/crosswave/`. Persistent-shell desktop, portrait, short-landscape, error, and entry/return motion captures are in `../../.impeccable/review/seamless/`; the independent follow-up review resolved the bounded-overlays finding and returned ship. These captures do not establish physical-controller behavior.

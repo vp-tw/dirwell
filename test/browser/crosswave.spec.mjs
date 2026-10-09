@@ -51,6 +51,15 @@ test("categories, keyboard navigation, search composition, and page transitions"
   await page.goto(server.url);
   await expect(page.locator("body")).toHaveAttribute("data-cw-enhanced", "true");
   await expect(page.locator(".cw-brand span")).toHaveText("Crosswave");
+  await page.evaluate(() => {
+    window.__canvas = document.querySelector("#cw-wave");
+    window.__cwAnimations = 0;
+    const animate = Element.prototype.animate;
+    Element.prototype.animate = function (...args) {
+      window.__cwAnimations++;
+      return animate.apply(this, args);
+    };
+  });
   const pause = page.getByRole("button", { name: "Pause waves" });
   await expect(pause).toHaveAttribute("aria-pressed", "false");
   await page.getByRole("tab", { name: /All files/ }).focus();
@@ -58,12 +67,15 @@ test("categories, keyboard navigation, search composition, and page transitions"
   await expect(page.getByRole("tab", { name: /Folders/ })).toHaveAttribute("aria-selected", "true");
   await expect(pause).toHaveAttribute("aria-pressed", "false");
   await page.keyboard.press("ArrowDown");
-  await expect(page.locator(".cw-selected")).toHaveAttribute("data-name", "Empty");
+  await expect(page.locator(".cw-stage .cw-selected")).toHaveAttribute("data-name", "Empty");
   await page.keyboard.press("ArrowUp");
-  await expect(page.locator(".cw-selected")).toHaveAttribute("data-name", "Albums");
+  await expect(page.locator(".cw-stage .cw-selected")).toHaveAttribute("data-name", "Albums");
   await page.keyboard.press("Enter");
   await expect(page).toHaveURL(/Albums\/$/);
-  expect(await page.evaluate(() => window.__cwTransition)).toBe(true);
+  expect(await page.evaluate(() => document.querySelector("#cw-wave") === window.__canvas)).toBe(
+    true,
+  );
+  expect(await page.evaluate(() => window.__cwAnimations)).toBeGreaterThan(0);
   await expect(page.getByRole("link", { name: /inside\.txt/ })).toBeVisible();
   await page.keyboard.press("Backspace");
   await expect(page).toHaveURL(server.url);
@@ -75,10 +87,10 @@ test("categories, keyboard navigation, search composition, and page transitions"
   await expect(page.locator("[data-cw-count]")).not.toHaveText("0 items");
   await search.dispatchEvent("compositionend");
   await expect(page.locator("[data-cw-count]")).toHaveText("0 items");
-  await expect(page.locator(".cw-empty")).toBeVisible();
+  await expect(page.locator(".cw-stage .cw-empty")).toBeVisible();
   await page.keyboard.press("Escape");
   await expect(search).toHaveValue("");
-  await expect(page.locator(".cw-empty")).toBeHidden();
+  await expect(page.locator(".cw-stage .cw-empty")).toBeHidden();
   expect(errors).toEqual([]);
 });
 
@@ -221,12 +233,12 @@ test("virtual standard gamepad: deadzone, held repeat, release, navigation, disc
   await page.evaluate(() => {
     window.__pads[0].buttons[13].pressed = true;
   });
-  await expect(page.locator(".cw-selected")).toHaveAttribute("data-name", "Empty");
+  await expect(page.locator(".cw-stage .cw-selected")).toHaveAttribute("data-name", "Empty");
   await page.evaluate(() => {
     window.__pads[0].buttons[13].pressed = false;
     window.__pads[0].buttons[12].pressed = true;
   });
-  await expect(page.locator(".cw-selected")).toHaveAttribute("data-name", "Albums");
+  await expect(page.locator(".cw-stage .cw-selected")).toHaveAttribute("data-name", "Albums");
   await page.evaluate(() => {
     window.__pads[0].buttons[12].pressed = false;
     window.__pads[0].buttons[0].pressed = true;
@@ -398,6 +410,11 @@ test("aborted page transitions preserve navigation without unhandled rejections"
     });
   });
   await page.goto(server.url);
+  await page.evaluate(() =>
+    document
+      .querySelector("a[data-cw-navigation][data-cw-path=Albums]")
+      .removeAttribute("data-cw-page"),
+  );
   await page.getByRole("link", { name: /Albums\/ Folder/ }).click();
   await expect(page).toHaveURL(/Albums\/$/);
   await expect(page.getByRole("link", { name: /inside\.txt/ })).toBeVisible();
