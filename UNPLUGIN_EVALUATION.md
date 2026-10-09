@@ -1,9 +1,11 @@
 # Unplugin integration evaluation
 
-> Historical evaluation. All nine Unplugin build hosts now have adapters.
+> Historical evaluation. Dirwell currently exposes nine build-tool adapters;
+> the pinned Unplugin also provides Unloader, which Dirwell does not expose.
 > See [the current build-tool guide](docs/src/content/docs/build-tools.md) for
 > verified build, watch, and development behavior. The evaluation below records
-> the earlier Vite-first decision, not the current support matrix.
+> the earlier Vite-first decision, not the current support matrix or policy.
+> Current integration scope is selective; see [support policy](docs/src/content/docs/support.md).
 
 ## Historical decision
 
@@ -51,6 +53,6 @@ not only transformed modules.
 
 The minimal public API for a future adapter would be `GenerateOptions` plus a
 host mount path and output ownership policy. It should first support one named
-host with a real user case. Vite is the only host exercised here. Rollup,
-webpack, Rspack, esbuild, and other Unplugin targets remain unverified; a
+host with a real user case. Vite was the only host exercised in this historical proof. Rollup,
+webpack, Rspack, esbuild, and other Unplugin targets were unverified at that time; a
 single build hook is insufficient evidence for support claims.

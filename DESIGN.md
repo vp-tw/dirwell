@@ -150,7 +150,7 @@ components, assets, or the complete document without using the official-site tok
 
 - **Do** show real commands, directory entries, and build modes when explaining capability.
 - **Do** keep examples paired with both their live output and source directory.
-- **Do** preserve the problem-to-proof-to-setup-to-advanced reading order on marketing surfaces.
+- **Do** lead with product value and a working preview, then first commands, examples, and advanced options.
 - **Do** keep focus visible and motion optional.
 
 ### Don't:

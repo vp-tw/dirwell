@@ -10,7 +10,7 @@ const examples = [
   {
     slug: "basic",
     name: "Zero config",
-    description: "A portable SSG build with relative URLs. Copy it anywhere and open it.",
+    description: "A portable SSG build with relative URLs. Publish the complete output under any path.",
     detail: "SSG · relative URLs",
   },
   {
@@ -74,8 +74,7 @@ const examples = [
         <div class="hero-copy">
           <h1 id="hero-title">Put a directory<br />on the web.</h1>
           <p>
-            Dirwell builds a static file explorer with search, keyboard navigation,
-            safe symlinks, and a theme API. Run one command. Deploy the output anywhere.
+            Dirwell builds a static file explorer from the folders and files you already have. Browse release downloads, reports, or build artifacts. Publish the generated files on a static host.
           </p>
           <div class="actions">
             <a class="primary-action" href={path("getting-started/")}>Build your first explorer</a>
@@ -84,7 +83,7 @@ const examples = [
         </div>
 
         <div class="terminal" aria-label="Dirwell quick start command">
-          <div class="terminal-bar"><span>terminal</span><span>~/releases</span></div>
+          <div class="terminal-bar"><span>terminal</span><span>Node.js 26+ · alpha</span></div>
           <pre><code class="language-shell">{landingCode.terminal.map((token) =>
             token.tone ? <span class={`syntax-${token.tone}`}>{token.text}</span> : token.text
           )}</code></pre>
@@ -105,6 +104,18 @@ const examples = [
         </div>
       </section>
 
+      <section class="quick-start" aria-labelledby="quick-title">
+        <div class="section-heading">
+          <h2 id="quick-title">Browse your folder. Then publish it.</h2>
+          <p>Requires Node.js 26 or later. Use the alpha package; no clone or config file is needed.</p>
+        </div>
+        <div class="command-pair">
+          <div><span>Preview and watch</span><code>npx @vp-tw/dirwell@alpha serve ./downloads</code></div>
+          <div><span>Build static output</span><code>npx @vp-tw/dirwell@alpha build ./downloads -o ./site-downloads</code></div>
+        </div>
+        <a class="text-action" href={path("getting-started/")}>Follow the getting-started guide</a>
+      </section>
+
       <section class="problem" aria-labelledby="problem-title">
         <div>
           <h2 id="problem-title">The folder already has the information.</h2>
@@ -123,7 +134,7 @@ const examples = [
 
       <section class="examples" id="examples" aria-labelledby="examples-title">
         <div class="section-heading">
-          <h2 id="examples-title">Five examples. Same directory model.</h2>
+          <h2 id="examples-title">Choose an example to try.</h2>
           <p>Open the generated site, then inspect the exact source that produced it.</p>
         </div>
         <div class="example-list">
@@ -143,24 +154,12 @@ const examples = [
         </div>
       </section>
 
-      <section class="quick-start" aria-labelledby="quick-title">
-        <div class="section-heading">
-          <h2 id="quick-title">Useful before you configure it.</h2>
-          <p>Serve the current folder while you work. Build the same folder when it is ready.</p>
-        </div>
-        <div class="command-pair">
-          <div><span>Preview and watch</span><code>pnpm dlx @vp-tw/dirwell@alpha .</code></div>
-          <div><span>Build static output</span><code>pnpm dlx @vp-tw/dirwell@alpha build . -o dist</code></div>
-        </div>
-        <a class="text-action" href={path("getting-started/")}>Read the five-minute guide</a>
-      </section>
-
       <section class="depth" aria-labelledby="depth-title">
         <div class="depth-intro">
-          <h2 id="depth-title">The defaults are an entry point, not a ceiling.</h2>
+          <h2 id="depth-title">Customize when your project needs it.</h2>
           <p>
-            Keep the built-in interface, replace one typed component, or own every byte of the
-            document. URL generation and output naming are separate decisions.
+            Start with the default explorer. Later, change its theme, choose a deployment path,
+            or connect it to an existing build.
           </p>
         </div>
         <div class="code-panel">
@@ -183,6 +182,7 @@ const examples = [
           <a href={path("configuration/")}>Configuration reference</a>
           <a href={path("themes/")}>Theme components</a>
           <a href={path("deployment/")}>Deployment patterns</a>
+          <a href={path("support/")}>Support and compatibility</a>
         </div>
       </section>
 

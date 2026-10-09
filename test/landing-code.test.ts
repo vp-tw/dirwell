@@ -4,7 +4,8 @@ import { landingCode } from "../docs/src/landing-code.ts";
 
 test("landing-page highlighting preserves the copyable code text", () => {
   const expected = {
-    terminal: "$ pnpm dlx dirwell .\nDirwell is watching /releases\nLocal: http://localhost:4173",
+    terminal:
+      "$ npx @vp-tw/dirwell@alpha serve ./downloads\nDirwell is watching /downloads\nLocal: http://127.0.0.1:4173",
     theme: "createDefaultTheme({\n  components: {\n    EntryRow: ReleaseRow,\n  },\n})",
     urls: 'defineConfig({\n  base: "/dirwell/",\n  urls: "base",\n  mode: "mpa",\n})',
     naming:

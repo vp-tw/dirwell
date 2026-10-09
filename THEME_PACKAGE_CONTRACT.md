@@ -5,9 +5,9 @@ An independent theme package exports a factory returning `ExplorerTheme` from
 renderer replacement is the smallest contract: the package owns its HTML,
 styles, assets, options, language controls, and browser behavior.
 
-The [external package example](examples/theme-package) exercises this boundary
+The [external package example](https://github.com/vp-tw/dirwell/tree/main/examples/theme-package) exercises this boundary
 from packed distributions rather than repository source aliases. The
-[i18n example](examples/i18n) separately demonstrates theme-owned localization.
+[i18n example](https://github.com/vp-tw/dirwell/tree/main/examples/i18n) separately demonstrates theme-owned localization.
 
 ## Public surface
 
@@ -60,5 +60,5 @@ selected alpha version.
 `pnpm verify:package` packs Dirwell and this private theme separately, installs
 them into a fresh project, and exercises their public imports. It verifies the
 CLI, an external renderer with SSG/MPA assets and encoded names, public types,
-and a real Rollup build. Successful local tarball consumption does not prove npm
+a real Rollup build, and an async CommonJS webpack build. Successful local tarball consumption does not prove npm
 publication or a registry install; release readback must verify those separately.

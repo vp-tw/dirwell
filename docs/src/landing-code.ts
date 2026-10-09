@@ -9,10 +9,10 @@ export const landingCode: Record<
 > = {
   terminal: [
     { text: "$", tone: "prompt" },
-    { text: " pnpm dlx " },
-    { text: "dirwell", tone: "shell-package" },
-    { text: " .\n" },
-    { text: "Dirwell is watching /releases\nLocal: http://localhost:4173", tone: "output" },
+    { text: " npx " },
+    { text: "@vp-tw/dirwell@alpha", tone: "shell-package" },
+    { text: " serve ./downloads\n" },
+    { text: "Dirwell is watching /downloads\nLocal: http://127.0.0.1:4173", tone: "output" },
   ],
   theme: [
     { text: "createDefaultTheme", tone: "call" },

@@ -7,6 +7,18 @@ Run `dirwell build` and publish its entire output directory. Dirwell writes
 ordinary HTML and assets; a static file host can serve them without a Dirwell
 server.
 
+## Publish your first build
+
+```bash
+npx @vp-tw/dirwell@alpha build ./downloads -o ./site-downloads
+```
+
+Upload everything in `site-downloads/` to your host's published directory.
+Start with the defaults; choose a mode or URL strategy below only when your
+hosting layout requires it. To inspect the output locally, serve it over HTTP
+with your host's preview tool or a local static server. MPA data requests may
+fail when pages are opened directly as `file://` URLs.
+
 ## Choose the output mode
 
 | Mode            | Result and trade-off                                                                                                                                                                             |
@@ -30,7 +42,7 @@ change the threshold. SSG and the plain theme keep complete list HTML.
 For a project site under `/project/`:
 
 ```bash
-pnpm dirwell build ./downloads -o ./dist --base /project/downloads/ --urls base
+npx @vp-tw/dirwell@alpha build ./downloads -o ./dist --base /project/downloads/ --urls base
 ```
 
 Publish `dist/` at `/project/downloads/`. `base` changes generated links,
@@ -59,7 +71,7 @@ absolute or relative path outside it, supply `base` and publish that second
 directory yourself. The adapter will not overwrite Vite's output root or an
 existing directory it does not own.
 
-This repository's [six live examples](../examples/) are built from one
+This repository's [live examples](../examples/) are built from one
 `Dirwell([...])` Vite configuration, then copied into the documentation's
 GitHub Pages tree.
 

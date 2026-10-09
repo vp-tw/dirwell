@@ -1,7 +1,42 @@
 ---
 title: Build tool adapters
-description: Generate an explorer alongside applications built with Unplugin hosts.
+description: Add Dirwell to an existing build and check each adapter's verified capabilities.
 ---
+
+Use an adapter only when you already have an application build. For a standalone
+folder, the [CLI](../getting-started/) is simpler.
+
+Vite, Rollup, and webpack are the primary integrations during alpha. Rolldown,
+Rspack, Rsbuild, esbuild, Farm, and Bun are experimental. This describes maintenance
+priority; the matrix below defines tested behavior. Unloader has no Dirwell
+adapter. See [support and compatibility](../support/) for the policy and framework
+boundaries.
+
+Install the package in your project before adding a plugin:
+
+```bash
+npm install --save-dev @vp-tw/dirwell@alpha
+```
+
+## Vite
+
+Vite is the recommended application integration. It builds explorers and serves
+them through its development server:
+
+```ts
+import { defineConfig } from "vite";
+import Dirwell from "@vp-tw/dirwell/vite";
+
+export default defineConfig({
+  plugins: [Dirwell({ root: "downloads" })],
+});
+```
+
+The default output is `dist/dirwell/` when Vite uses its default output directory.
+Its public base follows Vite. See the [Vite configuration](../configuration/#vite-adapter)
+for multiple explorers, custom output paths, and ownership rules.
+
+## Other adapters
 
 Dirwell provides adapters for Vite, Rollup, Rolldown, webpack, Rspack, Rsbuild,
 esbuild, Farm, and Bun. Each adapter emits ordinary explorer pages and mirrored
@@ -52,7 +87,7 @@ The non-Vite adapters use the host's output directory rather than the config's
 `outDir`; CLI server settings do not apply. URLs default to portable relative
 links. Set `base` and `urls` together when the deployment requires a fixed base.
 The existing `@vp-tw/dirwell/vite` adapter also supports an independent `outDir` and
-derives its base from Vite; see [configuration](./configuration.md#vite-adapter).
+derives its base from Vite; see [configuration](../configuration/#vite-adapter).
 
 Dirwell never replaces the host output root. Existing files in its dedicated
 path require a generated ownership manifest. It removes stale assets listed by

@@ -1,9 +1,8 @@
 # Trusted alpha publishing plan
 
-Bootstrap `@vp-tw/dirwell` manually first and verify its npm identity, organization
-permissions, alpha tag, tarball, and registry consumer. Then configure a
-GitHub Actions trusted publisher for this package and this repository; do not
-add a long-lived npm publish token.
+Trusted publishing is configured for `@vp-tw/dirwell` and was verified by a real
+OIDC alpha release. This document records security gates and historical evidence.
+For the current release procedure, use [RELEASING.md](RELEASING.md).
 
 ## Gates
 
@@ -20,8 +19,8 @@ add a long-lived npm publish token.
    tag, and GitHub prerelease are read back. Verify the provenance attestation
    separately; an OIDC configuration page is not a successful publish.
 
-Start with manual dispatch for an alpha release, then consider a Changesets
-version-PR workflow once this path is exercised. Keep release automation scoped
+Releases use manual dispatch after a reviewed version PR. A Changesets
+version-PR bot remains optional. Keep release automation scoped
 to the package; account-level token restrictions and permission changes require
 a separate security decision.
 
@@ -33,14 +32,14 @@ published version is immutable; repair a faulty alpha by publishing the next
 alpha with a changeset and, when justified, deprecating the faulty version.
 Changing a tag is not removal of an uploaded version.
 
-npm trusted publisher configuration must complete its first successful publish
-within the provider's validation period (currently two days). Configure it only
-when the reviewed release is ready. An unvalidated configuration, skipped job,
+A newly configured npm trusted publisher must meet the provider's validation
+deadline. Consult the current npm documentation and configure it only when the
+reviewed release is ready. An unvalidated configuration, skipped job,
 or green source CI is not publication/provenance evidence.
 
 The bootstrap package now exists. `publish-alpha.yml` implements the manual
 dispatch path with separate verification, OIDC publishing, registry consumer,
-and GitHub prerelease jobs. The initial candidate is `0.1.0-alpha.1`.
+and GitHub prerelease jobs. The first verified OIDC release was `0.1.0-alpha.1`.
 Configuration readback and the first successful OIDC run are recorded below.
 Future releases follow the same gates. The later Changesets version-PR bot is
 optional; versioning currently uses a reviewed contributor PR.

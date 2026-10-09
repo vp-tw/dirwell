@@ -9,27 +9,28 @@ and the source directory that generates it.
 - Portable folder: `basic` keeps SSG and relative URLs at their defaults.
   [Live page](https://vp-tw.github.io/dirwell/examples/basic/) ·
   [Source](https://github.com/vp-tw/dirwell/tree/main/examples/basic)
+- Bundled file-type artwork: `file-icons` shows the unmodified default
+  theme used on the homepage. [Live page](https://vp-tw.github.io/dirwell/examples/file-icons/) ·
+  [Source](https://github.com/vp-tw/dirwell/tree/main/examples/file-icons)
+- No-script list: `plain` uses `createPlainTheme()` and renders complete HTML.
+  [Live page](https://vp-tw.github.io/dirwell/examples/plain/) ·
+  [Source](https://github.com/vp-tw/dirwell/tree/main/examples/plain)
+
 - Fixed project-site path: `base` uses `mode: "mpa"`, `base`, and
   `urls: "base"` for shared assets under a known prefix.
   [Live page](https://vp-tw.github.io/dirwell/examples/base/) ·
   [Source](https://github.com/vp-tw/dirwell/tree/main/examples/base)
-- Completely different page: `custom-theme` renders a release catalog with
-  its own HTML and CSS. [Live page](https://vp-tw.github.io/dirwell/examples/custom-theme/) ·
-  [Source](https://github.com/vp-tw/dirwell/tree/main/examples/custom-theme)
 - New colors and icons with the same explorer: `default-theme-override`
   uses Catppuccin Latte and Macchiato with `icons` and `components`.
   [Live page](https://vp-tw.github.io/dirwell/examples/default-theme-override/) ·
   [Source](https://github.com/vp-tw/dirwell/tree/main/examples/default-theme-override)
-- Bundled file-type artwork: `file-icons` shows the unmodified default
-  theme used on the homepage. [Live page](https://vp-tw.github.io/dirwell/examples/file-icons/) ·
-  [Source](https://github.com/vp-tw/dirwell/tree/main/examples/file-icons)
 - Theme-owned localization: `i18n` switches English, Traditional Chinese, and
   Japanese, including interface labels, counts, and date/size formatting.
   [Live page](https://vp-tw.github.io/dirwell/examples/i18n/) ·
   [Source](https://github.com/vp-tw/dirwell/tree/main/examples/i18n)
-- No-script list: `plain` uses `createPlainTheme()` and renders complete HTML.
-  [Live page](https://vp-tw.github.io/dirwell/examples/plain/) ·
-  [Source](https://github.com/vp-tw/dirwell/tree/main/examples/plain)
+- Completely different page: `custom-theme` renders a release catalog with
+  its own HTML and CSS. [Live page](https://vp-tw.github.io/dirwell/examples/custom-theme/) ·
+  [Source](https://github.com/vp-tw/dirwell/tree/main/examples/custom-theme)
 
 The source directories include their own `dirwell.config.ts` and input
 `files/` trees. The documentation build reads those configs and passes them
