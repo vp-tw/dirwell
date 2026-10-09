@@ -767,6 +767,7 @@
     const scroll = document.querySelector(".cw-list-scroll");
     const fitList = () => {
       const footer = document.querySelector(".cw-bottom");
+      root.style.setProperty("--cw-footer-height", `${footer.getBoundingClientRect().height}px`);
       const available = Math.max(
         80,
         innerHeight -
