@@ -502,3 +502,71 @@ test("keyboard cancellation and Home abort pending loads without adding history"
     await app.close();
   }
 });
+
+test("Back and Forward retain edits made in the active folder", async ({ page }) => {
+  const app = await fixture();
+  try {
+    await page.goto(app.url);
+    await page.getByRole("link", { name: /Albums\/ Folder/ }).click();
+    await expect(page).toHaveURL(/Albums\/$/);
+    await page.getByRole("tab", { name: /Documents/ }).click();
+    await page.getByRole("searchbox").fill("album");
+    await expect(page.locator(".cw-stage [data-cw-count]")).toHaveText("1 item");
+    await page.goBack();
+    await expect(page).toHaveURL(app.url);
+    await page.goForward();
+    await expect(page).toHaveURL(/Albums\/$/);
+    await expect(page.getByRole("searchbox")).toHaveValue("album");
+    await expect(page.getByRole("tab", { name: /Documents/ })).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+    await page.reload();
+    await expect(page.getByRole("link", { name: /album\.txt/ })).toBeVisible();
+    await page.goBack();
+    await expect(page).toHaveURL(app.url);
+    await expect(page.getByRole("searchbox")).toHaveValue("");
+    await expect(page.getByRole("link", { name: /root\.txt/ })).toBeVisible();
+  } finally {
+    await app.close();
+  }
+});
+
+test("a new choice during a slow history load keeps address and history entries consistent", async ({
+  page,
+}) => {
+  const app = await fixture();
+  let release;
+  const delayed = new Promise((resolve) => {
+    release = resolve;
+  });
+  try {
+    await page.goto(app.url);
+    await page.getByRole("link", { name: /Albums\/ Folder/ }).click();
+    await expect(page).toHaveURL(/Albums\/$/);
+    const rootAsset = await page
+      .getByRole("link", { name: "Home", exact: true })
+      .getAttribute("data-cw-page");
+    await page.route(`${rootAsset}*`, async (route) => {
+      await delayed;
+      try {
+        await route.continue();
+      } catch {}
+    });
+    await page.goBack();
+    await expect(page).toHaveURL(app.url);
+    await expect(page.locator("[data-cw-root]")).toHaveAttribute("aria-busy", "true");
+    await page.getByRole("link", { name: /Deep\/ Folder/ }).click();
+    await expect(page).toHaveURL(/Albums\/Deep\/$/);
+    await expect(page.getByRole("link", { name: /deep\.txt/ })).toBeVisible();
+    release();
+    await page.goBack();
+    await expect(page).toHaveURL(app.url);
+    await expect(page.getByRole("link", { name: /root\.txt/ })).toBeVisible();
+    await expect(page.getByRole("link", { name: /album\.txt/ })).toHaveCount(0);
+  } finally {
+    release();
+    await page.unrouteAll({ behavior: "ignoreErrors" });
+    await app.close();
+  }
+});

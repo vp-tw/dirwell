@@ -28,7 +28,10 @@
       path: main.dataset.cwPath,
     };
     const recent = new Map();
-    let index = 0,
+    const historyViews = new Map();
+    const savedEntry = history.state?.dirwellCrosswave;
+    let index =
+        savedEntry?.owner === owner && Number.isInteger(savedEntry.index) ? savedEntry.index : 0,
       request = 0,
       pending,
       animations = [];
@@ -51,6 +54,10 @@
         link.dataset.cwPage = new URL(link.dataset.cwPage, base).href;
     };
     absoluteLinks(document, document.baseURI);
+    const ownsCurrentEntry = () => {
+      const entry = history.state?.dirwellCrosswave;
+      return entry?.owner === owner && entry.index === index && entry.route.path === current.path;
+    };
     const state = (route = current, position = index, view = getState()) => ({
       ...history.state,
       dirwellCrosswave: { owner, route, index: position, view },
@@ -232,11 +239,17 @@
           )
         : [];
       try {
-        if (writeHistory)
+        if (writeHistory) {
+          // Save the view at departure, including edits made while a request was pending.
+          if (ownsCurrentEntry()) history.replaceState(state(), "");
           history.pushState(state(loaded.route, position, view ?? {}), "", address(loaded.route));
+          for (const key of historyViews.keys())
+            if (key > position || key < position - history.length + 1) historyViews.delete(key);
+        }
         commit(loaded.doc, view);
         current = loaded.route;
         index = position;
+        historyViews.set(index, { path: current.path, view: getState() });
         try {
           history.replaceState(state(), "");
         } catch {}
@@ -280,17 +293,23 @@
       }
     };
     const navigate = async (route, { view, pop = false, position = index + 1 } = {}) => {
+      historyViews.set(index, { path: current.path, view: getState() });
+      if (pop && historyViews.get(position)?.path === route.path)
+        view = historyViews.get(position).view;
       const ticket = ++request;
       pending?.abort();
       const controller = new AbortController();
       pending = controller;
       if (!pop) {
+        const entry = history.state?.dirwellCrosswave;
+        position =
+          (entry?.owner === owner && Number.isInteger(entry.index) ? entry.index : index) + 1;
         recent.delete(current.path);
         recent.set(current.path, getState());
         if (recent.size > 32) recent.delete(recent.keys().next().value);
         if (view === undefined) view = recent.get(route.path);
         try {
-          history.replaceState(state(), "");
+          if (ownsCurrentEntry()) history.replaceState(state(), "");
         } catch {
           location.assign(route.url);
           return;
@@ -313,7 +332,7 @@
         notice.hidden = true;
       } catch (error) {
         if (ticket !== request) return;
-        if (pop) {
+        if (pop || !ownsCurrentEntry()) {
           // The browser has already changed its address: reload that exact destination on failure.
           if (local) location.replace(route.url);
           else location.reload();
@@ -406,7 +425,11 @@
         if (allowed(url) && allowed(asset))
           navigate(
             { url: url.href, asset: asset.href, path: hash.get("cw-path") },
-            { pop: true, position: 0 },
+            {
+              pop: true,
+              position: index,
+              view: savedEntry?.owner === owner ? savedEntry.view : undefined,
+            },
           );
       }
     }
