@@ -79,6 +79,9 @@ for(const mode of ['ssg','mpa']){
  assert.match(await readFile(output+'/index.html','utf8'),/Crosswave/);
  assert.match(await readFile(output+(mode==='mpa'?'/__dirwell':'')+'/crosswave.js','utf8'),/getGamepads/);
  assert.ok((await readFile(output+(mode==='mpa'?'/__dirwell':'')+'/crosswave.css')).length>0);
+ const nested=await readFile(output+'/docs/index.html','utf8');
+ const pageAsset=nested.match(/<main[^>]*data-cw-page="([^"]+)"/)[1].split('/').at(-1);
+ assert.match(await readFile(output+(mode==='mpa'?'/__dirwell':'/docs')+'/'+pageAsset,'utf8'),/dirwell:crosswave-page/);
 }
 const bundle=await rollup({input:'entry.js',plugins:[Dirwell({root:'files'})]});
 try {await bundle.write({dir:'rollup-output',format:'es'});} finally {await bundle.close();}
