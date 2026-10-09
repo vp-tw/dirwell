@@ -5,8 +5,11 @@
   // Registered before first paint for cross-document navigation and BFCache restores.
   for (const name of ["pageswap", "pagereveal"]) {
     addEventListener(name, (event) => {
-      if ((reduced.matches || root.dataset.cwTransitions === "false") && event.viewTransition)
-        event.viewTransition.skipTransition();
+      const transition = event.viewTransition;
+      if (!transition) return;
+      // A skipped or interrupted animation must not reject normal file navigation.
+      transition.ready.catch(() => {});
+      if (reduced.matches || root.dataset.cwTransitions === "false") transition.skipTransition();
     });
   }
   document.addEventListener("DOMContentLoaded", () => {

@@ -1,5 +1,11 @@
 # @vp-tw/dirwell
 
+## 0.1.0-alpha.5
+
+### Patch Changes
+
+- Handle rejected cross-document transition readiness when the browser skips or interrupts an animation, retaining native navigation without an unhandled Promise rejection.
+
 ## 0.1.0-alpha.4
 
 ### Minor Changes
