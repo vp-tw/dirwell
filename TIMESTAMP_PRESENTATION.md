@@ -2,9 +2,9 @@
 
 Keep the established policy: browser-enhanced Ledger rows use the viewer's local time zone; generated HTML and no-JavaScript output remain explicitly UTC; Plain remains UTC. Sorting, `<time datetime>`, and metadata retain the underlying instant.
 
-The unresolved issue is presentation. Before this change, every row repeated a full offset, such as `2026-10-08 15:20 UTC+08:00`.
+This decision is implemented in the Ledger alpha theme. See [the current theme guide](docs/src/content/docs/themes.md) for usage. The comparison below records the alternatives considered. Before this change, every row repeated a full offset, such as `2026-10-08 15:20 UTC+08:00`.
 
-## Recommendation
+## Adopted presentation
 
 Use a concise absolute local label, `2026-10-08 15:20`, for both recent and older files. Keep the year to avoid archive/date-boundary ambiguity. Label the column as local time after hydration. A focusable date control exposes the exact local timestamp with its per-instant offset and the UTC instant; it works with pointer, touch, Enter/Space, Escape, and screen readers. Do not rely on a native hover-only `title`.
 
@@ -31,12 +31,12 @@ Two instants during Los Angeles's fall daylight-saving transition both read `202
 
 At 390 px, retain the date and time together if they fit, and allow the date/time boundary to wrap when necessary. The exact-time panel is constrained to the viewport. At desktop width, align tabular numerals without an offset repeated in every row. No-JavaScript output still contains the readable UTC label and complete listing where that mode supports it.
 
-## Implementation and validation
+## Implemented behavior and validation
 
-- Add separate concise-label and exact-detail helpers while preserving instant-based sorting.
-- Route hydration, virtual rows, and global-search dates through the same DOM renderer.
-- Use one bounded exact-time disclosure with accessible labeling, focus handling, and touch/keyboard operation. Close it safely when its virtual row disappears.
-- Test Taipei/Los Angeles date boundaries and the repeated daylight-saving hour, invalid/missing dates, no-JavaScript fallback, static/virtual/global consistency, sorting, keyboard activation, Escape, and narrow viewports.
-- Update README, EXPERIENCE, and theme documentation to agree with the already implemented local/UTC policy. The older all-UTC description in EXPERIENCE has been corrected.
+- Separate concise-label and exact-detail helpers preserve instant-based sorting.
+- Hydration, virtual rows, and global-search dates use the same DOM renderer.
+- One bounded exact-time disclosure provides accessible labeling, focus handling, and touch/keyboard operation. It closes when its virtual row disappears.
+- Validation covers Taipei/Los Angeles date boundaries and the repeated daylight-saving hour, invalid/missing dates, no-JavaScript fallback, static/virtual/global consistency, sorting, keyboard activation, Escape, and narrow viewports.
+- README, EXPERIENCE, and theme documentation describe the implemented local/UTC policy. The former all-UTC description in EXPERIENCE has been corrected.
 
 Examples were executed with Node 26 Intl formatting. Relevant primary standards: [ECMA-402 Intl formatting](https://tc39.es/ecma402/) and [HTML popovers](https://html.spec.whatwg.org/multipage/popover.html). Browser tests and desktop/narrow captures separately verify interaction and layout; the calculations alone do not prove those behaviors.

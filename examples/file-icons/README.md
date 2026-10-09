@@ -7,7 +7,7 @@ in the generated output. To change a theme's icons, see the
 [Catppuccin override example](../default-theme-override/).
 
 Build from the repository root with `pnpm run examples:build`.
-The command builds all six examples through one Vite adapter configuration;
+The command builds the live examples through one Vite adapter configuration;
 the resulting preview is written to `docs/public/examples/file-icons/`.
 Use this example to inspect the bundled icons before deciding whether to
 provide a custom `icons` set.

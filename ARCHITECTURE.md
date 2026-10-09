@@ -1,8 +1,9 @@
 # Architecture
 
 Dirwell is a static generator with a small progressive-enhancement runtime.
-Node.js performs filesystem access and emits ordinary files. The browser never
-receives machine paths or performs filesystem traversal.
+Node.js performs filesystem access and emits ordinary files. Built-in themes keep resolved machine paths out of browser output. Custom themes
+receive trusted Node-side metadata and must preserve that boundary; the browser
+does not perform filesystem traversal.
 
 ## Build pipeline
 
@@ -51,8 +52,8 @@ markup, styling, icons, and browser behavior together.
 - Generated directories navigate in the same tab.
 - Files and preserved custom indexes open in a new tab.
 - Internal symlinks use canonical root-relative targets.
-- Broken targets open their raw `readlink()` text in a new tab. Outside-root
-  targets remain visible without a link.
+- Broken, excluded, and outside-root targets open only their declared
+  `readlink()` text in a new tab; external target files are not published.
 - Ancestor cycles remain visible and navigable but are never expanded again.
 - Directory symlink traversal is opt-in; the default boundary is the source
   root.
@@ -72,3 +73,11 @@ log under `.dirwell/`.
 - pnpm with exact dependency versions
 - Astro Starlight for the documentation site
 - Node's test runner for filesystem and integration tests
+
+## Build integrations
+
+Unplugin shares common build hooks; host-specific code handles output ownership,
+watch dependencies, and development serving. The [support policy](docs/src/content/docs/support.md)
+sets maintenance priority, and the [verification matrix](docs/src/content/docs/build-tools.md)
+bounds claims by tested behavior. Do not infer framework compatibility from its
+underlying build tool or add host-specific lifecycle helpers without a use case.

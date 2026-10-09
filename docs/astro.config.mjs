@@ -13,23 +13,30 @@ export default defineConfig({
       social: [],
       sidebar: [
         {
-          label: "Start",
+          label: "Start here",
           items: [
             { label: "Overview", slug: "overview" },
             { label: "Getting started", slug: "getting-started" },
+            { label: "Deployment", slug: "deployment" },
             { label: "Examples", slug: "examples" },
           ],
         },
         {
-          label: "Guides",
+          label: "Customize and integrate",
+          items: [
+            { label: "Themes", slug: "themes" },
+            { label: "Build tool adapters", slug: "build-tools" },
+            { label: "Support and compatibility", slug: "support" },
+          ],
+        },
+        {
+          label: "Reference and help",
           items: [
             { label: "CLI", slug: "cli" },
             { label: "Configuration", slug: "configuration" },
-            { label: "Build tools", slug: "build-tools" },
-            { label: "API reference", slug: "api-reference" },
-            { label: "Themes", slug: "themes" },
             { label: "Symlinks", slug: "symlinks" },
-            { label: "Deployment", slug: "deployment" },
+            { label: "API reference", slug: "api-reference" },
+            { label: "Troubleshooting", slug: "troubleshooting" },
           ],
         },
       ],

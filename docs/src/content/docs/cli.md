@@ -3,9 +3,14 @@ title: CLI
 description: Build once, watch locally, or run a detached explorer.
 ---
 
-From a repository checkout, run the CLI with `pnpm dirwell`. The examples
-below use that form. `dirwell` is the executable name when the package is
-installed.
+The examples use the published alpha package and require Node.js 26 or later:
+
+```bash
+npx @vp-tw/dirwell@alpha --help
+```
+
+After [installing it in a project](../getting-started/#3-save-project-settings-when-needed),
+use `npx dirwell` or an npm script. The executable is named `dirwell`.
 
 | Command                            | Result and use                                                          |
 | ---------------------------------- | ----------------------------------------------------------------------- |
@@ -23,7 +28,7 @@ from `--cwd`, whose default is the current working directory.
 ## Build once
 
 ```bash
-pnpm dirwell build ./public -o ./dist
+npx @vp-tw/dirwell@alpha build ./public -o ./dist
 ```
 
 `build` writes a deployable tree. It defaults to SSG, relative URLs, and
@@ -34,7 +39,7 @@ files remain; their directory explorer page uses `_dirwell.html` when free.
 To publish beneath a fixed URL prefix:
 
 ```bash
-pnpm dirwell build ./public -o ./dist --mode mpa --base /downloads/ --urls base
+npx @vp-tw/dirwell@alpha build ./public -o ./dist --mode mpa --base /downloads/ --urls base
 ```
 
 Set `--base` to the path where the output will actually be served. See
@@ -43,7 +48,7 @@ Set `--base` to the path where the output will actually be served. See
 ## Watch locally
 
 ```bash
-pnpm dirwell serve ./public --host 127.0.0.1 --port 4173
+npx @vp-tw/dirwell@alpha serve ./public --host 127.0.0.1 --port 4173
 ```
 
 `serve` defaults to `.dirwell-preview/` output, host `127.0.0.1`, and port
@@ -76,9 +81,9 @@ supervisor assign the listener. Other behavior such as `include`, `exclude`,
 ## Detached server
 
 ```bash
-pnpm dirwell daemon start ./public
-pnpm dirwell daemon status
-pnpm dirwell daemon stop
+npx @vp-tw/dirwell@alpha daemon start ./public
+npx @vp-tw/dirwell@alpha daemon status
+npx @vp-tw/dirwell@alpha daemon stop
 ```
 
 `daemon` defaults to `start`. State and logs live under `.dirwell/` in

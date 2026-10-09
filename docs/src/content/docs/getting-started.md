@@ -1,60 +1,90 @@
 ---
 title: Getting started
-description: Browse a folder locally, then build files for a static host.
+description: Turn your first folder into a browsable website, then publish it.
 ---
 
-These commands run from a Dirwell repository checkout. Install its
-dependencies once with `pnpm install`. The packaged CLI uses the same
-`dirwell` commands after installation.
+You need **Node.js 26 or later**, which includes npm, and a folder to browse.
+Check your Node version with `node --version`. You do not need to clone Dirwell
+or choose a build tool.
+
+Want to see the result first? [Open the live explorer](https://vp-tw.github.io/dirwell/examples/file-icons/).
 
 ## 1. Browse a folder
 
-```bash
-pnpm dirwell serve ./fixture
-```
-
-Open the `Local:` URL printed by the command. Dirwell watches `./fixture`,
-rebuilds after a change, and reloads connected browsers. Omit `serve` for the
-same foreground workflow. The source directory defaults to `.`, so pass it
-explicitly when you mean a different folder.
-
-## 2. Build a publishable tree
+Replace `./downloads` with an existing folder on your computer:
 
 ```bash
-pnpm dirwell build ./fixture -o ./generated
+npx @vp-tw/dirwell@alpha serve ./downloads
 ```
 
-`build` writes static files and exits. Deploy the complete `generated/`
-directory. With no options, Dirwell uses SSG and links relative to each page,
-so the output can move to another path as one tree. The build replaces the
-generated output directory; keep unrelated files elsewhere.
+Accept npm's installation prompt on first use. Open the `Local:` URL printed by
+the command. You should see your folders and files; open a directory, search
+for a file name, or follow a file link. Adding, changing, or deleting a source
+file updates the listing and reloads the browser. Press Ctrl+C to stop.
 
-If a source directory has `index.html` or `index.htm`, Dirwell keeps it and
-writes the explorer as `_dirwell.html`. If that name also exists, it skips the
-explorer page for that directory.
+Dirwell is alpha. Use `@alpha` to select the current alpha; `latest` remains on
+the bootstrap alpha. See [support and compatibility](../support/).
 
-## 3. Change one setting at a time
+## 2. Build a website
 
-| Need                                              | Change                                |
-| ------------------------------------------------- | ------------------------------------- |
-| A known public path such as `/project/downloads/` | Set `base` and `urls: "base"`.        |
-| One shared asset directory across many pages      | Set `mode: "mpa"`.                    |
-| A subset of the source tree                       | Set `include` and `exclude` globs.    |
-| Different controls or icons                       | Set `theme: createDefaultTheme(...)`. |
-| A no-script listing                               | Set `theme: createPlainTheme()`.      |
+```bash
+npx @vp-tw/dirwell@alpha build ./downloads -o ./site-downloads
+```
 
-Use `dirwell.config.ts` for settings that do not have CLI flags:
+This writes the website and copies the source files into `site-downloads/`,
+then exits. Publish that complete directory on a static host. You do not need
+to run Dirwell on the host. The command replaces its output directory, so
+choose a dedicated directory rather than one containing unrelated work.
+
+The defaults produce a page for each directory with relative links. Keep the
+output tree together when moving it. You can leave the advanced output and URL
+settings unchanged for this first build.
+
+If your source already contains `index.html` or `index.htm`, Dirwell preserves
+it and writes its listing as `_dirwell.html`. Open that file to see the explorer.
+If `_dirwell.html` is also present, no explorer page is generated there.
+
+For a fixed public path such as `/project/downloads/`, continue with
+[deployment](../deployment/).
+
+## 3. Save project settings when needed
+
+Install Dirwell locally so a config file can import its public API:
+
+```bash
+npm install --save-dev @vp-tw/dirwell@alpha
+```
+
+Create `dirwell.config.ts` beside your project's `package.json`:
 
 ```ts
 import { defineConfig } from "@vp-tw/dirwell";
 
 export default defineConfig({
-  include: ["**/*.md", "assets/**"],
   exclude: ["drafts/**"],
 });
 ```
 
-Run `pnpm dirwell build ./fixture -o ./generated` again. The CLI positional
-directory has a `.` default and overrides config `root`, so keep the source
-path in the command. The [configuration guide](../configuration/) lists every
-field, accepted value, default, and effect.
+Run the installed CLI:
+
+```bash
+npx dirwell build ./downloads -o ./site-downloads
+```
+
+The config is discovered from the current working directory. The positional
+source path overrides config `root`, including when omitted: its default is
+`.`. Keep the intended folder in the command. For reproducible builds, install
+with `--save-exact` and commit the package manager's lockfile.
+
+## Next steps
+
+| You want to                             | Read                                   |
+| --------------------------------------- | -------------------------------------- |
+| Publish the output                      | [Deployment](../deployment/)           |
+| Change selected files or URL layout     | [Configuration](../configuration/)     |
+| Change the appearance or use plain HTML | [Themes](../themes/)                   |
+| Integrate with an application's build   | [Build tool adapters](../build-tools/) |
+| Fix a problem with these steps          | [Troubleshooting](../troubleshooting/) |
+
+To work on Dirwell itself, use the repository's
+[contributor guide](https://github.com/vp-tw/dirwell/blob/main/CONTRIBUTING.md).

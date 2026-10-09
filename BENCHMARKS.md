@@ -79,7 +79,7 @@ for this machine and workload, not cross-device guarantees or a CI gate.
 | First global-search match at 4× throttle     |                                              under 2 s |
 | Desktop and narrow scroll sweep              | no empty viewport or positive gap between visible rows |
 
-The current observations are below these targets. They do not identify a
+The recorded baseline observations are below these targets. They do not identify a
 bottleneck that warrants replacing virtualization or changing search behavior.
 For a release regression gate, collect repeated cold and warm runs on a fixed
 CI runner and a real lower-powered device, then set percentile-based limits.

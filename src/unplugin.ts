@@ -543,7 +543,10 @@ const core = createUnplugin<DirwellPluginInput, true>((options, meta) => {
   });
 });
 
-/** The Vite host retains its server integration; all other hosts share asset generation. */
+/**
+ * Available adapters share asset generation, with host-specific lifecycle behavior.
+ * Availability does not imply feature parity; see the documented support policy.
+ */
 export const unplugin: Pick<
   UnpluginInstance<DirwellPluginInput, true>,
   "vite" | "rollup" | "rolldown" | "webpack" | "rspack" | "rsbuild" | "esbuild" | "farm" | "bun"

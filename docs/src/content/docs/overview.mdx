@@ -1,31 +1,44 @@
 ---
 title: Overview
-description: What Dirwell builds, where it fits, and what its defaults include.
+description: Publish a folder as a searchable website, without building a file browser.
 ---
 
-Dirwell turns a directory into a static, accessible file explorer. Use it for
-release downloads, generated artifacts, documentation attachments, or any
-folder that needs a useful web interface without an application server.
+Dirwell turns a folder into a website where visitors can browse directories,
+search for files, and open the original downloads. Use it for release files,
+reports, generated artifacts, or documentation attachments.
 
-SSG means static site generation: it writes portable pages with assets in
-each directory. MPA means multi-page application: directory pages share
-runtime assets under one output root. Both modes write static files.
+[Try the live explorer](https://vp-tw.github.io/dirwell/examples/file-icons/) or
+[build your first explorer](../getting-started/).
 
-## Choose a path
+## What you get
 
-| Your next step                                 | Open                                   |
-| ---------------------------------------------- | -------------------------------------- |
-| Browse one folder and build static output      | [Getting started](../getting-started/) |
-| Decide between SSG, MPA, and URL strategies    | [Deployment](../deployment/)           |
-| Look up an accepted value or default           | [Configuration](../configuration/)     |
-| Choose icons, controls, or a complete renderer | [Themes](../themes/)                   |
-| Compare working output with source             | [Examples](../examples/)               |
+- A page for each directory, with breadcrumbs and links to its files.
+- Search, sorting, file icons, and keyboard navigation in the default theme.
+- A local server that updates as the source folder changes.
+- Static HTML and assets you can publish without running a Dirwell server.
 
-## Defaults
+The first command needs no config. You need Node.js 26 or later to run Dirwell;
+visitors only need a browser. Dirwell is alpha; use the package's `@alpha` tag.
 
-- One-command local server with file watching and live reload.
-- Deployable SSG output; choose MPA when pages should share runtime assets.
-- Fuzzy search, IME-safe keyboard input, linked breadcrumbs, and color-scheme controls.
-- Explicit broken, cyclic, and out-of-root symlink states.
-- Relative, deployment-base, and native HTML `<base>` URL strategies.
-- Typed theme components that can be wrapped or replaced.
+## Follow one path
+
+| Your next step                                   | Read                                   |
+| ------------------------------------------------ | -------------------------------------- |
+| Browse your folder and create your first website | [Getting started](../getting-started/) |
+| Publish the generated files                      | [Deployment](../deployment/)           |
+| Compare working examples                         | [Examples](../examples/)               |
+| Fix setup or broken links                        | [Troubleshooting](../troubleshooting/) |
+
+## Customize after the first build
+
+Keep the defaults until you need a different result. Configuration controls file
+selection and URL layout. Themes control appearance and browser behavior.
+Build adapters let Dirwell run alongside an existing application.
+
+| You need to                                | Read                                     |
+| ------------------------------------------ | ---------------------------------------- |
+| Select files or look up defaults           | [Configuration](../configuration/)       |
+| Change the interface or use plain HTML     | [Themes](../themes/)                     |
+| Add Dirwell to a build tool                | [Build tool adapters](../build-tools/)   |
+| Check integration promises and limitations | [Support and compatibility](../support/) |
+| Call the Node API or write a renderer      | [API reference](../api-reference/)       |

@@ -13,6 +13,31 @@ Choose the smallest level of customization that gives you the page you need:
 - A complete `ExplorerTheme` uses prepared entries and safe links in your own
   document and assets. See the [release catalog](../examples/).
 
+For a config that imports a theme, first [install Dirwell in your project](../getting-started/#3-save-project-settings-when-needed).
+Ledger is the name of the default theme; `createDefaultTheme()` is its factory.
+
+## Plain theme
+
+`createPlainTheme()` writes complete, browser-native HTML in both SSG and MPA.
+It has no icons, JavaScript, appearance controls, search index, or virtual
+list. Use it when the folder is small enough to render fully and a basic list
+meets the need.
+
+```ts
+import { createPlainTheme, defineConfig } from "@vp-tw/dirwell";
+
+export default defineConfig({
+  theme: createPlainTheme({
+    project: { name: "Downloads", repositoryUrl: "https://example.com/downloads" },
+  }),
+});
+```
+
+`project` accepts the same metadata fields as the default theme. The plain
+theme links its repository name only when `repositoryUrl` is supplied
+explicitly. It shows modified times in UTC because it has no browser script.
+The [plain example](../examples/) shows the resulting page.
+
 ## Default theme options
 
 Pass the result of `createDefaultTheme()` as the config's `theme`:
@@ -48,7 +73,8 @@ and browser behavior for your directory.
 
 The default theme displays modified times in the visitor's local time zone
 after JavaScript loads. Generated HTML labels the UTC time until then and
-when JavaScript is disabled. Time sorting uses the stored instant.
+when JavaScript is disabled. Activate a date with pointer, touch, or keyboard to see its exact local offset
+and UTC instant. Time sorting uses the stored instant.
 
 ### Project metadata
 
@@ -119,28 +145,6 @@ text before inserting it into returned HTML.
 Overriding `EntryList` or `EntryRow` disables the default MPA virtual list for
 those pages. If the replacement must support large directories, implement
 its own row loading or keep the default components.
-
-## Plain theme
-
-`createPlainTheme()` writes complete, browser-native HTML in both SSG and MPA.
-It has no icons, JavaScript, appearance controls, search index, or virtual
-list. Use it when the folder is small enough to render fully and a basic list
-meets the need.
-
-```ts
-import { createPlainTheme, defineConfig } from "@vp-tw/dirwell";
-
-export default defineConfig({
-  theme: createPlainTheme({
-    project: { name: "Downloads", repositoryUrl: "https://example.com/downloads" },
-  }),
-});
-```
-
-`project` accepts the same metadata fields as the default theme. The plain
-theme links its repository name only when `repositoryUrl` is supplied
-explicitly. It shows modified times in UTC because it has no browser script.
-The [plain example](../examples/) shows the resulting page.
 
 ## Complete theme
 

@@ -12,7 +12,7 @@ import theme from "../../../examples/api-reference/theme.ts?raw";
 
 Use this page to find the TypeScript names. For accepted config values,
 defaults, results, and use cases, start with the [configuration guide](../configuration/).
-The `dirwell` package root exports the values and types below from `src/index.ts`.
+The `@vp-tw/dirwell` package root exports the values and types below from `src/index.ts`.
 The `@vp-tw/dirwell/theme` subpath exposes the component contracts from
 `src/theme-components.ts`, including the generic `ThemeComponent<Props>` type.
 The `@vp-tw/dirwell/vite` subpath exports the Vite adapter and its `DirwellViteOptions`
@@ -22,6 +22,28 @@ The command-line interface is described separately under [CLI](../cli/).
 Use the [configuration guide](../configuration/) and [theme guide](../themes/)
 for behavior and design examples. The code blocks on this page are imported from
 TypeScript files checked by the repository tests.
+
+## Run a Node build
+
+Install `@vp-tw/dirwell@alpha` in your project and create `build-explorer.mjs`:
+
+```js
+import { generateExplorer } from "@vp-tw/dirwell";
+
+await generateExplorer({
+  sourceDir: "./downloads",
+  outputDir: "./site-downloads",
+});
+```
+
+Run `node build-explorer.mjs` from the project directory. Await completion before
+serving or publishing the output. The generator replaces the output tree after a
+successful render; use a dedicated output directory. Use a [build adapter](../build-tools/)
+when another tool owns the application output.
+
+The other adapter subpaths export their factory and `DirwellPluginOptions`.
+`@vp-tw/dirwell/unplugin` exposes the available factories as named properties.
+See [support and compatibility](../support/) before choosing an integration.
 
 ## Start without configuration
 

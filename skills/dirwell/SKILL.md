@@ -44,7 +44,7 @@ Treat these as coordinated public contracts:
 - `DirectoryData`, file metadata, navigation decisions, and theme context.
 - `dirwell.config.ts` and `defineConfig()`.
 - `dirwell`, `build`, `serve`/`dev`, and `daemon` CLI help.
-- Stable theme component names and their props.
+- Public alpha theme component names and their props.
 - Documentation examples.
 
 When one surface changes, update its runtime validation, tests, help, and docs in

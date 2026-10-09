@@ -33,6 +33,7 @@ export interface SymlinkMetadata {
 
 export interface FileSystemEntry {
   readonly name: string;
+  /** Node-side source path; custom themes must not serialize it into public output. */
   readonly absolutePath: string;
   readonly relativePath: string;
   readonly kind: EntryKind;
@@ -53,6 +54,7 @@ export type OutputNameResolver = (
 ) => string | null | Promise<string | null>;
 
 export interface RenderedPage {
+  /** Complete document. Escape source names and other untrusted text before insertion. */
   readonly html: string;
   readonly assets?: Readonly<Record<string, string | Uint8Array>>;
 }
@@ -85,6 +87,7 @@ export interface ExplorerTheme {
   readonly name: string;
   /** Set to false when the theme does not offer global search. */
   readonly searchIndex?: boolean;
+  /** Owns the document and assets; async renderers are awaited before output replacement. */
   readonly render: (context: ThemeContext) => RenderedPage | Promise<RenderedPage>;
 }
 
@@ -93,11 +96,13 @@ export interface GenerateOptions {
   readonly include?: string | readonly string[];
   readonly exclude?: string | readonly string[];
   readonly sourceDir: string;
+  /** Dedicated output tree, replaced after a successful build. Keep unrelated files elsewhere. */
   readonly outputDir: string;
   readonly mode?: "mpa" | "ssg";
   readonly mirror?: boolean;
   readonly outputName?: OutputNameResolver | string;
   readonly theme?: ExplorerTheme;
+  /** Equivalent to `urls` in dirwell.config.ts; defaults to portable relative links. */
   readonly urlStrategy?: "base" | "html-base" | "relative";
   readonly symlinks?: {
     readonly follow?: boolean;

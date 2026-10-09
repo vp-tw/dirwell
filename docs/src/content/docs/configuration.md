@@ -17,6 +17,7 @@ you need a specific result:
 
 ## Where settings come from
 
+Install `@vp-tw/dirwell@alpha` in your project before importing it from a config.
 Create `dirwell.config.ts` in the directory selected by `--cwd`. The CLI loads
 it before resolving paths. The Vite adapter loads the file from the Vite project
 root and applies each plugin entry over it. The TypeScript API can pass
@@ -209,6 +210,10 @@ export default defineConfig({
 });
 ```
 
+`cwd` can override the project directory for config discovery and source paths.
+`outputPath` sets the default subdirectory beneath Vite's output when `outDir` is
+not set; it defaults to `dirwell`. Prefer `outDir` for an explicit destination.
+
 One object returns one Vite plugin. An array returns one plugin per explorer.
 Each entry needs its own output and public mount. An empty array or overlapping
 output or mount paths fails configuration. The same entries serve through Vite
@@ -226,5 +231,5 @@ Vite's output root, the source directory, or an existing destination without
 its ownership marker. It serves a temporary build in development, watches
 source changes, and keeps the previous preview available after a failed
 rebuild. With `mirror: true`, it rejects included absolute symlinks and links
-that escape the source tree. Vite is the verified host; other unplugin hosts
-have not been verified.
+that escape the source tree. For the other adapters and their tested modes, see [build tool adapters](../build-tools/)
+and the [support policy](../support/).
