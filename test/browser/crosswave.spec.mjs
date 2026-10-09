@@ -136,6 +136,7 @@ test("reduced motion and denied WebGL retain complete usable links", async ({ pa
 });
 
 for (const viewport of [
+  { width: 320, height: 568 },
   { width: 390, height: 844 },
   { width: 844, height: 390 },
 ]) {
@@ -147,6 +148,30 @@ for (const viewport of [
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
       true,
     );
+    const credit = page.locator(".cw-credits");
+    await expect(credit.getByRole("link", { name: "Crosswave", exact: true })).toHaveAttribute(
+      "href",
+      "https://github.com/vp-tw/dirwell/blob/main/src/theme-crosswave/README.md",
+    );
+    await expect(credit.getByRole("link", { name: "VdustR", exact: true })).toHaveAttribute(
+      "href",
+      "https://github.com/VdustR",
+    );
+    expect(
+      await page.evaluate(() => {
+        const footer = document.querySelector(".cw-bottom").getBoundingClientRect();
+        const list = document.querySelector(".cw-list-scroll").getBoundingClientRect();
+        return (
+          list.bottom <= footer.top &&
+          [...document.querySelectorAll(".cw-credits a")].every((a) => {
+            const r = a.getBoundingClientRect();
+            return (
+              r.height >= 44 && r.left >= 0 && r.right <= innerWidth && r.bottom <= innerHeight
+            );
+          })
+        );
+      }),
+    ).toBe(true);
     await page.getByRole("tab", { name: /Documents/ }).click();
     await expect(page.getByRole("tab", { name: /Documents/ })).toHaveAttribute(
       "aria-selected",
@@ -164,6 +189,7 @@ test("no JavaScript leaves native file and directory navigation", async ({ brows
   const context = await browser.newContext({ javaScriptEnabled: false });
   const page = await context.newPage();
   await page.goto(server.url);
+  await expect(page.locator(".cw-credits")).toBeVisible();
   await expect(page.getByRole("tab", { name: /Folders/ })).toBeHidden();
   await expect(page.getByRole("link", { name: /Albums\/ Folder/ })).toBeVisible();
   await page.getByRole("link", { name: /Albums\/ Folder/ }).click();
