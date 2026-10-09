@@ -15,6 +15,6 @@
     }
   },
   "peerDependencies": {
-    "@vp-tw/dirwell": "0.1.0-alpha.2"
+    "@vp-tw/dirwell": "0.1.0-alpha.3"
   }
 }

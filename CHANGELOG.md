@@ -1,5 +1,11 @@
 # @vp-tw/dirwell
 
+## 0.1.0-alpha.3
+
+### Patch Changes
+
+- Keep the bundled attribution link usable outside a repository checkout and align the API documentation with declared-target symlink navigation.
+
 ## 0.1.0-alpha.2
 
 ### Patch Changes

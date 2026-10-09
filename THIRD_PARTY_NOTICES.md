@@ -10,5 +10,5 @@ their respective owners. No endorsement is implied.
 The exact icon list is in [`dist/vscode-icons/NOTICE.txt`](./dist/vscode-icons/NOTICE.txt)
 in the published package, and in `src/vscode-icons/NOTICE.txt` in the source tree.
 Generated sites include this notice as `vscode-icons-NOTICE.txt`. The default
-theme footer links to the [Ledger theme README](./src/theme-default/README.md),
+theme footer links to the [Ledger theme README](https://github.com/vp-tw/dirwell/blob/main/src/theme-default/README.md),
 which links to the source notice.
