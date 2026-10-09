@@ -1,6 +1,6 @@
 {
   "name": "@vp-tw/dirwell",
-  "version": "0.1.0-alpha.4",
+  "version": "0.1.0-alpha.5",
   "description": "A static file explorer with safe symlinks, themes, and live reload.",
   "keywords": [
     "directory-index",

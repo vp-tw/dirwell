@@ -383,3 +383,27 @@ test("controller Back exits search without navigating away", async ({ page }) =>
   await expect(page.getByRole("searchbox")).not.toBeFocused();
   expect(page.url()).toBe(server.url);
 });
+
+test("aborted page transitions preserve navigation without unhandled rejections", async ({
+  page,
+}) => {
+  const errors = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  await page.addInitScript(() => {
+    window.addEventListener("pagereveal", (event) => {
+      if (event.viewTransition) {
+        window.__skippedTransitions = (window.__skippedTransitions ?? 0) + 1;
+        event.viewTransition.skipTransition();
+      }
+    });
+  });
+  await page.goto(server.url);
+  await page.getByRole("link", { name: /Albums\/ Folder/ }).click();
+  await expect(page).toHaveURL(/Albums\/$/);
+  await expect(page.getByRole("link", { name: /inside\.txt/ })).toBeVisible();
+  expect(await page.evaluate(() => window.__skippedTransitions)).toBeGreaterThan(0);
+  await page.keyboard.press("Backspace");
+  await expect(page).toHaveURL(server.url);
+  await expect(page.getByRole("link", { name: /note\.txt/ })).toBeVisible();
+  expect(errors).toEqual([]);
+});
