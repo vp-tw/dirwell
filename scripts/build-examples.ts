@@ -16,6 +16,7 @@ const examples = [
   "file-icons",
   "plain",
   "i18n",
+  "crosswave",
 ] as const;
 const siteBase = process.env.SITE_BASE ?? "/";
 process.env.DIRWELL_SITE_BASE = siteBase;

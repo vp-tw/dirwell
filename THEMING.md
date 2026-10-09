@@ -13,6 +13,13 @@ The [theme guide](https://vp-tw.github.io/dirwell/themes/) lists every default-t
 option, its accepted input, default, result, and use case. This file describes
 the component contract for theme authors.
 
+## Crosswave renderer
+
+`createCrosswaveTheme()` provides an independent, PSP-inspired renderer with
+category navigation, local search, ribbon light, and optional controller input.
+Its styles, assets, and runtime are separate from Ledger. See [Crosswave](https://vp-tw.github.io/dirwell/themes/#crosswave)
+for options, keyboard behavior, browser transition support, and hardware-test limits.
+
 ## Component layers
 
 Use an `ExplorerTheme` to replace the complete renderer. Use component layers

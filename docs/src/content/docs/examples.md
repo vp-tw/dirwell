@@ -28,6 +28,10 @@ and the source directory that generates it.
   Japanese, including interface labels, counts, and date/size formatting.
   [Live page](https://vp-tw.github.io/dirwell/examples/i18n/) ·
   [Source](https://github.com/vp-tw/dirwell/tree/main/examples/i18n)
+- Console-style media browsing: `crosswave` uses horizontal categories, a vertical
+  file list, ribbon lighting, keyboard/controller input, and directory transitions.
+  [Live page](https://vp-tw.github.io/dirwell/examples/crosswave/) ·
+  [Source](https://github.com/vp-tw/dirwell/tree/main/examples/crosswave)
 - Completely different page: `custom-theme` renders a release catalog with
   its own HTML and CSS. [Live page](https://vp-tw.github.io/dirwell/examples/custom-theme/) ·
   [Source](https://github.com/vp-tw/dirwell/tree/main/examples/custom-theme)

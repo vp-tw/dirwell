@@ -10,6 +10,8 @@ Choose the smallest level of customization that gives you the page you need:
   icons, metadata, or selected components. See the [Catppuccin override](../examples/).
 - `createPlainTheme()` renders prepared entries and safe links as basic HTML.
   Change project metadata only. See the [plain listing](../examples/).
+- `createCrosswaveTheme()` provides PSP-inspired category navigation, animated
+  light, and keyboard/gamepad controls. See [Crosswave](#crosswave).
 - A complete `ExplorerTheme` uses prepared entries and safe links in your own
   document and assets. See the [release catalog](../examples/).
 
@@ -146,6 +148,47 @@ Overriding `EntryList` or `EntryRow` disables the default MPA virtual list for
 those pages. If the replacement must support large directories, implement
 its own row loading or keep the default components.
 
+## Crosswave
+
+Crosswave uses a PSP-inspired crossbar with real file categories, a vertical
+file list, and flowing ribbon light. It is an optional packaged renderer:
+
+```ts
+import { createCrosswaveTheme, defineConfig } from "@vp-tw/dirwell";
+
+export default defineConfig({
+  theme: createCrosswaveTheme({
+    color: "azure",
+    project: { name: "Media Library" },
+  }),
+});
+```
+
+| Option             | Default          | Effect                                                                                                                        |
+| ------------------ | ---------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `color`            | `"azure"`        | Initial palette: `azure`, `violet`, `amber`, `rose`, `jade`, or `graphite`. Visitors can save another color.                  |
+| `backgroundMotion` | `true`           | Enables animated light. Visitors can pause it; reduced motion and WebGL fallback keep a static background.                    |
+| `pageTransitions`  | `true`           | Enables same-origin directory transitions in browsers with cross-document View Transitions. Other browsers navigate normally. |
+| `gamepad`          | `true`           | Enables standard-mapped Gamepad API navigation where available. Keyboard and touch remain usable independently.               |
+| `project`          | Dirwell metadata | Sets the displayed project name using the same metadata type as the other themes.                                             |
+
+Use left/right to choose a category, up/down to select a file, Enter to open,
+Backspace for the parent folder, and `/` for local search. Escape clears search.
+The horizontal rail scrolls on narrow screens; long names wrap. All entries remain
+HTML links in SSG and MPA, with no deferred list. Crosswave searches the current
+folder and does not generate a global index. Use Ledger when global search or
+large-directory virtualization is required.
+
+A standard controller uses the D-pad or left stick for navigation, button 0 for
+confirm, button 1 for back, and Start for search. Held confirm is ignored on
+connection until released. Browser tests inject controllable Gamepad API data;
+physical controllers, browser device activation, and USB/Bluetooth are unverified.
+If a browser blocks a controller-initiated file tab, the focused link remains
+available with an explicit Enter/click recovery message.
+
+[Live Crosswave example](https://vp-tw.github.io/dirwell/examples/crosswave/) ·
+[Source and research notes](https://github.com/vp-tw/dirwell/tree/main/examples/crosswave)
+
 ## Complete theme
 
 Implement `ExplorerTheme` when the whole page layout or rendering system
@@ -161,7 +204,7 @@ uses a complete renderer without client-side JavaScript. See the
 
 ## Localization belongs to the theme
 
-Dirwell does not provide a core locale setting. Ledger and Plain keep their
+Dirwell does not provide a core locale setting. Ledger, Plain, and Crosswave keep their
 English interface. A renderer may own its dictionaries, language controls,
 plural rules, and date/size formatting.
 

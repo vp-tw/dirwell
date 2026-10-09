@@ -60,7 +60,7 @@ try {
     `
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-import {generateExplorer} from ${JSON.stringify(metadata.name)};
+import {generateExplorer,createCrosswaveTheme} from ${JSON.stringify(metadata.name)};
 import {createExampleTheme} from 'dirwell-example-theme';
 import {rollup} from 'rollup';
 import Dirwell from ${JSON.stringify(`${metadata.name}/rollup`)};
@@ -72,6 +72,13 @@ for (const mode of ['ssg','mpa']) {
  assert.equal(await readFile(mode+'/a & b.txt','utf8'),'external consumer file');
  assert.match(await readFile(mode+'/docs/index.html','utf8'),/Parent directory/);
  assert.ok((await readFile(mode+(mode==='mpa'?'/__dirwell':'')+'/package-theme.css')).length>0);
+}
+for(const mode of ['ssg','mpa']){
+ await generateExplorer({sourceDir:'files',outputDir:'crosswave-'+mode,mode,theme:createCrosswaveTheme({color:'jade'})});
+ const output='crosswave-'+mode;
+ assert.match(await readFile(output+'/index.html','utf8'),/Crosswave/);
+ assert.match(await readFile(output+(mode==='mpa'?'/__dirwell':'')+'/crosswave.js','utf8'),/getGamepads/);
+ assert.ok((await readFile(output+(mode==='mpa'?'/__dirwell':'')+'/crosswave.css')).length>0);
 }
 const bundle=await rollup({input:'entry.js',plugins:[Dirwell({root:'files'})]});
 try {await bundle.write({dir:'rollup-output',format:'es'});} finally {await bundle.close();}

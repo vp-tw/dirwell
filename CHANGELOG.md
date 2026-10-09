@@ -1,5 +1,11 @@
 # @vp-tw/dirwell
 
+## 0.1.0-alpha.4
+
+### Minor Changes
+
+- Add the opt-in Crosswave theme with a PSP-inspired category rail, animated light ribbons, directory transitions, responsive file navigation, keyboard controls, and standard gamepad support. Include a live media-library example and document configuration and fallback behavior.
+
 ## 0.1.0-alpha.3
 
 ### Patch Changes

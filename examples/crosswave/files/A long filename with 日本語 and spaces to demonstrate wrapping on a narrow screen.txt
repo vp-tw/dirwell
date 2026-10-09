@@ -1,0 +1,1 @@
+A synthetic long-name specimen for responsive navigation and focus testing.
