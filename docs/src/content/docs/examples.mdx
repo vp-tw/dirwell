@@ -1,0 +1,56 @@
+---
+title: Examples
+description: Pick a working build, inspect its config, and compare the result.
+---
+
+import { exampleCatalog } from "../../../../examples/catalog.ts";
+export const siteBase = import.meta.env.BASE_URL;
+export const repositoryUrl =
+  import.meta.env.PUBLIC_REPOSITORY_URL ?? "https://github.com/vp-tw/dirwell";
+
+Open the example closest to your use case. Each item links to the live page
+and the source directory that generates it.
+
+<ul>
+  {exampleCatalog.map((example) => (
+    <li>
+      <strong>{example.name}</strong>: {example.description}{" "}
+      <a href={`${siteBase}examples/${example.slug}/`}>Live example</a> ·{" "}
+      <a href={`${repositoryUrl}/tree/main/examples/${example.slug}`}>Source and instructions</a>
+    </li>
+  ))}
+</ul>
+
+The source directories include their own `dirwell.config.ts` and input
+`files/` trees. The documentation build reads those configs and passes them
+as one array to `Dirwell([...])` in a Vite build. It writes each explorer to
+`docs/public/examples/` before Astro copies them into the publish tree. The
+homepage embeds the generated `file-icons` page, so its preview uses the same
+HTML and assets as the live example.
+
+## Run one example
+
+After [setting up a checkout](https://github.com/vp-tw/dirwell/blob/main/CONTRIBUTING.md#set-up-a-checkout), run this from the repository root. Replace `basic` with an example’s source directory name:
+
+```bash
+pnpm dirwell build files --cwd examples/basic -o dist
+```
+
+This writes `examples/basic/dist/`. Portable examples can be opened through their `index.html`. The `base` example needs its configured HTTP mount; use the docs server below or run `pnpm dirwell serve files --cwd examples/base -o dist`. Keep CLI output separate from `docs/public/examples/`, which the Vite adapter owns.
+
+## Build and inspect the site locally
+
+From the repository root:
+
+```bash
+SITE_BASE=/dirwell/ pnpm run site:build
+```
+
+Open the resulting `site/examples/` directories with a local static server.
+`SITE_BASE` sets the documentation base path; the `base` example uses it for
+its generated links. For local iteration, `pnpm run docs:dev` builds the
+examples, starts Astro, watches source and example files, and reloads the
+embedded preview after a successful rebuild.
+
+`PUBLIC_REPOSITORY_URL` controls the source links on the landing page.
+GitHub Actions supplies the repository URL when it deploys Pages.

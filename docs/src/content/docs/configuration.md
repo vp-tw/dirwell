@@ -6,14 +6,15 @@ description: Choose output, URLs, filters, sorting, themes, and server settings.
 Start with `ssg`, relative URLs, and the default theme. Change a setting when
 you need a specific result:
 
-| Need                                             | Start with                             |
-| ------------------------------------------------ | -------------------------------------- |
-| Publish one portable folder                      | `dirwell build ./files` with no config |
-| Publish under a fixed URL prefix                 | `base` and `urls: "base"`              |
-| Share runtime assets across many directory pages | `mode: "mpa"`                          |
-| Publish only selected files                      | `include` and `exclude`                |
-| Customize the explorer interface                 | `theme: createDefaultTheme(...)`       |
-| Serve several explorers from one Vite project    | `Dirwell([...])`                       |
+| Need                                             | Start with                                     |
+| ------------------------------------------------ | ---------------------------------------------- |
+| Publish one portable folder                      | `dirwell build ./files` with no config         |
+| Publish under a fixed URL prefix                 | `base` and `urls: "base"`                      |
+| Share runtime assets across many directory pages | `mode: "mpa"`                                  |
+| Publish only selected files                      | `include` and `exclude`                        |
+| Set page titles, descriptions, or share images   | `metadata` — see [page metadata](../metadata/) |
+| Customize the explorer interface                 | `theme: createDefaultTheme(...)`               |
+| Serve several explorers from one Vite project    | `Dirwell([...])`                               |
 
 ## Where settings come from
 
@@ -113,7 +114,9 @@ rejected. Empty arrays do not restrict that side of the filter.
 Parent directories stay in the explorer when they lead to a selected file.
 The same selection controls mirrored files, directory pages, and search
 results in build, serve, and Vite modes. A symlink to an excluded target may
-remain visible, but it has no usable link and is not mirrored.
+remain visible, but its excluded target is not mirrored or given a generated
+page. Its link opens the declared target as plain text; Dirwell does not expose
+the excluded file through that view.
 
 ## Public URLs
 
@@ -175,6 +178,10 @@ icons, and appearance controls. `createPlainTheme()` emits no JavaScript or
 search index. `createDefaultTheme(options)` changes selected controls and
 components without replacing the whole renderer. See [theme choices](../themes/).
 
+## Page metadata
+
+`metadata` accepts site naming, deployment URL, fixed or async title/description values, and an image source or async image callback. Built-in themes use a static whole-site image by default. See [page metadata and share images](../metadata/) for complete checked configurations, counts, path handling, and fonts.
+
 ## Server
 
 `server` configures the CLI `serve` and `daemon start` commands. Vite uses
@@ -233,7 +240,3 @@ source changes, and keeps the previous preview available after a failed
 rebuild. With `mirror: true`, it rejects included absolute symlinks and links
 that escape the source tree. For the other adapters and their tested modes, see [build tool adapters](../build-tools/)
 and the [support policy](../support/).
-
-## Page metadata and bundled fonts
-
-Built-in themes provide shared title/description configuration and one static whole-site share image by default. Set `metadata` in your config; use callbacks for per-folder text/images. [Page metadata and share images](https://vp-tw.github.io/dirwell/metadata/) covers counts, symlinks, fonts, path rules, and the dynamic example.

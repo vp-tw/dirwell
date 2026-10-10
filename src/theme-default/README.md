@@ -38,3 +38,7 @@ with the instant's UTC offset and the UTC ISO instant. The control works with
 keyboard, touch, and pointer, and Escape returns focus to the date. Static HTML
 and no-JavaScript listings remain labeled UTC. Plain keeps UTC throughout.
 See [the presentation decision](../../TIMESTAMP_PRESENTATION.md).
+
+## Fonts and share images
+
+The theme uses bundled Adobe Source fonts with pinned sources and SIL-OFL notices. Generated output includes `source-fonts-NOTICE.txt`; package sources and licenses are in [`src/fonts`](../fonts/). Shared config `metadata` controls titles, descriptions, and image sources/callbacks. See [page metadata and share images](https://vp-tw.github.io/dirwell/metadata/).

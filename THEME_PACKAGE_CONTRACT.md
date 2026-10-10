@@ -11,12 +11,12 @@ from packed distributions rather than repository source aliases. The
 
 ## Public surface
 
-| Surface                  | Contract                                                                                                               |
-| ------------------------ | ---------------------------------------------------------------------------------------------------------------------- |
-| `ExplorerTheme`          | A name, optional `searchIndex`, and a synchronous or asynchronous `render(context)` function.                          |
-| `ThemeContext`           | Prepared `DirectoryData`, output mode/name, sort policy, optional HTML base, asset/index URLs, and navigation helpers. |
-| `RenderedPage`           | A complete HTML document and optional map of safe asset filenames to strings or bytes.                                 |
-| Default theme components | Optional typed overrides and ordered layers from `@vp-tw/dirwell/theme`; a full renderer can operate independently.    |
+| Surface                  | Contract                                                                                                                               |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `ExplorerTheme`          | A name, optional `searchIndex` and `metadataDefaults`, and sync/async `render(context)`.                                               |
+| `ThemeContext`           | Prepared `DirectoryData`, output mode/name, sort policy, optional HTML base/page `metadata`, asset/index URLs, and navigation helpers. |
+| `RenderedPage`           | A complete HTML document and optional map of safe asset filenames to strings or bytes.                                                 |
+| Default theme components | Optional typed overrides and ordered layers from `@vp-tw/dirwell/theme`; a full renderer can operate independently.                    |
 
 Use `hrefFor()`, `hrefForDirectory()`, and `exitsExplorerFor()` instead of
 reconstructing filesystem or deployment URLs. `hrefFor()` can return `null`;
@@ -26,7 +26,11 @@ render an unavailable label in that case. Preserve the caller's HTML base when
 Set `searchIndex: false` when the theme has no global search. Otherwise the
 generator can emit index assets, but the theme still owns how they are used.
 Styles and tokens remain private to each renderer. Core does not supply a locale
-setting; Ledger and Plain keep their English interfaces.
+setting; Ledger, Plain, and Crosswave keep their English interfaces.
+
+## Page metadata
+
+A custom theme may include `context.metadata?.head` in its document head, or use the resolved title and description. The generator does not insert tags into custom HTML. `metadataDefaults` is optional and selects a built-in image preset; custom images belong in the caller’s `metadata.image` callback. These callbacks receive public counts and names, rather than full Node-side filesystem entries. See [metadata](https://vp-tw.github.io/dirwell/metadata/).
 
 ## Assets and trust
 

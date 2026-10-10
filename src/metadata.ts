@@ -1,3 +1,4 @@
+import { escapeHtml } from "./html.ts";
 import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
@@ -26,11 +27,15 @@ export interface ResolvedMetadataContext extends MetadataContext {
   readonly description: string;
 }
 export interface MetadataOptions {
+  /** Default page/image name; falls back to the built-in theme’s project.name. */
   readonly siteName?: string;
+  /** Image header label; falls back to the repository URL’s owner/path. */
   readonly repositoryName?: string;
   /** Deployed explorer root, including its deployment base; never the repository URL. */
   readonly siteUrl?: string;
+  /** Page title; defaults to site name at root and path · site name in child folders. */
   readonly title?: MetadataValue<string>;
+  /** Whole-site counts by default; use directory counts for per-folder descriptions. */
   readonly description?: MetadataValue<string>;
   readonly image?:
     | ImageSource
@@ -82,13 +87,7 @@ export function repositoryName(repositoryUrl: string): string {
     return repositoryUrl;
   }
 }
-function esc(text: string): string {
-  return text
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;");
-}
+
 function stringValue(value: unknown, label: string): string {
   if (typeof value !== "string") throw new TypeError(`${label} must resolve to a string`);
   return value;
@@ -140,6 +139,44 @@ export function createMetadataResolver(
   const siteUrl = deployedRoot(options.siteUrl);
   const assets = new Map<string, Uint8Array>();
   let defaultImage: Promise<File> | undefined;
+  // One source snapshot per build: fixed images should not reread or rehash per page.
+  const fileSources = new WeakMap<
+    File,
+    Promise<{ bytes: Uint8Array; extension: string; digest: string }>
+  >();
+  const pathSources = new Map<
+    string,
+    Promise<{ bytes: Uint8Array; extension: string; digest: string }>
+  >();
+  const loaded = async (bytes: Uint8Array, filename: string) => {
+    const extension = path.extname(filename).toLowerCase();
+    if (![".png", ".jpg", ".jpeg", ".webp", ".gif"].includes(extension))
+      throw new Error("Metadata images must be PNG, JPEG, WebP, or GIF files");
+    return { bytes, extension, digest: createHash("sha256").update(bytes).digest("hex") };
+  };
+  function loadImage(source: ImageSource) {
+    if (source instanceof File) {
+      let image = fileSources.get(source);
+      if (image === undefined) {
+        image = source.arrayBuffer().then((buffer) => loaded(new Uint8Array(buffer), source.name));
+        fileSources.set(source, image);
+      }
+      return image;
+    }
+    if (typeof source !== "string" && !(source instanceof URL))
+      throw new TypeError("metadata.image.source must be a File, local path, or file URL");
+    if (source instanceof URL && source.protocol !== "file:")
+      throw new Error("metadata.image source URLs must use file:");
+    const input =
+      source instanceof URL ? fileURLToPath(source) : path.resolve(sourceDirectory, source);
+    let image = pathSources.get(input);
+    if (image === undefined) {
+      image = readFile(input).then((bytes) => loaded(bytes, path.basename(input)));
+      pathSources.set(input, image);
+    }
+    return image;
+  }
+
   async function imageFor(
     context: ResolvedMetadataContext,
   ): Promise<{ outputPath: string; alt: string } | null> {
@@ -166,29 +203,12 @@ export function createMetadataResolver(
       throw new TypeError(
         "metadata.image must resolve to a File, local path, file URL, or source object",
       );
-    let bytes: Uint8Array, filename: string;
-    if (config.source instanceof File) {
-      bytes = new Uint8Array(await config.source.arrayBuffer());
-      filename = config.source.name;
-    } else if (typeof config.source === "string" || config.source instanceof URL) {
-      if (config.source instanceof URL && config.source.protocol !== "file:")
-        throw new Error("metadata.image source URLs must use file:");
-      const input =
-        config.source instanceof URL
-          ? fileURLToPath(config.source)
-          : path.resolve(sourceDirectory, config.source);
-      bytes = await readFile(input);
-      filename = path.basename(input);
-    } else throw new TypeError("metadata.image.source must be a File, local path, or file URL");
-    const extension = path.extname(filename).toLowerCase();
-    if (![".png", ".jpg", ".jpeg", ".webp", ".gif"].includes(extension))
-      throw new Error("Metadata images must be PNG, JPEG, WebP, or GIF files");
+    const { bytes, extension, digest } = await loadImage(config.source);
     const outputPath = safeOutputPath(
-      config.outputPath ??
-        `__dirwell/metadata/${createHash("sha256").update(bytes).digest("hex")}${extension}`,
+      config.outputPath ?? `__dirwell/metadata/${digest}${extension}`,
     );
     const existing = assets.get(outputPath);
-    if (existing !== undefined && !Buffer.from(existing).equals(bytes))
+    if (existing !== undefined && existing !== bytes && !Buffer.from(existing).equals(bytes))
       throw new Error(`Conflicting metadata image outputPath: ${outputPath}`);
     assets.set(outputPath, bytes);
     return {
@@ -234,12 +254,12 @@ export function createMetadataResolver(
       );
       const image = await imageFor(Object.freeze({ ...context, title, description }));
       const meta = (key: string, value: string, property = false) =>
-        `<meta data-dirwell-metadata ${property ? "property" : "name"}="${key}" content="${esc(value)}">`;
-      let head = `<title>${esc(title)}</title>${meta("description", description)}${meta("og:title", title, true)}${meta("og:description", description, true)}${meta("og:type", "website", true)}`;
+        `<meta data-dirwell-metadata ${property ? "property" : "name"}="${key}" content="${escapeHtml(value)}">`;
+      let head = `<title>${escapeHtml(title)}</title>${meta("description", description)}${meta("og:title", title, true)}${meta("og:description", description, true)}${meta("og:type", "website", true)}`;
       if (siteUrl) {
         const canonical = new URL(pagePath.split("/").map(encodeURIComponent).join("/"), siteUrl)
           .href;
-        head += `${meta("og:url", canonical, true)}<link data-dirwell-metadata rel="canonical" href="${esc(canonical)}">`;
+        head += `${meta("og:url", canonical, true)}<link data-dirwell-metadata rel="canonical" href="${escapeHtml(canonical)}">`;
       }
       if (image) {
         const href = siteUrl

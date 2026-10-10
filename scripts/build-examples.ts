@@ -1,3 +1,4 @@
+import { exampleCatalog } from "../examples/catalog.ts";
 import { randomUUID } from "node:crypto";
 import { access, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -8,18 +9,7 @@ import { loadDirwellConfig } from "../src/config.ts";
 import dirwellVite, { type DirwellViteOptions } from "../src/vite.ts";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const examples = [
-  "basic",
-  "base",
-  "custom-theme",
-  "default-theme-override",
-  "file-icons",
-  "plain",
-  "i18n",
-  "crosswave",
-  "crosswave-categories",
-  "dynamic-og",
-] as const;
+const examples = exampleCatalog.map(({ slug }) => slug);
 const siteBase = process.env.SITE_BASE ?? "/";
 process.env.DIRWELL_SITE_BASE = siteBase;
 const publishedExamples = path.join(root, "docs/public/examples");

@@ -77,6 +77,7 @@ asynchronous. A `dirwell.config.ts` file is discovered from `--cwd`.
 | `outputName` | Safe filename or sync/async resolver; `defaultOutputName` uses `_dirwell.html` when an index exists and skips when both names exist. |
 | `sort`       | `field`, `nameMode`, `direction`, and `directoriesFirst`; name, natural comparison, ascending, directories first.                    |
 | `symlinks`   | `follow`, `boundary`, and `onCycle`; `{ follow: false, boundary: "root", onCycle: "skip" }`.                                         |
+| `metadata`   | Shared title/description and image settings; built-in themes supply defaults. See [metadata](../metadata/).                          |
 | `theme`      | `defaultTheme`.                                                                                                                      |
 | `server`     | Serve/daemon host `127.0.0.1`, port `4173`; `HOST` and `PORT` may override these.                                                    |
 | `extends`    | No inherited config; local path or array of local paths.                                                                             |
@@ -144,45 +145,45 @@ See [Crosswave options](../themes/#crosswave).
 
 ## Exported types
 
-| Type                             | Contract                                                                                                                       |
-| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `DirwellConfig`                  | Config object fields listed above.                                                                                             |
-| `DirwellConfigContext`           | Command passed to a config function.                                                                                           |
-| `DirwellConfigInput`             | Config object or synchronous/asynchronous config function.                                                                     |
-| `GenerateOptions`                | Generator source, output, URL, symlink, sort, and theme options.                                                               |
-| `DirectoryData`                  | Root, current directory, parent, depth, and complete entries passed to output naming and themes.                               |
-| `FileSystemEntry`                | Entry name, paths, kind, metadata, and symlink state. `absolutePath` is for Node-side renderers; do not put it in public HTML. |
-| `FileMetadata`                   | Device, ownership, inode, size, mode, link count, and times.                                                                   |
-| `FileTimes`                      | Access, change, creation, and modification ISO timestamps.                                                                     |
-| `EntryKind`                      | Directory, file, symlink, or other.                                                                                            |
-| `SymlinkMetadata`                | Declared target, resolved and root-relative paths, target kind, and safety flags.                                              |
-| `OutputNameResolver`             | Sync or async function from `DirectoryData` to a filename or `null`.                                                           |
-| `SortField`                      | Name, modified time, or size.                                                                                                  |
-| `NameSortMode`                   | Unicode, locale-aware, or natural name comparison.                                                                             |
-| `SortDirection`                  | Ascending or descending.                                                                                                       |
-| `SortOptions`                    | Field, name mode, direction, and directory grouping.                                                                           |
-| `ExplorerTheme`                  | Theme name, optional search-index policy, and renderer.                                                                        |
-| `ThemeContext`                   | Prepared directory, output mode, URL helpers, sort state, and link decisions.                                                  |
-| `RenderedPage`                   | HTML plus optional named text or byte assets.                                                                                  |
-| `PlainThemeOptions`              | Optional plain-theme project metadata.                                                                                         |
-| `DirwellThemeComponents`         | The eight typed HTML component functions.                                                                                      |
-| `DirwellThemeComponentOverrides` | Partial component layer.                                                                                                       |
-| `DefaultThemeIconSet`            | Light and optional dark SVG icon sets with attribution.                                                                        |
-| `DefaultThemeIconVariant`        | File, folder, and extension-specific SVG markup for one color scheme.                                                          |
-| `ThemeComponent<Props>`          | Function that renders typed props to an HTML string; available from `@vp-tw/dirwell/theme`.                                    |
-| `DefaultThemeRuntimeConfig`      | Serialized default-theme browser controls and asset links.                                                                     |
-| `BreadcrumbItem`                 | Label, link, and current-page state.                                                                                           |
-| `EntryNavigation`                | Link and whether navigation leaves the explorer.                                                                               |
-| `EntryListItem`                  | Entry, position, and navigation data.                                                                                          |
-| `PageShellProps`                 | Full-document component inputs.                                                                                                |
-| `BreadcrumbsProps`               | Breadcrumb component inputs.                                                                                                   |
-| `ToolbarProps`                   | Search, sorting, keyboard, and appearance-control inputs.                                                                      |
-| `EntryListProps`                 | List markup, directory, parent link, and sorting state.                                                                        |
-| `EntryRowProps`                  | One entry's data, navigation, and icon.                                                                                        |
-| `EmptyStateProps`                | Empty-state message.                                                                                                           |
-| `FooterProps`                    | Project metadata, shortcuts, and notice link.                                                                                  |
-| `IconName`                       | Built-in control icon names.                                                                                                   |
-| `IconProps`                      | Icon name, optional label, size, and file-type image source.                                                                   |
+| Type                             | Contract                                                                                                                                                  |
+| -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `DirwellConfig`                  | Config object fields listed above.                                                                                                                        |
+| `DirwellConfigContext`           | Command passed to a config function.                                                                                                                      |
+| `DirwellConfigInput`             | Config object or synchronous/asynchronous config function.                                                                                                |
+| `GenerateOptions`                | Generator source, output, URL, symlink, sort, theme, and metadata options. `metadataBaseDirectory` resolves local image paths; default working directory. |
+| `DirectoryData`                  | Root, current directory, parent, depth, and complete entries passed to output naming and themes.                                                          |
+| `FileSystemEntry`                | Entry name, paths, kind, metadata, and symlink state. `absolutePath` is for Node-side renderers; do not put it in public HTML.                            |
+| `FileMetadata`                   | Device, ownership, inode, size, mode, link count, and times.                                                                                              |
+| `FileTimes`                      | Access, change, creation, and modification ISO timestamps.                                                                                                |
+| `EntryKind`                      | Directory, file, symlink, or other.                                                                                                                       |
+| `SymlinkMetadata`                | Declared target, resolved and root-relative paths, target kind, and safety flags.                                                                         |
+| `OutputNameResolver`             | Sync or async function from `DirectoryData` to a filename or `null`.                                                                                      |
+| `SortField`                      | Name, modified time, or size.                                                                                                                             |
+| `NameSortMode`                   | Unicode, locale-aware, or natural name comparison.                                                                                                        |
+| `SortDirection`                  | Ascending or descending.                                                                                                                                  |
+| `SortOptions`                    | Field, name mode, direction, and directory grouping.                                                                                                      |
+| `ExplorerTheme`                  | Theme name, optional search-index policy and `metadataDefaults`, and renderer.                                                                            |
+| `ThemeContext`                   | Prepared directory, output mode, URL helpers, sort state, link decisions, and optional resolved page `metadata`.                                          |
+| `RenderedPage`                   | HTML plus optional named text or byte assets.                                                                                                             |
+| `PlainThemeOptions`              | Optional plain-theme project metadata.                                                                                                                    |
+| `DirwellThemeComponents`         | The eight typed HTML component functions.                                                                                                                 |
+| `DirwellThemeComponentOverrides` | Partial component layer.                                                                                                                                  |
+| `DefaultThemeIconSet`            | Light and optional dark SVG icon sets with attribution.                                                                                                   |
+| `DefaultThemeIconVariant`        | File, folder, and extension-specific SVG markup for one color scheme.                                                                                     |
+| `ThemeComponent<Props>`          | Function that renders typed props to an HTML string; available from `@vp-tw/dirwell/theme`.                                                               |
+| `DefaultThemeRuntimeConfig`      | Serialized default-theme browser controls and asset links.                                                                                                |
+| `BreadcrumbItem`                 | Label, link, and current-page state.                                                                                                                      |
+| `EntryNavigation`                | Link and whether navigation leaves the explorer.                                                                                                          |
+| `EntryListItem`                  | Entry, position, and navigation data.                                                                                                                     |
+| `PageShellProps`                 | Full-document component inputs, including optional `metadata` for the head.                                                                               |
+| `BreadcrumbsProps`               | Breadcrumb component inputs.                                                                                                                              |
+| `ToolbarProps`                   | Search, sorting, keyboard, and appearance-control inputs.                                                                                                 |
+| `EntryListProps`                 | List markup, directory, parent link, and sorting state.                                                                                                   |
+| `EntryRowProps`                  | One entry's data, navigation, and icon.                                                                                                                   |
+| `EmptyStateProps`                | Empty-state message.                                                                                                                                      |
+| `FooterProps`                    | Project metadata, shortcuts, and notice link.                                                                                                             |
+| `IconName`                       | Built-in control icon names.                                                                                                                              |
+| `IconProps`                      | Icon name, optional label, size, and file-type image source.                                                                                              |
 
 The types are re-exported from `src/model.ts`, `src/config.ts`,
 `src/theme-components.ts`, and `src/theme-plain.ts`. Component functions return
@@ -207,8 +208,19 @@ HTML strings; call `escapeHtml()` for untrusted entry or project text.
 
 ## Metadata and share images
 
-`describeContent` formats counts; it formats folders, files, and links in that order, omitting zero counts and returning `Empty folder` when all are zero. `createShareImage` asynchronously returns a PNG `File` with fixed bundled fonts and one of the `ledger`, `plain`, or `crosswave` styles.
+`describeContent` formats folders, files, and links in that order, omitting zero counts and returning `Empty folder` when all are zero. `createShareImage` asynchronously returns a PNG `File` with fixed bundled fonts and one of the `ledger`, `plain`, or `crosswave` styles.
 
-`ContentCounts` contains `folderCount`, `fileCount`, and `linkCount`. `MetadataContext` supplies public `site` totals/name/repositoryName and direct `directory` counts/name/relativePath. `ResolvedMetadataContext` also contains resolved `title` and `description`. `MetadataValue` accepts a fixed value or an async callback. `MetadataOptions` configures site naming, deployment URL, title, description, and image. `ImageSource` is a `File`, local path string, or file `URL`. `MetadataImage` adds an optional output-root `outputPath` and `alt`. `PageMetadata` contains resolved strings and escaped `head` HTML for custom themes. `ThemeMetadataDefaults` selects default site/repository naming and image style. `ShareImageOptions` configures the image theme, title, description, repositoryName, and optional directoryPath.
+| Type                      | Contract                                                                                     |
+| ------------------------- | -------------------------------------------------------------------------------------------- |
+| `ContentCounts`           | `folderCount`, `fileCount`, and `linkCount`.                                                 |
+| `MetadataContext`         | Public `site` totals/name/repositoryName and immediate `directory` counts/name/relativePath. |
+| `ResolvedMetadataContext` | The same context plus resolved `title` and `description`, passed to image callbacks.         |
+| `MetadataValue`           | A fixed value or sync/async callback from `MetadataContext`.                                 |
+| `MetadataOptions`         | Site naming, deployment URL, text values/callbacks, and image source/callback.               |
+| `ImageSource`             | A Node `File`, local path string, or `file:` URL.                                            |
+| `MetadataImage`           | A `source` with optional output-root `outputPath` and `alt`.                                 |
+| `PageMetadata`            | Resolved title/description and escaped `head` HTML for custom themes.                        |
+| `ThemeMetadataDefaults`   | A theme’s default site/repository naming and built-in image style.                           |
+| `ShareImageOptions`       | Image `theme`, `title`, `description`, optional `repositoryName` and `directoryPath`.        |
 
 See [Page metadata and share images](../metadata/) for defaults, path handling, counting, and complete examples.

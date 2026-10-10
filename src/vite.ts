@@ -1,3 +1,4 @@
+import { contentTypes } from "./content-types.ts";
 import { lstat, mkdtemp, readFile, realpath, rm, stat, writeFile } from "node:fs/promises";
 import { createReadStream } from "node:fs";
 import { tmpdir } from "node:os";
@@ -20,20 +21,6 @@ export type DirwellViteOptions = Omit<DirwellConfig, "extends" | "server"> & {
 };
 
 const ownershipMarker = ".dirwell-vite-output";
-const contentTypes: Readonly<Record<string, string>> = {
-  ".css": "text/css; charset=utf-8",
-  ".html": "text/html; charset=utf-8",
-  ".js": "text/javascript; charset=utf-8",
-  ".json": "application/json; charset=utf-8",
-  ".svg": "image/svg+xml",
-  ".png": "image/png",
-  ".jpg": "image/jpeg",
-  ".jpeg": "image/jpeg",
-  ".webp": "image/webp",
-  ".gif": "image/gif",
-  ".woff2": "font/woff2",
-  ".txt": "text/plain; charset=utf-8",
-};
 
 function mountPath(base: string): string {
   const pathname = /^https?:\/\//i.test(base) ? new URL(base).pathname : base;

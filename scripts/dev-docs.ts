@@ -47,7 +47,11 @@ await buildExamples();
 
 const watcher = chokidar.watch(inputs, {
   ignoreInitial: true,
-  ignored: [/(^|[/\\])node_modules([/\\]|$)/, /(^|[/\\])\.dirwell([/\\]|$)/],
+  ignored: [
+    /(^|[/\\])node_modules([/\\]|$)/,
+    /(^|[/\\])\.dirwell([/\\]|$)/,
+    /[/\\]examples[/\\][^/\\]+[/\\](dist|\.dirwell-preview)([/\\]|$)/,
+  ],
 });
 
 watcher.on("all", () => {

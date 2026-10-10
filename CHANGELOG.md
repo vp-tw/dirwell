@@ -1,5 +1,11 @@
 # @vp-tw/dirwell
 
+## 0.1.0-alpha.12
+
+### Patch Changes
+
+- Clarify theme and metadata documentation, order examples from first build to advanced customization, and make standalone example commands preserve Vite-owned output. Resolve native example folder links in docs development. Reuse fixed metadata image sources once per build, share HTML escaping and response media types, and distribute generated font licenses.
+
 ## 0.1.0-alpha.11
 
 ### Patch Changes

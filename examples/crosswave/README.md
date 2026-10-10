@@ -1,4 +1,4 @@
-# Crosswave media library
+# Crosswave file browser
 
 A complete packaged theme inspired by the PSP crossbar: horizontal file
 categories, a vertical item list, original geometric icons, and procedural
@@ -8,7 +8,7 @@ ribbon lighting. No console firmware assets or external runtime dependencies.
 import { createCrosswaveTheme, defineConfig } from "@vp-tw/dirwell";
 
 export default defineConfig({
-  theme: createCrosswaveTheme({ color: "azure", project: { name: "Media Library" } }),
+  theme: createCrosswaveTheme({ color: "azure", project: { name: "Sample files" } }),
 });
 ```
 

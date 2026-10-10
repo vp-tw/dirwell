@@ -4,16 +4,14 @@ description: Choose the default, plain, or complete renderer and configure its p
 ---
 
 `theme` controls the generated HTML, styles, icons, and browser behavior.
-Choose the smallest level of customization that gives you the page you need:
+Choose a built-in theme before replacing components or writing a renderer:
 
-- `createDefaultTheme(options)` keeps the explorer and changes controls,
-  icons, metadata, or selected components. See the [Catppuccin override](../examples/).
-- `createPlainTheme()` renders prepared entries and safe links as basic HTML.
-  Change project metadata only. See the [plain listing](../examples/).
-- `createCrosswaveTheme()` provides PSP-inspired category navigation, animated
-  light, and keyboard/gamepad controls. See [Crosswave](#crosswave).
-- A complete `ExplorerTheme` uses prepared entries and safe links in your own
-  document and assets. See the [release catalog](../examples/).
+- **Ledger (default)**: search, sorting, icons, and large-folder support. Use `createDefaultTheme()`. [Live Ledger](https://vp-tw.github.io/dirwell/examples/file-icons/).
+- **Plain**: complete HTML with native links and no JavaScript. Use `createPlainTheme()`. [Live Plain](https://vp-tw.github.io/dirwell/examples/plain/).
+- **Crosswave**: a PSP-inspired crossbar, moving light, and keyboard/gamepad controls. Use `createCrosswaveTheme()`. [Live Crosswave](https://vp-tw.github.io/dirwell/examples/crosswave/).
+
+Keep Ledger’s behavior with [component overrides](#component-overrides), or implement an `ExplorerTheme` for a [complete renderer](#complete-theme).
+All three built-in themes support [page metadata and share images](../metadata/). Interface text and bookmarks/share previews are configured separately.
 
 For a config that imports a theme, first [install Dirwell in your project](../getting-started/#3-save-project-settings-when-needed).
 Ledger is the name of the default theme; `createDefaultTheme()` is its factory.
@@ -30,14 +28,12 @@ import { createPlainTheme, defineConfig } from "@vp-tw/dirwell";
 
 export default defineConfig({
   theme: createPlainTheme({
-    project: { name: "Downloads", repositoryUrl: "https://example.com/downloads" },
+    project: { name: "Downloads", repositoryUrl: "https://github.com/you/downloads" },
   }),
 });
 ```
 
-`project` accepts the same metadata fields as the default theme. The plain
-theme links its repository name only when `repositoryUrl` is supplied
-explicitly. It shows modified times in UTC because it has no browser script.
+`project` accepts the same metadata fields as the default theme. The Plain theme links its repository name using the resolved `repositoryUrl`; by default this is the Dirwell repository. Set it explicitly for your own project. It shows modified times in UTC because it has no browser script.
 The [plain example](../examples/) shows the resulting page.
 
 ## Default theme options
@@ -155,8 +151,7 @@ file list, and flowing ribbon light. It is an optional packaged renderer:
 
 Crosswave’s header links to its theme documentation and to VdustR, its author.
 `project.name` controls your site’s display name; it does not rename the theme
-or change its author credit. The example’s “Media Library” is a configured site
-name, not a built-in media player or preview feature.
+or change its author credit. The example’s “Sample files” is a configured display name. Crosswave browses and opens files; it does not provide a media player or previews.
 
 ```ts
 import { createCrosswaveTheme, defineConfig } from "@vp-tw/dirwell";
@@ -164,7 +159,7 @@ import { createCrosswaveTheme, defineConfig } from "@vp-tw/dirwell";
 export default defineConfig({
   theme: createCrosswaveTheme({
     color: "azure",
-    project: { name: "Media Library" },
+    project: { name: "Sample files" },
   }),
 });
 ```
@@ -268,7 +263,3 @@ The [package contract](https://github.com/vp-tw/dirwell/blob/main/THEME_PACKAGE_
 describes rendering, navigation, assets, trust, and compatibility. The
 [external package proof](https://github.com/vp-tw/dirwell/tree/main/examples/theme-package)
 is packed and consumed separately from Dirwell by `pnpm verify:package`.
-
-## Page metadata and bundled fonts
-
-Built-in themes provide shared title/description configuration and one static whole-site share image by default. Set `metadata` in your config; use callbacks for per-folder text/images. [Page metadata and share images](https://vp-tw.github.io/dirwell/metadata/) covers counts, symlinks, fonts, path rules, and the dynamic example.

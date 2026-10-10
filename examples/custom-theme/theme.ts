@@ -44,25 +44,24 @@ export const releaseCatalogTheme: ExplorerTheme = {
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     ${context.documentBaseHref === null ? "" : `<base href="${escapeHtml(context.documentBaseHref)}">`}
-    <title>${escapeHtml(visiblePath)} · Northstar releases</title>
+    <title>${visiblePath === "/" ? "Release catalog" : `${escapeHtml(visiblePath)} · Release catalog`}</title>
     <link rel="stylesheet" href="${escapeHtml(context.assetHref("release-catalog.css"))}">
   </head>
   <body>
     <main>
       <header>
-        <p class="eyebrow">Northstar release catalog</p>
         <nav aria-label="Location">
           <a href="${escapeHtml(context.hrefForDirectory(""))}">Home</a>
           ${parentLink ? `<span aria-hidden="true">/</span>${parentLink}` : ""}
         </nav>
-        <h1>${escapeHtml(visiblePath)}</h1>
+        <h1>${visiblePath === "/" ? "Release catalog" : escapeHtml(visiblePath)}</h1>
         <p class="summary">${directory.entries.length} ${directory.entries.length === 1 ? "item" : "items"} in this collection</p>
       </header>
       <section aria-labelledby="contents">
         <h2 id="contents">Available files</h2>
         ${directory.entries.length === 0 ? "<p>This collection is empty.</p>" : `<ul>${rows}</ul>`}
       </section>
-      <footer>Northstar release archive · Sample content</footer>
+      <footer>Custom theme example · Sample release files</footer>
     </main>
   </body>
 </html>`;

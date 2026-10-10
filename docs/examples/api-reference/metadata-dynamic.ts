@@ -3,16 +3,12 @@ import {
   createShareImage,
   defineConfig,
   describeContent,
-} from "../../src/index.ts";
+} from "@vp-tw/dirwell";
 
 export default defineConfig({
   root: "files",
-  outDir: "../../docs/public/examples/dynamic-og",
   theme: createCrosswaveTheme({ project: { name: "Design kit" } }),
   metadata: {
-    repositoryName: "vp-tw/dirwell",
-    title: ({ directory, site }) =>
-      directory.relativePath ? `${directory.relativePath} · ${site.name}` : site.name,
     description: ({ directory }) => describeContent(directory),
     image: async ({ directory, site, description }) => ({
       source: await createShareImage({
@@ -22,9 +18,7 @@ export default defineConfig({
         description,
         directoryPath: directory.relativePath,
       }),
-      // Unique output-root paths for each directory; PNGs are built before deployment.
       outputPath: `og/${directory.relativePath || "root"}.png`,
-      alt: `${directory.relativePath || site.name}: ${description}`,
     }),
   },
 });

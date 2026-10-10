@@ -123,6 +123,60 @@ test("relative source paths resolve from config directory; image:false skips ass
     await rm(f.root, { recursive: true, force: true });
   }
 });
+test("a reused image source is read once per build and refreshed on the next build", async () => {
+  const f = await fixture();
+  let reads = 0;
+  class CountingFile extends File {
+    override arrayBuffer() {
+      reads++;
+      return super.arrayBuffer();
+    }
+  }
+  const cover = new CountingFile(["first"], "cover.png");
+  try {
+    await generateExplorer({ ...f, metadata: { image: () => cover } });
+    assert.equal(reads, 1);
+    await generateExplorer({ ...f, metadata: { image: cover } });
+    assert.equal(reads, 2);
+    const coverPath = path.join(f.root, "cover.png");
+    await writeFile(coverPath, "first");
+    const options = { ...f, metadata: { image: coverPath } };
+    await generateExplorer(options);
+    const first = (await readdir(path.join(f.outputDir, "__dirwell/metadata")))[0]!;
+    await writeFile(coverPath, "second");
+    await generateExplorer(options);
+    const second = (await readdir(path.join(f.outputDir, "__dirwell/metadata")))[0]!;
+    assert.notEqual(first, second);
+    assert.equal(
+      await readFile(path.join(f.outputDir, "__dirwell/metadata", second), "utf8"),
+      "second",
+    );
+  } finally {
+    await rm(f.root, { recursive: true, force: true });
+  }
+});
+
+test("every built-in theme distributes notices for its generated fonts in both modes", async () => {
+  const f = await fixture();
+  try {
+    for (const [theme, names] of [
+      [createDefaultTheme(), ["Source Sans 3", "Source Code Pro"]],
+      [createPlainTheme(), ["Source Serif 4"]],
+      [createCrosswaveTheme(), ["Source Sans 3"]],
+    ] as const) {
+      for (const mode of ["ssg", "mpa"] as const) {
+        await generateExplorer({ ...f, theme, mode, metadata: { image: false } });
+        const noticePath =
+          mode === "ssg" ? "source-fonts-NOTICE.txt" : "__dirwell/source-fonts-NOTICE.txt";
+        const notice = await readFile(path.join(f.outputDir, noticePath), "utf8");
+        for (const name of names) assert.ok(notice.includes(name));
+        assert.match(notice, /SIL OPEN FONT LICENSE/);
+      }
+    }
+  } finally {
+    await rm(f.root, { recursive: true, force: true });
+  }
+});
 test("failed callbacks, unsafe and conflicting paths preserve previous output", async () => {
   const f = await fixture();
   try {
