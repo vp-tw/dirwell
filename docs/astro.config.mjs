@@ -25,6 +25,7 @@ export default defineConfig({
           label: "Customize and integrate",
           items: [
             { label: "Themes", slug: "themes" },
+            { label: "Page metadata and share images", slug: "metadata" },
             { label: "Build tool adapters", slug: "build-tools" },
             { label: "Support and compatibility", slug: "support" },
           ],

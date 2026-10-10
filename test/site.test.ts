@@ -47,6 +47,7 @@ test("site build combines docs and examples in one publish directory", async () 
       "i18n",
       "crosswave",
       "crosswave-categories",
+      "dynamic-og",
     ],
   );
   assert.match(buildScript, /plugins: dirwellVite\(options\)/);

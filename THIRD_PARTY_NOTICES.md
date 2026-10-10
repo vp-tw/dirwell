@@ -20,3 +20,7 @@ Copyright (c) 2023 Robert Kieffer, for filename-based classification during Node
 generation. It uses optimized MIME database mappings; no MIME database is emitted
 to generated browser assets. The installed dependency includes its full MIT
 license. MIME estimates do not validate file contents or change serving headers.
+
+## Adobe Source fonts
+
+Source Sans 3, Source Serif 4, and Source Code Pro are bundled under the SIL Open Font License 1.1. Their original licenses and pinned source manifests are in `dist/fonts/`. Source repositories: https://github.com/adobe-fonts/source-sans and https://github.com/adobe-fonts/source-serif, and https://github.com/adobe-fonts/source-code-pro.

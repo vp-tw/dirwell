@@ -4,6 +4,7 @@ import type { ExplorerTheme, GenerateOptions, SortOptions } from "./model.ts";
 import { normalizePathPatterns } from "./filters.ts";
 
 export interface DirwellConfig {
+  readonly metadata?: GenerateOptions["metadata"];
   readonly base?: string;
   readonly include?: GenerateOptions["include"];
   readonly exclude?: GenerateOptions["exclude"];
@@ -52,6 +53,24 @@ export function validateConfig(value: unknown): asserts value is DirwellConfig {
     throw new TypeError("Dirwell config must resolve to an object");
   }
   const config = value as Record<string, unknown>;
+  if (config.metadata !== undefined) {
+    if (
+      typeof config.metadata !== "object" ||
+      config.metadata === null ||
+      Array.isArray(config.metadata)
+    )
+      throw new TypeError("metadata must be an object");
+    const metadata = config.metadata as Record<string, unknown>;
+    for (const key of ["siteName", "repositoryName", "siteUrl"])
+      assertOptionalString(metadata[key], `metadata.${key}`);
+    for (const key of ["title", "description"])
+      if (
+        metadata[key] !== undefined &&
+        typeof metadata[key] !== "string" &&
+        typeof metadata[key] !== "function"
+      )
+        throw new TypeError(`metadata.${key} must be a string or function`);
+  }
   assertOptionalString(config.root, "root");
   assertOptionalString(config.outDir, "outDir");
   assertOptionalString(config.base, "base");
@@ -157,6 +176,8 @@ export function resolveGenerateOptions(
   return {
     sourceDir,
     outputDir,
+    metadataBaseDirectory: cwd,
+    ...(config.metadata === undefined ? {} : { metadata: config.metadata }),
     ...(overrides.base === undefined && config.base === undefined
       ? {}
       : { base: overrides.base ?? config.base }),

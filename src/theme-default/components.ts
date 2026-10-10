@@ -213,6 +213,7 @@ export const defaultThemeComponents: DirwellThemeComponents = {
     return `<footer><p class="project-meta">${attribution}${iconNotice}</p>${shortcuts}</footer>`;
   },
   PageShell: ({
+    metadata,
     assets,
     breadcrumbs,
     directory,
@@ -226,7 +227,7 @@ export const defaultThemeComponents: DirwellThemeComponents = {
     toolbar,
     visiblePath,
   }) => `<!doctype html>
-<html lang="en" data-theme="system"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light dark">${documentBaseHref === null ? "" : `<base href="${escapeHtml(documentBaseHref)}">`}<title>${escapeHtml(visiblePath)} · Files</title><style>${styles}</style></head>
+<html lang="en" data-theme="system"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light dark">${documentBaseHref === null ? "" : `<base href="${escapeHtml(documentBaseHref)}">`}${metadata?.head ?? `<title>${escapeHtml(visiblePath)} · Files</title>`}<style>${styles}</style></head>
 <body><main data-explorer data-config="${escapeHtml(JSON.stringify(runtimeConfig))}"${parentHref === null ? "" : ` data-parent-href="${escapeHtml(parentHref)}"`}>
 <header><div class="chrome">${breadcrumbs}<p class="summary"><span data-visible-count>${directory.entries.length}</span> <span data-count-label>${directory.entries.length === 1 ? "entry" : "entries"}</span></p></div><h1 class="visually-hidden">${escapeHtml(visiblePath)}</h1></header>
 ${toolbar}${entryList}${runtimeConfig.entriesHref ? '<p class="folder-loading" data-folder-loading>Loading this folder…</p><noscript><style>[data-folder-loading]{display:none}</style><p class="folder-loading">This large folder needs JavaScript. Use SSG mode for a complete HTML listing.</p></noscript>' : ""}${emptyState}<p class="visually-hidden" aria-live="polite" data-live-status></p>${footer}</main>${

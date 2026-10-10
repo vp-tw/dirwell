@@ -1,3 +1,4 @@
+import type { MetadataOptions, PageMetadata, ThemeMetadataDefaults } from "./metadata.ts";
 export type EntryKind = "directory" | "file" | "symlink" | "other";
 
 export interface FileTimes {
@@ -71,6 +72,7 @@ export interface SortOptions {
 }
 
 export interface ThemeContext {
+  readonly metadata?: PageMetadata;
   readonly documentBaseHref: string | null;
   readonly directory: DirectoryData;
   readonly outputName: string;
@@ -84,6 +86,7 @@ export interface ThemeContext {
 }
 
 export interface ExplorerTheme {
+  readonly metadataDefaults?: ThemeMetadataDefaults;
   readonly name: string;
   /** Set to false when the theme does not offer global search. */
   readonly searchIndex?: boolean;
@@ -92,6 +95,9 @@ export interface ExplorerTheme {
 }
 
 export interface GenerateOptions {
+  readonly metadata?: MetadataOptions;
+  /** Base directory for local metadata image paths; defaults to process.cwd(). */
+  readonly metadataBaseDirectory?: string;
   readonly base?: string;
   readonly include?: string | readonly string[];
   readonly exclude?: string | readonly string[];

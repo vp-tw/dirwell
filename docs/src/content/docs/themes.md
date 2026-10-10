@@ -268,3 +268,7 @@ The [package contract](https://github.com/vp-tw/dirwell/blob/main/THEME_PACKAGE_
 describes rendering, navigation, assets, trust, and compatibility. The
 [external package proof](https://github.com/vp-tw/dirwell/tree/main/examples/theme-package)
 is packed and consumed separately from Dirwell by `pnpm verify:package`.
+
+## Page metadata and bundled fonts
+
+Built-in themes provide shared title/description configuration and one static whole-site share image by default. Set `metadata` in your config; use callbacks for per-folder text/images. [Page metadata and share images](https://vp-tw.github.io/dirwell/metadata/) covers counts, symlinks, fonts, path rules, and the dynamic example.

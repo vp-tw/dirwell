@@ -18,6 +18,7 @@ const examples = [
   "i18n",
   "crosswave",
   "crosswave-categories",
+  "dynamic-og",
 ] as const;
 const siteBase = process.env.SITE_BASE ?? "/";
 process.env.DIRWELL_SITE_BASE = siteBase;
@@ -29,6 +30,11 @@ for (const example of examples) {
   const { config } = await loadDirwellConfig(exampleRoot, "build");
   options.push({
     ...config,
+    cwd: exampleRoot,
+    metadata: {
+      ...config.metadata,
+      siteUrl: `https://vp-tw.github.io${siteBase.replace(/\/$/, "")}/examples/${example}/`,
+    },
     root: path.resolve(exampleRoot, config.root ?? "."),
     outDir: path.resolve(exampleRoot, config.outDir ?? "dist"),
     base: config.base ?? `${siteBase.replace(/\/$/, "")}/examples/${example}/`,

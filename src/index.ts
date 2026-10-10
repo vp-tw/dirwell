@@ -59,3 +59,18 @@ export type {
   PageShellProps,
   ToolbarProps,
 } from "./theme-components.ts";
+
+export { describeContent } from "./metadata.ts";
+export { createShareImage } from "./share-image-api.ts";
+export type { ShareImageOptions } from "./share-image-api.ts";
+export type {
+  ContentCounts,
+  MetadataContext,
+  ResolvedMetadataContext,
+  MetadataValue,
+  MetadataOptions,
+  MetadataImage,
+  ImageSource,
+  PageMetadata,
+  ThemeMetadataDefaults,
+} from "./metadata.ts";

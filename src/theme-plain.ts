@@ -1,3 +1,5 @@
+import { themeFonts } from "./theme-fonts.ts";
+import { repositoryName } from "./metadata.ts";
 import type { ExplorerTheme, FileSystemEntry, ThemeContext } from "./model.ts";
 import { resolveThemeProject, type ThemeProjectOptions } from "./theme-project.ts";
 import { utcTimestamp } from "./timestamp.ts";
@@ -76,8 +78,14 @@ export function createPlainTheme(options: PlainThemeOptions = {}): ExplorerTheme
   );
   return {
     name: "plain",
+    metadataDefaults: {
+      siteName: project.name,
+      repositoryName: repositoryName(project.repositoryUrl),
+      imageTheme: "plain",
+    },
     searchIndex: false,
     render(context) {
+      const fonts = themeFonts("plain", context.assetHref);
       const visiblePath =
         context.directory.current.relativePath === ""
           ? "/"
@@ -92,9 +100,9 @@ export function createPlainTheme(options: PlainThemeOptions = {}): ExplorerTheme
       const count = context.directory.entries.length;
       const footer = `<footer><hr><p>Repository: ${externalLink(project.name, repositoryHref)} by ${escapeHtml(project.author)} · ${externalLink(project.license, licenseHref)}</p></footer>`;
       const html = `<!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light">${context.documentBaseHref === null ? "" : `<base href="${escapeHtml(context.documentBaseHref)}">`}<title>Index of ${escapeHtml(visiblePath)}</title><style>body{max-width:72ch;margin:2rem auto;padding:0 1rem}h1,li,nav{overflow-wrap:anywhere}li{margin:.6rem 0}small{display:block}</style></head>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light">${context.documentBaseHref === null ? "" : `<base href="${escapeHtml(context.documentBaseHref)}">`}${context.metadata?.head ?? `<title>Index of ${escapeHtml(visiblePath)}</title>`}<style>body{max-width:72ch;margin:2rem auto;padding:0 1rem}h1,li,nav{overflow-wrap:anywhere}li{margin:.6rem 0}small{display:block}${fonts.css}</style></head>
 <body><main>${renderBreadcrumbs(context)}<h1>Index of ${escapeHtml(visiblePath)}</h1><p>${count} ${count === 1 ? "entry" : "entries"}</p>${count === 0 ? "<p>This directory is empty.</p>" : ""}<ul>${parentRow}${rows}</ul></main>${footer}</body></html>`;
-      return { html };
+      return { html, assets: fonts.assets };
     },
   };
 }

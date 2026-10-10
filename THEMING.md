@@ -98,3 +98,7 @@ An external package can return `ExplorerTheme` through its own factory and own
 its HTML, assets, styles, options, and localization. Pin the tested Dirwell alpha
 in its peer dependency. See [the package contract](THEME_PACKAGE_CONTRACT.md)
 and [the separately packed example](https://github.com/vp-tw/dirwell/tree/main/examples/theme-package).
+
+## Page metadata and bundled fonts
+
+Built-in themes provide shared title/description configuration and one static whole-site share image by default. Set `metadata` in your config; use callbacks for per-folder text/images. [Page metadata and share images](https://vp-tw.github.io/dirwell/metadata/) covers counts, symlinks, fonts, path rules, and the dynamic example.

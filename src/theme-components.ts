@@ -1,3 +1,4 @@
+import type { PageMetadata } from "./metadata.ts";
 import type {
   DirectoryData,
   FileSystemEntry,
@@ -40,6 +41,7 @@ export interface EntryNavigation {
 }
 
 export interface PageShellProps {
+  readonly metadata?: PageMetadata;
   readonly assets: string;
   readonly breadcrumbs: string;
   readonly directory: DirectoryData;

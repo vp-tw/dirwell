@@ -27,30 +27,30 @@ colors:
   open-line: "#e8f1ff88"
 typography:
   headline:
-    fontFamily: '"Segoe UI", Helvetica, Arial, sans-serif'
+    fontFamily: '"Source Sans 3", sans-serif'
     fontSize: "25px"
     fontWeight: 300
     lineHeight: 1.3
     letterSpacing: "-.015em"
   title:
-    fontFamily: '"Segoe UI", Helvetica, Arial, sans-serif'
+    fontFamily: '"Source Sans 3", sans-serif'
     fontSize: "18px"
     fontWeight: 400
     lineHeight: 1.4
   body:
-    fontFamily: '"Segoe UI", Helvetica, Arial, sans-serif'
+    fontFamily: '"Source Sans 3", sans-serif'
     fontSize: "16px"
     lineHeight: 1.5
   label:
-    fontFamily: '"Segoe UI", Helvetica, Arial, sans-serif'
+    fontFamily: '"Source Sans 3", sans-serif'
     fontSize: "14px"
   metadata:
-    fontFamily: '"Segoe UI", Helvetica, Arial, sans-serif'
+    fontFamily: '"Source Sans 3", sans-serif'
     fontSize: "11px"
   brand:
-    fontFamily: '"Segoe UI", Helvetica, Arial, sans-serif'
+    fontFamily: '"Source Sans 3", sans-serif'
     fontSize: "20px"
-    fontWeight: 500
+    fontWeight: 300
     letterSpacing: "-.02em"
 rounded:
   focus: "3px"
@@ -109,7 +109,7 @@ Native file links, source names, link states, and actual metadata remain the con
 
 - Horizontal category rail and vertical file list.
 - Six dark ambient palettes with bright text.
-- Original inline SVG geometry and procedural light; no shipped raster artwork.
+- Original inline SVG geometry and procedural light; no shipped background raster artwork.
 - Visible focus, IME-safe search, reduced motion, and static fallbacks.
 
 ## Colors
@@ -136,7 +136,7 @@ The review artifacts provide a six-palette all-time composited contrast lower bo
 
 ## Typography
 
-**Display and Body Font:** Segoe UI with Helvetica, Arial, and sans-serif fallbacks. This system face is the user-pinned quiet-label material for this theme; it is not a display-font prescription for other Dirwell surfaces.
+**Display and Body Font:** Bundled Source Sans 3 with a sans-serif fallback. Regular (400) carries filenames, controls, and metadata; Light (300) carries selected-file detail titles and the linked project name. Both are local Latin faces. Font synthesis remains disabled.
 
 **Character:** A compact sans hierarchy with light detail titles and readable regular file names. There is no large marketing display role.
 
@@ -150,6 +150,11 @@ The review artifacts provide a six-palette all-time composited contrast lower bo
 - **Brand:** project name; narrows to 18px in portrait. The subordinate theme label uses 12px, regular weight, and .08em tracking, then 10px in portrait.
 
 Directory headings are 17px regular (16px in portrait); search is 13px; detail metadata and appearance controls are 12px. The clock uses tabular numerals. Type sizes are role-specific, not a generated modular scale.
+
+The built-in Open Graph image pairs Source Sans 3 Light for the large title
+with Regular for repository/theme labels, counts, and the optional folder
+path. It uses bundled OTF faces and the default Azure ground with static
+ribbons; it does not capture the runtime palette or animated shader.
 
 ## Layout
 
@@ -241,6 +246,6 @@ Without JavaScript, the complete native file listing remains available; category
 - **Don't** hide file reachability behind the detail panel or controller support.
 - **Don't** claim physical controller support was verified by synthetic handler tests.
 
-Not canonized or repaired: no implementation defect is promoted into a token. The theme's intentional system-sans and ambient-color boundary does not redefine the root system. Hardware controller activation remains a verification limit.
+Not canonized or repaired: no implementation defect is promoted into a token. The theme's local Source Sans and ambient-color boundary does not redefine the root system. Hardware controller activation remains a verification limit.
 
-Source of truth: `styles.ts`, `icons.ts`, `categories.ts`, `../theme-crosswave.ts`, and `../crosswave-runtime.js`. Original review captures and contrast artifacts are in `../../.impeccable/review/crosswave/`. Persistent-shell desktop, portrait, short-landscape, error, and entry/return motion captures are in `../../.impeccable/review/seamless/`; the independent follow-up review resolved the bounded-overlays finding and returned ship. Custom-category desktop, portrait, and short-landscape captures are in `../../.impeccable/review/categories/`; they retain the existing Jade palette and both navigation axes. These captures do not establish physical-controller behavior or content-based MIME detection.
+Source of truth: `../theme-fonts.ts`, `../share-image.ts`, `styles.ts`, `icons.ts`, `categories.ts`, `../theme-crosswave.ts`, and `../crosswave-runtime.js`. Original review captures and contrast artifacts are in `../../.impeccable/review/crosswave/`. Persistent-shell desktop, portrait, short-landscape, error, and entry/return motion captures are in `../../.impeccable/review/seamless/`; the independent follow-up review resolved the bounded-overlays finding and returned ship. Custom-category desktop, portrait, and short-landscape captures are in `../../.impeccable/review/categories/`; they retain the existing Jade palette and both navigation axes. These captures do not establish physical-controller behavior or content-based MIME detection.

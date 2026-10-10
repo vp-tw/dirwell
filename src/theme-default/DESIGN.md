@@ -18,23 +18,23 @@ colors:
   focus-dark: "#78b7f4"
 typography:
   body:
-    fontFamily: 'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+    fontFamily: '"Source Sans 3", sans-serif'
     fontSize: "15px"
     lineHeight: 1.45
   metadata:
-    fontFamily: 'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+    fontFamily: '"Source Sans 3", sans-serif'
     fontSize: "0.82rem"
   control-label:
-    fontFamily: 'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+    fontFamily: '"Source Sans 3", sans-serif'
     fontSize: "0.76rem"
   column-label:
-    fontFamily: 'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+    fontFamily: '"Source Sans 3", sans-serif'
     fontSize: "0.68rem"
   badge:
-    fontFamily: 'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+    fontFamily: '"Source Sans 3", sans-serif'
     fontSize: "0.72rem"
   target:
-    fontFamily: "ui-monospace, SFMono-Regular, monospace"
+    fontFamily: '"Source Code Pro", monospace'
     fontSize: "0.8rem"
 rounded:
   key: "0.2rem"
@@ -73,10 +73,20 @@ decoration. Keep unavailable links visibly distinct from usable ones.
 
 ## Typography
 
-One system sans family carries controls, paths, and metadata. Tabular numerals
+Bundled Source Sans 3 Regular carries controls, paths, and metadata. Tabular numerals
 keep sizes and timestamps steady in the ledger. Use monospace only for symlink
 targets and key-like data, not as a general technical motif. The path is the
 document's semantic heading, visually represented by the breadcrumb trail.
+
+Bundled Source Code Pro Regular carries symlink targets; their status labels
+use Source Sans 3. Both local Latin families provide only the regular (400)
+face. Existing 500, 650, and 720 weights use browser synthesis; they are not
+additional font assets. The monospace role remains limited to targets and
+key-like data.
+
+The built-in Open Graph image uses the same Source Sans 3 Regular face from a
+bundled OTF, including its title, repository/theme labels, counts, and optional
+folder path. It retains the light paper ledger composition and rules.
 
 ## Layout
 

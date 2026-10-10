@@ -1,3 +1,5 @@
+import { themeFonts } from "./theme-fonts.ts";
+import { repositoryName } from "./metadata.ts";
 import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import type { ExplorerTheme, FileSystemEntry, ThemeContext } from "./model.ts";
@@ -102,9 +104,15 @@ export function createCrosswaveTheme(options: CrosswaveThemeOptions = {}): Explo
     .slice(0, 24);
   return {
     name: "crosswave",
+    metadataDefaults: {
+      siteName: project.name,
+      repositoryName: repositoryName(project.repositoryUrl),
+      imageTheme: "crosswave",
+    },
     searchIndex: false,
     render(context) {
       const { directory } = context;
+      const fonts = themeFonts("crosswave", (name) => name);
       const path = directory.current.relativePath || "/";
       const parent =
         directory.parent === null ? null : context.hrefForDirectory(directory.parent.relativePath);
@@ -123,7 +131,7 @@ export function createCrosswaveTheme(options: CrosswaveThemeOptions = {}): Explo
         )
         .join("");
       const html = `<!doctype html>
-<html lang="en" data-cw-color="${color}" data-cw-motion="${options.backgroundMotion !== false}" data-cw-transitions="${options.pageTransitions !== false}" data-cw-gamepad="${options.gamepad !== false}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">${context.documentBaseHref === null ? "" : `<base href="${escapeHtml(context.documentBaseHref)}">`}<title>${escapeHtml(path)} · ${escapeHtml(project.name)} · Crosswave</title><link rel="stylesheet" href="${escapeHtml(context.assetHref("crosswave.css"))}"><script src="${escapeHtml(context.assetHref("crosswave.js"))}"></script></head>
+<html lang="en" data-cw-color="${color}" data-cw-motion="${options.backgroundMotion !== false}" data-cw-transitions="${options.pageTransitions !== false}" data-cw-gamepad="${options.gamepad !== false}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">${context.documentBaseHref === null ? "" : `<base href="${escapeHtml(context.documentBaseHref)}">`}${context.metadata?.head ?? `<title>${escapeHtml(path)} · ${escapeHtml(project.name)} · Crosswave</title>`}<link rel="stylesheet" href="${escapeHtml(context.assetHref("crosswave.css"))}"><script src="${escapeHtml(context.assetHref("crosswave.js"))}"></script></head>
 <body><a class="cw-skip" href="${escapeHtml(context.hrefForDirectory(directory.current.relativePath))}#cw-panel">Skip to files</a><div class="cw-background" aria-hidden="true"><canvas id="cw-wave"></canvas><svg class="cw-fallback-wave" viewBox="0 0 1440 900" preserveAspectRatio="none"><path d="M-80 570C220 300 370 690 760 450S1260 290 1510 510"/><path d="M-80 540C220 640 400 330 820 470S1240 620 1510 360"/></svg></div>
 <header class="cw-top"><div class="cw-brand"><a data-cw-navigation${navigationData(context, "", context.hrefForDirectory(""))} href="${escapeHtml(context.hrefForDirectory(""))}">${escapeHtml(project.name)}</a><p class="cw-credits"><a href="https://github.com/vp-tw/dirwell/blob/main/src/theme-crosswave/README.md" target="_blank" rel="noopener">Crosswave</a><span>by</span><a href="https://github.com/VdustR" target="_blank" rel="noopener">VdustR</a></p></div><nav class="cw-location" aria-label="Location"><a data-cw-navigation${navigationData(context, "", context.hrefForDirectory(""))} href="${escapeHtml(context.hrefForDirectory(""))}">Home</a>${breadcrumbs ? `<span class="cw-separator" aria-hidden="true">/</span>${breadcrumbs}` : ""}</nav><time class="cw-clock" aria-label="Current time" hidden></time></header>
 <main class="cw-stage" data-cw-root="${escapeHtml(context.hrefForDirectory(""))}" data-cw-path="${escapeHtml(directory.current.relativePath)}" data-cw-page="${escapeHtml(context.assetHref(pageAsset(directory.current.relativePath)))}" data-cw-file="${escapeHtml(context.outputName)}" data-cw-category-config="${categoryConfig}"><h1 class="cw-sr">Files in ${escapeHtml(path)}</h1><nav class="cw-rail" aria-label="File categories" hidden><div class="cw-categories" role="tablist" aria-label="File categories">${tabs}</div></nav>
@@ -143,7 +151,8 @@ export function createCrosswaveTheme(options: CrosswaveThemeOptions = {}): Explo
       return {
         html,
         assets: {
-          "crosswave.css": crosswaveStyles,
+          ...fonts.assets,
+          "crosswave.css": crosswaveStyles + fonts.css,
           "crosswave.js": runtime,
           [asset]: `window.dispatchEvent(new CustomEvent("dirwell:crosswave-page",{detail:${payload}}));`,
         },
