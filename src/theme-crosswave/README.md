@@ -14,7 +14,7 @@ export default defineConfig({
 });
 ```
 
-`project.name` is your site's display name. The footer identifies the theme
+`project.name` is your site's display name. The header identifies the theme
 separately as **Crosswave by VdustR**. Categories, colors, motion, and navigation
 options are described in the [theme guide](../../THEMING.md#crosswave-renderer).
 

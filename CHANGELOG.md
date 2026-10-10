@@ -1,5 +1,11 @@
 # @vp-tw/dirwell
 
+## 0.1.0-alpha.9
+
+### Patch Changes
+
+- Move Crosswave theme and author links into the header and remove the duplicate footer attribution, leaving more room for files on narrow screens.
+
 ## 0.1.0-alpha.8
 
 ### Patch Changes

@@ -203,6 +203,10 @@ A transparent search field with an inline geometric search icon and bottom strok
 
 A small dark translucent select switches among six palettes. The adjacent transparent motion button reports Pause waves, Resume waves, Reduced motion, or Static background. Color and pause preferences are scoped to the explorer root in local storage. Visible focus is a 2px white outline, offset 6px, with the focus radius; search uses a 3px outline offset.
 
+### Theme attribution
+
+Quiet secondary text beneath the project name reads Crosswave by VdustR. The theme name and author are native links to the theme README and author profile, available without JavaScript. Attribution uses Muted foreground, regular secondary-label type (12px), normal letter spacing, and underlined links with a minimum target height (24px). The underline brightens on hover; keyboard focus uses the incumbent white outline. Desktop, portrait, and short landscape keep attribution in the header. The fixed footer retains navigation help, controller status, and appearance controls without a duplicate attribution row; it is hidden before enhancement. Captures in `../../.impeccable/review/header-credits/` show these three layouts. This component record introduces no new tokens or visual world.
+
 ### Persistent directory navigation and feedback
 
 Generated classic-script page data supplies each folder on demand in SSG, MPA, and relative local-file output. Enhanced folder links, parent links, breadcrumbs, and Home update the title, location, file list, counts, and selected details inside the mounted shell. Native file actions and modified/new-tab activations retain ordinary link behavior. Category, search query, selected path, and list scroll restore from browser history; recent folder revisits also restore their view state. Local-file navigation keeps the launch document address and records its destination in the hash so history and reload can recover it.

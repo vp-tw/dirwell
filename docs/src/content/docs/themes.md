@@ -153,7 +153,7 @@ its own row loading or keep the default components.
 Crosswave uses a PSP-inspired crossbar with real file categories, a vertical
 file list, and flowing ribbon light. It is an optional packaged renderer:
 
-Crosswave’s footer links to its theme documentation and to VdustR, its author.
+Crosswave’s header links to its theme documentation and to VdustR, its author.
 `project.name` controls your site’s display name; it does not rename the theme
 or change its author credit. The example’s “Media Library” is a configured site
 name, not a built-in media player or preview feature.

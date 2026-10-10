@@ -50,7 +50,7 @@ test("categories, keyboard navigation, search composition, and page transitions"
   });
   await page.goto(server.url);
   await expect(page.locator("body")).toHaveAttribute("data-cw-enhanced", "true");
-  await expect(page.locator(".cw-brand span")).toHaveText("Crosswave");
+  await expect(page.locator(".cw-brand .cw-credits")).toHaveText("CrosswavebyVdustR");
   await page.evaluate(() => {
     window.__canvas = document.querySelector("#cw-wave");
     window.__cwAnimations = 0;
@@ -166,7 +166,7 @@ for (const viewport of [
           [...document.querySelectorAll(".cw-credits a")].every((a) => {
             const r = a.getBoundingClientRect();
             return (
-              r.height >= 44 && r.left >= 0 && r.right <= innerWidth && r.bottom <= innerHeight
+              r.height >= 24 && r.left >= 0 && r.right <= innerWidth && r.bottom <= innerHeight
             );
           })
         );

@@ -20,7 +20,7 @@ category navigation, local search, ribbon light, and optional controller input.
 Its styles, assets, and runtime are separate from Ledger. See [Crosswave](https://vp-tw.github.io/dirwell/themes/#crosswave)
 for options, keyboard behavior, browser transition support, and hardware-test limits.
 
-Crosswave’s footer links to its theme documentation and to VdustR, its author.
+Crosswave’s header links to its theme documentation and to VdustR, its author.
 `project.name` controls your site’s display name; it does not rename the theme
 or change its author credit. The example’s “Media Library” is a configured site
 name, not a built-in media player or preview feature.
