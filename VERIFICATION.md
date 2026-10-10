@@ -37,10 +37,11 @@ cross-document View Transitions are unavailable.
 | Native macOS Safari 26.6.2                           | A separate normal Safari window exercised Ledger search, clearing and keyboard parent navigation; Crosswave search, folder navigation and Back/Forward; and Plain folder/parent links on the published examples. The window was closed afterward. Remote Automation remained disabled.                                                                                                                       |
 | iPhone 17 and iPad (A16) simulators, Safari/iOS 26.5 | Three published themes passed a bounded DOM/layout smoke at 402 and 820 CSS pixels in portrait: local fonts, no horizontal overflow, folder/parent links, search, and Crosswave category/motion controls. Text and activation were synthesized through DOM events. Native keyboard/touch and simulator Back/Forward are not verified: WebDriver input/history commands were unreliable in this installation. |
 
-The simulator observations are not physical-device acceptance. The machine had
-no usable Windows VM; available disk space did not justify creating one for this
-run. Windows, physical iOS devices, hardware controller mappings, real screen
-reader output, and low-end hardware remain outside this evidence. Adapter tiers
+The simulator observations are not physical-device acceptance. The first local
+run had no usable Windows VM; Windows consumer coverage and the user-reported
+controller smoke were added in the follow-up below. Physical iOS devices, other
+controller mappings, real screen-reader output, and low-end hardware remain
+outside the agent's completed evidence. Adapter tiers
 and Farm's standalone-watch limitation remain unchanged; see
 [support and compatibility](docs/src/content/docs/support.md).
 
@@ -57,3 +58,71 @@ The 10,000-file and 20-level workloads stayed within the existing local budgets.
 At 4× CPU throttling, the desktop and narrow virtual-list sweeps showed no empty
 viewport or positive gaps between visible rows. See [benchmark observations](BENCHMARKS.md)
 for workload definitions, timings, and their limits.
+
+## Follow-up verification
+
+The additional native-platform consumer run uses the same built 0.1.1 tarball
+on six standard GitHub-hosted runners: Linux, Windows, and macOS, each in ARM64
+and x64 variants. All six passed three-theme SSG/MPA generation, native share
+images, encoded filenames, valid/broken file symlinks, CLI build/serve, and live
+file creation, modification, and deletion. The three fixed-font PNGs were
+byte-identical across all six runners. These are bounded installed-consumer
+checks; they do not establish every Windows build-adapter or browser behavior.
+
+The reusable workflow is [platform consumer verification](.github/workflows/platforms.yml).
+Run `node scripts/verify-platform.mjs <tarball-or-version> <report-directory>`
+locally. It creates a disposable consumer, installs with npm scripts disabled,
+tests the package, writes a JSON report, and removes the consumer. The runner
+report keeps OS, architecture, Node version, image hashes, and any symlink limit.
+
+### User-reported controller smoke
+
+The maintainer reported a Windows + Xbox controller test with no major problem
+observed. The browser, Windows/Dirwell versions, connection type, and complete
+button/axis coverage were not specified. This is physical-controller evidence
+reported by the user; the agent did not reproduce that hardware test. Other
+controller mappings and physical iOS devices remain unverified.
+
+### Text contrast assessment
+
+Built-in settled text states received an additional quantitative check:
+
+| Theme/state                                                     | Lowest assessed ratio |
+| --------------------------------------------------------------- | --------------------: |
+| Ledger light, six foreground tokens against four surface tokens |                5.00:1 |
+| Ledger dark, the same token combinations                        |                7.36:1 |
+| Plain native text and links against the rendered white Canvas   |      21.00:1 / 9.40:1 |
+| Crosswave Azure                                                 |                5.13:1 |
+| Crosswave Violet                                                |                5.24:1 |
+| Crosswave Amber                                                 |                4.88:1 |
+| Crosswave Rose                                                  |                5.16:1 |
+| Crosswave Jade                                                  |                4.83:1 |
+| Crosswave Graphite                                              |                5.22:1 |
+
+Ledger uses the rendered CSS token values. Crosswave combines five actual WebGL
+framebuffer samples per palette with conservative bounds for every wave time,
+the CSS fallback, and the selected/hover row layer. The shader's lower region
+uses its full light cap; above y=0.7, the maximum wave center and breadth bound
+the light contribution below 0.0001. One color byte covers framebuffer rounding.
+The opaque muted text color is the weakest built-in text foreground used here.
+
+All assessed values exceed the [4.5:1 normal-text minimum](https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum).
+This closes the specific built-in text/background uncertainty from the automated
+audit. It does not certify user overrides, motion intermediate states, every
+non-text control boundary, real screen readers, or overall WCAG conformance.
+
+### VoiceOver attempt
+
+With the maintainer's approval, VoiceOver was temporarily enabled in macOS
+26.6.2 for a separate Safari private window. Its first-run tutorial restricted
+commands and was closed. Both background and foreground keyboard routes were
+attempted, but the automation interfaces did not provide reliable Rotor or
+spoken-output readback. Enabling the service alone is not a passed screen-reader
+test. VoiceOver was returned to its original off state, and the original caption,
+modifier, and welcome settings were preserved. A separately approved attempt to
+enable AppleScript control caused VoiceOver Utility to stop responding; after
+restarting the task-owned utility, its control checkbox was confirmed off.
+System Events also could not resolve the utility's window while it was
+unresponsive. No spoken-output result was obtained, so actual VoiceOver output
+remains unverified. A manual screen-reader test is still needed; physical iOS
+VoiceOver is a separate unverified environment.

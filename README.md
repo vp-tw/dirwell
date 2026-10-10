@@ -62,7 +62,7 @@ Pin your tested version when you need reproducible builds.
 
 ## Verified scope
 
-Tests run on macOS and Linux with Node.js 26. Full regression has passed in Chromium, Firefox, and Playwright WebKit; CI runs Chromium plus a bounded cross-engine suite. CLI build/serve, SSG/MPA output, theme packages, and primary Vite/Rollup/webpack integrations are exercised. Additional checks cover Linux ARM64 with glibc/musl, native macOS Safari navigation, and iPhone/iPad Safari simulators' layout and scripted controls. Windows, physical iOS devices, and hardware controllers remain unverified. See the [verification record](https://github.com/vp-tw/dirwell/blob/main/VERIFICATION.md) and [adapter capabilities](https://vp-tw.github.io/dirwell/build-tools/#development-and-verification).
+Tests run with Node.js 26. Full regression has passed in Chromium, Firefox, and Playwright WebKit; CI runs Chromium plus a bounded cross-engine suite. Installed-consumer checks cover Windows, Linux, and macOS in ARM64/x64 variants: three-theme SSG/MPA output, CLI build/serve and live updates, encoded names, symlinks, and matching fixed-font share images. Primary Vite/Rollup/webpack paths, native macOS Safari navigation, and iPhone/iPad simulators' layout and scripted controls are also exercised. A user-reported Windows/Xbox controller smoke found no major issue; it is not a complete hardware mapping test. Physical iOS and real screen-reader output remain unverified. See the [verification record](https://github.com/vp-tw/dirwell/blob/main/VERIFICATION.md) and [adapter capabilities](https://vp-tw.github.io/dirwell/build-tools/#development-and-verification).
 
 ## Choose your next step
 
