@@ -1,6 +1,14 @@
 ---
 import { exampleCatalog } from "../../../examples/catalog.ts";
 import { landingCode } from "../landing-code.ts";
+import {
+  siteDescription,
+  siteTitle,
+  shareImagePath,
+  shareImageWidth,
+  shareImageHeight,
+  shareImageAlt,
+} from "../../site-branding.mjs";
 
 const base = import.meta.env.BASE_URL;
 const path = (value: string) => `${base}${value}`.replace(/\/+/g, "/");
@@ -8,6 +16,8 @@ const path = (value: string) => `${base}${value}`.replace(/\/+/g, "/");
 const examplePath = (slug: string) => path(`examples/${slug}/${import.meta.env.DEV ? "index.html" : ""}`);
 const repositoryUrl = import.meta.env.PUBLIC_REPOSITORY_URL ?? "https://github.com/vp-tw/dirwell";
 const examples = exampleCatalog;
+const canonicalUrl = new URL(base, Astro.site);
+const shareImageUrl = new URL(path(shareImagePath), Astro.site);
 ---
 
 <!doctype html>
@@ -15,17 +25,34 @@ const examples = exampleCatalog;
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta
-      name="description"
-      content="Dirwell builds a static, searchable file explorer from any directory."
-    />
+    <meta name="description" content={siteDescription} />
     <meta name="theme-color" content="#f3f0e8" />
-    <title>Dirwell — a file explorer you can deploy anywhere</title>
+    <title>{siteTitle}</title>
+    <link rel="icon" type="image/png" sizes="1254x1254" href={path("brand/paper-bird.png")} />
+    <link rel="canonical" href={canonicalUrl} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Dirwell" />
+    <meta property="og:title" content={siteTitle} />
+    <meta property="og:description" content={siteDescription} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:image" content={shareImageUrl} />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content={shareImageWidth} />
+    <meta property="og:image:height" content={shareImageHeight} />
+    <meta property="og:image:alt" content={shareImageAlt} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={siteTitle} />
+    <meta name="twitter:description" content={siteDescription} />
+    <meta name="twitter:image" content={shareImageUrl} />
+    <meta name="twitter:image:alt" content={shareImageAlt} />
     <link rel="stylesheet" href={path("landing.css")} />
   </head>
   <body>
     <header class="site-header">
-      <a class="wordmark" href={base} aria-label="Dirwell home">dirwell<span>/</span></a>
+      <a class="wordmark" href={base} aria-label="Dirwell home">
+        <img src={path("brand/paper-bird.png")} alt="" width="36" height="36" />
+        <span class="wordmark-name">dirwell<span>/</span></span>
+      </a>
       <nav aria-label="Primary navigation">
         <a href="#examples">Examples</a>
         <a href={path("getting-started/")}>Docs</a>
@@ -35,22 +62,34 @@ const examples = exampleCatalog;
 
     <main>
       <section class="hero" aria-labelledby="hero-title">
-        <div class="hero-copy">
-          <h1 id="hero-title">Put a directory<br />on the web.</h1>
-          <p>
-            Dirwell builds a static file explorer from the folders and files you already have. Browse release downloads, reports, or build artifacts. Publish the generated files on a static host.
-          </p>
-          <div class="actions">
-            <a class="primary-action" href={path("getting-started/")}>Build your first explorer</a>
-            <a class="text-action" href="#examples">See working examples</a>
+        <div class="hero-intro">
+          <div class="hero-copy">
+            <h1 id="hero-title">Put a directory<br />on the web.</h1>
+            <p>
+              Dirwell builds a static file explorer from the folders and files you already have. Browse release downloads, reports, or build artifacts. Publish the generated files on a static host.
+            </p>
+            <div class="actions">
+              <a class="primary-action" href={path("getting-started/")}>Build your first explorer</a>
+              <a class="text-action" href="#examples">See working examples</a>
+            </div>
           </div>
-        </div>
 
-        <div class="terminal" aria-label="Dirwell quick start command">
-          <div class="terminal-bar"><span>terminal</span><span>Node.js 26+</span></div>
-          <pre><code class="language-shell">{landingCode.terminal.map((token) =>
-            token.tone ? <span class={`syntax-${token.tone}`}>{token.text}</span> : token.text
-          )}</code></pre>
+          <div class="hero-visual">
+            <img
+              class="hero-mascot"
+              src={path("brand/paper-bird.png")}
+              alt="Dirwell’s curious bird, folded from a cream paper page with an orange wing."
+              width="1254"
+              height="1254"
+              fetchpriority="high"
+            />
+            <div class="terminal" aria-label="Dirwell quick start command">
+              <div class="terminal-bar"><span>terminal</span><span>Node.js 26+</span></div>
+              <pre><code class="language-shell">{landingCode.terminal.map((token) =>
+                token.tone ? <span class={`syntax-${token.tone}`}>{token.text}</span> : token.text
+              )}</code></pre>
+            </div>
+          </div>
         </div>
 
         <div class="explorer-sample">

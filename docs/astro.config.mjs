@@ -1,17 +1,38 @@
 import { defineConfig } from "astro/config";
 import { exampleDirectoryIndexes } from "./example-index.ts";
 import starlight from "@astrojs/starlight";
+import {
+  siteDescription,
+  shareImagePath,
+  shareImageWidth,
+  shareImageHeight,
+  shareImageAlt,
+} from "./site-branding.mjs";
 
 const siteBase = process.env.SITE_BASE ?? "/";
+const siteOrigin = process.env.SITE_ORIGIN ?? "https://vp-tw.github.io";
+const shareImageUrl = new URL(`${siteBase.replace(/\/?$/, "/")}${shareImagePath}`, siteOrigin).href;
 
 export default defineConfig({
+  site: siteOrigin,
   base: siteBase,
   outDir: "../site",
   vite: { plugins: [exampleDirectoryIndexes()] },
   integrations: [
     starlight({
       title: "Dirwell",
-      description: "A static file explorer that is easy to start and deep to customize.",
+      description: siteDescription,
+      favicon: "/brand/paper-bird.png",
+      logo: { src: "./public/brand/paper-bird.png", alt: "", replacesTitle: false },
+      head: [
+        { tag: "meta", attrs: { property: "og:image", content: shareImageUrl } },
+        { tag: "meta", attrs: { property: "og:image:type", content: "image/png" } },
+        { tag: "meta", attrs: { property: "og:image:width", content: String(shareImageWidth) } },
+        { tag: "meta", attrs: { property: "og:image:height", content: String(shareImageHeight) } },
+        { tag: "meta", attrs: { property: "og:image:alt", content: shareImageAlt } },
+        { tag: "meta", attrs: { name: "twitter:image", content: shareImageUrl } },
+        { tag: "meta", attrs: { name: "twitter:image:alt", content: shareImageAlt } },
+      ],
       social: [],
       sidebar: [
         {
