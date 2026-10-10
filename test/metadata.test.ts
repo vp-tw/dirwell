@@ -362,6 +362,13 @@ test("theme images accept files, paths and async callbacks; caller image overrid
       /theme image failed/,
     );
     assert.deepEqual(await readFile(path.join(f.outputDir, "index.html")), before);
+    // Simulate an untyped JavaScript theme returning no image value.
+    Reflect.set(theme.metadataDefaults, "image", () => undefined);
+    await assert.rejects(
+      generateExplorer({ ...f, theme }),
+      /callback must return an image or false/,
+    );
+    assert.deepEqual(await readFile(path.join(f.outputDir, "index.html")), before);
   } finally {
     await rm(f.root, { recursive: true, force: true });
   }

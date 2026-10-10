@@ -67,7 +67,7 @@ for (const mode of ["ssg", "mpa"] as const) {
       });
       // A row override deliberately keeps complete HTML above the virtualization threshold.
       const html = await readFile(path.join(outputDir, "index.html"), "utf8");
-      expect(html).not.toContain('"entriesHref"');
+      expect(html).not.toContain("&quot;entriesHref&quot;");
       const server = await serve(outputDir);
       try {
         await page.goto(server.url);
