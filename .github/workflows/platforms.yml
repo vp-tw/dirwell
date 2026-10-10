@@ -1,0 +1,85 @@
+name: Platform consumer verification
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/platforms.yml
+      - scripts/verify-platform.mjs
+      - scripts/platform-consumer.mjs
+      - src/**
+      - package.json
+      - pnpm-lock.yaml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 26
+          package-manager-cache: false
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: mkdir package-artifact && npm pack --pack-destination package-artifact
+      - uses: actions/upload-artifact@v4
+        with:
+          name: platform-package
+          path: package-artifact/*.tgz
+  consumer:
+    needs: package
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          [
+            ubuntu-latest,
+            ubuntu-24.04-arm,
+            windows-latest,
+            windows-11-arm,
+            macos-26,
+            macos-26-intel,
+          ]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 26
+          package-manager-cache: false
+      - uses: actions/download-artifact@v4
+        with:
+          name: platform-package
+          path: package-artifact
+      - name: Test the installed tarball
+        env:
+          PLATFORM_PROOF_NAME: ${{ matrix.os }}
+        shell: bash
+        run: node scripts/verify-platform.mjs package-artifact/*.tgz
+      - uses: actions/upload-artifact@v4
+        with:
+          name: platform-proof-${{ matrix.os }}
+          path: .platform-proof/*.json
+          include-hidden-files: true
+  compare-images:
+    needs: consumer
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 26
+          package-manager-cache: false
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: platform-proof-*
+          path: proofs
+          merge-multiple: true
+      - name: Compare bundled-font image output
+        run: |
+          node --input-type=module -e 'import{readFile,readdir}from"node:fs/promises";import assert from"node:assert/strict";const files=await readdir("proofs");assert.equal(files.length,6);const reports=await Promise.all(files.map(async f=>JSON.parse(await readFile("proofs/"+f,"utf8"))));for(const report of reports)assert.deepEqual(report.images,reports[0].images);console.log("All three share images are byte-identical across six OS/architecture runners.");'
