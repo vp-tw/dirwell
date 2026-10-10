@@ -60,3 +60,7 @@ embedded preview after a successful rebuild.
 
 `PUBLIC_REPOSITORY_URL` controls the source links on the landing page.
 GitHub Actions supplies the repository URL when it deploys Pages.
+
+## Dynamic share images
+
+[Open the dynamic OG example](https://vp-tw.github.io/dirwell/examples/dynamic-og/) to browse a six-file Design kit with per-folder share images generated at build time. [Source](https://github.com/vp-tw/dirwell/tree/main/examples/dynamic-og).

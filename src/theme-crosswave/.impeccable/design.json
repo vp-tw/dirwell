@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-09T17:26:47Z",
+  "generatedAt": "2026-10-10T05:40:19.607734Z",
   "title": "Design System: Dirwell Crosswave",
   "extensions": {
     "colorMeta": {
@@ -248,7 +248,7 @@
     "typographyMeta": {
       "headline": {
         "displayName": "Headline",
-        "purpose": "Selected-file detail title."
+        "purpose": "Selected-file detail title in bundled Source Sans 3 Light (300); synthesis disabled."
       },
       "title": {
         "displayName": "Title",
@@ -256,7 +256,7 @@
       },
       "body": {
         "displayName": "Body",
-        "purpose": "Page baseline."
+        "purpose": "Page baseline in bundled Source Sans 3 Regular (400); synthesis disabled."
       },
       "label": {
         "displayName": "Label",
@@ -268,7 +268,7 @@
       },
       "brand": {
         "displayName": "Brand",
-        "purpose": "Project identity."
+        "purpose": "Linked project identity in bundled Source Sans 3 Light (300); synthesis disabled."
       }
     },
     "shadows": [
@@ -380,7 +380,7 @@
       "refersTo": "category",
       "description": "Horizontal icon-and-label category with counts and selected underline; configured labels, order, visibility, decorative rail icons, and overlapping extension/MIME rules retain the same visual states.",
       "html": "<button class=\"ds-category\" role=\"tab\" aria-selected=\"true\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.45\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M3 7V5a1 1 0 0 1 1-1h5l2 3h9a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1Z\"/><path d=\"M3 9h18\"/></svg><span>Folders</span></button>",
-      "css": ".ds-category{font-family:\"Segoe UI\",Helvetica,Arial,sans-serif;color:#f7fbff;display:flex;flex-direction:column;align-items:center;gap:12px;position:relative;min-width:94px;min-height:96px;padding:10px 4px;background:none;border:0;font-size:14px;transition:color .2s,transform .3s cubic-bezier(.16,1,.3,1)}.ds-category svg{width:40px;height:40px;filter:drop-shadow(0 3px 2px #07182a55)}.ds-category:hover{color:#fff;transform:translateY(-3px)}.ds-category[aria-selected=true]{color:#fff;transform:scale(1.1)}.ds-category[aria-selected=true]:after{content:\"\";position:absolute;left:calc(50% - 12px);bottom:-8px;width:24px;height:2px;background:#e6f2ff;box-shadow:0 3px 10px #bddaff55}.ds-category:focus-visible{outline:2px solid #fff;outline-offset:6px;border-radius:3px}@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}.ds-category,.ds-category:hover,.ds-category[aria-selected=true],.ds-row{transform:none}}"
+      "css": ".ds-category{font-family:\"Source Sans 3\",sans-serif;font-synthesis:none;color:#f7fbff;display:flex;flex-direction:column;align-items:center;gap:12px;position:relative;min-width:94px;min-height:96px;padding:10px 4px;background:none;border:0;font-size:14px;transition:color .2s,transform .3s cubic-bezier(.16,1,.3,1)}.ds-category svg{width:40px;height:40px;filter:drop-shadow(0 3px 2px #07182a55)}.ds-category:hover{color:#fff;transform:translateY(-3px)}.ds-category[aria-selected=true]{color:#fff;transform:scale(1.1)}.ds-category[aria-selected=true]:after{content:\"\";position:absolute;left:calc(50% - 12px);bottom:-8px;width:24px;height:2px;background:#e6f2ff;box-shadow:0 3px 10px #bddaff55}.ds-category:focus-visible{outline:2px solid #fff;outline-offset:6px;border-radius:3px}@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}.ds-category,.ds-category:hover,.ds-category[aria-selected=true],.ds-row{transform:none}}"
     },
     {
       "name": "Selected file row",
@@ -388,7 +388,7 @@
       "refersTo": "file-row",
       "description": "Native link with faint selected wash; row and detail icons retain filename-based MIME estimates independently of configured rail membership.",
       "html": "<a class=\"ds-row\" href=\"#files\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.45\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M3 7V5a1 1 0 0 1 1-1h5l2 3h9a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1Z\"/><path d=\"M3 9h18\"/></svg><span><span class=\"ds-name\">Albums/</span><span class=\"ds-meta\">Folder</span></span></a>",
-      "css": ".ds-row{font-family:\"Segoe UI\",Helvetica,Arial,sans-serif;color:#f7fbff;display:flex;align-items:center;gap:25px;min-height:76px;padding:14px 18px;border-radius:7px;text-decoration:none;background:linear-gradient(90deg,#f4f9ff08,#f4f9ff04);transform:translateX(5px);transition:background .2s,transform .3s cubic-bezier(.16,1,.3,1)}.ds-row svg{width:34px;height:34px;transform:scale(1.22);filter:drop-shadow(0 3px 2px #08192c66)}.ds-name{display:block;font-size:18px;font-weight:400;line-height:1.4;overflow-wrap:anywhere;text-shadow:0 2px 3px #07192b66}.ds-meta{display:block;font-size:11px;color:#edf4fc;margin-top:3px}.ds-row:hover{background:#eef7ff08}.ds-row:focus-visible{outline:2px solid #fff;outline-offset:6px;border-radius:3px}@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}.ds-category,.ds-category:hover,.ds-category[aria-selected=true],.ds-row{transform:none}}"
+      "css": ".ds-row{font-family:\"Source Sans 3\",sans-serif;font-synthesis:none;color:#f7fbff;display:flex;align-items:center;gap:25px;min-height:76px;padding:14px 18px;border-radius:7px;text-decoration:none;background:linear-gradient(90deg,#f4f9ff08,#f4f9ff04);transform:translateX(5px);transition:background .2s,transform .3s cubic-bezier(.16,1,.3,1)}.ds-row svg{width:34px;height:34px;transform:scale(1.22);filter:drop-shadow(0 3px 2px #08192c66)}.ds-name{display:block;font-size:18px;font-weight:400;line-height:1.4;overflow-wrap:anywhere;text-shadow:0 2px 3px #07192b66}.ds-meta{display:block;font-size:11px;color:#edf4fc;margin-top:3px}.ds-row:hover{background:#eef7ff08}.ds-row:focus-visible{outline:2px solid #fff;outline-offset:6px;border-radius:3px}@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}.ds-category,.ds-category:hover,.ds-category[aria-selected=true],.ds-row{transform:none}}"
     },
     {
       "name": "Folder search",
@@ -396,7 +396,7 @@
       "refersTo": "search",
       "description": "Local transparent search field.",
       "html": "<label class=\"ds-search\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.45\" aria-hidden=\"true\"><circle cx=\"10.5\" cy=\"10.5\" r=\"6.5\"/><path d=\"m16 16 5 5\"/></svg><input aria-label=\"Search this folder\" placeholder=\"Search this folder\" type=\"search\"></label>",
-      "css": ".ds-search{font-family:\"Segoe UI\",Helvetica,Arial,sans-serif;color:#f7fbff;display:flex;align-items:center;gap:8px;border-bottom:1px solid #d5e7ff55;width:220px;padding:6px 0}.ds-search svg{width:17px;height:17px;color:#edf4fc}.ds-search input{font-family:\"Segoe UI\",Helvetica,Arial,sans-serif;color:#f7fbff;background:none;border:0;min-width:0;width:100%;font-size:13px;caret-color:#fff}.ds-search input::placeholder{color:#edf4fc;opacity:1}.ds-search input:focus-visible{outline:2px solid #fff;outline-offset:3px;border-radius:3px}@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}.ds-category,.ds-category:hover,.ds-category[aria-selected=true],.ds-row{transform:none}}"
+      "css": ".ds-search{font-family:\"Source Sans 3\",sans-serif;font-synthesis:none;color:#f7fbff;display:flex;align-items:center;gap:8px;border-bottom:1px solid #d5e7ff55;width:220px;padding:6px 0}.ds-search svg{width:17px;height:17px;color:#edf4fc}.ds-search input{font-family:\"Source Sans 3\",sans-serif;font-synthesis:none;color:#f7fbff;background:none;border:0;min-width:0;width:100%;font-size:13px;caret-color:#fff}.ds-search input::placeholder{color:#edf4fc;opacity:1}.ds-search input:focus-visible{outline:2px solid #fff;outline-offset:3px;border-radius:3px}@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}.ds-category,.ds-category:hover,.ds-category[aria-selected=true],.ds-row{transform:none}}"
     },
     {
       "name": "Palette selector",
@@ -404,7 +404,7 @@
       "refersTo": "appearance-select",
       "description": "Six ambient ground alternatives.",
       "html": "<select class=\"ds-select\" aria-label=\"Background color\"><option>Azure</option><option>Violet</option><option>Amber</option><option>Rose</option><option>Jade</option><option>Graphite</option></select>",
-      "css": ".ds-select{font-family:\"Segoe UI\",Helvetica,Arial,sans-serif;color:#f7fbff;background:#0b193b70;border:1px solid #d7e9ff33;padding:7px 24px 7px 10px;border-radius:4px;max-width:116px;font-size:12px;min-height:36px;cursor:pointer}.ds-select:focus-visible{outline:2px solid #fff;outline-offset:6px;border-radius:3px}@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}.ds-category,.ds-category:hover,.ds-category[aria-selected=true],.ds-row{transform:none}}"
+      "css": ".ds-select{font-family:\"Source Sans 3\",sans-serif;font-synthesis:none;color:#f7fbff;background:#0b193b70;border:1px solid #d7e9ff33;padding:7px 24px 7px 10px;border-radius:4px;max-width:116px;font-size:12px;min-height:36px;cursor:pointer}.ds-select:focus-visible{outline:2px solid #fff;outline-offset:6px;border-radius:3px}@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}.ds-category,.ds-category:hover,.ds-category[aria-selected=true],.ds-row{transform:none}}"
     },
     {
       "name": "Wave motion button",
@@ -412,7 +412,7 @@
       "refersTo": "motion-button",
       "description": "Transparent pause/resume control.",
       "html": "<button class=\"ds-motion\" type=\"button\" aria-pressed=\"false\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.45\" aria-hidden=\"true\"><path d=\"M8 5v14M16 5v14\"/></svg><span>Pause waves</span></button>",
-      "css": ".ds-motion{font-family:\"Segoe UI\",Helvetica,Arial,sans-serif;color:#f7fbff;display:flex;align-items:center;gap:8px;background:transparent;border:0;font-size:12px;min-height:40px;padding:6px 0;cursor:pointer}.ds-motion svg{width:16px;height:16px}.ds-motion:focus-visible{outline:2px solid #fff;outline-offset:6px;border-radius:3px}@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}.ds-category,.ds-category:hover,.ds-category[aria-selected=true],.ds-row{transform:none}}"
+      "css": ".ds-motion{font-family:\"Source Sans 3\",sans-serif;font-synthesis:none;color:#f7fbff;display:flex;align-items:center;gap:8px;background:transparent;border:0;font-size:12px;min-height:40px;padding:6px 0;cursor:pointer}.ds-motion svg{width:16px;height:16px}.ds-motion:focus-visible{outline:2px solid #fff;outline-offset:6px;border-radius:3px}@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}.ds-category,.ds-category:hover,.ds-category[aria-selected=true],.ds-row{transform:none}}"
     },
     {
       "name": "Open file link",
@@ -420,14 +420,14 @@
       "refersTo": "open-link",
       "description": "Lined native selected-entry action.",
       "html": "<a class=\"ds-open\" href=\"#files\">Open folder</a>",
-      "css": ".ds-open{font-family:\"Segoe UI\",Helvetica,Arial,sans-serif;color:#f7fbff;display:inline-flex;min-height:44px;align-items:center;font-size:14px;border-bottom:1px solid #e8f1ff88;gap:12px;text-decoration:none}.ds-open:after{content:\"\";display:block;width:7px;height:7px;border-top:1px solid currentColor;border-right:1px solid currentColor;transform:rotate(45deg)}.ds-open:hover{border-bottom-color:#fff}.ds-open:focus-visible{outline:2px solid #fff;outline-offset:6px;border-radius:3px}@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}.ds-category,.ds-category:hover,.ds-category[aria-selected=true],.ds-row{transform:none}}"
+      "css": ".ds-open{font-family:\"Source Sans 3\",sans-serif;font-synthesis:none;color:#f7fbff;display:inline-flex;min-height:44px;align-items:center;font-size:14px;border-bottom:1px solid #e8f1ff88;gap:12px;text-decoration:none}.ds-open:after{content:\"\";display:block;width:7px;height:7px;border-top:1px solid currentColor;border-right:1px solid currentColor;transform:rotate(45deg)}.ds-open:hover{border-bottom-color:#fff}.ds-open:focus-visible{outline:2px solid #fff;outline-offset:6px;border-radius:3px}@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}.ds-category,.ds-category:hover,.ds-category[aria-selected=true],.ds-row{transform:none}}"
     },
     {
       "name": "Navigation feedback",
       "kind": "custom",
       "description": "Persistent-shell loading and retained-list error banner; Cancel while loading, Retry and Open normally after failure. A category-configuration mismatch offers native navigation to reload the destination rail.",
       "html": "<div class=\"ds-navigation-notice\" role=\"status\"><span>Could not open this folder. Your current files are still available.</span><button type=\"button\">Retry</button><a href=\"#files\">Open normally</a></div>",
-      "css": ".ds-navigation-notice{font-family:\"Segoe UI\",Helvetica,Arial,sans-serif;background:#091a3a;color:#f7fbff;padding:12px 16px;border-radius:4px;font-size:13px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}.ds-navigation-notice button,.ds-navigation-notice a{font:inherit;color:inherit;background:none;min-height:44px;padding:6px 12px;border:1px solid #edf4fc;border-radius:4px;text-decoration:none;display:inline-flex;align-items:center;cursor:pointer}.ds-navigation-notice button:focus-visible,.ds-navigation-notice a:focus-visible{outline:2px solid #fff;outline-offset:6px;border-radius:3px}"
+      "css": ".ds-navigation-notice{font-family:\"Source Sans 3\",sans-serif;font-synthesis:none;background:#091a3a;color:#f7fbff;padding:12px 16px;border-radius:4px;font-size:13px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}.ds-navigation-notice button,.ds-navigation-notice a{font:inherit;color:inherit;background:none;min-height:44px;padding:6px 12px;border:1px solid #edf4fc;border-radius:4px;text-decoration:none;display:inline-flex;align-items:center;cursor:pointer}.ds-navigation-notice button:focus-visible,.ds-navigation-notice a:focus-visible{outline:2px solid #fff;outline-offset:6px;border-radius:3px}"
     }
   ],
   "narrative": {
@@ -436,7 +436,7 @@
     "keyCharacteristics": [
       "Horizontal category rail and vertical file list.",
       "Six dark ambient palettes with bright text.",
-      "Original inline SVG geometry and procedural light; no shipped raster artwork.",
+      "Original inline SVG geometry and procedural light; no shipped background raster artwork.",
       "Visible focus, IME-safe search, reduced motion, and static fallbacks."
     ],
     "rules": [

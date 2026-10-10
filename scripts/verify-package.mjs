@@ -60,7 +60,7 @@ try {
     `
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-import {generateExplorer,createCrosswaveTheme,defaultCrosswaveCategories} from ${JSON.stringify(metadata.name)};
+import {generateExplorer,createShareImage,describeContent,createCrosswaveTheme,defaultCrosswaveCategories} from ${JSON.stringify(metadata.name)};
 import {createExampleTheme} from 'dirwell-example-theme';
 import {rollup} from 'rollup';
 import Dirwell from ${JSON.stringify(`${metadata.name}/rollup`)};
@@ -84,6 +84,16 @@ for(const mode of ['ssg','mpa']){
  const pageAsset=nested.match(/<main[^>]*data-cw-page="([^"]+)"/)[1].split('/').at(-1);
  assert.match(await readFile(output+(mode==='mpa'?'/__dirwell':'/docs')+'/'+pageAsset,'utf8'),/dirwell:crosswave-page/);
 }
+const image=await createShareImage({theme:'plain',title:'Packed fonts',description:'1 folder · 2 files'});
+assert.equal(image.type,'image/png');
+assert.equal(Buffer.from(await image.arrayBuffer()).readUInt32BE(16),1200);
+await generateExplorer({sourceDir:'files',outputDir:'metadata-output',metadata:{siteName:'Packed metadata',description:({directory})=>describeContent(directory),image:async()=>({source:image,outputPath:'og/cover.png'})}});
+const metadataHtml=await readFile('metadata-output/index.html','utf8');
+assert.match(metadataHtml,/<title>Packed metadata<\\/title>/);
+assert.match(metadataHtml,/content="1 folder · 1 file"/);
+assert.match(metadataHtml,/content="og\\/cover.png"/);
+assert.equal((await readFile('metadata-output/source-sans-3-regular.woff2')).subarray(0,4).toString(),'wOF2');
+assert.ok((await readFile('metadata-output/og/cover.png')).length>0);
 const bundle=await rollup({input:'entry.js',plugins:[Dirwell({root:'files'})]});
 try {await bundle.write({dir:'rollup-output',format:'es'});} finally {await bundle.close();}
 assert.equal(await readFile('rollup-output/dirwell/a & b.txt','utf8'),'external consumer file');
@@ -106,7 +116,7 @@ console.log('Public imports, external SSG/MPA theme assets, encoded names, and R
   );
   await writeFile(
     path.join(project, "verify.ts"),
-    `import {createCrosswaveTheme,defaultCrosswaveCategories,type CrosswaveCategory,type CrosswaveCategoryMatch,type CrosswaveCategoryIcon,defineConfig,type ExplorerTheme} from ${JSON.stringify(metadata.name)};import type {DirwellPluginOptions} from ${JSON.stringify(`${metadata.name}/unplugin`)};import {createExampleTheme} from 'dirwell-example-theme';const matcher:CrosswaveCategoryMatch={mimeTypes:['text/*']};const icon:CrosswaveCategoryIcon={svg:'<svg viewBox="0 0 24 24"><path d="M2 12h20"/></svg>'};const categories:readonly CrosswaveCategory[]=[...defaultCrosswaveCategories,{id:'texts',label:'Texts',icon,match:matcher}];const crosswave:ExplorerTheme=createCrosswaveTheme({categories});void crosswave;const theme:ExplorerTheme=createExampleTheme({title:'Downloads'});const config=defineConfig({theme});const plugin:DirwellPluginOptions={root:'files',theme:config.theme!};void plugin;`,
+    `import {createCrosswaveTheme,defaultCrosswaveCategories,type CrosswaveCategory,type CrosswaveCategoryMatch,type CrosswaveCategoryIcon,defineConfig,type ExplorerTheme,type MetadataOptions,type ResolvedMetadataContext} from ${JSON.stringify(metadata.name)};import type {DirwellPluginOptions} from ${JSON.stringify(`${metadata.name}/unplugin`)};import {createExampleTheme} from 'dirwell-example-theme';const matcher:CrosswaveCategoryMatch={mimeTypes:['text/*']};const icon:CrosswaveCategoryIcon={svg:'<svg viewBox="0 0 24 24"><path d="M2 12h20"/></svg>'};const categories:readonly CrosswaveCategory[]=[...defaultCrosswaveCategories,{id:'texts',label:'Texts',icon,match:matcher}];const crosswave:ExplorerTheme=createCrosswaveTheme({categories});void crosswave;const metadata:MetadataOptions={title:({site})=>site.name,image:async(m:ResolvedMetadataContext)=>new File([m.description],'cover.png')};void metadata;const theme:ExplorerTheme=createExampleTheme({title:'Downloads'});const config=defineConfig({theme});const plugin:DirwellPluginOptions={root:'files',theme:config.theme!};void plugin;`,
   );
   run("pnpm", [
     "exec",

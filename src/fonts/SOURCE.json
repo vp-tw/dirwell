@@ -1,0 +1,88 @@
+[
+  {
+    "repo": "https://github.com/adobe-fonts/source-sans",
+    "sha": "87b37a2daaed80fcb8e8ccb0085c4d72ddade12e",
+    "path": "OTF/SourceSans3-Regular.otf",
+    "file": "SourceSans3-Regular.otf",
+    "bytes": 334924,
+    "sha256": "08df266400933d3178d081a45f94a08814c3e55b4b7dd2e0ff69cb1329f13ab6"
+  },
+  {
+    "repo": "https://github.com/adobe-fonts/source-sans",
+    "sha": "87b37a2daaed80fcb8e8ccb0085c4d72ddade12e",
+    "path": "OTF/SourceSans3-Light.otf",
+    "file": "SourceSans3-Light.otf",
+    "bytes": 327396,
+    "sha256": "bbfab2c58d46defe8a194634744660ee15d560dcf3d7a8c7bb509936acc618c7"
+  },
+  {
+    "repo": "https://github.com/adobe-fonts/source-sans",
+    "sha": "87b37a2daaed80fcb8e8ccb0085c4d72ddade12e",
+    "path": "LICENSE.md",
+    "file": "source-sans-LICENSE.md",
+    "bytes": 4480,
+    "sha256": "3d78cfa3c4c179a49cbfe4b7603f9683b58d41c3e29f85b5ee9a480e2a057165",
+    "upstreamSha256": "56af9b9c6715597e458284a474dc118a50a4150e9d547c70f7b4a33c3e6a9328",
+    "transformation": "License line endings normalized to LF; license text unchanged"
+  },
+  {
+    "repo": "https://github.com/adobe-fonts/source-serif",
+    "sha": "80d3f8894c09c937bebfa9011247d2e1c79fd6f4",
+    "path": "OTF/SourceSerif4-Regular.otf",
+    "file": "SourceSerif4-Regular.otf",
+    "bytes": 241392,
+    "sha256": "edf160d0d584deee8a3bb2c3371b2a7624ca63580fbe02c57c1f4c91e84d8787"
+  },
+  {
+    "repo": "https://github.com/adobe-fonts/source-serif",
+    "sha": "80d3f8894c09c937bebfa9011247d2e1c79fd6f4",
+    "path": "LICENSE.md",
+    "file": "source-serif-LICENSE.md",
+    "bytes": 4486,
+    "sha256": "58d616db06d9f0540735051efb49b5b3b77c9c0f2f2a37a6b1bf72bd241fec80",
+    "upstreamSha256": "c21d7293d87b6d7ab1d0229a2f55b77f33a7613a6a4e66f6693d68d7d8d09464",
+    "transformation": "License line endings normalized to LF; license text unchanged"
+  },
+  {
+    "repo": "https://github.com/adobe-fonts/source-sans",
+    "sha": "87b37a2daaed80fcb8e8ccb0085c4d72ddade12e",
+    "path": "WOFF2/OTF/SourceSans3-Regular.otf.woff2",
+    "file": "SourceSans3-Regular.woff2",
+    "bytes": 153800,
+    "sha256": "63de0da0cc05298e2e9c6e5cef506d8454ca665f6e668a99d94f51174b9256ed"
+  },
+  {
+    "repo": "https://github.com/adobe-fonts/source-sans",
+    "sha": "87b37a2daaed80fcb8e8ccb0085c4d72ddade12e",
+    "path": "WOFF2/OTF/SourceSans3-Light.otf.woff2",
+    "file": "SourceSans3-Light.woff2",
+    "bytes": 149704,
+    "sha256": "2d5308c1e971769ab7a3d4a406507bb941e6126b179caf39edabd39b9bb726c0"
+  },
+  {
+    "repo": "https://github.com/adobe-fonts/source-serif",
+    "sha": "80d3f8894c09c937bebfa9011247d2e1c79fd6f4",
+    "path": "WOFF2/OTF/SourceSerif4-Regular.otf.woff2",
+    "file": "SourceSerif4-Regular.woff2",
+    "bytes": 107408,
+    "sha256": "42aa010dbb82d90764a28f6cc7d809a9395999b7390eb3b212028c6975e97402"
+  },
+  {
+    "repo": "https://github.com/adobe-fonts/source-code-pro",
+    "sha": "803b7e23ec97ae58b6232ea76519a76d428ba268",
+    "path": "WOFF2/OTF/SourceCodePro-Regular.otf.woff2",
+    "file": "SourceCodePro-Regular.woff2",
+    "bytes": 76348,
+    "sha256": "23a0d7981dc90c0a8ec7d8a6ca7ee5dc439c777f3e2aabcf1009fdcf0e821b79"
+  },
+  {
+    "repo": "https://github.com/adobe-fonts/source-code-pro",
+    "sha": "803b7e23ec97ae58b6232ea76519a76d428ba268",
+    "path": "LICENSE.md",
+    "file": "source-code-LICENSE.md",
+    "bytes": 4473,
+    "sha256": "0b2c3168605cb4f3ba54cf3cf2003f67ff894c66484c75702007f23eda92c353",
+    "upstreamSha256": "7c940e28a5388e9bba866cf0e408edda45fe0899ba98665b8f6ab31dc5e4b8ff",
+    "transformation": "License line endings normalized to LF; license text unchanged"
+  }
+]

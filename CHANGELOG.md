@@ -1,5 +1,11 @@
 # @vp-tw/dirwell
 
+## 0.1.0-alpha.10
+
+### Patch Changes
+
+- Add shared page metadata, static theme share images, bundled Source fonts, and a dynamic per-folder image example. Count folders, files, and symlinks separately, update Crosswave metadata during navigation, and prevent mirrored directory aliases from overwriting target pages.
+
 ## 0.1.0-alpha.9
 
 ### Patch Changes

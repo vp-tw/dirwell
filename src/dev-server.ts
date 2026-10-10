@@ -1,5 +1,5 @@
-import { createReadStream, watch } from "node:fs";
-import { stat } from "node:fs/promises";
+import { watch } from "node:fs";
+import { open, stat, type FileHandle } from "node:fs/promises";
 import { createServer, type ServerResponse } from "node:http";
 import path from "node:path";
 import { generateExplorer } from "./generator.ts";
@@ -18,6 +18,12 @@ const contentTypes: Readonly<Record<string, string>> = {
   ".js": "text/javascript; charset=utf-8",
   ".json": "application/json; charset=utf-8",
   ".svg": "image/svg+xml",
+  ".png": "image/png",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".webp": "image/webp",
+  ".gif": "image/gif",
+  ".woff2": "font/woff2",
   ".txt": "text/plain; charset=utf-8",
 };
 
@@ -36,25 +42,27 @@ export async function createExplorerDevServer(
       : "/";
   const eventsPath = `${mountPath}__explorer/events`;
   const clients = new Set<ServerResponse>();
-  let building = false;
+  let activeBuild: Promise<void> | null = null;
   let rebuildRequested = false;
   let timer: ReturnType<typeof setTimeout> | undefined;
 
   async function rebuild(): Promise<void> {
-    if (building) {
+    if (activeBuild !== null) {
       rebuildRequested = true;
-      return;
+      return activeBuild;
     }
-    building = true;
-    try {
-      await generateExplorer(options);
-      for (const client of clients) client.write("event: reload\ndata: updated\n\n");
-    } finally {
-      building = false;
-      if (rebuildRequested) {
+    const task = (async () => {
+      do {
         rebuildRequested = false;
-        await rebuild();
-      }
+        await generateExplorer(options);
+        for (const client of clients) client.write("event: reload\ndata: updated\n\n");
+      } while (rebuildRequested);
+    })();
+    activeBuild = task;
+    try {
+      await task;
+    } finally {
+      activeBuild = null;
     }
   }
 
@@ -104,26 +112,51 @@ export async function createExplorerDevServer(
       send(response, 403, "Forbidden");
       return;
     }
-    try {
-      if ((await stat(filePath)).isDirectory()) filePath = path.join(filePath, "index.html");
-      const fileStats = await stat(filePath);
-      if (!fileStats.isFile()) throw new Error("Not a file");
-      const extension = path.extname(filePath).toLowerCase();
-      const headers: Record<string, string | number> = {
-        "cache-control": "no-store",
-        "content-type": contentTypes[extension] ?? "application/octet-stream",
-      };
-      if (extension !== ".html") headers["content-length"] = fileStats.size;
-      response.writeHead(200, headers);
-      if (extension === ".html") {
-        let html = "";
-        for await (const chunk of createReadStream(filePath, { encoding: "utf8" })) html += chunk;
-        response.end(html.replace("</body>", `${reloadClient(eventsPath)}</body>`));
-      } else {
-        createReadStream(filePath).pipe(response);
+    for (let attempt = 0; attempt < 2; attempt++) {
+      // A completed build replaces this directory. Wait before resolving a path,
+      // then keep an open file descriptor so replacement cannot invalidate reads.
+      await activeBuild?.catch(() => {});
+      let handle: FileHandle | undefined;
+      try {
+        if ((await stat(filePath)).isDirectory()) filePath = path.join(filePath, "index.html");
+        handle = await open(filePath, "r");
+        const fileStats = await handle.stat();
+        if (!fileStats.isFile()) throw new Error("Not a file");
+        const extension = path.extname(filePath).toLowerCase();
+        const headers: Record<string, string | number> = {
+          "cache-control": "no-store",
+          "content-type": contentTypes[extension] ?? "application/octet-stream",
+        };
+        if (extension === ".html") {
+          const html = await handle.readFile("utf8");
+          await handle.close();
+          handle = undefined;
+          response.writeHead(200, headers);
+          response.end(html.replace("</body>", `${reloadClient(eventsPath)}</body>`));
+        } else {
+          headers["content-length"] = fileStats.size;
+          const stream = handle.createReadStream();
+          handle = undefined;
+          stream.on("error", (error) => response.destroy(error));
+          response.once("close", () => stream.destroy());
+          response.writeHead(200, headers);
+          stream.pipe(response);
+        }
+        return;
+      } catch (error) {
+        await handle?.close().catch(() => {});
+        if (
+          attempt === 0 &&
+          activeBuild !== null &&
+          error instanceof Error &&
+          "code" in error &&
+          error.code === "ENOENT"
+        )
+          continue;
+        if (response.headersSent) response.destroy();
+        else send(response, 404, "Not found");
+        return;
       }
-    } catch {
-      send(response, 404, "Not found");
     }
   });
 

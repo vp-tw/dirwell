@@ -7,6 +7,7 @@ const output = path.join(root, "dist");
 
 await mkdir(output, { recursive: true });
 await Promise.all([
+  cp(path.join(root, "src/fonts"), path.join(output, "fonts"), { recursive: true }),
   cp(path.join(root, "src/crosswave-runtime.js"), path.join(output, "crosswave-runtime.js")),
   cp(path.join(root, "src/theme-runtime.js"), path.join(output, "theme-runtime.js")),
   cp(path.join(root, "src/theme-worker.js"), path.join(output, "theme-worker.js")),

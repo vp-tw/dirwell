@@ -162,6 +162,13 @@
             if (local && url.pathname.endsWith("/")) url.pathname += payload.outputName;
             const base = new URL(payload.baseHref ?? ".", url);
             absoluteLinks(doc, base);
+            for (const node of doc.head.querySelectorAll(
+              '[data-dirwell-metadata][property="og:image"], link[data-dirwell-metadata]',
+            )) {
+              const attribute = node.tagName === "LINK" ? "href" : "content";
+              const value = node.getAttribute(attribute);
+              if (value) node.setAttribute(attribute, new URL(value, base).href);
+            }
             resolve({ doc, route: { ...route, url: url.href } });
           } catch (error) {
             reject(error);
@@ -802,6 +809,9 @@
         clearTimeout(searchTimer);
         composing = false;
         document.title = doc.title;
+        for (const node of document.head.querySelectorAll("[data-dirwell-metadata]")) node.remove();
+        for (const node of doc.head.querySelectorAll("[data-dirwell-metadata]"))
+          document.head.append(node.cloneNode(true));
         document
           .querySelector(".cw-location")
           .replaceChildren(...doc.querySelector(".cw-location").childNodes);

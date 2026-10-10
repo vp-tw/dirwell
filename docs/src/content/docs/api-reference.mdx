@@ -204,3 +204,11 @@ HTML strings; call `escapeHtml()` for untrusted entry or project text.
 `daemon status` and `daemon stop` accept `--cwd`. `daemon` defaults to `start`;
 `dev` aliases `serve`, and a bare directory also invokes `serve`. Run
 `dirwell <command> --help` for generated help and current flag spelling.
+
+## Metadata and share images
+
+`describeContent` formats counts; it formats folders, files, and links in that order, omitting zero counts and returning `Empty folder` when all are zero. `createShareImage` asynchronously returns a PNG `File` with fixed bundled fonts and one of the `ledger`, `plain`, or `crosswave` styles.
+
+`ContentCounts` contains `folderCount`, `fileCount`, and `linkCount`. `MetadataContext` supplies public `site` totals/name/repositoryName and direct `directory` counts/name/relativePath. `ResolvedMetadataContext` also contains resolved `title` and `description`. `MetadataValue` accepts a fixed value or an async callback. `MetadataOptions` configures site naming, deployment URL, title, description, and image. `ImageSource` is a `File`, local path string, or file `URL`. `MetadataImage` adds an optional output-root `outputPath` and `alt`. `PageMetadata` contains resolved strings and escaped `head` HTML for custom themes. `ThemeMetadataDefaults` selects default site/repository naming and image style. `ShareImageOptions` configures the image theme, title, description, repositoryName, and optional directoryPath.
+
+See [Page metadata and share images](../metadata/) for defaults, path handling, counting, and complete examples.

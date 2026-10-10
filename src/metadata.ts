@@ -1,0 +1,253 @@
+import { createHash } from "node:crypto";
+import { readFile } from "node:fs/promises";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import type { DirectoryData } from "./model.ts";
+
+export interface ContentCounts {
+  readonly folderCount: number;
+  readonly fileCount: number;
+  readonly linkCount: number;
+}
+export interface MetadataContext {
+  readonly site: ContentCounts & { readonly name: string; readonly repositoryName: string };
+  readonly directory: ContentCounts & { readonly relativePath: string; readonly name: string };
+}
+export type MetadataValue<T> = T | ((metadata: MetadataContext) => T | Promise<T>);
+export type ImageSource = File | string | URL;
+export interface MetadataImage {
+  readonly source: ImageSource;
+  /** Relative to the generated output root, never a source-file path. */
+  readonly outputPath?: string;
+  readonly alt?: string;
+}
+export interface ResolvedMetadataContext extends MetadataContext {
+  readonly title: string;
+  readonly description: string;
+}
+export interface MetadataOptions {
+  readonly siteName?: string;
+  readonly repositoryName?: string;
+  /** Deployed explorer root, including its deployment base; never the repository URL. */
+  readonly siteUrl?: string;
+  readonly title?: MetadataValue<string>;
+  readonly description?: MetadataValue<string>;
+  readonly image?:
+    | ImageSource
+    | MetadataImage
+    | false
+    | ((
+        metadata: ResolvedMetadataContext,
+      ) => ImageSource | MetadataImage | false | Promise<ImageSource | MetadataImage | false>);
+}
+export interface ThemeMetadataDefaults {
+  readonly siteName: string;
+  readonly repositoryName: string;
+  readonly imageTheme: "ledger" | "plain" | "crosswave";
+}
+export interface PageMetadata {
+  readonly title: string;
+  readonly description: string;
+  readonly head: string;
+}
+export function countEntries(directory: DirectoryData): ContentCounts {
+  return countKinds(directory.entries.map((entry) => entry.kind));
+}
+export function countKinds(kinds: Iterable<string>): ContentCounts {
+  let folderCount = 0,
+    fileCount = 0,
+    linkCount = 0;
+  for (const kind of kinds) {
+    if (kind === "directory") folderCount++;
+    else if (kind === "file") fileCount++;
+    else if (kind === "symlink") linkCount++;
+  }
+  return { folderCount, fileCount, linkCount };
+}
+export function describeContent(counts: ContentCounts): string {
+  const parts: string[] = [];
+  for (const [count, noun] of [
+    [counts.folderCount, "folder"],
+    [counts.fileCount, "file"],
+    [counts.linkCount, "link"],
+  ] as const) {
+    if (count > 0) parts.push(`${count} ${noun}${count === 1 ? "" : "s"}`);
+  }
+  return parts.join(" · ") || "Empty folder";
+}
+export function repositoryName(repositoryUrl: string): string {
+  try {
+    return new URL(repositoryUrl).pathname.replace(/^\/+|\/+$/g, "").replace(/\.git$/, "");
+  } catch {
+    return repositoryUrl;
+  }
+}
+function esc(text: string): string {
+  return text
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;");
+}
+function stringValue(value: unknown, label: string): string {
+  if (typeof value !== "string") throw new TypeError(`${label} must resolve to a string`);
+  return value;
+}
+function safeOutputPath(value: string): string {
+  if (
+    !value ||
+    value.includes("\\") ||
+    value.includes("\0") ||
+    value.startsWith("/") ||
+    /^[a-z]:/i.test(value) ||
+    value.split("/").some((part) => !part || part === "." || part === "..")
+  )
+    throw new Error(`Unsafe metadata image outputPath: ${value}`);
+  if (value.startsWith("__dirwell/") && !value.startsWith("__dirwell/metadata/"))
+    throw new Error("Metadata image cannot overwrite reserved Dirwell assets");
+  return value;
+}
+function deployedRoot(value: string | undefined): URL | undefined {
+  if (value === undefined) return undefined;
+  const url = new URL(value);
+  if (
+    !["http:", "https:"].includes(url.protocol) ||
+    url.search ||
+    url.hash ||
+    url.username ||
+    url.password
+  )
+    throw new Error(
+      "metadata.siteUrl must be an HTTP(S) explorer root without credentials, query, or fragment",
+    );
+  if (!url.pathname.endsWith("/")) url.pathname += "/";
+  return url;
+}
+export function createMetadataResolver(
+  options: MetadataOptions,
+  defaults: ThemeMetadataDefaults,
+  counts: ContentCounts,
+  sourceDirectory: string,
+) {
+  const site = Object.freeze({
+    ...counts,
+    name: stringValue(options.siteName ?? defaults.siteName, "metadata.siteName"),
+    repositoryName: stringValue(
+      options.repositoryName ?? defaults.repositoryName,
+      "metadata.repositoryName",
+    ),
+  });
+  const siteUrl = deployedRoot(options.siteUrl);
+  const assets = new Map<string, Uint8Array>();
+  let defaultImage: Promise<File> | undefined;
+  async function imageFor(
+    context: ResolvedMetadataContext,
+  ): Promise<{ outputPath: string; alt: string } | null> {
+    const isDefault = options.image === undefined;
+    let image = typeof options.image === "function" ? await options.image(context) : options.image;
+    if (image === false) return null;
+    if (image === undefined) {
+      defaultImage ??= import("./share-image-api.ts").then(({ createShareImage }) =>
+        createShareImage({
+          theme: defaults.imageTheme,
+          repositoryName: site.repositoryName,
+          title: typeof options.title === "string" ? options.title : site.name,
+          description:
+            typeof options.description === "string" ? options.description : describeContent(site),
+        }),
+      );
+      image = await defaultImage;
+    }
+    const config: MetadataImage =
+      image instanceof File || typeof image === "string" || image instanceof URL
+        ? { source: image }
+        : image;
+    if (!config || typeof config !== "object")
+      throw new TypeError(
+        "metadata.image must resolve to a File, local path, file URL, or source object",
+      );
+    let bytes: Uint8Array, filename: string;
+    if (config.source instanceof File) {
+      bytes = new Uint8Array(await config.source.arrayBuffer());
+      filename = config.source.name;
+    } else if (typeof config.source === "string" || config.source instanceof URL) {
+      if (config.source instanceof URL && config.source.protocol !== "file:")
+        throw new Error("metadata.image source URLs must use file:");
+      const input =
+        config.source instanceof URL
+          ? fileURLToPath(config.source)
+          : path.resolve(sourceDirectory, config.source);
+      bytes = await readFile(input);
+      filename = path.basename(input);
+    } else throw new TypeError("metadata.image.source must be a File, local path, or file URL");
+    const extension = path.extname(filename).toLowerCase();
+    if (![".png", ".jpg", ".jpeg", ".webp", ".gif"].includes(extension))
+      throw new Error("Metadata images must be PNG, JPEG, WebP, or GIF files");
+    const outputPath = safeOutputPath(
+      config.outputPath ??
+        `__dirwell/metadata/${createHash("sha256").update(bytes).digest("hex")}${extension}`,
+    );
+    const existing = assets.get(outputPath);
+    if (existing !== undefined && !Buffer.from(existing).equals(bytes))
+      throw new Error(`Conflicting metadata image outputPath: ${outputPath}`);
+    assets.set(outputPath, bytes);
+    return {
+      outputPath,
+      alt: stringValue(
+        config.alt ??
+          (isDefault
+            ? typeof options.title === "string"
+              ? options.title
+              : site.name
+            : context.title),
+        "metadata.image.alt",
+      ),
+    };
+  }
+  return {
+    assets,
+    async resolve(
+      directory: DirectoryData,
+      hrefForOutput: (outputPath: string) => string,
+      pagePath: string,
+    ): Promise<PageMetadata> {
+      const relativePath = directory.current.relativePath;
+      const context: MetadataContext = Object.freeze({
+        site,
+        directory: Object.freeze({
+          ...countEntries(directory),
+          relativePath,
+          name: directory.current.name,
+        }),
+      });
+      const title = stringValue(
+        typeof options.title === "function"
+          ? await options.title(context)
+          : (options.title ?? (relativePath ? `${relativePath} · ${site.name}` : site.name)),
+        "metadata.title",
+      );
+      const description = stringValue(
+        typeof options.description === "function"
+          ? await options.description(context)
+          : (options.description ?? describeContent(site)),
+        "metadata.description",
+      );
+      const image = await imageFor(Object.freeze({ ...context, title, description }));
+      const meta = (key: string, value: string, property = false) =>
+        `<meta data-dirwell-metadata ${property ? "property" : "name"}="${key}" content="${esc(value)}">`;
+      let head = `<title>${esc(title)}</title>${meta("description", description)}${meta("og:title", title, true)}${meta("og:description", description, true)}${meta("og:type", "website", true)}`;
+      if (siteUrl) {
+        const canonical = new URL(pagePath.split("/").map(encodeURIComponent).join("/"), siteUrl)
+          .href;
+        head += `${meta("og:url", canonical, true)}<link data-dirwell-metadata rel="canonical" href="${esc(canonical)}">`;
+      }
+      if (image) {
+        const href = siteUrl
+          ? new URL(image.outputPath.split("/").map(encodeURIComponent).join("/"), siteUrl).href
+          : hrefForOutput(image.outputPath);
+        head += meta("og:image", href, true) + meta("og:image:alt", image.alt, true);
+      }
+      return { title, description, head };
+    },
+  };
+}

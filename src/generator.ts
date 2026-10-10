@@ -1,3 +1,4 @@
+import { countKinds, createMetadataResolver } from "./metadata.ts";
 import {
   cp,
   lstat,
@@ -425,6 +426,14 @@ export async function generateExplorerSkippingPaths(
           !selection.selected.has(entry.symlink.targetRelativePath))
       )
         continue;
+      // Mirrored internal aliases already resolve to the target's generated page.
+      // Writing an alias page through the copied symlink would overwrite that page.
+      if (
+        (options.mirror ?? true) &&
+        entry.symlink.targetRelativePath !== null &&
+        !entry.symlink.isOutsideRoot
+      )
+        continue;
       await visit(
         path.posix.join(logicalDir, entry.name),
         entry.symlink.resolvedPath,
@@ -450,6 +459,25 @@ export async function generateExplorerSkippingPaths(
         ? logicalPath
         : path.posix.join(logicalPath, pageName);
     };
+    const sourceKinds = new Map<string, string>();
+    for (const { directory } of plans)
+      for (const entry of directory.entries) {
+        const sourcePath = path.relative(sourceDir, entry.absolutePath).split(path.sep).join("/");
+        if (selection.selected.has(sourcePath)) sourceKinds.set(sourcePath, entry.kind);
+      }
+    const metadataResolver =
+      theme.metadataDefaults === undefined && options.metadata === undefined
+        ? null
+        : createMetadataResolver(
+            options.metadata ?? {},
+            theme.metadataDefaults ?? {
+              siteName: path.basename(sourceDir),
+              repositoryName: "",
+              imageTheme: "ledger",
+            },
+            countKinds(sourceKinds.values()),
+            options.metadataBaseDirectory ?? process.cwd(),
+          );
     const sharedAssets = new Map<string, string | Uint8Array>();
     const rawLinkFiles = new Map<string, string>();
     const searchEntries = new Map<
@@ -562,7 +590,17 @@ export async function generateExplorerSkippingPaths(
           entry.kind === "directory" || entry.symlink?.targetKind === "directory";
         return hrefForLogicalPath(targetLogicalPath, directoryLike);
       };
+      const metadata = await metadataResolver?.resolve(
+        directory,
+        (outputPath) => hrefForLogicalPath(outputPath, false),
+        name === "index.html"
+          ? logicalDir
+            ? `${logicalDir}/`
+            : ""
+          : path.posix.join(logicalDir, name),
+      );
       const page = await theme.render({
+        ...(metadata === undefined ? {} : { metadata }),
         directory,
         documentBaseHref: urlStrategy === "html-base" ? base : null,
         outputName: name,
@@ -618,6 +656,26 @@ export async function generateExplorerSkippingPaths(
       for (const [assetName, contents] of sharedAssets) {
         await writeFile(path.join(assetDirectory, assetName), contents);
       }
+    }
+
+    for (const [filename, bytes] of metadataResolver?.assets ?? []) {
+      const parts = filename.split("/");
+      for (let index = 1; index <= parts.length; index++) {
+        const prefix = parts.slice(0, index).join("/");
+        if (selection.selected.has(prefix))
+          throw new Error(`Metadata image conflicts with source entry: ${filename}`);
+        const candidate = path.join(buildOutputDir, prefix);
+        try {
+          const info = await lstat(candidate);
+          if (info.isSymbolicLink() || index === parts.length || !info.isDirectory())
+            throw new Error(`Metadata image conflicts with generated output: ${filename}`);
+        } catch (error) {
+          if (!(error instanceof Error && "code" in error && error.code === "ENOENT")) throw error;
+        }
+      }
+      const destination = path.join(buildOutputDir, filename);
+      await mkdir(path.dirname(destination), { recursive: true });
+      await writeFile(destination, bytes);
     }
 
     if (rawLinkFiles.size > 0) {

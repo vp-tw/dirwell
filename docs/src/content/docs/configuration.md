@@ -233,3 +233,7 @@ source changes, and keeps the previous preview available after a failed
 rebuild. With `mirror: true`, it rejects included absolute symlinks and links
 that escape the source tree. For the other adapters and their tested modes, see [build tool adapters](../build-tools/)
 and the [support policy](../support/).
+
+## Page metadata and bundled fonts
+
+Built-in themes provide shared title/description configuration and one static whole-site share image by default. Set `metadata` in your config; use callbacks for per-folder text/images. [Page metadata and share images](https://vp-tw.github.io/dirwell/metadata/) covers counts, symlinks, fonts, path rules, and the dynamic example.

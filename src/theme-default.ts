@@ -1,3 +1,5 @@
+import { themeFonts } from "./theme-fonts.ts";
+import { repositoryName } from "./metadata.ts";
 import { readFile } from "node:fs/promises";
 import { createHash } from "node:crypto";
 import type { ExplorerTheme } from "./model.ts";
@@ -96,8 +98,14 @@ export function createDefaultTheme(options: DefaultThemeOptions = {}): ExplorerT
 
   return {
     name: "ledger",
+    metadataDefaults: {
+      siteName: project.name,
+      repositoryName: repositoryName(project.repositoryUrl),
+      imageTheme: "ledger",
+    },
     render({
       assetHref,
+      metadata,
       directory,
       documentBaseHref,
       exitsExplorerFor,
@@ -107,6 +115,7 @@ export function createDefaultTheme(options: DefaultThemeOptions = {}): ExplorerT
       sort,
       mode,
     }) {
+      const fonts = themeFonts("ledger", assetHref);
       const visiblePath =
         directory.current.relativePath === "" ? "/" : `/${directory.current.relativePath}/`;
       const virtualized =
@@ -157,6 +166,7 @@ export function createDefaultTheme(options: DefaultThemeOptions = {}): ExplorerT
         directory.parent === null ? null : hrefForDirectory(directory.parent.relativePath);
       const html = components.PageShell({
         assets,
+        ...(metadata === undefined ? {} : { metadata }),
         breadcrumbs: components.Breadcrumbs({
           items: createBreadcrumbs(directory.current.relativePath, hrefForDirectory),
         }),
@@ -177,7 +187,7 @@ export function createDefaultTheme(options: DefaultThemeOptions = {}): ExplorerT
         }),
         parentHref,
         runtimeConfig,
-        styles: defaultStyles,
+        styles: defaultStyles + fonts.css,
         toolbar: components.Toolbar({
           colorScheme,
           fuzzySearch,
@@ -191,6 +201,7 @@ export function createDefaultTheme(options: DefaultThemeOptions = {}): ExplorerT
       return {
         html,
         assets: {
+          ...fonts.assets,
           ...iconSet.assets,
           ...(interactive ? { "dirwell.runtime.js": runtimeSource } : {}),
           ...(entriesAssetName === null ? {} : { "dirwell.worker.js": workerSource }),

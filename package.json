@@ -1,6 +1,6 @@
 {
   "name": "@vp-tw/dirwell",
-  "version": "0.1.0-alpha.9",
+  "version": "0.1.0-alpha.10",
   "description": "A static file explorer with safe symlinks, themes, and live reload.",
   "keywords": [
     "directory-index",
@@ -101,9 +101,11 @@
     "verify:package": "node scripts/verify-package.mjs"
   },
   "dependencies": {
+    "@resvg/resvg-js": "2.6.2",
     "c12": "4.0.0-rc.1",
     "chokidar": "5.0.0",
     "citty": "0.2.2",
+    "fontkit": "2.0.4",
     "giget": "3.3.1",
     "jiti": "2.7.0",
     "mime": "4.1.0",
@@ -117,6 +119,7 @@
     "@playwright/test": "1.63.0",
     "@rsbuild/core": "2.2.12",
     "@rspack/core": "2.2.8",
+    "@types/fontkit": "2.0.9",
     "@types/node": "26.6.2",
     "@types/picomatch": "4.0.3",
     "astro": "7.3.3",
