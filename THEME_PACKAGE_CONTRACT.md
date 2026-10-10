@@ -30,7 +30,7 @@ setting; Ledger, Plain, and Crosswave keep their English interfaces.
 
 ## Page metadata
 
-A custom theme may include `context.metadata?.head` in its document head, or use the resolved title and description. The generator does not insert tags into custom HTML. `metadataDefaults` is optional and selects a built-in image preset; custom images belong in the caller’s `metadata.image` callback. These callbacks receive public counts and names, rather than full Node-side filesystem entries. See [metadata](https://vp-tw.github.io/dirwell/metadata/).
+A custom theme may include `context.metadata?.head` in its document head, or use the resolved title and description. The generator does not insert tags into custom HTML. `metadataDefaults` is optional. A theme can provide its own `image` source/callback or choose an `imageTheme` preset. Caller `metadata.image` wins, including `false`; callbacks receive resolved page text. Omitting both theme image settings produces text metadata only. Theme-owned local files should use a `file:` URL from `import.meta.url` or a Node `File`; relative strings resolve from the consumer’s config directory. These callbacks receive public counts and names, rather than full Node-side filesystem entries. See [metadata](https://vp-tw.github.io/dirwell/metadata/).
 
 ## Assets and trust
 
@@ -57,7 +57,7 @@ stable. Consumers own the decision to upgrade their Dirwell/theme pair.
 The proof package deliberately replaces the full renderer. Component overrides
 remain supported, but their authors must also verify the default runtime's DOM
 expectations, keyboard behavior, virtualization, and theme assets against their
-selected alpha version.
+selected alpha version. The [Ledger runtime contract](THEME_RUNTIME_CONTRACT.md) lists the hooks and verification procedure.
 
 ## Consumer verification
 

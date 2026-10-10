@@ -6,6 +6,7 @@ description: Set page titles, descriptions, and static or per-folder share image
 import { Code } from "@astrojs/starlight/components";
 import site from "../../../examples/api-reference/metadata-site.ts?raw";
 import fixed from "../../../examples/api-reference/metadata-static.ts?raw";
+import themeImages from "../../../examples/api-reference/theme-images.ts?raw";
 import dynamic from "../../../examples/api-reference/metadata-dynamic.ts?raw";
 
 The three built-in themes provide page titles, descriptions, and one static 1200×630 share image per site. Each image uses a fixed theme palette and bundled Source font family, with repository name and theme name above the site title.
@@ -58,5 +59,11 @@ Title resolves first, then description, then the image callback receives both re
 Ledger uses Source Sans 3 Regular, with Source Code Pro Regular for symlink target paths. Plain uses Source Serif 4 Regular. Crosswave uses Source Sans 3 Regular with Light for its brand title. WOFF2 files are served with each theme; PNG rendering uses pinned OTF sources with system-font discovery disabled. Normal builds need no font download. The source versions and SIL-OFL licenses ship in the package. Generated sites include a `source-fonts-NOTICE.txt` asset alongside the font files.
 
 The bundled fonts support their upstream character repertoire; built-in text is English and no CJK font bundle or localization system is included. Use a custom image renderer/font set for languages outside that repertoire. Browser rasterization can differ across environments; pinning font files does not guarantee identical pixels on every device.
+
+Theme packages can supply `metadataDefaults.image` as a fixed source or an async callback, with the same input/output types as caller `metadata.image`. Caller settings take precedence, including `false`, without running the theme callback. `imageTheme` is an optional built-in fallback preset; omit both defaults for text-only metadata. Theme-local files should use `new URL("./cover.png", import.meta.url)` or a `File`; a relative path string still resolves from the consumer config directory. See the [separately packed theme example](https://github.com/vp-tw/dirwell/tree/main/examples/theme-package).
+
+Assign the following object to your theme factory’s `metadataDefaults`. This is theme-author code; consumer configuration still uses `metadata.image`. The callback below creates per-page images; the separately packed theme example instead uses whole-site totals.
+
+<Code code={themeImages} lang="ts" />
 
 Custom themes can render `context.metadata?.head` inside their head element, or use its resolved title/description. Metadata does not inject HTML into arbitrary custom themes automatically. Ledger PageShell overrides receive `metadata` too. Crosswave updates managed metadata tags during persistent folder navigation, including browser history restoration.

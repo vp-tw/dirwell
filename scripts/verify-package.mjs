@@ -68,6 +68,7 @@ for (const host of ['unplugin','vite','rollup','rolldown','webpack','rspack','rs
 for (const mode of ['ssg','mpa']) {
  await generateExplorer({sourceDir:'files',outputDir:mode,mode,theme:createExampleTheme({title:'<Downloads>'})});
  const html=await readFile(mode+'/index.html','utf8');
+ assert.match(html,/property="og:image"/);const cover=html.match(/property="og:image" content="([^"]+)"/)[1];assert.ok((await readFile(mode+'/'+cover)).length>0);
  assert.match(html,/&lt;Downloads&gt;/);assert.match(html,/a &amp; b.txt/);
  assert.equal(await readFile(mode+'/a & b.txt','utf8'),'external consumer file');
  assert.match(await readFile(mode+'/docs/index.html','utf8'),/Parent directory/);

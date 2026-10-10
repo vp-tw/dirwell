@@ -210,17 +210,18 @@ HTML strings; call `escapeHtml()` for untrusted entry or project text.
 
 `describeContent` formats folders, files, and links in that order, omitting zero counts and returning `Empty folder` when all are zero. `createShareImage` asynchronously returns a PNG `File` with fixed bundled fonts and one of the `ledger`, `plain`, or `crosswave` styles.
 
-| Type                      | Contract                                                                                     |
-| ------------------------- | -------------------------------------------------------------------------------------------- |
-| `ContentCounts`           | `folderCount`, `fileCount`, and `linkCount`.                                                 |
-| `MetadataContext`         | Public `site` totals/name/repositoryName and immediate `directory` counts/name/relativePath. |
-| `ResolvedMetadataContext` | The same context plus resolved `title` and `description`, passed to image callbacks.         |
-| `MetadataValue`           | A fixed value or sync/async callback from `MetadataContext`.                                 |
-| `MetadataOptions`         | Site naming, deployment URL, text values/callbacks, and image source/callback.               |
-| `ImageSource`             | A Node `File`, local path string, or `file:` URL.                                            |
-| `MetadataImage`           | A `source` with optional output-root `outputPath` and `alt`.                                 |
-| `PageMetadata`            | Resolved title/description and escaped `head` HTML for custom themes.                        |
-| `ThemeMetadataDefaults`   | A theme’s default site/repository naming and built-in image style.                           |
-| `ShareImageOptions`       | Image `theme`, `title`, `description`, optional `repositoryName` and `directoryPath`.        |
+| Type                      | Contract                                                                                                |
+| ------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `ContentCounts`           | `folderCount`, `fileCount`, and `linkCount`.                                                            |
+| `MetadataContext`         | Public `site` totals/name/repositoryName and immediate `directory` counts/name/relativePath.            |
+| `ResolvedMetadataContext` | The same context plus resolved `title` and `description`, passed to image callbacks.                    |
+| `MetadataValue`           | A fixed value or sync/async callback from `MetadataContext`.                                            |
+| `MetadataOptions`         | Site naming, deployment URL, text values/callbacks, and image source/callback.                          |
+| `ImageSource`             | A Node `File`, local path string, or `file:` URL.                                                       |
+| `MetadataImageValue`      | Fixed image, false, or sync/async image callback; shared by caller settings and theme defaults.         |
+| `MetadataImage`           | A `source` with optional output-root `outputPath` and `alt`.                                            |
+| `PageMetadata`            | Resolved title/description and escaped `head` HTML for custom themes.                                   |
+| `ThemeMetadataDefaults`   | A theme’s default site/repository naming, own image source/callback, and optional built-in image style. |
+| `ShareImageOptions`       | Image `theme`, `title`, `description`, optional `repositoryName` and `directoryPath`.                   |
 
 See [Page metadata and share images](../metadata/) for defaults, path handling, counting, and complete examples.

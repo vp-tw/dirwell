@@ -1,6 +1,6 @@
 {
   "name": "@vp-tw/dirwell",
-  "version": "0.1.0-alpha.12",
+  "version": "0.1.0-alpha.13",
   "description": "A static file explorer with safe symlinks, themes, and live reload.",
   "keywords": [
     "directory-index",
@@ -24,7 +24,8 @@
     "README.md",
     "CHANGELOG.md",
     "THEMING.md",
-    "THEME_PACKAGE_CONTRACT.md"
+    "THEME_PACKAGE_CONTRACT.md",
+    "THEME_RUNTIME_CONTRACT.md"
   ],
   "type": "module",
   "exports": {
@@ -96,6 +97,7 @@
     "site:build": "pnpm run examples:build && pnpm run docs:build",
     "test": "node --test test/*.test.ts test/*.test.mjs",
     "test:browser": "playwright test",
+    "test:compat": "playwright test --config playwright.compat.config.ts",
     "check:types": "tsc --noEmit",
     "release:version": "changeset version && vp fmt --write .changeset CHANGELOG.md package.json",
     "verify:package": "node scripts/verify-package.mjs"

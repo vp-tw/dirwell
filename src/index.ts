@@ -70,6 +70,7 @@ export type {
   MetadataValue,
   MetadataOptions,
   MetadataImage,
+  MetadataImageValue,
   ImageSource,
   PageMetadata,
   ThemeMetadataDefaults,

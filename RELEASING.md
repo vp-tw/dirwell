@@ -1,7 +1,7 @@
 # Releasing Dirwell alpha
 
 The package is `@vp-tw/dirwell`; the executable is `dirwell`. Releases remain on
-`alpha`. A stable release needs a separate decision. npm trusted publishing is
+`alpha`. A stable release needs a separate decision and the [stable readiness gates](STABLE_READINESS.md). npm trusted publishing is
 configured and has completed a verified release; use the existing OIDC workflow.
 Do not repeat bootstrap publication or publisher configuration for each release.
 

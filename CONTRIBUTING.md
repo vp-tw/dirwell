@@ -32,6 +32,7 @@ For browser behavior, install Chromium once and run the browser tests:
 ```bash
 pnpm exec playwright install chromium --only-shell
 pnpm test:browser
+pnpm test:compat
 ```
 
 For documentation and live examples:
@@ -75,3 +76,5 @@ Keep releases on `alpha`. Review and merge the version before dispatching the
 OIDC workflow. The site deploys separately from `main` through GitHub Pages.
 Follow [RELEASING.md](RELEASING.md) for source, artifact, registry, and provenance
 verification. Do not republish an existing version.
+
+Use `pnpm exec playwright install chromium firefox webkit` when the compatible engine binaries are not installed. `test:compat` is a bounded theme-contract suite; it complements the full Chromium regression. Review [stable readiness](STABLE_READINESS.md) before proposing a stable release.

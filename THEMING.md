@@ -83,6 +83,8 @@ Default components are exported as `defaultThemeComponents`, so a replacement
 can wrap one explicitly. This provides the useful part of Docusaurus swizzling
 without virtual aliases or unsafe component categories.
 
+The [Ledger runtime contract](THEME_RUNTIME_CONTRACT.md) lists required DOM hooks and behavior tests for component overrides. Wrapping the defaults is the safest way to retain interaction.
+
 Component props and names are public API. Components receive prepared
 filesystem data and navigation decisions; they do not read the filesystem.
 Escape untrusted file names with the exported `escapeHtml` helper.

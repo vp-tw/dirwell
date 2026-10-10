@@ -283,3 +283,86 @@ test("CLI development server serves generated PNG and fonts with their media typ
     await rm(f.root, { recursive: true, force: true });
   }
 });
+
+test("theme images accept files, paths and async callbacks; caller image overrides theme defaults", async () => {
+  const f = await fixture();
+  try {
+    await writeFile(path.join(f.root, "cover.png"), "theme cover");
+    for (const image of [
+      png,
+      path.join(f.root, "cover.png"),
+      new URL(`file://${f.root}/cover.png`),
+    ]) {
+      for (const mode of ["ssg", "mpa"] as const) {
+        const theme = {
+          ...createDefaultTheme(),
+          metadataDefaults: { siteName: "Independent", repositoryName: "owner/theme", image },
+        };
+        await generateExplorer({ ...f, theme, mode });
+        assert.match(
+          await readFile(path.join(f.outputDir, "index.html"), "utf8"),
+          /<title>Independent<\/title>/,
+        );
+        assert.equal((await readdir(path.join(f.outputDir, "__dirwell/metadata"))).length, 1);
+      }
+    }
+    let calls = 0;
+    const theme = {
+      ...createDefaultTheme(),
+      metadataDefaults: {
+        siteName: "Independent",
+        repositoryName: "owner/theme",
+        image: async (m: import("../src/index.ts").ResolvedMetadataContext) => {
+          calls++;
+          assert.ok(m.title.includes("Independent"));
+          return {
+            source: png,
+            outputPath: `og/${m.directory.relativePath || "root"}.png`,
+            alt: m.title,
+          };
+        },
+      },
+    };
+    await generateExplorer({ ...f, theme });
+    assert.equal(calls, 3);
+    assert.match(
+      await readFile(path.join(f.outputDir, "docs/index.html"), "utf8"),
+      /content="docs · Independent"/,
+    );
+    assert.equal(await readFile(path.join(f.outputDir, "og/docs.png")).then((b) => b.length), 4);
+    calls = 0;
+    for (const image of [
+      false,
+      new File(["caller"], "caller.png"),
+      () => false as const,
+    ] as const) {
+      await generateExplorer({ ...f, theme, metadata: { image } });
+      assert.equal(calls, 0);
+    }
+    const textOnly = {
+      ...createDefaultTheme(),
+      metadataDefaults: { siteName: "Independent", repositoryName: "" },
+    };
+    await generateExplorer({ ...f, theme: textOnly });
+    assert.doesNotMatch(await readFile(path.join(f.outputDir, "index.html"), "utf8"), /og:image/);
+    const before = await readFile(path.join(f.outputDir, "index.html"));
+    await assert.rejects(
+      generateExplorer({
+        ...f,
+        theme: {
+          ...theme,
+          metadataDefaults: {
+            ...theme.metadataDefaults,
+            image: () => {
+              throw new Error("theme image failed");
+            },
+          },
+        },
+      }),
+      /theme image failed/,
+    );
+    assert.deepEqual(await readFile(path.join(f.outputDir, "index.html")), before);
+  } finally {
+    await rm(f.root, { recursive: true, force: true });
+  }
+});
