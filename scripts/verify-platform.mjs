@@ -14,7 +14,7 @@ const packageSource = input.endsWith(".tgz")
 const temporary = await mkdtemp(path.join(tmpdir(), "dirwell-platform-"));
 const reportDir = path.resolve(process.argv[3] ?? ".platform-proof");
 const name = process.env.PLATFORM_PROOF_NAME ?? `${process.platform}-${process.arch}`;
-assert.match(name, /^[a-z0-9-]+$/);
+assert.match(name, /^[a-z0-9]+(?:[.-][a-z0-9]+)*$/);
 const candidates = [
   path.join(path.dirname(process.execPath), "node_modules/npm/bin/npm-cli.js"),
   path.resolve(path.dirname(process.execPath), "../lib/node_modules/npm/bin/npm-cli.js"),
