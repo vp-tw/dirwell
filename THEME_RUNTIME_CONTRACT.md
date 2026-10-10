@@ -1,8 +1,8 @@
-# Ledger component runtime contract (alpha)
+# Ledger component runtime contract
 
 Use `createDefaultTheme({ components })` to keep Ledger behavior while replacing its HTML. Prefer wrapping `defaultThemeComponents` and passing every prop through, as the [complete override example](examples/default-theme-override/dirwell.config.ts) does. A type-correct component can still break behavior if it removes the runtime's hooks.
 
-This contract applies only to Ledger component overrides. Independent `ExplorerTheme` renderers own their runtime and do not need Ledger's markup. Crosswave's internal hooks are not a generic theme API. Alpha users must pin the tested version; these hooks are candidates for a stable contract, not a stable compatibility promise yet.
+This contract applies only to Ledger component overrides. Independent `ExplorerTheme` renderers own their runtime and do not need Ledger's markup. Crosswave's internal hooks are not a generic theme API. Verify the documented hooks against the Dirwell versions declared by your theme package.
 
 ## Keep the shell and output lifecycle
 

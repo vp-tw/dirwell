@@ -32,7 +32,7 @@ Users run Dirwell through a CLI or its TypeScript API. They may preview a direct
 - Ledger: local and global fuzzy search, type filters, configurable sorting, IME-safe keyboard input, Backspace parent navigation, linked breadcrumbs, and system/light/dark appearance controls.
 - The default theme keeps complete HTML listings in SSG mode. With its default settings, MPA directories above 500 entries use a data asset and a virtual list when the default row components are present; those listings require JavaScript.
 - Symlinks remain visible. Cycles are navigable without recursive generation. Broken, out-of-root, and excluded targets expose only their declared text through a safe raw-file route.
-- Build integrations are selective: Vite, Rollup, and webpack are primary during alpha; other existing adapters are experimental. Full Unplugin target coverage and dedicated framework adapters are not product goals. See [support policy](docs/src/content/docs/support.md).
+- Build integrations are selective: Vite, Rollup, and webpack are primary; other existing adapters are experimental. Full Unplugin target coverage and dedicated framework adapters are not product goals. See [support policy](docs/src/content/docs/support.md).
 - Three packaged themes: Ledger, Plain, and Crosswave. Built-in interfaces stay English; localization belongs to custom themes.
 - Configurable page metadata, static share images, and build-time per-folder image callbacks with public counts. Bundled font sources keep normal builds independent of remote font services.
 - Themes may replace typed components, add assets, wrap defaults, or replace the full document.

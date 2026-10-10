@@ -14,20 +14,17 @@ You need **Node.js 26 or later**, which includes npm. From a terminal, replace
 `./downloads` with a folder that already exists:
 
 ```bash
-npx @vp-tw/dirwell@alpha serve ./downloads
+npx @vp-tw/dirwell serve ./downloads
 ```
 
 Accept npm's installation prompt on first use. Open the `Local:` URL printed by
 Dirwell. Add or change a file to see the list update. Press Ctrl+C to stop.
 No repository clone or config file is required.
 
-Dirwell is currently **alpha**. Use `@alpha` explicitly; the `latest` npm tag
-remains on the bootstrap alpha and does not select the newest alpha.
-
 ## Publish the folder
 
 ```bash
-npx @vp-tw/dirwell@alpha build ./downloads -o ./site-downloads
+npx @vp-tw/dirwell build ./downloads -o ./site-downloads
 ```
 
 Upload the complete `site-downloads/` directory to a static host. The default
@@ -46,7 +43,7 @@ JavaScript. Advanced MPA output can use JavaScript for large directory lists.
 Install the package when you need a reusable config, a theme, or a build adapter:
 
 ```bash
-npm install --save-dev @vp-tw/dirwell@alpha
+npm install --save-dev @vp-tw/dirwell
 ```
 
 Create `dirwell.config.ts` beside your project's `package.json`:
@@ -61,7 +58,11 @@ export default defineConfig({
 
 Run `npx dirwell build ./downloads -o ./site-downloads`. Pass the source folder
 explicitly: the CLI defaults to the current directory even if config sets `root`.
-Pin your tested version when you need reproducible alpha builds.
+Pin your tested version when you need reproducible builds.
+
+## Verified scope
+
+Tests run on macOS and Linux with Node.js 26. Full browser regression runs in Chromium; a smaller Firefox/WebKit suite checks theme overrides, folder navigation and history, and Plain without JavaScript. CLI build/serve, SSG/MPA output, theme packages, and primary Vite/Rollup/webpack integrations are exercised. Windows, physical Safari/iOS devices, and hardware controllers are not verified. Other adapters remain experimental; see [tested capabilities](https://vp-tw.github.io/dirwell/build-tools/#development-and-verification).
 
 ## Choose your next step
 

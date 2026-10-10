@@ -258,9 +258,9 @@ provides English, Traditional Chinese, and Japanese switching. It updates
 preference across directories; and keeps an English listing with UTC dates
 when JavaScript is unavailable. File names and link targets remain unchanged.
 
-## Independent alpha packages
+## Independent theme packages
 
-Use a peer dependency pinned to the Dirwell alpha that the theme has tested.
+Declare the tested Dirwell versions in the theme’s peer dependency.
 The [package contract](https://github.com/vp-tw/dirwell/blob/main/THEME_PACKAGE_CONTRACT.md)
 describes rendering, navigation, assets, trust, and compatibility. The
 [external package proof](https://github.com/vp-tw/dirwell/tree/main/examples/theme-package)

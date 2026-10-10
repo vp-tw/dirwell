@@ -14,7 +14,7 @@ Want to see the result first? [Open the live explorer](https://vp-tw.github.io/d
 Replace `./downloads` with an existing folder on your computer:
 
 ```bash
-npx @vp-tw/dirwell@alpha serve ./downloads
+npx @vp-tw/dirwell serve ./downloads
 ```
 
 Accept npm's installation prompt on first use. Open the `Local:` URL printed by
@@ -22,13 +22,12 @@ the command. You should see your folders and files; open a directory, search
 for a file name, or follow a file link. Adding, changing, or deleting a source
 file updates the listing and reloads the browser. Press Ctrl+C to stop.
 
-Dirwell is alpha. Use `@alpha` to select the current alpha; `latest` remains on
-the bootstrap alpha. See [support and compatibility](../support/).
+See [support and compatibility](../support/) for verified environments and integration limits.
 
 ## 2. Build a website
 
 ```bash
-npx @vp-tw/dirwell@alpha build ./downloads -o ./site-downloads
+npx @vp-tw/dirwell build ./downloads -o ./site-downloads
 ```
 
 This writes the website and copies the source files into `site-downloads/`,
@@ -52,7 +51,7 @@ For a fixed public path such as `/project/downloads/`, continue with
 Install Dirwell locally so a config file can import its public API:
 
 ```bash
-npm install --save-dev @vp-tw/dirwell@alpha
+npm install --save-dev @vp-tw/dirwell
 ```
 
 Create `dirwell.config.ts` beside your project's `package.json`:

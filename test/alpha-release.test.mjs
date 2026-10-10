@@ -1,6 +1,12 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { readProvenance, validateProvenance, validateRelease } from "../scripts/alpha-release.mjs";
+import {
+  readProvenance,
+  releaseTag,
+  releaseNotes,
+  validateProvenance,
+  validateRelease,
+} from "../scripts/alpha-release.mjs";
 
 const metadata = {
   name: "@vp-tw/dirwell",
@@ -47,7 +53,7 @@ test("provenance readback tolerates delayed availability but rejects other error
   );
 });
 
-test("alpha release accepts the exact main version and rejects unsafe dispatches", () => {
+test("release accepts the exact main version and rejects unsafe dispatches", () => {
   validateRelease(metadata, environment);
   for (const change of [
     { GITHUB_REF: "refs/heads/feature" },
@@ -57,12 +63,22 @@ test("alpha release accepts the exact main version and rejects unsafe dispatches
     { RELEASE_VERSION: "0.1.0-alpha.0" },
   ])
     assert.throws(() => validateRelease(metadata, { ...environment, ...change }));
-  assert.throws(() =>
-    validateRelease(
-      { ...metadata, version: "0.1.0" },
-      { ...environment, RELEASE_VERSION: "0.1.0" },
-    ),
+  validateRelease(
+    { ...metadata, version: "0.1.0", publishConfig: { tag: "latest", access: "public" } },
+    { ...environment, RELEASE_VERSION: "0.1.0" },
   );
+  for (const version of ["01.0.0", "0.1.0-beta.1", "0.1.0+build", "../0.1.0", "0.1.0-alpha.01"])
+    assert.throws(() => releaseTag(version));
+  assert.throws(
+    () =>
+      validateRelease(
+        { ...metadata, version: "0.1.0" },
+        { ...environment, RELEASE_VERSION: "0.1.0" },
+      ),
+    /latest/,
+  );
+  assert.equal(releaseTag("0.1.0"), "latest");
+  assert.equal(releaseTag("0.1.0-alpha.14"), "alpha");
   assert.throws(() =>
     validateRelease(
       { ...metadata, publishConfig: { tag: "latest", access: "public" } },
@@ -103,4 +119,11 @@ test("provenance must bind the artifact to the reviewed workflow and source", ()
   statement.predicate.buildDefinition.externalParameters.workflow.path =
     ".github/workflows/unreviewed.yml";
   assert.throws(() => validateProvenance(statement, manifest));
+});
+
+test("release notes select the exact version without earlier alpha history", () => {
+  const changelog = "# Package\n\n## 0.1.0\nStable notes\n\n## 0.1.0-alpha.14\nAlpha notes\n";
+  assert.equal(releaseNotes(changelog, "0.1.0"), "## 0.1.0\nStable notes");
+  assert.equal(releaseNotes(changelog, "0.1.0-alpha.14"), "## 0.1.0-alpha.14\nAlpha notes");
+  assert.throws(() => releaseNotes(changelog, "0.2.0"), /Missing release/);
 });

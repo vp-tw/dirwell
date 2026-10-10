@@ -1,4 +1,4 @@
-# Alpha theme package contract
+# Theme package contract
 
 An independent theme package exports a factory returning `ExplorerTheme` from
 `@vp-tw/dirwell`. Consumers import that factory in `dirwell.config.ts`. Complete
@@ -47,17 +47,14 @@ paths as untrusted text and escape them before HTML insertion. Avoid serializing
 machine-absolute `absolutePath` or `resolvedPath` into browser output. A theme
 owns its asset licenses and notices.
 
-## Alpha compatibility
+## Package compatibility
 
-Pin the exact Dirwell alpha used by the theme's tests in `peerDependencies`.
-Retest before widening that range or accepting another alpha; this contract is
-not a stable API promise. Public types and component contracts may evolve before
-stable. Consumers own the decision to upgrade their Dirwell/theme pair.
+Declare the Dirwell versions verified by the theme in `peerDependencies`. Test public imports, rendering, navigation and assets before widening that range. The private proof package uses an exact version for reproducible consumption tests.
 
 The proof package deliberately replaces the full renderer. Component overrides
 remain supported, but their authors must also verify the default runtime's DOM
 expectations, keyboard behavior, virtualization, and theme assets against their
-selected alpha version. The [Ledger runtime contract](THEME_RUNTIME_CONTRACT.md) lists the hooks and verification procedure.
+selected Dirwell version. The [Ledger runtime contract](THEME_RUNTIME_CONTRACT.md) lists the hooks and verification procedure.
 
 ## Consumer verification
 

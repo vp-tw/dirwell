@@ -1,117 +1,54 @@
-# Releasing Dirwell alpha
+# Releasing Dirwell
 
-The package is `@vp-tw/dirwell`; the executable is `dirwell`. Releases remain on
-`alpha`. A stable release needs a separate decision and the [stable readiness gates](STABLE_READINESS.md). npm trusted publishing is
-configured and has completed a verified release; use the existing OIDC workflow.
-Do not repeat bootstrap publication or publisher configuration for each release.
+The package is `@vp-tw/dirwell`; the executable is `dirwell`. Use the configured OIDC workflow. Stable versions publish to `latest` and create a normal GitHub release; `-alpha.N` versions publish to `alpha` and create a prerelease. The workflow filename remains `publish-alpha.yml` because npm's existing trusted publisher is bound to it.
 
-## 1. Prepare the next version
+## Prepare and verify
 
-Add a Changesets note for an in-scope package change. Packaged README updates
-also need a release so installed users receive them. Docs-site-only changes deploy
-through Pages and do not require an npm version.
+Add a Changesets note for package changes, including packaged documentation. Run `pnpm release:version` and `pnpm install --lockfile-only`. Update the private theme example's exact peer dependency to the prepared version. Review the version and changelog; do not version a committed release again just to silence Changesets status.
+
+For an explicitly approved prerelease, use Changesets prerelease mode; exit it before promoting that line. Docs-site-only changes deploy through Pages without an npm version.
 
 ```sh
-pnpm release:status
-pnpm release:version
-pnpm install --lockfile-only
-```
-
-Keep `.changeset/pre.json` in alpha prerelease mode. Update the private theme
-example's exact Dirwell peer dependency to the new version. Review the version,
-changelog, prerelease notes, and lockfile before committing.
-
-Changesets v3 moves consumed prerelease notes into `.changeset/pre/`. The Vite+
-formatter runs after versioning because Changesets formatting is disabled.
-An already-versioned branch can have no unconsumed notes. On a clean committed
-snapshot, `pnpm exec changeset status --since HEAD` checks for new changes.
-Do not version again just to make a status command quiet.
-
-## 2. Verify and merge the version
-
-```sh
+pnpm audit:dependencies
 pnpm check
 pnpm test
 pnpm test:browser
+pnpm test:compat
 pnpm build
 pnpm site:build
 pnpm verify:package
 ```
 
-`verify:package` packs the library and a private external theme independently,
-then installs them into a fresh consumer. It checks public imports, types, CLI,
-SSG/MPA renderer assets, Rollup, and async CommonJS webpack. It cleans that
-consumer. This proves local distribution behavior, not npm publication.
+The package proof installs Dirwell and an external theme separately and exercises public imports/types, CLI, SSG/MPA assets and real build-host consumption. This is tarball evidence; registry consumption is verified after publication. See [dependency security](DEPENDENCY_SECURITY.md) for the two retained Farm development findings and the guarded audit.
 
-Review and merge the versioned change before publishing. The release must use
-that exact merged source; if main changes, reconcile it before dispatching.
+## Merge and publish
 
-## 3. Dispatch trusted publishing
-
-Read the merged `package.json` version, then pass that exact value as the workflow
-input. Replace the illustrative `0.1.0-alpha.N` below with the real new version:
+Merge the verified version first. Dispatch its exact version from main:
 
 ```sh
-gh workflow run publish-alpha.yml --ref main -f version=0.1.0-alpha.N
+gh workflow run publish-alpha.yml --ref main -f version=0.1.0
 ```
 
-The workflow accepts only a new merged alpha on main. It runs source checks,
-Node/Chromium tests, builds, and tarball consumer checks before packing an artifact.
-Only its publish job has `id-token: write`. That job publishes those exact bytes
-with `alpha` and provenance, without a long-lived npm token.
+The script rejects mismatched source/version/tag, unexpected repositories/refs/events, unsupported prerelease labels and malformed versions. Only the publish job has `id-token: write`. It publishes the immutable verified tarball with provenance. Subsequent jobs install the registry package, verify signatures and provenance cryptographically, and bind the Git tag to the same source commit.
 
-A separate job installs the registry package and runs `npm audit signatures`.
-Only after registry verification passes does the workflow create the package tag
-and GitHub prerelease. Inspect the whole run, not only the upload job.
+## Read back delivery
 
-## 4. Read back delivery
-
-Use the exact released version in these commands:
+Use the released version:
 
 ```sh
-npm view @vp-tw/dirwell@0.1.0-alpha.N version dist.integrity dist.attestations --json
+npm view @vp-tw/dirwell@0.1.0 version dist.integrity dist.attestations --json
 npm dist-tag ls @vp-tw/dirwell
 pnpm verify:package --registry
 ```
 
-Confirm that `alpha` selects the new version. `latest` deliberately remains on
-`0.1.0-alpha.0`; subsequent releases advance `alpha` only. Check that the package
-tag, GitHub prerelease, artifact integrity, and provenance bind to the released
-source commit. The workflow stores the registry proof as an artifact.
+Confirm the expected `latest` or `alpha` tag, artifact integrity, provenance source, Git tag and GitHub release/prerelease status. The workflow stores `registry-proof` as an artifact. Publishing stable does not move the `alpha` tag.
 
-The docs site deploys separately through `pages.yml` after a main push. Verify
-its deployed commit and actual pages, including a nested explorer example and
-the final base path. A successful npm release does not prove site deployment.
+Pages deploys separately after the main push. Verify its source and actual public pages, including nested directory navigation under the deployed base. npm publication alone does not prove site deployment.
 
-## Failure and recovery
+## Recovery and publisher maintenance
 
-If upload succeeds but verification fails, rerun failed jobs on the **original
-workflow run**. This retains its source commit and immutable artifact. Registry
-metadata or provenance may propagate later; the workflow retries readback for
-up to ten minutes. It accepts an existing version only when the artifact bytes
-match, and never republishes that version.
+If publication succeeds but readback fails, rerun failed jobs on the original workflow run. It retains the source and tarball; the script accepts an existing version only when its bytes match. Registry/provenance readback retries for up to ten minutes. Never dispatch an existing version from different source or republish different bytes; release a new version for a repair.
 
-Do not dispatch an existing version from a later main commit. Different source
-or artifact bytes fail verification. Repair a faulty published alpha with a new
-changeset and version. Published versions are immutable.
+The publisher is bound to `vp-tw/dirwell` and `publish-alpha.yml`, with publish/stage-publish permissions and no GitHub environment restriction. Standalone dist-tag management is a separate permission; normal publication sets its selected tag. Changing repository, workflow filename or environment requires corresponding npm settings and may need human MFA. Do not store credentials in the repository.
 
-## Publisher maintenance
-
-The configured publisher is scoped to `vp-tw/dirwell` and `publish-alpha.yml`,
-with publish/stage-publish permissions and no GitHub environment restriction.
-It does not grant dist-tag management. No publisher change is needed for a
-normal release. Changes to its repository, workflow filename, or environment
-need matching npm configuration and may require human MFA.
-
-For an authorized configuration change, verify the npm identity and read back
-the existing configuration with `npm trust list @vp-tw/dirwell`. Use npm's
-supported MFA flow; do not store credentials in the repository. Account-wide
-publishing restrictions are a separate security decision.
-
-## Historical evidence
-
-The bootstrap alpha was published manually. The first verified OIDC release was
-`0.1.0-alpha.1`; its [workflow](https://github.com/vp-tw/dirwell/actions/runs/37800608707)
-and [prerelease](https://github.com/vp-tw/dirwell/releases/tag/%40vp-tw/dirwell%400.1.0-alpha.1)
-record publication and provenance. See [trusted publishing evidence and gates](TRUSTED_PUBLISHING_PLAN.md)
-and [npm's trusted-publishing documentation](https://docs.npmjs.com/trusted-publishers/).
+The first verified alpha OIDC publication is preserved in its [historical workflow](https://github.com/vp-tw/dirwell/actions/runs/37800608707) and [prerelease](https://github.com/vp-tw/dirwell/releases/tag/%40vp-tw/dirwell%400.1.0-alpha.1). See [trusted-publishing evidence](TRUSTED_PUBLISHING_PLAN.md) and [npm's documentation](https://docs.npmjs.com/trusted-publishers/).

@@ -6,7 +6,7 @@ description: Add Dirwell to an existing build and check each adapter's verified 
 Use an adapter only when you already have an application build. For a standalone
 folder, the [CLI](../getting-started/) is simpler.
 
-Vite, Rollup, and webpack are the primary integrations during alpha. Rolldown,
+Vite, Rollup, and webpack are the primary integrations. Rolldown,
 Rspack, Rsbuild, esbuild, Farm, and Bun are experimental. This describes maintenance
 priority; the matrix below defines tested behavior. Unloader has no Dirwell
 adapter. See [support and compatibility](../support/) for the policy and framework
@@ -15,7 +15,7 @@ boundaries.
 Install the package in your project before adding a plugin:
 
 ```bash
-npm install --save-dev @vp-tw/dirwell@alpha
+npm install --save-dev @vp-tw/dirwell
 ```
 
 ## Vite

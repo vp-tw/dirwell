@@ -1,5 +1,16 @@
 # @vp-tw/dirwell
 
+## 0.1.0
+
+First stable release, promoting the verified alpha line.
+
+- Publish folders through the CLI or Node API with SSG/MPA output, live reload, file selection, and safe symlink navigation.
+- Choose Ledger, Plain, or Crosswave; customize components or provide an independent renderer and theme-owned localization.
+- Configure page metadata, static/per-folder share images, bundled fonts, and Crosswave categories, keyboard/controller controls, and continuous folder navigation.
+- Integrate with the primary Vite, Rollup, and webpack paths; other existing adapters remain experimental.
+- Publish verified artifacts through OIDC to `latest`, with provenance, installed-consumer validation, and exact-source release tags.
+- Document tested environments and retain the bounded dependency security findings visibly.
+
 ## 0.1.0-alpha.14
 
 ### Patch Changes
