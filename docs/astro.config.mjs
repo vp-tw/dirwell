@@ -1,4 +1,5 @@
 import { defineConfig } from "astro/config";
+import { exampleDirectoryIndexes } from "./example-index.ts";
 import starlight from "@astrojs/starlight";
 
 const siteBase = process.env.SITE_BASE ?? "/";
@@ -6,6 +7,7 @@ const siteBase = process.env.SITE_BASE ?? "/";
 export default defineConfig({
   base: siteBase,
   outDir: "../site",
+  vite: { plugins: [exampleDirectoryIndexes()] },
   integrations: [
     starlight({
       title: "Dirwell",

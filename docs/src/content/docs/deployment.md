@@ -75,6 +75,10 @@ This repository's [live examples](../examples/) are built from one
 `Dirwell([...])` Vite configuration, then copied into the documentation's
 GitHub Pages tree.
 
+## Share preview URLs
+
+Set `metadata.siteUrl` to your deployed explorer root, including its path prefix, when you want absolute share-image and canonical URLs. `base` controls file/navigation links; `siteUrl` controls page metadata. These values do not copy or mount files for you. See [page metadata](../metadata/).
+
 ## Before publishing
 
 1. Build the site and open a nested directory page, not only the root.

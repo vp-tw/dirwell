@@ -1,3 +1,4 @@
+import { escapeHtml } from "./html.ts";
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { createHash } from "node:crypto";
@@ -54,13 +55,7 @@ const themes = {
   },
 } as const;
 const segmenter = new Intl.Segmenter("en", { granularity: "grapheme" });
-function escape(text: string): string {
-  return text
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;");
-}
+
 function width(text: string, face: number, size: number): number {
   const font = fonts[face]!;
   return (
@@ -128,7 +123,7 @@ function text(
   return value.lines
     .map(
       (line, index) =>
-        `<text x="${x}" y="${y + index * gap}" font-family="${family}" font-weight="${weight}" font-size="${value.size}" fill="${fill}" text-anchor="${anchor}">${escape(line)}</text>`,
+        `<text x="${x}" y="${y + index * gap}" font-family="${family}" font-weight="${weight}" font-size="${value.size}" fill="${fill}" text-anchor="${anchor}">${escapeHtml(line)}</text>`,
     )
     .join("");
 }

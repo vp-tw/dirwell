@@ -22,8 +22,12 @@ for options, keyboard behavior, browser transition support, and hardware-test li
 
 Crosswave’s header links to its theme documentation and to VdustR, its author.
 `project.name` controls your site’s display name; it does not rename the theme
-or change its author credit. The example’s “Media Library” is a configured site
+or change its author credit. The example’s “Sample files” is a configured site
 name, not a built-in media player or preview feature.
+
+## Page metadata
+
+Built-in themes consume the shared config `metadata` settings. A custom document can include `context.metadata?.head`; Ledger PageShell overrides receive the same optional `metadata`. Use the [metadata guide](https://vp-tw.github.io/dirwell/metadata/) for titles, descriptions, image callbacks, and bundled fonts.
 
 ## Component layers
 
@@ -98,7 +102,3 @@ An external package can return `ExplorerTheme` through its own factory and own
 its HTML, assets, styles, options, and localization. Pin the tested Dirwell alpha
 in its peer dependency. See [the package contract](THEME_PACKAGE_CONTRACT.md)
 and [the separately packed example](https://github.com/vp-tw/dirwell/tree/main/examples/theme-package).
-
-## Page metadata and bundled fonts
-
-Built-in themes provide shared title/description configuration and one static whole-site share image by default. Set `metadata` in your config; use callbacks for per-folder text/images. [Page metadata and share images](https://vp-tw.github.io/dirwell/metadata/) covers counts, symlinks, fonts, path rules, and the dynamic example.

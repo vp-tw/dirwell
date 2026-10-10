@@ -29,10 +29,12 @@ Users run Dirwell through a CLI or its TypeScript API. They may preview a direct
 - Relative, deployment-base, and native HTML `<base>` URL strategies.
 - Directory-aware output naming that may skip generation by returning `null`; the default preserves existing `index.html` and `index.htm` files.
 - Watch mode with live reload.
-- Local and global fuzzy search, type filters, configurable sorting, IME-safe keyboard input, Backspace parent navigation, linked breadcrumbs, and system/light/dark appearance controls.
+- Ledger: local and global fuzzy search, type filters, configurable sorting, IME-safe keyboard input, Backspace parent navigation, linked breadcrumbs, and system/light/dark appearance controls.
 - The default theme keeps complete HTML listings in SSG mode. With its default settings, MPA directories above 500 entries use a data asset and a virtual list when the default row components are present; those listings require JavaScript.
 - Symlinks remain visible. Cycles are navigable without recursive generation. Broken, out-of-root, and excluded targets expose only their declared text through a safe raw-file route.
 - Build integrations are selective: Vite, Rollup, and webpack are primary during alpha; other existing adapters are experimental. Full Unplugin target coverage and dedicated framework adapters are not product goals. See [support policy](docs/src/content/docs/support.md).
+- Three packaged themes: Ledger, Plain, and Crosswave. Built-in interfaces stay English; localization belongs to custom themes.
+- Configurable page metadata, static share images, and build-time per-folder image callbacks with public counts. Bundled font sources keep normal builds independent of remote font services.
 - Themes may replace typed components, add assets, wrap defaults, or replace the full document.
 - Generated sites must work as static files without a required application server.
 - The public repository is [vp-tw/dirwell](https://github.com/vp-tw/dirwell), and the documentation site is deployed at [vp-tw.github.io/dirwell](https://vp-tw.github.io/dirwell/). Generated sites remain configurable for other hosts and base paths.

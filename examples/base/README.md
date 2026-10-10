@@ -4,14 +4,13 @@ Use this example for a known project-site path. MPA shares runtime assets in
 `__dirwell/`; `urls: "base"` prefixes generated links with the published mount.
 Set `DIRWELL_SITE_BASE` to the site's base path before building.
 
+From the repository root after installing dependencies:
+
 ```bash
-DIRWELL_SITE_BASE=/dirwell/ node ../../src/bin.ts build files --cwd .
+pnpm dirwell serve files --cwd examples/base -o dist
 ```
 
-Run it from this directory. It writes `docs/public/examples/base/`; its asset
-links point to `/dirwell/examples/base/`. Change the environment value if the
-site is published under another path. The Pages build loads this same config
-through the Vite adapter.
+Open the printed `Local:` URL, which includes the configured `/examples/base/` mount. Stop with Ctrl+C. To build once, use `pnpm dirwell build files --cwd examples/base -o dist`; serve that output beneath its configured HTTP prefix, rather than opening it as a local file. `pnpm examples:build` separately generates the Vite-owned published example. See [example workflows](https://vp-tw.github.io/dirwell/examples/).
 
 - [Live demo](https://vp-tw.github.io/dirwell/examples/base/)
 - [Source code on GitHub](https://github.com/vp-tw/dirwell/tree/main/examples/base)

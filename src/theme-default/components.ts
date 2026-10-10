@@ -1,14 +1,9 @@
+import { escapeHtml } from "../html.ts";
 import type { DirwellThemeComponents, IconName } from "../theme-components.ts";
 import type { FileSystemEntry } from "../model.ts";
 import { utcTimestamp } from "../timestamp.ts";
 
-export function escapeHtml(value: string): string {
-  return value
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;");
-}
+export { escapeHtml } from "../html.ts";
 
 type SelectControlName = "color-scheme" | "sort-field" | "name-mode" | "sort-direction";
 

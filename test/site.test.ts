@@ -2,23 +2,21 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
+import { exampleCatalog } from "../examples/catalog.ts";
 
 const root = path.resolve(import.meta.dirname, "..");
 
 test("landing page exposes every live example and source directory", async () => {
   const source = await readFile(path.join(root, "docs/src/pages/index.astro"), "utf8");
-  for (const slug of [
-    "basic",
-    "base",
-    "custom-theme",
-    "default-theme-override",
-    "plain",
-    "i18n",
-    "crosswave",
-    "crosswave-categories",
-  ]) {
-    assert.match(source, new RegExp(`slug: "${slug}"`));
-    assert.match(source, /examplePath\(example\.slug\)/);
+  assert.match(source, /const examples = exampleCatalog/);
+  assert.match(source, /examplePath\(example\.slug\)/);
+  assert.equal(new Set(exampleCatalog.map(({ slug }) => slug)).size, exampleCatalog.length);
+  assert.equal(exampleCatalog[0].slug, "basic");
+  assert.equal(exampleCatalog.at(-1)?.slug, "dynamic-og");
+  const examplesDoc = await readFile(path.join(root, "docs/src/content/docs/examples.mdx"), "utf8");
+  assert.match(examplesDoc, /exampleCatalog\.map/);
+  for (const { slug } of exampleCatalog) {
+    await readFile(path.join(root, `examples/${slug}/README.md`), "utf8");
   }
   assert.match(source, /PUBLIC_REPOSITORY_URL/);
   assert.match(source, /https:\/\/github\.com\/vp-tw\/dirwell/);
@@ -33,36 +31,10 @@ test("site build combines docs and examples in one publish directory", async () 
   assert.equal(packageJson.scripts["docs:dev"], "node scripts/dev-docs.ts");
 
   const buildScript = await readFile(path.join(root, "scripts/build-examples.ts"), "utf8");
-  const exampleList = buildScript.match(/const examples = \[([\s\S]*?)\] as const;/)?.[1];
-  assert.ok(exampleList);
-  assert.deepEqual(
-    [...exampleList.matchAll(/"([^"]+)"/g)].map((match) => match[1]),
-    [
-      "basic",
-      "base",
-      "custom-theme",
-      "default-theme-override",
-      "file-icons",
-      "plain",
-      "i18n",
-      "crosswave",
-      "crosswave-categories",
-      "dynamic-og",
-    ],
-  );
+  assert.match(buildScript, /exampleCatalog\.map/);
   assert.match(buildScript, /plugins: dirwellVite\(options\)/);
   assert.match(buildScript, /loadDirwellConfig\(exampleRoot, "build"\)/);
-  for (const slug of [
-    "basic",
-    "base",
-    "custom-theme",
-    "default-theme-override",
-    "file-icons",
-    "plain",
-    "i18n",
-    "crosswave",
-    "crosswave-categories",
-  ]) {
+  for (const { slug } of exampleCatalog) {
     const config = await readFile(path.join(root, `examples/${slug}/dirwell.config.ts`), "utf8");
     assert.match(config, new RegExp(`docs/public/examples/${slug}`));
   }

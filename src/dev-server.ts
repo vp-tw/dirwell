@@ -1,3 +1,4 @@
+import { contentTypes } from "./content-types.ts";
 import { watch } from "node:fs";
 import { open, stat, type FileHandle } from "node:fs/promises";
 import { createServer, type ServerResponse } from "node:http";
@@ -11,21 +12,6 @@ const events=new EventSource(${JSON.stringify(eventsPath)});
 events.addEventListener('reload',()=>location.reload());
 </script>`;
 }
-
-const contentTypes: Readonly<Record<string, string>> = {
-  ".css": "text/css; charset=utf-8",
-  ".html": "text/html; charset=utf-8",
-  ".js": "text/javascript; charset=utf-8",
-  ".json": "application/json; charset=utf-8",
-  ".svg": "image/svg+xml",
-  ".png": "image/png",
-  ".jpg": "image/jpeg",
-  ".jpeg": "image/jpeg",
-  ".webp": "image/webp",
-  ".gif": "image/gif",
-  ".woff2": "font/woff2",
-  ".txt": "text/plain; charset=utf-8",
-};
 
 function send(response: ServerResponse, status: number, body: string): void {
   response.writeHead(status, { "content-type": "text/plain; charset=utf-8" });

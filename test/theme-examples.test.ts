@@ -20,11 +20,11 @@ test("release catalog theme owns HTML, CSS, and safe navigation", async (context
       theme: customConfig.theme,
     });
     const html = await readFile(path.join(outputDir, "index.html"), "utf8");
-    assert.match(html, /Northstar release catalog/);
+    assert.match(html, /<h1>Release catalog<\/h1>/);
     assert.match(html, /href="stable\/"/);
     assert.doesNotMatch(html, /dirwell\.runtime\.js|data-search-input|file-icon/);
     const assetDir = path.join(outputDir, mode === "mpa" ? "__dirwell" : "");
-    assert.match(await readFile(path.join(assetDir, "release-catalog.css"), "utf8"), /\.eyebrow/);
+    assert.match(await readFile(path.join(assetDir, "release-catalog.css"), "utf8"), /main/);
     const nested = await readFile(path.join(outputDir, "stable/index.html"), "utf8");
     assert.match(nested, /northstar-linux-x64\.tar\.gz/);
     assert.match(nested, /target="_blank" rel="noopener"/);

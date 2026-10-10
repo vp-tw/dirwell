@@ -70,6 +70,7 @@ Pin your tested version when you need reproducible alpha builds.
 | Publish under a fixed path, such as GitHub Pages     | [Deployment](https://vp-tw.github.io/dirwell/deployment/)                                                       |
 | Select files, change output names, or configure URLs | [Configuration](https://vp-tw.github.io/dirwell/configuration/)                                                 |
 | Change the interface or use a no-script listing      | [Themes](https://vp-tw.github.io/dirwell/themes/)                                                               |
+| Set page titles, descriptions, or share images       | [Page metadata](https://vp-tw.github.io/dirwell/metadata/)                                                      |
 | Generate alongside an existing application           | [Build tool adapters](https://vp-tw.github.io/dirwell/build-tools/)                                             |
 | Check supported integrations and limitations         | [Support policy](https://vp-tw.github.io/dirwell/support/)                                                      |
 | Call Dirwell from Node.js or write a theme package   | [API reference](https://vp-tw.github.io/dirwell/api-reference/) · [Theme contract](./THEME_PACKAGE_CONTRACT.md) |
@@ -85,5 +86,5 @@ has identical behavior. See the support policy before choosing an adapter.
 For repository setup, tests, examples, architecture, and release instructions,
 see [Contributing](https://github.com/vp-tw/dirwell/blob/main/CONTRIBUTING.md).
 
-Dirwell's code is MIT licensed. Ledger's bundled file icons have separate
+Dirwell's code is MIT licensed. Bundled Source fonts and Ledger file icons have separate
 attribution and license terms in [third-party notices](./THIRD_PARTY_NOTICES.md).

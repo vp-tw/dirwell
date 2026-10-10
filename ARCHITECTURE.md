@@ -13,7 +13,7 @@ does not perform filesystem traversal.
 4. Resolve every directory's output filename. `null` skips generation.
 5. Plan all pages before rendering so link policy knows which directories have
    explorer pages.
-6. Render into a sibling staging directory.
+6. Count the selected source tree, resolve page title/description and image callbacks, then render into a sibling staging directory.
 7. Replace the output only after a complete successful build.
 
 A failed render leaves the last successful output intact.
@@ -30,7 +30,7 @@ These rows require JavaScript; filtering and sorting use a Web Worker when
 available, with a main-thread fallback. Smaller MPA listings and SSG listings
 retain their entries in HTML and support browsing without JavaScript.
 
-Both modes use `__dirwell/` for generated raw-link artifacts and, when enabled,
+Both modes store default metadata images once under `__dirwell/metadata/`. They use `__dirwell/` for generated raw-link artifacts and, when enabled,
 the global search index. A source collision with that path is an error.
 
 Both modes mirror source files by default and preserve an existing
@@ -43,8 +43,7 @@ assets. The default renderer is composed from eight typed HTML component
 functions. Component layers are shallow, ordered overrides; a component may
 wrap the exported default explicitly.
 
-Themes receive prepared data and URL decisions. They do not read the
-filesystem. Tokens remain private to a theme, so a replacement may change
+Core owns source-tree traversal. Themes receive prepared data and URL decisions and may read their own bundled styles, fonts, and runtime assets. Metadata callbacks receive public counts/names; full Node-side paths remain available only to trusted theme renderers. Tokens remain private to a theme, so a replacement may change
 markup, styling, icons, and browser behavior together.
 
 ## Link and symlink policy
@@ -63,7 +62,7 @@ markup, styling, icons, and browser behavior together.
 The foreground server watches the source recursively, debounces changes, and
 serializes rebuilds. Successful rebuilds notify browsers through server-sent
 events. Failed rebuilds are logged while the prior atomic output remains
-available. The daemon command launches this same server and records its PID and
+available. Requests wait for an active rebuild and use open file descriptors across output replacement. A queued source edit survives a failed async renderer; only the final failed attempt is reported. The daemon command launches this same server and records its PID and
 log under `.dirwell/`.
 
 ## Toolchain

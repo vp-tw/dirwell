@@ -21,3 +21,7 @@ options are described in the [theme guide](../../THEMING.md#crosswave-renderer).
 Crosswave browses and opens published files. It does not provide a media player
 or file previews. Its graphics and icons are original Dirwell artwork, licensed
 under the [MIT License](../../LICENSE). Crosswave is not affiliated with Sony.
+
+## Fonts and share images
+
+The theme uses bundled Adobe Source fonts with pinned sources and SIL-OFL notices. Generated output includes `source-fonts-NOTICE.txt`; package sources and licenses are in [`src/fonts`](../fonts/). Shared config `metadata` controls titles, descriptions, and image sources/callbacks. See [page metadata and share images](https://vp-tw.github.io/dirwell/metadata/).

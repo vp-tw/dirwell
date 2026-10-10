@@ -1,3 +1,4 @@
+import { escapeHtml } from "./html.ts";
 import { themeFonts } from "./theme-fonts.ts";
 import { repositoryName } from "./metadata.ts";
 import type { ExplorerTheme, FileSystemEntry, ThemeContext } from "./model.ts";
@@ -6,14 +7,6 @@ import { utcTimestamp } from "./timestamp.ts";
 
 export interface PlainThemeOptions {
   readonly project?: ThemeProjectOptions;
-}
-
-function escapeHtml(value: string): string {
-  return value
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;");
 }
 
 function externalHref(value: string | undefined): string | null {

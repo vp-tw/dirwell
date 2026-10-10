@@ -58,5 +58,15 @@ verified development-server integration, run builds explicitly, or use the
 standalone Dirwell CLI for folder browsing. These are separate workflows; the
 CLI does not rebuild the rest of a Farm application.
 
+## A share image cannot be generated
+
+Built-in PNG rendering uses bundled Source fonts and reports unsupported characters instead of using system-font fallback. For text outside their repertoire, provide `metadata.image` as an existing image or custom renderer; `image: false` disables the image while keeping page text metadata.
+
+Local image paths resolve from the config/project directory. Explicit `outputPath` values are relative to generated output and must not overlap source entries, page names, or reserved assets. Use a separate `og/` directory. A failed image callback leaves the previous output intact. See [image sources and paths](../metadata/#fixed-text-and-an-existing-image).
+
+## The Vite adapter refuses an existing output directory
+
+The adapter requires its ownership marker before replacing an existing tree. A CLI build into `docs/public/examples/` removes that marker. Build standalone examples to their own `dist/`, or use `pnpm examples:build` for the site output. Do not delete an unknown directory to bypass this check; preserve its contents and choose a dedicated output. See [example workflows](../examples/#run-one-example).
+
 For a problem outside these cases, include a small reproduction in an
 [issue](https://github.com/vp-tw/dirwell/issues). See the [support policy](../support/).

@@ -3,5 +3,5 @@ import { defineConfig, createCrosswaveTheme } from "../../src/index.ts";
 export default defineConfig({
   root: "files",
   outDir: "../../docs/public/examples/crosswave",
-  theme: createCrosswaveTheme({ project: { name: "Media Library" }, color: "azure" }),
+  theme: createCrosswaveTheme({ project: { name: "Sample files" }, color: "azure" }),
 });

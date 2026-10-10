@@ -41,22 +41,26 @@ pnpm site:build
 pnpm docs:dev
 ```
 
-The first builds `site/`; the second builds the examples, serves the docs, and
-watches source changes. `SITE_BASE=/dirwell/ pnpm site:build` checks the GitHub
+For one portable example, run `pnpm dirwell build files --cwd examples/basic -o dist` and open `examples/basic/dist/index.html`. Keep CLI output away from Vite-owned `docs/public/examples/`.
+
+`examples/catalog.ts` provides the shared beginner-to-advanced order, descriptions, and directory names for the homepage, docs, and builder.
+
+`pnpm site:build` writes `site/`. `pnpm docs:dev` builds the examples, serves
+the docs, and watches source changes. `SITE_BASE=/dirwell/ pnpm site:build` checks the GitHub
 Pages prefix. `pnpm docs:build` alone does not regenerate explorer examples.
 
 ## Documentation map
 
-| Reader or task                       | Source                                                                                                                                    |
-| ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| New package user                     | [README](README.md), [docs overview](docs/src/content/docs/overview.mdx), [getting started](docs/src/content/docs/getting-started.md)     |
-| Usage and public contracts           | [Docs guides and reference](docs/src/content/docs), [theme architecture](THEMING.md), [theme package contract](THEME_PACKAGE_CONTRACT.md) |
-| Integration promises and limits      | [Support policy](docs/src/content/docs/support.md), [verified build behavior](docs/src/content/docs/build-tools.md)                       |
-| Implementation and product decisions | [Architecture](ARCHITECTURE.md), [product](PRODUCT.md), [experience](EXPERIENCE.md)                                                       |
-| Interface design                     | [Official site](DESIGN.md), [Ledger](src/theme-default/DESIGN.md), [Plain](src/theme-plain/DESIGN.md)                                     |
-| Performance evidence                 | [Recorded benchmarks](BENCHMARKS.md)                                                                                                      |
-| Historical decisions                 | [Unplugin evaluation](UNPLUGIN_EVALUATION.md), [timestamp presentation](TIMESTAMP_PRESENTATION.md)                                        |
-| Package release                      | [Releasing](RELEASING.md), [trusted publishing](TRUSTED_PUBLISHING_PLAN.md)                                                               |
+| Reader or task                       | Source                                                                                                                                            |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| New package user                     | [README](README.md), [docs overview](docs/src/content/docs/overview.mdx), [getting started](docs/src/content/docs/getting-started.md)             |
+| Usage and public contracts           | [Docs guides and reference](docs/src/content/docs), [theme architecture](THEMING.md), [theme package contract](THEME_PACKAGE_CONTRACT.md)         |
+| Integration promises and limits      | [Support policy](docs/src/content/docs/support.md), [verified build behavior](docs/src/content/docs/build-tools.md)                               |
+| Implementation and product decisions | [Architecture](ARCHITECTURE.md), [product](PRODUCT.md), [experience](EXPERIENCE.md)                                                               |
+| Interface design                     | [Official site](DESIGN.md), [Ledger](src/theme-default/DESIGN.md), [Plain](src/theme-plain/DESIGN.md), [Crosswave](src/theme-crosswave/DESIGN.md) |
+| Performance evidence                 | [Recorded benchmarks](BENCHMARKS.md)                                                                                                              |
+| Historical decisions                 | [Unplugin evaluation](UNPLUGIN_EVALUATION.md), [timestamp presentation](TIMESTAMP_PRESENTATION.md)                                                |
+| Package release                      | [Releasing](RELEASING.md), [trusted publishing](TRUSTED_PUBLISHING_PLAN.md)                                                                       |
 
 Keep the docs site and packaged README aligned with current code. Put the first
 working command before advanced options. Label historical evidence instead of

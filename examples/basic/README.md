@@ -4,13 +4,13 @@ Use this example when the published tree may move between paths. Its config
 only sets the source and output directories. SSG and relative URLs keep their
 defaults, so a nested file link resolves from the current page.
 
+From the repository root after installing dependencies:
+
 ```bash
-node ../../src/bin.ts build files --cwd .
+pnpm dirwell build files --cwd examples/basic -o dist
 ```
 
-Run the command from this example directory. It writes
-`docs/public/examples/basic/` in this repository. The Pages build uses the
-same config through the Vite adapter.
+Open `examples/basic/dist/index.html` for this portable build. `pnpm examples:build` separately generates the Vite-owned published example under `docs/public/examples/basic/`. Keep CLI output in its own directory. See [all example workflows](https://vp-tw.github.io/dirwell/examples/).
 
 - [Live demo](https://vp-tw.github.io/dirwell/examples/basic/)
 - [Source code on GitHub](https://github.com/vp-tw/dirwell/tree/main/examples/basic)

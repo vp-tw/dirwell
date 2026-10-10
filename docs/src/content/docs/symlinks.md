@@ -7,6 +7,8 @@ Dirwell always lists a selected symlink and shows its declared target.
 Following directory symlinks is optional.
 
 ```ts
+import { defineConfig } from "@vp-tw/dirwell";
+
 export default defineConfig({
   symlinks: {
     follow: true,
