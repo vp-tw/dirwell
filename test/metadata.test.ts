@@ -208,3 +208,24 @@ test("pinned PNG goldens match across development and CI platforms", async () =>
     assert.equal(hash, goldens[theme]);
   }
 });
+
+test("CLI development server serves generated PNG and fonts with their media types", async () => {
+  const { createExplorerDevServer } = await import("../src/index.ts");
+  const f = await fixture();
+  const server = await createExplorerDevServer({ ...f, host: "127.0.0.1", port: 0 });
+  try {
+    const html = await fetch(server.url).then((response) => response.text());
+    const image = html.match(/property="og:image" content="([^"]+)"/)![1]!;
+    assert.equal(
+      (await fetch(new URL(image, server.url))).headers.get("content-type"),
+      "image/png",
+    );
+    assert.equal(
+      (await fetch(new URL("source-sans-3-regular.woff2", server.url))).headers.get("content-type"),
+      "font/woff2",
+    );
+  } finally {
+    await server.close();
+    await rm(f.root, { recursive: true, force: true });
+  }
+});
