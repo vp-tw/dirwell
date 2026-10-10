@@ -1,0 +1,10 @@
+{
+  "reference": {
+    "commit": "d31dbd22a2ecd940aaa0c3ce679888c5d0af1d13",
+    "path": "docs/brand/og-dark-source.png"
+  },
+  "prompt": "Edit the supplied complete Dirwell dark Open Graph cover. Make ONLY one localized change: place a small, matte warm-cream oval paper disk underneath and behind BOTH of the bird's feet, so the black legs and toes are clearly visible against it. The disk should read as a subtle flat paper landing spot, a circle seen in perspective, centered under the two feet, just wide enough for all toes and tall enough to provide contrast behind the feet and lower legs. Use the existing cream color from the bird's paper body rather than stark pure white. Keep the black feet visible on top of it. No glow, no blur, no spotlight rays, no luminous halo, no heavy shadow, no border or badge. Preserve the bird's exact silhouette, colors, eye, wing, pose, legs and feet; do not redraw the bird. Preserve the dark background, all typography, all exact text ('Dirwell', 'A static file explorer.', 'Browse and search the files you publish.'), positions, scale, margins and original wide aspect ratio. Do not crop, reframe or add anything else. Return a complete finished image; all changes must be made inside the image tool.",
+  "tool": "image_gen",
+  "change": "Approved warm-cream oval paper disk behind the black feet. Complete cover edited in the image tool.",
+  "postprocessing": "Proportional resize only; lossless PNG encoding. No manual compositing, cropping, or relettering."
+}

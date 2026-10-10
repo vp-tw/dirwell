@@ -22,7 +22,7 @@ export default defineConfig({
     starlight({
       title: "Dirwell",
       description: siteDescription,
-      favicon: "/brand/paper-bird.png",
+      favicon: "/brand/favicon-48.png",
       logo: { src: "./public/brand/paper-bird.png", alt: "", replacesTitle: false },
       head: [
         { tag: "meta", attrs: { property: "og:image", content: shareImageUrl } },

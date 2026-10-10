@@ -1,0 +1,20 @@
+{
+  "source": "docs/brand/favicon-source.png",
+  "reference": "docs/public/brand/paper-bird.png",
+  "prompt": "Edit the supplied APPROVED Dirwell folded-paper bird into a minimally adjusted favicon master. It must remain unmistakably the SAME bird: same upward-looking pose, cream folded-page body, huge expressive black eye, orange-red folded wing and beak, black outline, and two black feet. This is tiny-icon adaptation, not a new mascot or redesign. Keep the complete bird including both feet and tail. Reduce wasted transparent margins so the complete silhouette fills about 88% of a square canvas, with balanced 6% clear margin around the outermost parts. Clean stray edge pixels and use crisp slightly sturdier black contours, with a little less hairline detail in the tiny foot/toe strokes; preserve the existing shapes and expression. The main eye and wing should stay bold and clear at 16 and 32 pixels. Do not add a circle, ground, badge, frame, extra colors, text, or any background. No white keyline around the bird, no glow, shadow, checkerboard or texture. True transparent alpha outside the silhouette and through its gaps. Keep colors and character faithful; only small-size legibility and framing are allowed to change. Single centered flat raster favicon master.",
+  "exports": [
+    {
+      "path": "docs/public/brand/favicon-16.png",
+      "dimensions": [16, 16]
+    },
+    {
+      "path": "docs/public/brand/favicon-32.png",
+      "dimensions": [32, 32]
+    },
+    {
+      "path": "docs/public/brand/favicon-48.png",
+      "dimensions": [48, 48]
+    }
+  ],
+  "postprocessing": "Proportional downscaling to lossless transparent PNG. Original mascot remains unchanged."
+}
