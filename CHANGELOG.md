@@ -1,5 +1,11 @@
 # @vp-tw/dirwell
 
+## 0.1.2
+
+### Patch Changes
+
+- Document six-platform installed-consumer verification, fixed-font share-image consistency, built-in text contrast, and the maintainer's Windows/Xbox controller smoke. Add reusable platform verification tooling and CI.
+
 ## 0.1.1
 
 ### Patch Changes

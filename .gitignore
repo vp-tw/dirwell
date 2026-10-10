@@ -2,6 +2,7 @@
 .dirwell-preview/
 .impeccable/review/
 .playwright-results/
+.platform-proof/
 .release-artifact/
 .DS_Store
 coverage/

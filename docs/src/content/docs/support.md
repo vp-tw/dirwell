@@ -67,6 +67,13 @@ parity. See the [verification record](https://github.com/vp-tw/dirwell/blob/main
 for versions, methods, and limits. Choose plain HTML or validate your target
 browsers when those environments matter.
 
+Installed-package consumer checks also run on native Windows, Linux, and macOS
+ARM64/x64 runners. They cover CLI build/serve and live updates, all three themes
+in SSG/MPA, encoded names, symlinks, and matching fixed-font PNG output. They do
+not establish every build-adapter mode on Windows. A maintainer-reported Windows
+and Xbox controller smoke found no major issue; its browser/version and complete
+button/axis coverage were not specified.
+
 ## Themes and language
 
 Themes own presentation, browser behavior, and localization. Ledger, Plain, and Crosswave
