@@ -52,11 +52,18 @@ export async function createExplorerDevServer(
       return activeBuild;
     }
     const task = (async () => {
+      let failure: { readonly error: unknown } | null = null;
       do {
         rebuildRequested = false;
-        await generateExplorer(options);
-        for (const client of clients) client.write("event: reload\ndata: updated\n\n");
+        failure = null;
+        try {
+          await generateExplorer(options);
+          for (const client of clients) client.write("event: reload\ndata: updated\n\n");
+        } catch (error) {
+          failure = { error };
+        }
       } while (rebuildRequested);
+      if (failure !== null) throw failure.error;
     })();
     activeBuild = task;
     try {
