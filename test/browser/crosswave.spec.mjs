@@ -50,6 +50,9 @@ test("categories, keyboard navigation, search composition, and page transitions"
   });
   await page.goto(server.url);
   await expect(page.locator("body")).toHaveAttribute("data-cw-enhanced", "true");
+  await expect(page.locator(".cw-clock")).not.toHaveAttribute("aria-label");
+  await expect(page.locator(".cw-clock")).toHaveAttribute("aria-describedby", "cw-clock-context");
+  await expect(page.locator("#cw-clock-context")).toHaveText("Current time");
   await expect(page.locator(".cw-brand .cw-credits")).toHaveText("CrosswavebyVdustR");
   await page.evaluate(() => {
     window.__canvas = document.querySelector("#cw-wave");
@@ -83,7 +86,11 @@ test("categories, keyboard navigation, search composition, and page transitions"
   const search = page.getByRole("searchbox", { name: "Search this folder" });
   await expect(search).toBeFocused();
   await search.dispatchEvent("compositionstart");
-  await search.fill("nothing");
+  // Browser automation fill can commit IME input; dispatch an in-progress edit instead.
+  await search.evaluate((input) => {
+    input.value = "nothing";
+    input.dispatchEvent(new InputEvent("input", { bubbles: true, isComposing: true }));
+  });
   await expect(page.locator("[data-cw-count]")).not.toHaveText("0 items");
   await search.dispatchEvent("compositionend");
   await expect(page.locator("[data-cw-count]")).toHaveText("0 items");
@@ -436,6 +443,7 @@ test("aborted page transitions preserve navigation without unhandled rejections"
     });
   });
   await page.goto(server.url);
+  const crossDocumentTransitions = await page.evaluate(() => "onpagereveal" in window);
   await page.evaluate(() =>
     document
       .querySelector("a[data-cw-navigation][data-cw-path=Albums]")
@@ -444,7 +452,9 @@ test("aborted page transitions preserve navigation without unhandled rejections"
   await page.getByRole("link", { name: /Albums\/ Folder/ }).click();
   await expect(page).toHaveURL(/Albums\/$/);
   await expect(page.getByRole("link", { name: /inside\.txt/ })).toBeVisible();
-  expect(await page.evaluate(() => window.__skippedTransitions)).toBeGreaterThan(0);
+  if (crossDocumentTransitions)
+    expect(await page.evaluate(() => window.__skippedTransitions)).toBeGreaterThan(0);
+  else expect(await page.evaluate(() => window.__skippedTransitions)).toBeUndefined();
   await page.keyboard.press("Backspace");
   await expect(page).toHaveURL(server.url);
   await expect(page.getByRole("link", { name: /note\.txt/ })).toBeVisible();

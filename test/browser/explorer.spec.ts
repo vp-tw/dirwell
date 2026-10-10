@@ -549,6 +549,38 @@ for (const mode of ["ssg", "mpa", "virtual"] as const) {
   });
 }
 
+test("global IME commit does not replace a result twice or lose exact-time focus", async ({
+  page,
+}) => {
+  await page.goto(urls.ssg);
+  await page.getByRole("button", { name: "Search all files" }).click();
+  const search = page.getByRole("dialog", { name: "Search all files", exact: true });
+  await page.evaluate(() => {
+    const results = document.querySelector<HTMLElement>("[data-global-results]")!;
+    results.dataset.renderCount = "0";
+    new MutationObserver(() => {
+      results.dataset.renderCount = String(Number(results.dataset.renderCount) + 1);
+    }).observe(results, { childList: true });
+  });
+  await search.getByRole("searchbox").evaluate((element) => {
+    element.dispatchEvent(new CompositionEvent("compositionstart", { bubbles: true }));
+    (element as HTMLInputElement).value = "file2";
+    element.dispatchEvent(new InputEvent("input", { bubbles: true, isComposing: true }));
+    element.dispatchEvent(new CompositionEvent("compositionend", { bubbles: true }));
+    element.dispatchEvent(new InputEvent("input", { bubbles: true, isComposing: false }));
+  });
+  const result = search.locator("[data-timestamp]").first();
+  await result.click();
+  await expect(
+    page.getByRole("dialog", { name: "Exact modified time", exact: true }),
+  ).toBeVisible();
+  await page.keyboard.press("Escape");
+  // Cover the trailing input debounce after compositionend, not only the first result.
+  await page.waitForTimeout(250);
+  await expect(search.locator("[data-global-results]")).toHaveAttribute("data-render-count", "1");
+  await expect(result).toBeFocused();
+});
+
 test("narrow exact-time panel stays inside the viewport and closes when a virtual row leaves", async ({
   page,
 }) => {

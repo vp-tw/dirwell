@@ -28,12 +28,13 @@ pnpm build
 pnpm verify:package
 ```
 
-For browser behavior, install Chromium once and run the browser tests:
+For browser behavior, install the engines once and run the browser tests:
 
 ```bash
-pnpm exec playwright install chromium --only-shell
+pnpm exec playwright install chromium firefox webkit
 pnpm test:browser
 pnpm test:compat
+pnpm test:browser:all
 ```
 
 For documentation and live examples:
@@ -78,6 +79,6 @@ OIDC workflow. The site deploys separately from `main` through GitHub Pages.
 Follow [RELEASING.md](RELEASING.md) for source, artifact, registry, and provenance
 verification. Do not republish an existing version.
 
-Use `pnpm exec playwright install chromium firefox webkit` when the compatible engine binaries are not installed. `test:compat` is a bounded theme-contract suite; it complements the full Chromium regression.
+Use `pnpm exec playwright install chromium firefox webkit` when the engine binaries are not installed. `test:compat` is a bounded theme-contract and IME suite; `test:browser:all` runs the full regression in Chromium, Firefox, and WebKit. Keep cross-engine tests capability-aware and distinguish scripted input from physical-device evidence. See [local verification](VERIFICATION.md) for additional environment checks.
 
 Use the [dependency security disposition](DEPENDENCY_SECURITY.md) when changing the lockfile. The guarded audit keeps documented Farm warnings visible and fails for unreviewed or changed findings; use the raw audit alongside it.

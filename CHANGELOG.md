@@ -1,5 +1,11 @@
 # @vp-tw/dirwell
 
+## 0.1.1
+
+### Patch Changes
+
+- Debounce IME commit and its trailing input event into one global-search update, preserving exact-time focus. Use a description for the Crosswave clock instead of an unsupported accessible name. Expand browser regression coverage and document local platform verification.
+
 ## 0.1.0
 
 First stable release, promoting the verified alpha line.

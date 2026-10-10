@@ -58,10 +58,13 @@ usable without JavaScript. Search, sorting controls, appearance preferences,
 and large MPA virtualized lists need JavaScript. Plain renders complete HTML
 without a runtime in either mode.
 
-Full browser regression runs in Chromium. The bounded theme-contract smoke suite
-also runs in Firefox and Playwright WebKit, covering core navigation and Ledger
-overrides. This does not establish physical Safari/iOS behavior or full engine
-parity. A minimum browser-version policy has not been established. Choose plain HTML or validate your target
+Full regression has passed locally in Chromium, Firefox, and Playwright WebKit.
+CI runs the full Chromium suite and a bounded cross-engine suite for theme
+contracts and global-search IME behavior. Additional local checks cover native
+macOS Safari navigation and iPhone/iPad Safari simulators' layout and scripted
+controls. These checks do not establish physical iOS behavior or full engine
+parity. See the [verification record](https://github.com/vp-tw/dirwell/blob/main/VERIFICATION.md)
+for versions, methods, and limits. Choose plain HTML or validate your target
 browsers when those environments matter.
 
 ## Themes and language
