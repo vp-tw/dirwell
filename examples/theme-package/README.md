@@ -17,7 +17,7 @@ export default defineConfig({
 
 The factory owns its options and validates its title. It escapes entry names,
 uses the prepared navigation helpers, handles skipped/unavailable destinations,
-and owns a stylesheet referenced with `assetHref()`. The same renderer works
+and owns a stylesheet referenced with `assetHref()`. It supplies a default share-image callback through `metadataDefaults.image`, reusing the public PNG helper. The renderer includes `context.metadata.head`; consumers can replace the image or disable it with `metadata.image: false` without invoking the theme callback. The same renderer works
 with SSG, MPA, relative URLs, and an HTML base.
 
 The example is private to prevent accidental publication. A real theme package

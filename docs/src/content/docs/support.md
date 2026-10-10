@@ -60,8 +60,10 @@ usable without JavaScript. Search, sorting controls, appearance preferences,
 and large MPA virtualized lists need JavaScript. Plain renders complete HTML
 without a runtime in either mode.
 
-Browser tests run in Chromium. Firefox, Safari, and a minimum browser-version
-policy have not been established. Choose plain HTML or validate your target
+Full browser regression runs in Chromium. The bounded theme-contract smoke suite
+also runs in Firefox and Playwright WebKit, covering core navigation and Ledger
+overrides. This does not establish physical Safari/iOS behavior or full engine
+parity. A minimum browser-version policy has not been established. Choose plain HTML or validate your target
 browsers when those environments matter.
 
 ## Themes and language
@@ -73,6 +75,10 @@ are optional theme features, not promised basic-theme functionality.
 
 Independent theme packages should pin the exact alpha they have tested and
 retest before accepting another version. See [theme packages](../themes/#independent-alpha-packages).
+
+## Before stable
+
+The [stable readiness checklist](https://github.com/vp-tw/dirwell/blob/main/STABLE_READINESS.md) tracks compatibility promises, dependency audit resolution, environment policy, and stable publication. Alpha publication does not complete those gates.
 
 ## Report a problem
 

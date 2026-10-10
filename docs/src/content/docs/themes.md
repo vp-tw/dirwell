@@ -144,6 +144,8 @@ Overriding `EntryList` or `EntryRow` disables the default MPA virtual list for
 those pages. If the replacement must support large directories, implement
 its own row loading or keep the default components.
 
+For overrides that retain Ledger interaction, follow the [runtime hooks and behavior tests](https://github.com/vp-tw/dirwell/blob/main/THEME_RUNTIME_CONTRACT.md). The complete override example wraps the default Toolbar rather than duplicating its controls.
+
 ## Crosswave
 
 Crosswave uses a PSP-inspired crossbar with real file categories, a vertical

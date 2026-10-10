@@ -146,6 +146,9 @@ export default defineConfig({
       notice: `Catppuccin Icons for VSCode, revision b6915da9f6889b683a110aa747de96c2820a537d\nhttps://github.com/catppuccin/vscode-icons\n\n${iconLicense}`,
     },
     components: {
+      // Wrap the toolbar to retain its runtime hooks and native control semantics.
+      Toolbar: (props) =>
+        `<section aria-label="Explorer controls">${defaultThemeComponents.Toolbar(props)}</section>`,
       PageShell: (props) =>
         defaultThemeComponents.PageShell({
           ...props,

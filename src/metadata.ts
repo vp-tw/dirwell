@@ -26,6 +26,14 @@ export interface ResolvedMetadataContext extends MetadataContext {
   readonly title: string;
   readonly description: string;
 }
+/** Fixed image, disabled image, or a build-time callback with resolved page text. */
+export type MetadataImageValue =
+  | ImageSource
+  | MetadataImage
+  | false
+  | ((
+      metadata: ResolvedMetadataContext,
+    ) => ImageSource | MetadataImage | false | Promise<ImageSource | MetadataImage | false>);
 export interface MetadataOptions {
   /** Default page/image name; falls back to the built-in theme’s project.name. */
   readonly siteName?: string;
@@ -37,18 +45,15 @@ export interface MetadataOptions {
   readonly title?: MetadataValue<string>;
   /** Whole-site counts by default; use directory counts for per-folder descriptions. */
   readonly description?: MetadataValue<string>;
-  readonly image?:
-    | ImageSource
-    | MetadataImage
-    | false
-    | ((
-        metadata: ResolvedMetadataContext,
-      ) => ImageSource | MetadataImage | false | Promise<ImageSource | MetadataImage | false>);
+  readonly image?: MetadataImageValue;
 }
 export interface ThemeMetadataDefaults {
   readonly siteName: string;
   readonly repositoryName: string;
-  readonly imageTheme: "ledger" | "plain" | "crosswave";
+  /** Built-in preset, used only when neither caller nor theme provides image. */
+  readonly imageTheme?: "ledger" | "plain" | "crosswave";
+  /** Caller metadata.image takes precedence, including false. Omit both for text only. */
+  readonly image?: MetadataImageValue;
 }
 export interface PageMetadata {
   readonly title: string;
@@ -180,13 +185,16 @@ export function createMetadataResolver(
   async function imageFor(
     context: ResolvedMetadataContext,
   ): Promise<{ outputPath: string; alt: string } | null> {
-    const isDefault = options.image === undefined;
-    let image = typeof options.image === "function" ? await options.image(context) : options.image;
+    const configured = options.image === undefined ? defaults.image : options.image;
+    const isPreset = configured === undefined && defaults.imageTheme !== undefined;
+    let image = typeof configured === "function" ? await configured(context) : configured;
     if (image === false) return null;
-    if (image === undefined) {
+    if (configured === undefined) {
+      const preset = defaults.imageTheme;
+      if (preset === undefined) return null;
       defaultImage ??= import("./share-image-api.ts").then(({ createShareImage }) =>
         createShareImage({
-          theme: defaults.imageTheme,
+          theme: preset,
           repositoryName: site.repositoryName,
           title: typeof options.title === "string" ? options.title : site.name,
           description:
@@ -195,6 +203,8 @@ export function createMetadataResolver(
       );
       image = await defaultImage;
     }
+    if (image === undefined)
+      throw new TypeError("metadata.image callback must return an image or false");
     const config: MetadataImage =
       image instanceof File || typeof image === "string" || image instanceof URL
         ? { source: image }
@@ -215,7 +225,7 @@ export function createMetadataResolver(
       outputPath,
       alt: stringValue(
         config.alt ??
-          (isDefault
+          (isPreset
             ? typeof options.title === "string"
               ? options.title
               : site.name
