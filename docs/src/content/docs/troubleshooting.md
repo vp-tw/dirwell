@@ -6,10 +6,10 @@ description: Resolve common installation, generated-output, and deployment probl
 ## The command does not start
 
 Run `node --version`; Dirwell requires Node.js 26 or later. Use the scoped package
-name and alpha tag:
+name:
 
 ```bash
-npx @vp-tw/dirwell@alpha serve ./downloads
+npx @vp-tw/dirwell serve ./downloads
 ```
 
 If the source is not found, check that `./downloads` exists relative to your
@@ -22,7 +22,7 @@ An `npx` run does not add Dirwell to your project's dependencies. Before creatin
 a config that imports `@vp-tw/dirwell`, install it in that project:
 
 ```bash
-npm install --save-dev @vp-tw/dirwell@alpha
+npm install --save-dev @vp-tw/dirwell
 ```
 
 Run the command from the directory containing the config, or pass `--cwd`.

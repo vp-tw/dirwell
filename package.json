@@ -1,6 +1,6 @@
 {
   "name": "@vp-tw/dirwell",
-  "version": "0.1.0-alpha.14",
+  "version": "0.1.0",
   "description": "A static file explorer with safe symlinks, themes, and live reload.",
   "keywords": [
     "directory-index",
@@ -80,7 +80,7 @@
   },
   "publishConfig": {
     "access": "public",
-    "tag": "alpha"
+    "tag": "latest"
   },
   "scripts": {
     "build": "vp pack && node scripts/copy-static-assets.ts",

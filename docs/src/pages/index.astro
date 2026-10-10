@@ -47,7 +47,7 @@ const examples = exampleCatalog;
         </div>
 
         <div class="terminal" aria-label="Dirwell quick start command">
-          <div class="terminal-bar"><span>terminal</span><span>Node.js 26+ · alpha</span></div>
+          <div class="terminal-bar"><span>terminal</span><span>Node.js 26+</span></div>
           <pre><code class="language-shell">{landingCode.terminal.map((token) =>
             token.tone ? <span class={`syntax-${token.tone}`}>{token.text}</span> : token.text
           )}</code></pre>
@@ -71,11 +71,11 @@ const examples = exampleCatalog;
       <section class="quick-start" aria-labelledby="quick-title">
         <div class="section-heading">
           <h2 id="quick-title">Browse your folder. Then publish it.</h2>
-          <p>Requires Node.js 26 or later. Use the alpha package; no clone or config file is needed.</p>
+          <p>Requires Node.js 26 or later. Use the published package; no clone or config file is needed.</p>
         </div>
         <div class="command-pair">
-          <div><span>Preview and watch</span><code>npx @vp-tw/dirwell@alpha serve ./downloads</code></div>
-          <div><span>Build static output</span><code>npx @vp-tw/dirwell@alpha build ./downloads -o ./site-downloads</code></div>
+          <div><span>Preview and watch</span><code>npx @vp-tw/dirwell serve ./downloads</code></div>
+          <div><span>Build static output</span><code>npx @vp-tw/dirwell build ./downloads -o ./site-downloads</code></div>
         </div>
         <a class="text-action" href={path("getting-started/")}>Follow the getting-started guide</a>
       </section>

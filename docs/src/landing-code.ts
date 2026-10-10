@@ -10,7 +10,7 @@ export const landingCode: Record<
   terminal: [
     { text: "$", tone: "prompt" },
     { text: " npx " },
-    { text: "@vp-tw/dirwell@alpha", tone: "shell-package" },
+    { text: "@vp-tw/dirwell", tone: "shell-package" },
     { text: " serve ./downloads\n" },
     { text: "Dirwell is watching /downloads\nLocal: http://127.0.0.1:4173", tone: "output" },
   ],

@@ -3,10 +3,10 @@ title: CLI
 description: Build once, watch locally, or run a detached explorer.
 ---
 
-The examples use the published alpha package and require Node.js 26 or later:
+The examples use the published package and require Node.js 26 or later:
 
 ```bash
-npx @vp-tw/dirwell@alpha --help
+npx @vp-tw/dirwell --help
 ```
 
 After [installing it in a project](../getting-started/#3-save-project-settings-when-needed),
@@ -28,7 +28,7 @@ from `--cwd`, whose default is the current working directory.
 ## Build once
 
 ```bash
-npx @vp-tw/dirwell@alpha build ./public -o ./dist
+npx @vp-tw/dirwell build ./public -o ./dist
 ```
 
 `build` writes a deployable tree. It defaults to SSG, relative URLs, and
@@ -39,7 +39,7 @@ files remain; their directory explorer page uses `_dirwell.html` when free.
 To publish beneath a fixed URL prefix:
 
 ```bash
-npx @vp-tw/dirwell@alpha build ./public -o ./dist --mode mpa --base /downloads/ --urls base
+npx @vp-tw/dirwell build ./public -o ./dist --mode mpa --base /downloads/ --urls base
 ```
 
 Set `--base` to the path where the output will actually be served. See
@@ -48,7 +48,7 @@ Set `--base` to the path where the output will actually be served. See
 ## Watch locally
 
 ```bash
-npx @vp-tw/dirwell@alpha serve ./public --host 127.0.0.1 --port 4173
+npx @vp-tw/dirwell serve ./public --host 127.0.0.1 --port 4173
 ```
 
 `serve` defaults to `.dirwell-preview/` output, host `127.0.0.1`, and port
@@ -81,9 +81,9 @@ supervisor assign the listener. Other behavior such as `include`, `exclude`,
 ## Detached server
 
 ```bash
-npx @vp-tw/dirwell@alpha daemon start ./public
-npx @vp-tw/dirwell@alpha daemon status
-npx @vp-tw/dirwell@alpha daemon stop
+npx @vp-tw/dirwell daemon start ./public
+npx @vp-tw/dirwell daemon status
+npx @vp-tw/dirwell daemon stop
 ```
 
 `daemon` defaults to `start`. State and logs live under `.dirwell/` in

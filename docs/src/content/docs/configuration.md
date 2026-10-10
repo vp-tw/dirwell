@@ -18,7 +18,7 @@ you need a specific result:
 
 ## Where settings come from
 
-Install `@vp-tw/dirwell@alpha` in your project before importing it from a config.
+Install `@vp-tw/dirwell` in your project before importing it from a config.
 Create `dirwell.config.ts` in the directory selected by `--cwd`. The CLI loads
 it before resolving paths. The Vite adapter loads the file from the Vite project
 root and applies each plugin entry over it. The TypeScript API can pass

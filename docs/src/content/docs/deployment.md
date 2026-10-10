@@ -10,7 +10,7 @@ server.
 ## Publish your first build
 
 ```bash
-npx @vp-tw/dirwell@alpha build ./downloads -o ./site-downloads
+npx @vp-tw/dirwell build ./downloads -o ./site-downloads
 ```
 
 Upload everything in `site-downloads/` to your host's published directory.
@@ -42,7 +42,7 @@ change the threshold. SSG and the plain theme keep complete list HTML.
 For a project site under `/project/`:
 
 ```bash
-npx @vp-tw/dirwell@alpha build ./downloads -o ./dist --base /project/downloads/ --urls base
+npx @vp-tw/dirwell build ./downloads -o ./dist --base /project/downloads/ --urls base
 ```
 
 Publish `dist/` at `/project/downloads/`. `base` changes generated links,

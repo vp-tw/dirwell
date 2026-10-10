@@ -70,14 +70,14 @@ presenting it as current support. Example input documents are specimen content,
 not package instructions. The `docs/examples/api-reference/` snippets are checked
 TypeScript; test new commands against an installed package in a fresh project.
 
-## Alpha releases
+## Releases
 
 Add a Changesets note for package changes, including packaged README updates.
-Keep releases on `alpha`. Review and merge the version before dispatching the
+Review and merge the version before dispatching the
 OIDC workflow. The site deploys separately from `main` through GitHub Pages.
 Follow [RELEASING.md](RELEASING.md) for source, artifact, registry, and provenance
 verification. Do not republish an existing version.
 
-Use `pnpm exec playwright install chromium firefox webkit` when the compatible engine binaries are not installed. `test:compat` is a bounded theme-contract suite; it complements the full Chromium regression. Review [stable readiness](STABLE_READINESS.md) before proposing a stable release.
+Use `pnpm exec playwright install chromium firefox webkit` when the compatible engine binaries are not installed. `test:compat` is a bounded theme-contract suite; it complements the full Chromium regression.
 
 Use the [dependency security disposition](DEPENDENCY_SECURITY.md) when changing the lockfile. The guarded audit keeps documented Farm warnings visible and fails for unreviewed or changed findings; use the raw audit alongside it.

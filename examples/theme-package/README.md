@@ -1,7 +1,7 @@
 # External theme package proof
 
 This private example is packed and installed separately from the Dirwell
-tarball by `pnpm verify:package`. Its peer dependency pins the alpha version it
+tarball by `pnpm verify:package`. Its peer dependency pins the Dirwell version it
 is tested against. It imports only `@vp-tw/dirwell`; there are no repository
 source imports or inherited design tokens.
 
@@ -23,4 +23,4 @@ with SSG, MPA, relative URLs, and an HTML base.
 The example is private to prevent accidental publication. A real theme package
 should choose its own package name and publish configuration, test against each
 supported Dirwell version, and carry its own license and asset notices. See
-[the alpha package contract](../../THEME_PACKAGE_CONTRACT.md).
+[the package contract](../../THEME_PACKAGE_CONTRACT.md).

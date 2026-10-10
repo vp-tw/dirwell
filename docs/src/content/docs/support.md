@@ -1,14 +1,12 @@
 ---
 title: Support and compatibility
-description: Understand alpha compatibility, supported integrations, and verified limits.
+description: Understand supported integrations and verified limits.
 ---
 
 Use the CLI for a folder you want to browse or publish. You only need a build
 adapter when Dirwell must run alongside an existing application's build.
 
-Dirwell is currently alpha. Install `@vp-tw/dirwell@alpha`; `latest` remains on
-the bootstrap alpha. Pin the version you tested for repeatable builds. Public
-APIs and theme contracts can change between alphas; this is not a stable release.
+Install `@vp-tw/dirwell` for the current release. Pin the version you tested for repeatable builds. The sections below describe tested capabilities and known limits.
 
 ## Build-tool support policy
 
@@ -21,7 +19,7 @@ target available in Unplugin or make all targets behave identically.
 | Experimental | Rolldown, Rspack, Rsbuild, esbuild, Farm, Bun | Existing adapters remain available. Use only the behaviors listed in the [verification matrix](../build-tools/#development-and-verification); additional modes may be unverified or limited. |
 | Not provided | Unloader                                      | The pinned Unplugin 3.4.0 has an entry, but Dirwell has no public adapter or verification for it.                                                                                            |
 
-These tiers describe maintenance priority during alpha, not a guarantee that
+These tiers describe maintenance priority, not a guarantee that
 all modes or versions of a primary tool work. The verification matrix states
 what is actually tested. We do not remove an existing adapter simply because it
 is experimental. Promotion needs a real use case, repeatable tests, and a clean
@@ -73,12 +71,8 @@ use English. The [i18n example](../examples/) demonstrates English, Traditional
 Chinese, and Japanese in an independent theme. Copy controls and file previews
 are optional theme features, not promised basic-theme functionality.
 
-Independent theme packages should pin the exact alpha they have tested and
-retest before accepting another version. See [theme packages](../themes/#independent-alpha-packages).
-
-## Before stable
-
-The [stable readiness checklist](https://github.com/vp-tw/dirwell/blob/main/STABLE_READINESS.md) tracks compatibility promises, dependency audit resolution, environment policy, and stable publication. Alpha publication does not complete those gates.
+Independent theme packages should pin the versions they have tested and
+retest before widening that range. See [theme packages](../themes/#independent-theme-packages).
 
 ## Report a problem
 

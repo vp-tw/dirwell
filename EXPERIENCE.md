@@ -85,7 +85,6 @@ date/size formatting without adding a core localization setting.
 
 The three built-in themes use bundled Source fonts and one static whole-site share image by default. Titles identify the site and folder path; descriptions order folders, files, and links. Image callbacks can use per-folder counts and run only at build time. Crosswave updates managed metadata on folder exchanges and history restoration. See [the metadata guide](https://vp-tw.github.io/dirwell/metadata/).
 
-## Decisions for production
+## Verification limits
 
-- Confirm the supported browser floor before choosing normalization and
-  international fuzzy-matching behavior.
+The README and support guide list tested environments. Physical Safari/iOS, Windows and hardware gamepad verification remain outside the current evidence.

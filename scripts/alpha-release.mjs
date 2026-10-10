@@ -7,19 +7,37 @@ import { pathToFileURL } from "node:url";
 const repository = "vp-tw/dirwell";
 const artifactDirectory = ".release-artifact";
 
+/** Stable versions publish to latest; explicitly supported alpha versions retain alpha. */
+export function releaseTag(version) {
+  assert.match(
+    version,
+    /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(-alpha\.(0|[1-9]\d*))?$/,
+    "Stable or alpha versions only",
+  );
+  return version.includes("-alpha.") ? "alpha" : "latest";
+}
+
+export function releaseNotes(changelog, version) {
+  const heading = `## ${version}\n`;
+  const start = changelog.indexOf(heading);
+  assert.ok(start >= 0, "Missing release changelog section");
+  const next = changelog.indexOf("\n## ", start + heading.length);
+  return changelog.slice(start, next < 0 ? undefined : next).trim();
+}
+
 export function validateRelease(metadata, environment) {
   assert.equal(environment.GITHUB_REPOSITORY, repository, "Unexpected repository");
   assert.equal(environment.GITHUB_REF, "refs/heads/main", "Publish only from main");
   assert.equal(environment.GITHUB_EVENT_NAME, "workflow_dispatch", "Manual dispatch required");
   assert.match(environment.GITHUB_SHA ?? "", /^[a-f0-9]{40}$/, "Expected exact commit");
   assert.equal(metadata.name, "@vp-tw/dirwell");
-  assert.match(metadata.version, /^\d+\.\d+\.\d+-alpha\.\d+$/, "Alpha versions only");
+  const tag = releaseTag(metadata.version);
   assert.equal(
     environment.RELEASE_VERSION,
     metadata.version,
     "Requested version must match source",
   );
-  assert.equal(metadata.publishConfig?.tag, "alpha");
+  assert.equal(metadata.publishConfig?.tag, tag);
   assert.equal(metadata.publishConfig?.access, "public");
   assert.equal(metadata.repository?.url, `git+https://github.com/${repository}.git`);
 }
@@ -69,6 +87,7 @@ export async function readProvenance(url, request = fetch) {
 async function main(mode) {
   const metadata = JSON.parse(await readFile("package.json", "utf8"));
   validateRelease(metadata, process.env);
+  const tag = releaseTag(metadata.version);
   const commit = execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim();
   assert.equal(commit, process.env.GITHUB_SHA);
   execFileSync("git", ["diff", "--exit-code", "HEAD"], { stdio: "inherit" });
@@ -82,7 +101,7 @@ async function main(mode) {
     const [artifact] = Array.isArray(result) ? result : Object.values(result);
     assert.equal(artifact.name, metadata.name);
     assert.equal(artifact.version, metadata.version);
-    assert.match(artifact.filename, /^vp-tw-dirwell-[\d.]+-alpha\.\d+\.tgz$/);
+    assert.equal(artifact.filename, `vp-tw-dirwell-${metadata.version}.tgz`);
     await writeFile(
       `${artifactDirectory}/manifest.json`,
       JSON.stringify(
@@ -125,7 +144,7 @@ async function main(mode) {
           "publish",
           `${artifactDirectory}/${manifest.filename}`,
           "--tag",
-          "alpha",
+          tag,
           "--access",
           "public",
           "--provenance",
@@ -148,14 +167,14 @@ async function main(mode) {
       }
       const tags = await fetch("https://registry.npmjs.org/-/package/@vp-tw%2fdirwell/dist-tags");
       assert.ok(tags.ok);
-      assert.equal((await tags.json()).alpha, metadata.version);
+      assert.equal((await tags.json())[tag], metadata.version);
       validateProvenance(statement, manifest);
       await writeFile(
         `${artifactDirectory}/registry-proof.json`,
         JSON.stringify({ manifest, dist: published.dist, statement }, null, 2),
       );
       console.log(
-        `Registry integrity, alpha tag, source commit, and provenance payload verified for ${metadata.version}.`,
+        `Registry integrity, ${tag} tag, source commit, and provenance payload verified for ${metadata.version}.`,
       );
       return;
     }
