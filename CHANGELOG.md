@@ -1,5 +1,11 @@
 # @vp-tw/dirwell
 
+## 0.1.0-alpha.11
+
+### Patch Changes
+
+- Keep queued source edits when an async theme or metadata renderer fails during a development rebuild. Retry the latest queued state before reporting the final failure, preserving the last successful output throughout recovery.
+
 ## 0.1.0-alpha.10
 
 ### Patch Changes
