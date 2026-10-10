@@ -1,6 +1,6 @@
 # Dynamic share images
 
-Run `pnpm exec dirwell build` from this directory after installing the repository dependencies. The source config imports Dirwell from this checkout; in your project import from `@vp-tw/dirwell`.
+From the repository root, run `pnpm dirwell build files --cwd examples/dynamic-og -o dist` after installing the repository dependencies. The source config imports Dirwell from this checkout; in your project import from `@vp-tw/dirwell`.
 
 This Crosswave example generates a separate 1200×630 PNG for each folder at build time. Its six source files span three folders. Descriptions count immediate folders, files, and symlinks; the default themes instead use whole-site counts and one shared static image.
 
