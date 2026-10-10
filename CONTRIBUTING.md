@@ -21,6 +21,7 @@ the published scoped package, not assume a checkout.
 ## Validate a change
 
 ```bash
+pnpm audit:dependencies
 pnpm check
 pnpm test
 pnpm build
@@ -78,3 +79,5 @@ Follow [RELEASING.md](RELEASING.md) for source, artifact, registry, and provenan
 verification. Do not republish an existing version.
 
 Use `pnpm exec playwright install chromium firefox webkit` when the compatible engine binaries are not installed. `test:compat` is a bounded theme-contract suite; it complements the full Chromium regression. Review [stable readiness](STABLE_READINESS.md) before proposing a stable release.
+
+Use the [dependency security disposition](DEPENDENCY_SECURITY.md) when changing the lockfile. The guarded audit keeps documented Farm warnings visible and fails for unreviewed or changed findings; use the raw audit alongside it.

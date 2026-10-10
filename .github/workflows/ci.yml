@@ -20,6 +20,7 @@ jobs:
         with:
           bun-version: 1.4.2
       - run: pnpm install --frozen-lockfile
+      - run: pnpm audit:dependencies
       - run: pnpm check
       - run: pnpm test
       - run: pnpm build

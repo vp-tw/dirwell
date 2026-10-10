@@ -88,3 +88,5 @@ see [Contributing](https://github.com/vp-tw/dirwell/blob/main/CONTRIBUTING.md).
 
 Dirwell's code is MIT licensed. Bundled Source fonts and Ledger file icons have separate
 attribution and license terms in [third-party notices](./THIRD_PARTY_NOTICES.md).
+
+For dependency audit scope, patched workspace resolutions, and retained development-only findings, see [dependency security](https://github.com/vp-tw/dirwell/blob/main/DEPENDENCY_SECURITY.md). Workspace overrides do not rewrite an installed consumer’s existing lockfile.

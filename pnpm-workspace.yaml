@@ -91,6 +91,9 @@ catalog:
   vite: npm:@voidzero-dev/vite-plus-core@0.3.3
   vite-plus: 0.3.3
 overrides:
+  # Security fixes; the selector override is limited to the reviewed nested-CSS consumer.
+  source-map-js@<1.2.2: 1.2.2
+  postcss-nested@6.2.0>postcss-selector-parser: 7.1.6
   vite@*: "catalog:"
 peerDependencyRules:
   allowAny:

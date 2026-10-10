@@ -1,6 +1,6 @@
 {
   "name": "@vp-tw/dirwell",
-  "version": "0.1.0-alpha.13",
+  "version": "0.1.0-alpha.14",
   "description": "A static file explorer with safe symlinks, themes, and live reload.",
   "keywords": [
     "directory-index",
@@ -86,6 +86,7 @@
     "build": "vp pack && node scripts/copy-static-assets.ts",
     "build:explorer": "node src/bin.ts build fixture --out-dir generated",
     "check": "vp check && tsc --noEmit",
+    "audit:dependencies": "node scripts/audit-dependencies.mjs",
     "dev": "node src/bin.ts serve fixture --out-dir generated",
     "dirwell": "node src/bin.ts",
     "docs:build": "pnpm --dir docs build",
