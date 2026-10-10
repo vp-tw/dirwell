@@ -28,7 +28,9 @@ const shareImageUrl = new URL(path(shareImagePath), Astro.site);
     <meta name="description" content={siteDescription} />
     <meta name="theme-color" content="#f3f0e8" />
     <title>{siteTitle}</title>
-    <link rel="icon" type="image/png" sizes="1254x1254" href={path("brand/paper-bird.png")} />
+    <link rel="icon" type="image/png" sizes="16x16" href={path("brand/favicon-16.png")} />
+    <link rel="icon" type="image/png" sizes="32x32" href={path("brand/favicon-32.png")} />
+    <link rel="icon" type="image/png" sizes="48x48" href={path("brand/favicon-48.png")} />
     <link rel="canonical" href={canonicalUrl} />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Dirwell" />

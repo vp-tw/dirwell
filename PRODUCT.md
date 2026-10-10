@@ -43,7 +43,7 @@ Users run Dirwell through a CLI or its TypeScript API. They may preview a direct
 
 The product name is Dirwell. The project is MIT-licensed. Product writing is direct, concrete, and technical without sounding like a framework landing-page template. The default explorer is calm, compact, and usable before customization.
 
-The official project identity uses the approved folded-paper bird, preserved as the original PNG for the README, website, documentation header, and favicon. Its curious expression and folded-page silhouette connect the brand to publishing files. Official-site share images extend that identity with factual product text. This identity does not impose branding or assets on generated explorers or third-party themes.
+The official project identity uses the approved folded-paper bird, preserved as the original PNG for the README, website, and documentation header. Its favicon uses a small-size adaptation of the same bird with tighter framing and sturdier contours. Its curious expression and folded-page silhouette connect the brand to publishing files. The white publishing-poster share image remains the official-site default. The approved dark alternate adds a warm-cream oval paper disk behind the feet through a localized image-tool edit. Official-site share images extend that identity with factual product text. This identity does not impose branding or assets on generated explorers or third-party themes.
 
 ## Evidence on Hand
 

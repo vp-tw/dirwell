@@ -63,6 +63,15 @@ components:
   brand-hero-compact:
     width: "min(100%, 260px)"
     height: "auto"
+  brand-favicon-16:
+    width: "16px"
+    height: "16px"
+  brand-favicon-32:
+    width: "32px"
+    height: "32px"
+  brand-favicon-48:
+    width: "48px"
+    height: "48px"
   brand-readme:
     width: "160px"
     height: "auto"
@@ -83,8 +92,9 @@ themes may replace without inheriting the official site's tokens.
 The approved folded-paper bird is the official project identity. Its cream page-body,
 large observant eye, orange-red folded wing, and curious pose add a recognizable
 character to the catalog. The original illustration anchors the README, landing page,
-documentation header, and favicon; complete editorial share artwork extends it to
-link previews. This extension preserves the incumbent palette, typography, and layout.
+and documentation header; a minimal adaptation of the same bird supplies the favicon.
+Complete editorial share artwork extends it to link previews. This extension preserves
+the incumbent palette, typography, and layout.
 
 **Key Characteristics:**
 
@@ -163,16 +173,25 @@ a transparent 1254px square PNG. Preserve its bytes, full canvas, silhouette, an
 expression. Display it proportionally: 160px in the README, 36px square beside
 the landing-header name, and up to 330px above the hero terminal. At the existing
 850px stack breakpoint, the hero bird becomes at most 260px. The Starlight header
-uses the same asset beside its title. The favicon also uses this exact PNG; do not
-simplify, redraw, trim transparency, or crop it for small sizes.
+uses the same original asset beside its title. Favicon exports are 16px, 32px, and
+48px transparent PNGs from [a separate 1254px square favicon master](docs/brand/favicon-source.png),
+created by an `image_gen` edit of the same approved bird. The landing page declares
+all three sizes; Starlight uses the 48px export.
+Only tighter framing and small-size contour cleanup are permitted; preserve the
+full bird, including its eye, orange wing, beak, and both feet. The original
+mascot remains unchanged. See [favicon provenance](docs/brand/favicon-provenance.json).
 
-The selected [official-site share image](docs/public/brand/dirwell-og.png) is a
+The selected white [official-site share image](docs/public/brand/dirwell-og.png) is a
 complete publishing-poster composition: Dirwell and the factual statement
 "Turn a folder into a searchable website." Its artwork, lettering, and layout were
 generated together in one `image_gen` call with the approved bird reference. The
 1730 × 909 source was proportionally resized to a lossless 1199 × 630 PNG. Do not
-crop, composite, reletter, or rebuild its layout after generation. Alternate complete
-compositions and exact prompts are retained in [brand provenance](docs/brand/provenance.json).
+crop, composite, reletter, or rebuild its layout after generation; the selected asset
+remains byte-identical. The approved dark alternate uses a warm-cream oval paper disk
+behind the feet, added through a localized `image_gen` edit. Its 1731 × 909 edited
+source is proportionally resized to a lossless 1200 × 630 PNG; no manual compositing
+or further layout changes are permitted. See [dark-edit provenance](docs/brand/dark-circle-provenance.json).
+Alternate complete compositions and exact prompts are retained in [brand provenance](docs/brand/provenance.json).
 [Shared site metadata](docs/site-branding.mjs) owns the description, share path,
 dimensions, and image alternative text for the landing page and documentation.
 This artwork and metadata apply to the official site; generated explorers keep
@@ -198,9 +217,9 @@ components, assets, or the complete document without using the official-site tok
 
 ### Don't:
 
-- **Don't** simplify, crop, redraw, or replace the approved bird for the favicon.
+- **Don't** replace the favicon with a different character, unrelated badge, or cropped bird body.
 - **Don't** derive new UI palette colors from the illustration or force official-site branding into explorer themes.
-- **Don't** crop, composite, or reletter generated share artwork.
+- **Don't** crop, manually composite, or reletter generated share artwork; the approved dark-cover disk is a localized image-tool edit.
 - **Don't** turn the page into an equal-card feature grid.
 - **Don't** use invented adoption claims, customers, metrics, or testimonials.
 - **Don't** use Unicode arrows or emoji as interface icons.
