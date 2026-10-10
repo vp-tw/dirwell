@@ -1,3 +1,5 @@
+<img src="./docs/public/brand/paper-bird.png" alt="Dirwell paper bird" width="160" align="right" />
+
 # Dirwell
 
 Turn a folder of downloads, reports, or build artifacts into a searchable website.

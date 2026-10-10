@@ -43,9 +43,11 @@ Users run Dirwell through a CLI or its TypeScript API. They may preview a direct
 
 The product name is Dirwell. The project is MIT-licensed. Product writing is direct, concrete, and technical without sounding like a framework landing-page template. The default explorer is calm, compact, and usable before customization.
 
+The official project identity uses the approved folded-paper bird, preserved as the original PNG for the README, website, documentation header, and favicon. Its curious expression and folded-page silhouette connect the brand to publishing files. Official-site share images extend that identity with factual product text. This identity does not impose branding or assets on generated explorers or third-party themes.
+
 ## Evidence on Hand
 
-The public repository contains the CLI, generator, watch server, daemon, default theme, component theme API, tests, a fixture directory, architecture and experience documents, and a Starlight documentation site. There are no verified customer quotes, adoption metrics, or production logos; the website must not fabricate them.
+The public repository contains the CLI, generator, watch server, daemon, default theme, component theme API, tests, a fixture directory, architecture and experience documents, and a Starlight documentation site. There are no verified customer quotes, adoption metrics, or customer logos; the website must not fabricate them.
 
 ## Product Principles
 

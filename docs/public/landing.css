@@ -60,12 +60,21 @@ button:focus-visible {
   border-bottom: 1px solid var(--line);
 }
 .wordmark {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
   font-size: 1.2rem;
   font-weight: 760;
   text-decoration: none;
   letter-spacing: -0.02em;
 }
-.wordmark span {
+.wordmark img {
+  object-fit: contain;
+}
+.wordmark .wordmark-name {
+  color: var(--ink);
+}
+.wordmark-name > span {
   color: var(--blue);
 }
 nav,
@@ -104,9 +113,24 @@ main {
   padding: 100px 0 88px;
 }
 .hero-copy {
-  width: min(620px, 58%);
+  width: 100%;
   position: relative;
   z-index: 2;
+}
+.hero-intro {
+  display: grid;
+  grid-template-columns: minmax(0, 620px) minmax(0, 1fr);
+  align-items: center;
+  gap: 60px;
+}
+.hero-visual {
+  min-width: 0;
+}
+.hero-mascot {
+  display: block;
+  width: min(100%, 330px);
+  height: auto;
+  margin: 0 auto 30px;
 }
 h1,
 h2,
@@ -155,10 +179,7 @@ h1 {
 }
 
 .terminal {
-  position: absolute;
-  right: 0;
-  top: 108px;
-  width: 440px;
+  width: 100%;
   background: var(--code);
   color: #f5f3ec;
   border-radius: 14px;
@@ -456,12 +477,24 @@ h2 {
   .hero-copy {
     width: 100%;
   }
+  .hero-intro {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+  .hero-visual {
+    width: min(100%, 440px);
+    margin-inline: auto;
+  }
+  .hero-mascot {
+    width: min(100%, 260px);
+    margin-bottom: 24px;
+  }
   .terminal {
     position: relative;
     top: auto;
     right: auto;
     width: min(100%, 440px);
-    margin: 48px 0 0 auto;
+    margin: 0;
     transform: rotate(0.8deg);
   }
   .explorer-sample {
@@ -515,7 +548,7 @@ h2 {
   }
   .terminal {
     width: 100%;
-    margin-top: 42px;
+    margin-top: 0;
   }
   .actions {
     align-items: flex-start;

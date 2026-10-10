@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-09-22T09:45:00.000Z",
+  "generatedAt": "2026-10-10T18:02:48.769Z",
   "title": "Design System: Dirwell",
   "extensions": {
     "colorMeta": {
@@ -42,6 +42,30 @@
     "motion": [
       { "name": "anchor-scroll", "value": "smooth", "purpose": "Section navigation; disabled when reduced motion is requested." }
     ],
+    "brandAssets": {
+      "paperBird": {
+        "path": "docs/public/brand/paper-bird.png",
+        "intrinsicSize": "1254 × 1254",
+        "purpose": "Canonical official project identity: README, landing page, Starlight header, and exact original PNG favicon.",
+        "invariant": "Preserve original bytes and full transparent canvas. Proportional display sizing only; no simplification, cropping, trimming, or redrawing.",
+        "componentRefs": [
+          "brand-header",
+          "brand-hero",
+          "brand-hero-compact",
+          "brand-readme"
+        ]
+      },
+      "officialShare": {
+        "path": "docs/public/brand/dirwell-og.png",
+        "sourceSize": "1730 × 909",
+        "outputSize": "1199 × 630",
+        "purpose": "Complete official-site publishing-poster link preview.",
+        "invariant": "Typography, artwork, and layout generated together with the approved bird reference in one image_gen call per candidate. Only proportional resize and lossless PNG encoding afterward.",
+        "provenance": "docs/brand/provenance.json",
+        "metadata": "docs/site-branding.mjs"
+      },
+      "scope": "Official project identity extension. Existing UI palette and type remain fixed; generated explorers and custom themes retain independent assets and metadata."
+    },
     "breakpoints": [
       { "name": "stack", "value": "850px" },
       { "name": "compact", "value": "560px" }
@@ -73,10 +97,10 @@
   ],
   "narrative": {
     "northStar": "The Public Release Index",
-    "overview": "Dirwell uses the visual language of a maintained technical catalog: warm paper, precise rules, readable metadata, and a restrained deployment blue. The official site is editorial at the top and increasingly dense as it explains the product. The generated explorer remains a separate, compact inventory interface that third-party themes may replace without inheriting the official site's tokens.",
+    "overview": "Dirwell uses the visual language of a maintained technical catalog: warm paper, precise rules, readable metadata, and a restrained deployment blue. The official site is editorial at the top and increasingly dense as it explains the product. The generated explorer remains a separate, compact inventory interface that third-party themes may replace without inheriting the official site's tokens. The approved original folded-paper bird identifies the official project across its README, landing page, documentation header, and favicon. Complete editorial share artwork extends that identity without changing the UI palette, typography, or explorer-theme contracts.",
     "keyCharacteristics": [
       "Editorial display type leads; interface type carries actions and metadata.",
-      "Real terminal and file-ledger content prove the product instead of decorative imagery.",
+      "The paper bird identifies the project; real terminal and file-ledger content prove its behavior.",
       "Thin rules organize dense information; rounded surfaces are reserved for controls and demonstrations.",
       "Keyboard focus and reduced-motion behavior are part of the visual system."
     ],
@@ -89,13 +113,17 @@
       "Do show real commands, directory entries, and build modes when explaining capability.",
       "Do keep examples paired with both their live output and source directory.",
       "Do lead with product value and a working preview, then first commands, examples, and advanced options.",
-      "Do keep focus visible and motion optional."
+      "Do keep focus visible and motion optional.",
+      "Do reuse the original paper-bird PNG and preserve proportional display sizing."
     ],
     "donts": [
       "Don't turn the page into an equal-card feature grid.",
       "Don't use invented adoption claims, customers, metrics, or testimonials.",
       "Don't use Unicode arrows or emoji as interface icons.",
-      "Don't force third-party themes to inherit either the official-site or default-theme palette."
+      "Don't force third-party themes to inherit either the official-site or default-theme palette.",
+      "Don't simplify, crop, redraw, or replace the approved bird for the favicon.",
+      "Don't derive new UI palette colors from the illustration or force official-site branding into explorer themes.",
+      "Don't crop, composite, or reletter generated share artwork."
     ]
   }
 }
