@@ -888,17 +888,22 @@ function initializeExplorer(root) {
   globalDialog?.addEventListener("close", () => {
     globalGeneration += 1;
   });
+  const scheduleGlobalSearch = () => {
+    clearTimeout(globalTimer);
+    globalTimer = setTimeout(searchGlobal, 120);
+  };
   globalInput?.addEventListener("compositionstart", () => {
     globalInput.dataset.composing = "true";
+    clearTimeout(globalTimer);
   });
   globalInput?.addEventListener("compositionend", () => {
     delete globalInput.dataset.composing;
-    searchGlobal();
+    // IME commit also emits input; debounce both events into one result update.
+    scheduleGlobalSearch();
   });
   globalInput?.addEventListener("input", () => {
     if (globalInput.dataset.composing) return;
-    clearTimeout(globalTimer);
-    globalTimer = setTimeout(searchGlobal, 120);
+    scheduleGlobalSearch();
   });
   globalTypeFilters?.addEventListener("change", () => {
     globalTypes = selectedTypes(globalTypeFilters);

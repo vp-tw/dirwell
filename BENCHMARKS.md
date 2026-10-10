@@ -85,3 +85,26 @@ For a release regression gate, collect repeated cold and warm runs on a fixed
 CI runner and a real lower-powered device, then set percentile-based limits.
 The 4× CPU setting is a browser simulation; it does not validate physical
 low-end hardware, slow storage, or network delivery.
+
+## 2026-10-10 verification
+
+On the same Mac with Node 26.11.1, the current workloads generated successfully:
+
+| Case               | Generation |       Output | Peak RSS |
+| ------------------ | ---------: | -----------: | -------: |
+| flat, 10,000 files |   6,319 ms | 10,483,934 B |  257 MiB |
+| deep, 2,000 files  |   2,017 ms |  3,743,738 B |  156 MiB |
+
+Headless Chrome 154.0.8037.98 used the retained flat output over local HTTPS at
+4× CPU throttling:
+
+| Viewport   | Filter | Clear | Reverse sort | First global match | Blank scroll points | Maximum gap |
+| ---------- | -----: | ----: | -----------: | -----------------: | ------------------: | ----------: |
+| 1280 × 800 |  90 ms | 88 ms |       109 ms |             434 ms |             0 of 30 |        0 px |
+| 390 × 844  |  87 ms | 95 ms |        93 ms |             435 ms |             0 of 20 |        0 px |
+
+These are single local observations, not percentiles or isolated-machine results.
+Other verification processes were active during generation. The browser sweep
+ran after full regression; maximum two-frame intervals were 36 ms and 35 ms.
+All measured values remained within the provisional budgets above. See the
+[verification record](VERIFICATION.md) for the rest of this run's scope.

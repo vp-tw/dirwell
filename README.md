@@ -62,7 +62,7 @@ Pin your tested version when you need reproducible builds.
 
 ## Verified scope
 
-Tests run on macOS and Linux with Node.js 26. Full browser regression runs in Chromium; a smaller Firefox/WebKit suite checks theme overrides, folder navigation and history, and Plain without JavaScript. CLI build/serve, SSG/MPA output, theme packages, and primary Vite/Rollup/webpack integrations are exercised. Windows, physical Safari/iOS devices, and hardware controllers are not verified. Other adapters remain experimental; see [tested capabilities](https://vp-tw.github.io/dirwell/build-tools/#development-and-verification).
+Tests run on macOS and Linux with Node.js 26. Full regression has passed in Chromium, Firefox, and Playwright WebKit; CI runs Chromium plus a bounded cross-engine suite. CLI build/serve, SSG/MPA output, theme packages, and primary Vite/Rollup/webpack integrations are exercised. Additional checks cover Linux ARM64 with glibc/musl, native macOS Safari navigation, and iPhone/iPad Safari simulators' layout and scripted controls. Windows, physical iOS devices, and hardware controllers remain unverified. See the [verification record](https://github.com/vp-tw/dirwell/blob/main/VERIFICATION.md) and [adapter capabilities](https://vp-tw.github.io/dirwell/build-tools/#development-and-verification).
 
 ## Choose your next step
 
