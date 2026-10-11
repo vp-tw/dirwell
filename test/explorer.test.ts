@@ -57,16 +57,10 @@ test("plain theme emits complete HTML without icons, scripts, or search assets",
     assert.match(html, /broken link.*Target: missing/);
     assert.match(html, /unavailable link.*Target: \.\.\/external/);
     assert.doesNotMatch(html, /<svg|<script|<img|data-theme|search-index|prefers-color-scheme/);
-    assert.match(html, /<meta name="color-scheme" content="light">/);
+    assert.match(html, /:root\{color-scheme:light dark\}/);
     assert.match(html, /<time datetime="[^"]+">/);
-    assert.match(
-      html,
-      /<footer><hr><p>Repository: <a href="https:\/\/github\.com\/vp-tw\/dirwell" target="_blank" rel="noopener">Dirwell<\/a> by VdustR/,
-    );
-    assert.match(
-      html,
-      /<a href="https:\/\/opensource\.org\/license\/mit" target="_blank" rel="noopener">MIT License<\/a>/,
-    );
+    assert.match(html, /<title>Index of \/<\/title>/);
+    assert.doesNotMatch(html, /<footer|@font-face|woff2|og:|twitter:|name="description"/);
     await assert.rejects(readFile(path.join(output, "__dirwell", "search-index.json"), "utf8"));
     const nested = await readFile(path.join(output, "releases", "index.html"), "utf8");
     assert.match(
@@ -74,7 +68,7 @@ test("plain theme emits complete HTML without icons, scripts, or search assets",
       /aria-label="Breadcrumb"><a href="\.\.\/">Home<\/a> \/ <span aria-current="page">releases<\/span>/,
     );
     assert.match(nested, /href="\.\.\/">\.\.\/<\/a>/);
-    assert.match(nested, /<footer><hr><p>Repository:/);
+    assert.doesNotMatch(nested, /<footer|og:|twitter:|@font-face/);
   }
 
   await generateExplorer({

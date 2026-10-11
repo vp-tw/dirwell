@@ -22,7 +22,7 @@ test.beforeAll(async () => {
   await writeFile(path.join(source, "docs/guide.txt"), "guide");
 });
 test.afterAll(async () => rm(root, { recursive: true, force: true }));
-async function app(theme, mode = "mpa", urls = "relative", dynamic = false) {
+async function app(theme, mode = "mpa", urls = "relative", dynamic = false, minimal = false) {
   const output = path.join(root, `${theme.name}-${mode}-${urls}-${dynamic}`);
   await generateExplorer({
     sourceDir: source,
@@ -31,22 +31,26 @@ async function app(theme, mode = "mpa", urls = "relative", dynamic = false) {
     urlStrategy: urls,
     base: "/catalog/",
     theme,
-    metadata: {
-      siteName: "Design kit",
-      ...(dynamic
-        ? {
-            description: ({ directory }) => describeContent(directory),
-            image: async ({ directory, description }) => ({
-              source: await createShareImage({
-                theme: "crosswave",
-                title: directory.relativePath || "Design kit",
-                description,
-              }),
-              outputPath: `og/${directory.relativePath || "root"}.png`,
-            }),
-          }
-        : {}),
-    },
+    ...(!minimal
+      ? {
+          metadata: {
+            siteName: "Design kit",
+            ...(dynamic
+              ? {
+                  description: ({ directory }) => describeContent(directory),
+                  image: async ({ directory, description }) => ({
+                    source: await createShareImage({
+                      theme: "crosswave",
+                      title: directory.relativePath || "Design kit",
+                      description,
+                    }),
+                    outputPath: `og/${directory.relativePath || "root"}.png`,
+                  }),
+                }
+              : {}),
+          },
+        }
+      : {}),
   });
   const server = createServer(async (req, res) => {
     try {
@@ -86,7 +90,6 @@ async function app(theme, mode = "mpa", urls = "relative", dynamic = false) {
 }
 for (const [name, factory, family] of [
   ["ledger", createDefaultTheme, "Source Sans 3"],
-  ["plain", createPlainTheme, "Source Serif 4"],
   ["crosswave", createCrosswaveTheme, "Source Sans 3"],
 ]) {
   test(`${name}: offline local fonts, one static image, desktop/mobile layout`, async ({
@@ -242,4 +245,44 @@ test("Ledger symlink target and status use bundled fonts", async ({ page }) => {
     await page.locator(".target").evaluate((node) => getComputedStyle(node).fontFamily),
   ).toContain("Source Code Pro");
   expect(await page.evaluate(() => document.fonts.check('12px "Source Code Pro"'))).toBe(true);
+});
+
+test.describe("Plain minimal output", () => {
+  test.use({ javaScriptEnabled: false });
+  for (const mode of ["ssg", "mpa"]) {
+    test(`${mode}: native navigation and system appearance need no generated assets`, async ({
+      page,
+    }) => {
+      const site = await app(createPlainTheme(), mode, "relative", false, true);
+      const assets = [];
+      page.on("request", (request) => {
+        if (/\.(?:js|woff2?|png)(?:$|\?)/.test(request.url())) assets.push(request.url());
+      });
+      try {
+        await page.goto(site.url);
+        await expect(page).toHaveTitle("Index of /");
+        expect(
+          await page.locator('meta[property^="og:"],meta[name^="twitter:"],footer,script').count(),
+        ).toBe(0);
+        expect(await page.evaluate(() => document.fonts.size)).toBe(0);
+        for (const width of [1280, 390]) {
+          await page.setViewportSize({ width, height: 844 });
+          expect(
+            await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
+          ).toBe(true);
+        }
+        await page.emulateMedia({ colorScheme: "dark" });
+        expect(
+          await page.evaluate(() => getComputedStyle(document.documentElement).colorScheme),
+        ).toBe("light dark");
+        await page.getByRole("link", { name: "docs/", exact: true }).click();
+        await expect(page).toHaveTitle("Index of /docs/");
+        await page.getByRole("link", { name: "../", exact: true }).click();
+        await expect(page).toHaveTitle("Index of /");
+        expect(assets).toEqual([]);
+      } finally {
+        await site.close();
+      }
+    });
+  }
 });

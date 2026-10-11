@@ -40,6 +40,19 @@ for (const [name, factory] of [
   assert.equal(bytes.readUInt32BE(20), 630);
   images[name] = createHash("sha256").update(bytes).digest("hex");
   for (const mode of ["ssg", "mpa"]) {
+    if (name === "plain") {
+      const minimalDir = `plain-${mode}-minimal`;
+      await generateExplorer({
+        sourceDir: "files",
+        outputDir: minimalDir,
+        mode,
+        theme: factory(),
+        mirror: false,
+      });
+      const minimal = await readFile(`${minimalDir}/index.html`, "utf8");
+      assert.match(minimal, /<title>Index of \/<\/title>/);
+      assert.doesNotMatch(minimal, /og:|twitter:|@font-face|<footer|<script/);
+    }
     const outputDir = `${name}-${mode}`;
     await generateExplorer({
       sourceDir: "files",

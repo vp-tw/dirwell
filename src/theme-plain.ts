@@ -1,5 +1,4 @@
 import { escapeHtml } from "./html.ts";
-import { themeFonts } from "./theme-fonts.ts";
 import { repositoryName } from "./metadata.ts";
 import type { ExplorerTheme, FileSystemEntry, ThemeContext } from "./model.ts";
 import { resolveThemeProject, type ThemeProjectOptions } from "./theme-project.ts";
@@ -74,11 +73,10 @@ export function createPlainTheme(options: PlainThemeOptions = {}): ExplorerTheme
     metadataDefaults: {
       siteName: project.name,
       repositoryName: repositoryName(project.repositoryUrl),
-      imageTheme: "plain",
+      enabledByDefault: false,
     },
     searchIndex: false,
     render(context) {
-      const fonts = themeFonts("plain", context.assetHref);
       const visiblePath =
         context.directory.current.relativePath === ""
           ? "/"
@@ -91,11 +89,20 @@ export function createPlainTheme(options: PlainThemeOptions = {}): ExplorerTheme
         parentHref === null ? "" : `<li><a href="${escapeHtml(parentHref)}">../</a></li>`;
       const rows = context.directory.entries.map((entry) => renderEntry(entry, context)).join("");
       const count = context.directory.entries.length;
-      const footer = `<footer><hr><p>Repository: ${externalLink(project.name, repositoryHref)} by ${escapeHtml(project.author)} · ${externalLink(project.license, licenseHref)}</p></footer>`;
+      const fallbackTitle =
+        options.project?.name === undefined
+          ? `Index of ${visiblePath}`
+          : context.directory.current.relativePath
+            ? `${context.directory.current.relativePath} · ${project.name}`
+            : project.name;
+      const footer =
+        options.project === undefined
+          ? ""
+          : `<footer><hr><p>Repository: ${externalLink(project.name, repositoryHref)} by ${escapeHtml(project.author)} · ${externalLink(project.license, licenseHref)}</p></footer>`;
       const html = `<!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light">${context.documentBaseHref === null ? "" : `<base href="${escapeHtml(context.documentBaseHref)}">`}${context.metadata?.head ?? `<title>Index of ${escapeHtml(visiblePath)}</title>`}<style>body{max-width:72ch;margin:2rem auto;padding:0 1rem}h1,li,nav{overflow-wrap:anywhere}li{margin:.6rem 0}small{display:block}${fonts.css}</style></head>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">${context.documentBaseHref === null ? "" : `<base href="${escapeHtml(context.documentBaseHref)}">`}${context.metadata?.head ?? `<title>${escapeHtml(fallbackTitle)}</title>`}<style>:root{color-scheme:light dark}body{max-width:72ch;margin:2rem auto;padding:0 1rem}h1,li,nav{overflow-wrap:anywhere}li{margin:.6rem 0}small{display:block}</style></head>
 <body><main>${renderBreadcrumbs(context)}<h1>Index of ${escapeHtml(visiblePath)}</h1><p>${count} ${count === 1 ? "entry" : "entries"}</p>${count === 0 ? "<p>This directory is empty.</p>" : ""}<ul>${parentRow}${rows}</ul></main>${footer}</body></html>`;
-      return { html, assets: fonts.assets };
+      return { html };
     },
   };
 }

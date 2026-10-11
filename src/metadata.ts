@@ -48,6 +48,8 @@ export interface MetadataOptions {
   readonly image?: MetadataImageValue;
 }
 export interface ThemeMetadataDefaults {
+  /** Set false to resolve metadata only when the caller explicitly configures it. */
+  readonly enabledByDefault?: boolean;
   readonly siteName: string;
   readonly repositoryName: string;
   /** Built-in preset, used only when neither caller nor theme provides image. */

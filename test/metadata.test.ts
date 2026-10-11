@@ -32,10 +32,10 @@ test("count descriptions order folders, files, links and handle zero/plurals", (
   );
   assert.equal(describeContent({ folderCount: 0, fileCount: 0, linkCount: 0 }), "Empty folder");
 });
-test("all built-in themes share one static image across SSG/MPA; symlink traversal does not inflate totals", async () => {
+test("default-on themes share one static image across SSG/MPA; symlink traversal does not inflate totals", async () => {
   const f = await fixture();
   try {
-    for (const theme of [createDefaultTheme(), createPlainTheme(), createCrosswaveTheme()])
+    for (const theme of [createDefaultTheme(), createCrosswaveTheme()])
       for (const mode of ["ssg", "mpa"] as const) {
         await generateExplorer({
           ...f,
@@ -178,12 +178,11 @@ test("a reused image source is read once per build and refreshed on the next bui
   }
 });
 
-test("every built-in theme distributes notices for its generated fonts in both modes", async () => {
+test("font-emitting themes distribute notices for their generated fonts in both modes", async () => {
   const f = await fixture();
   try {
     for (const [theme, names] of [
       [createDefaultTheme(), ["Source Sans 3", "Source Code Pro"]],
-      [createPlainTheme(), ["Source Serif 4"]],
       [createCrosswaveTheme(), ["Source Sans 3"]],
     ] as const) {
       for (const mode of ["ssg", "mpa"] as const) {
@@ -391,6 +390,59 @@ test("theme images accept files, paths and async callbacks; caller image overrid
       /callback must return an image or false/,
     );
     assert.deepEqual(await readFile(path.join(f.outputDir, "index.html")), before);
+  } finally {
+    await rm(f.root, { recursive: true, force: true });
+  }
+});
+
+test("Plain metadata is opt-in and does not imply a generated image", async () => {
+  const f = await fixture();
+  try {
+    const theme = createPlainTheme({ project: { name: "Downloads" } });
+    for (const mode of ["ssg", "mpa"] as const) {
+      await generateExplorer({ ...f, theme, mode });
+      let html = await readFile(path.join(f.outputDir, "index.html"), "utf8");
+      assert.match(html, /<title>Downloads<\/title>/);
+      assert.doesNotMatch(html, /data-dirwell-metadata|og:|twitter:|@font-face/);
+      await generateExplorer({ ...f, theme, mode, metadata: {} });
+      html = await readFile(path.join(f.outputDir, "index.html"), "utf8");
+      assert.match(html, /property="og:title" content="Downloads"/);
+      assert.doesNotMatch(html, /og:image|twitter:card|@font-face/);
+      await generateExplorer({ ...f, theme, mode, metadata: { image: png } });
+      html = await readFile(path.join(f.outputDir, "index.html"), "utf8");
+      assert.match(html, /og:image|summary_large_image/);
+    }
+  } finally {
+    await rm(f.root, { recursive: true, force: true });
+  }
+});
+
+test("independent themes can opt out without invoking metadata image callbacks", async () => {
+  const f = await fixture();
+  let calls = 0;
+  const theme = {
+    name: "independent-opt-in",
+    searchIndex: false,
+    metadataDefaults: {
+      enabledByDefault: false,
+      siteName: "Independent",
+      repositoryName: "owner/theme",
+      image: () => {
+        calls++;
+        return png;
+      },
+    },
+    render: (context: import("../src/index.ts").ThemeContext) => ({
+      html: `<!doctype html><head>${context.metadata?.head ?? "<title>Minimal</title>"}</head>`,
+    }),
+  };
+  try {
+    await generateExplorer({ ...f, theme });
+    assert.equal(calls, 0);
+    assert.doesNotMatch(await readFile(path.join(f.outputDir, "index.html"), "utf8"), /og:/);
+    await generateExplorer({ ...f, theme, metadata: {} });
+    assert.ok(calls > 0);
+    assert.match(await readFile(path.join(f.outputDir, "index.html"), "utf8"), /og:image/);
   } finally {
     await rm(f.root, { recursive: true, force: true });
   }
