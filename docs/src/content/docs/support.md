@@ -52,7 +52,7 @@ a Dirwell adapter running inside Astro's own build or development lifecycle.
 
 ## Runtime and browser expectations
 
-The package requires Node.js 26 or later. Generated websites need a static file
+The package requires Node.js 22.12 or later. Generated websites need a static file
 host, not Node.js. Ledger is the default theme; its normal SSG listing remains
 usable without JavaScript. Search, sorting controls, appearance preferences,
 and large MPA virtualized lists need JavaScript. Plain renders complete HTML
@@ -68,8 +68,10 @@ for versions, methods, and limits. Choose plain HTML or validate your target
 browsers when those environments matter.
 
 Installed-package consumer checks also run on native Windows, Linux, and macOS
-ARM64/x64 runners. They cover CLI build/serve and live updates, all three themes
-in SSG/MPA, encoded names, symlinks, and matching fixed-font PNG output. They do
+ARM64/x64 runners on Node 22.12, 24.1, and 26. They cover async JavaScript/TypeScript
+config loading, adapter entry-point imports, CLI build/serve and live updates,
+all three themes in SSG/MPA, encoded names, symlinks, and matching fixed-font PNG
+output. They do
 not establish every build-adapter mode on Windows. A maintainer-reported Windows
 and Xbox controller smoke found no major issue; its browser/version and complete
 button/axis coverage were not specified.

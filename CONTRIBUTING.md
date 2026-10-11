@@ -31,8 +31,9 @@ pnpm verify:package
 `node scripts/verify-platform.mjs <tarball-or-exact-version> <report-directory>`
 checks a disposable installed consumer and writes its OS/architecture, native
 image hashes, and CLI/watch results. `.github/workflows/platforms.yml` builds one
-tarball and runs this check on six native OS/architecture runners; its final job
-compares the three fixed-font image hashes. No install scripts run in consumers.
+tarball and runs this check on Node 22.12, 24.1, and 26 across six native
+OS/architecture runners; its final job compares the three fixed-font image hashes.
+No install scripts run in consumers.
 
 For browser behavior, install the engines once and run the browser tests:
 

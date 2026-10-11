@@ -3,7 +3,7 @@ title: Getting started
 description: Turn your first folder into a browsable website, then publish it.
 ---
 
-You need **Node.js 26 or later**, which includes npm, and a folder to browse.
+You need **Node.js 22.12 or later**, which includes npm, and a folder to browse.
 Check your Node version with `node --version`. You do not need to clone Dirwell
 or choose a build tool.
 

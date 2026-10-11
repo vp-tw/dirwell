@@ -1,5 +1,11 @@
 # @vp-tw/dirwell
 
+## 0.2.1
+
+### Patch Changes
+
+- Lower the verified Node.js consumer requirement from 26 to 22.12 and explicitly target Node 22.12 when building the package. Verify Node 22.12, 24.1, and 26 across native Windows, Linux, and macOS ARM64/x64 consumers, including async config loading and adapter imports. Keep the source development toolchain on Node 26 and leave dependency packaging unchanged.
+
 ## 0.2.0
 
 ### Minor Changes

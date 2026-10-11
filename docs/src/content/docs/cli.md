@@ -3,7 +3,7 @@ title: CLI
 description: Build once, watch locally, or run a detached explorer.
 ---
 
-The examples use the published package and require Node.js 26 or later:
+The examples use the published package and require Node.js 22.12 or later:
 
 ```bash
 npx @vp-tw/dirwell --help
