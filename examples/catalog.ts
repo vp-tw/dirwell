@@ -11,8 +11,8 @@ export const exampleCatalog = [
     group: "themes",
     slug: "plain",
     name: "Plain",
-    description: "A complete directory listing with native links and no JavaScript.",
-    detail: "Built-in theme · no JavaScript",
+    description: "Minimal directory HTML with native links, system fonts, and no generated assets.",
+    detail: "Built-in theme · minimal HTML",
   },
   {
     group: "themes",

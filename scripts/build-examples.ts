@@ -18,13 +18,17 @@ const options: DirwellViteOptions[] = [];
 for (const example of examples) {
   const exampleRoot = path.join(root, "examples", example);
   const { config } = await loadDirwellConfig(exampleRoot, "build");
+  const metadata =
+    config.metadata === undefined && config.theme?.metadataDefaults?.enabledByDefault === false
+      ? undefined
+      : {
+          ...config.metadata,
+          siteUrl: `https://vp-tw.github.io${siteBase.replace(/\/$/, "")}/examples/${example}/`,
+        };
   options.push({
     ...config,
     cwd: exampleRoot,
-    metadata: {
-      ...config.metadata,
-      siteUrl: `https://vp-tw.github.io${siteBase.replace(/\/$/, "")}/examples/${example}/`,
-    },
+    ...(metadata === undefined ? {} : { metadata }),
     root: path.resolve(exampleRoot, config.root ?? "."),
     outDir: path.resolve(exampleRoot, config.outDir ?? "dist"),
     base: config.base ?? `${siteBase.replace(/\/$/, "")}/examples/${example}/`,

@@ -1,48 +1,18 @@
 ---
 name: Dirwell Plain
-description: A browser-native directory index with bundled serif text.
+description: A minimal browser-native directory index with no generated presentation assets.
 typography:
   body:
-    fontFamily: '"Source Serif 4", serif'
+    fontFamily: serif
     fontWeight: 400
 ---
 
 # Design System: Dirwell Plain
 
-## Overview
+Plain uses semantic HTML: a directory heading, linked breadcrumbs, an unordered list, native links, entry details, and machine-readable UTC timestamps. It keeps native link colors, focus indicators, list markers, and the browser's system serif font. Native colors follow the system appearance through `color-scheme: light dark`.
 
-The plain theme is a browser-native directory listing. It keeps the
-filesystem as the content and uses semantic HTML: a heading, linked breadcrumbs,
-an unordered list, links, small metadata, and machine-readable timestamps.
-The footer uses a native horizontal rule and plain text to identify the
-repository, author, and license. External links open in a new tab.
-The default repository name links to the published Dirwell repository. An
-invalid custom URL remains plain text.
+The body retains a readable maximum width (72ch), centered margins (2rem), and horizontal padding (1rem). List rows have .6rem block margins; metadata is block-level. Headings, rows, and breadcrumbs allow emergency wrapping for long names.
 
-It has no icons, JavaScript, client-side search, sorting controls, color-scheme
-switch, or generated search index. It deliberately keeps the browser's native
-link colors, focus indicator, and list markers.
+The default output has no fonts, JavaScript, icons, search index, social metadata, share image, or brand footer. The title is `Index of /` or the current folder path. Providing `project` opts into the existing repository/author/license footer and an optional project-name title. Providing `metadata` opts into managed text metadata; image generation requires an explicit image source or callback. The optional Plain share-image renderer retains its bundled Source Serif face, but it does not add a browser font.
 
-## Typography
-
-Bundled Source Serif 4 Regular (400) replaces the browser's default serif
-family. The local Latin face applies to body text and native form controls;
-heading sizes and weights still follow browser defaults. Only Regular is
-bundled, so bold headings use browser synthesis.
-
-The built-in Open Graph image uses the same Source Serif 4 Regular face from
-a bundled OTF for the title, repository/theme labels, counts, and optional
-folder path. Its white ground and horizontal rule retain the plain index
-character.
-
-## Layout
-
-The body has a readable maximum width (72ch), centered margins (2rem), and
-horizontal padding (1rem). List rows have .6rem block margins; metadata is
-block-level. Headings, rows, and breadcrumbs allow emergency wrapping for long
-names.
-
-The same complete HTML is emitted in SSG and MPA modes. Very large directories
-will produce large documents; use the default theme when virtualization or
-client-side search matters. Broken links may open their raw target text in a new
-tab; links outside the root remain visible but unavailable.
+SSG and MPA both emit the complete listing. Source mirroring and safe raw-link target stubs remain generator behavior. Large folders produce large documents; use Ledger for virtualization or search. External file links still open in a new tab, and unavailable symlinks retain their safe status and declared-target handling.

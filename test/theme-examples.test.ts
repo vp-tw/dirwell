@@ -66,7 +66,6 @@ test("Catppuccin override emits paired icons and palettes in SSG and MPA", async
 for (const [slug, name, child, childCounts] of [
   ["basic", "Sample downloads", "releases", "1 folder"],
   ["file-icons", "Sample files", "docs", "1 file"],
-  ["plain", "Sample downloads", "releases", "1 folder"],
   ["crosswave", "Sample media files", "Photos", "1 file"],
 ] as const) {
   test(`${slug}: previews identify content and distinguish folder counts from archive totals`, async (context) => {
@@ -101,3 +100,22 @@ for (const [slug, name, child, childCounts] of [
     }
   });
 }
+
+test("the public Plain example opts out of metadata and emits only listing pages", async (context) => {
+  const { loadDirwellConfig, resolveGenerateOptions } = await import("../src/config.ts");
+  const exampleRoot = path.join(examples, "plain");
+  const { config } = await loadDirwellConfig(exampleRoot, "build");
+  assert.equal(config.metadata, undefined);
+  const outputDir = await mkdtemp(path.join(tmpdir(), "dirwell-plain-minimal-"));
+  context.after(() => rm(outputDir, { recursive: true, force: true }));
+  for (const mode of ["ssg", "mpa"] as const) {
+    await generateExplorer(
+      resolveGenerateOptions(exampleRoot, { ...config, mode, mirror: false, outDir: outputDir }),
+    );
+    assert.deepEqual(await readdir(outputDir), ["index.html", "releases"]);
+    const html = await readFile(path.join(outputDir, "index.html"), "utf8");
+    assert.match(html, /<title>Index of \/<\/title>/);
+    assert.doesNotMatch(html, /og:|twitter:|@font-face|<footer|<script/);
+    assert.ok(Buffer.byteLength(html) < 1500);
+  }
+});

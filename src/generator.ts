@@ -466,7 +466,8 @@ export async function generateExplorerSkippingPaths(
         if (selection.selected.has(sourcePath)) sourceKinds.set(sourcePath, entry.kind);
       }
     const metadataResolver =
-      theme.metadataDefaults === undefined && options.metadata === undefined
+      options.metadata === undefined &&
+      (theme.metadataDefaults === undefined || theme.metadataDefaults.enabledByDefault === false)
         ? null
         : createMetadataResolver(
             options.metadata ?? {},

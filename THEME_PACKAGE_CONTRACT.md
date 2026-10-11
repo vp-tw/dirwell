@@ -63,3 +63,5 @@ them into a fresh project, and exercises their public imports. It verifies the
 CLI, an external renderer with SSG/MPA assets and encoded names, public types,
 a real Rollup build, and an async CommonJS webpack build. Successful local tarball consumption does not prove npm
 publication or a registry install; release readback must verify those separately.
+
+Themes may set `metadataDefaults.enabledByDefault: false` to avoid automatic metadata and image generation. Consumer `metadata` opts back into those defaults; explicit `metadata.image` overrides remain supported. Ledger and Crosswave stay default-on. Plain uses this opt-in policy and has no fallback image preset in 0.2.

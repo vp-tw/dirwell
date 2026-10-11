@@ -1,5 +1,13 @@
 # @vp-tw/dirwell
 
+## 0.2.0
+
+### Minor Changes
+
+- Make Plain a minimal, asset-free directory listing by default. Remove automatic web fonts, social metadata, share images, and brand attribution; retain native navigation, safe links, entry details, and UTC timestamps. Native colors now follow system appearance. Project attribution and metadata remain explicit opt-ins, with an explicit image required for image cards. Add the theme-author `metadataDefaults.enabledByDefault` opt-in policy without changing Ledger or Crosswave defaults.
+
+  Breaking default changes in this minor release: Plain document titles use `Index of …`, automatic fonts/images/metadata are absent, and the footer requires `project`. See the Plain 0.2 migration guide for opt-ins. Package installation still includes the assets and dependencies used by other themes and optional image rendering.
+
 ## 0.1.4
 
 ### Patch Changes

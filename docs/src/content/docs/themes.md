@@ -11,14 +11,14 @@ Choose a built-in theme before replacing components or writing a renderer:
 - **Crosswave**: a PSP-inspired crossbar, moving light, and keyboard/gamepad controls. Use `createCrosswaveTheme()`. [Live Crosswave](https://vp-tw.github.io/dirwell/examples/crosswave/).
 
 Keep Ledger’s behavior with [component overrides](#component-overrides), or implement an `ExplorerTheme` for a [complete renderer](#complete-theme).
-All three built-in themes support [page metadata and share images](../metadata/). Interface text and bookmarks/share previews are configured separately.
+All three built-in themes support [optional page metadata and share images](../metadata/); Plain leaves them disabled by default. Interface text and bookmarks/share previews are configured separately.
 
 For a config that imports a theme, first [install Dirwell in your project](../getting-started/#3-save-project-settings-when-needed).
 Ledger is the name of the default theme; `createDefaultTheme()` is its factory.
 
 ## Plain theme
 
-`createPlainTheme()` writes complete, browser-native HTML in both SSG and MPA.
+`createPlainTheme()` writes complete, browser-native HTML in both SSG and MPA. By default it emits only listing HTML with a small inline style: no fonts, share images, social metadata, search index, JavaScript, or repository footer. Native colors follow the system appearance.
 It has no icons, JavaScript, appearance controls, search index, or virtual
 list. Use it when the folder is small enough to render fully and a basic list
 meets the need.
@@ -33,7 +33,7 @@ export default defineConfig({
 });
 ```
 
-`project` accepts the same metadata fields as the default theme. The Plain theme links its repository name using the resolved `repositoryUrl`; by default this is the Dirwell repository. Set it explicitly for your own project. It shows modified times in UTC because it has no browser script.
+`project` accepts the same metadata fields as the default theme. Providing `project` opts into a footer that links the repository name using the resolved `repositoryUrl`; set that URL explicitly for your project. Omitting `project` omits the footer. It shows modified times in UTC because it has no browser script.
 The [plain example](../examples/) shows the resulting page.
 
 ## Default theme options
