@@ -1,7 +1,7 @@
 // Copied into a disposable installed-package consumer by verify-platform.mjs.
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { spawn } from "node:child_process";
+import { execFileSync, spawn } from "node:child_process";
 import { mkdir, readFile, rm, symlink, writeFile } from "node:fs/promises";
 import { release } from "node:os";
 import {
@@ -16,6 +16,32 @@ await mkdir("files/docs", { recursive: true });
 await writeFile("files/a & 日本語.txt", "encoded content");
 await writeFile("files/README.md", "readme");
 await writeFile("files/docs/nested.txt", "nested");
+for (const extension of ["mjs", "ts"]) {
+  const filename = "dirwell.config." + extension;
+  await writeFile(
+    filename,
+    `import {defineConfig,createPlainTheme} from '@vp-tw/dirwell';export default defineConfig(async ({command})=>({outDir:'config-${extension}',mirror:false,theme:createPlainTheme({project:{name:'Config '+command}})}));`,
+  );
+  execFileSync(process.execPath, ["node_modules/@vp-tw/dirwell/dist/bin.mjs", "build", "files"], {
+    stdio: "inherit",
+  });
+  assert.match(await readFile("config-" + extension + "/index.html", "utf8"), /Config build/);
+  await rm(filename);
+}
+for (const host of [
+  "unplugin",
+  "vite",
+  "rollup",
+  "rolldown",
+  "webpack",
+  "rspack",
+  "rsbuild",
+  "esbuild",
+  "farm",
+  "bun",
+])
+  await import("@vp-tw/dirwell/" + host);
+console.log("MJS/TS async config and all adapter imports passed on " + process.version);
 let fileSymlinks = "verified";
 try {
   await symlink("README.md", "files/valid-link");
@@ -125,6 +151,8 @@ const report = {
   images,
   fileSymlinks,
   checks: [
+    "MJS/TS async config",
+    "all adapter entry-point imports",
     "three themes × SSG/MPA",
     "native share images",
     "encoded filenames",

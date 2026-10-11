@@ -36,6 +36,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        node: ["20.19.0", "22.12.0", "26"]
         os:
           [
             ubuntu-latest,
@@ -51,7 +52,7 @@ jobs:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
         with:
-          node-version: 26
+          node-version: ${{ matrix.node }}
           package-manager-cache: false
       - uses: actions/download-artifact@v4
         with:
@@ -59,12 +60,12 @@ jobs:
           path: package-artifact
       - name: Test the installed tarball
         env:
-          PLATFORM_PROOF_NAME: ${{ matrix.os }}
+          PLATFORM_PROOF_NAME: ${{ matrix.os }}-node-${{ matrix.node }}
         shell: bash
         run: node scripts/verify-platform.mjs package-artifact/*.tgz
       - uses: actions/upload-artifact@v4
         with:
-          name: platform-proof-${{ matrix.os }}
+          name: platform-proof-${{ matrix.os }}-node-${{ matrix.node }}
           path: .platform-proof/*.json
           include-hidden-files: true
   compare-images:
@@ -82,4 +83,4 @@ jobs:
           merge-multiple: true
       - name: Compare bundled-font image output
         run: |
-          node --input-type=module -e 'import{readFile,readdir}from"node:fs/promises";import assert from"node:assert/strict";const files=await readdir("proofs");assert.equal(files.length,6);const reports=await Promise.all(files.map(async f=>JSON.parse(await readFile("proofs/"+f,"utf8"))));for(const report of reports)assert.deepEqual(report.images,reports[0].images);console.log("All three share images are byte-identical across six OS/architecture runners.");'
+          node --input-type=module -e 'import{readFile,readdir}from"node:fs/promises";import assert from"node:assert/strict";const files=await readdir("proofs");assert.equal(files.length,18);const reports=await Promise.all(files.map(async f=>JSON.parse(await readFile("proofs/"+f,"utf8"))));for(const report of reports)assert.deepEqual(report.images,reports[0].images);console.log("All three share images are byte-identical across eighteen Node/OS/architecture combinations.");'
