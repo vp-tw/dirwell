@@ -17,11 +17,11 @@ The three built-in themes provide page titles, descriptions, and one static 1200
 
 Save this as `dirwell.config.ts` after [installing Dirwell](../getting-started/#3-save-project-settings-when-needed), then run `npx dirwell build files -o dist`. Replace the sample repository and deployment URLs with your own. The CLI source argument remains explicit.
 
-The homepage title is `Downloads`; a child page is `docs · Downloads`. The default description uses whole-site totals, such as `3 folders · 6 files`, and is reused across pages. The share image stays the same while browsing folders. Rebuilding refreshes its totals.
+The homepage title is `Downloads`; a child page is `docs · Downloads`. The default root description explains the archive, such as `Browse files in Downloads. Archive totals: 3 folders · 6 files.` Child descriptions name the destination and use direct folder counts, such as `Browse docs in Downloads. This folder: 2 files.` The share image stays the same while browsing folders, and its default count line is labeled `Archive totals:`. Rebuilding refreshes its totals.
 
 The example sets the display name once in `project.name`. If omitted, page and image names come from the built-in theme's `project` settings. `metadata.siteName` controls page/image naming; `project.name` still controls the theme header or attribution. Set both when you want them to match. Theme names appear in the image's upper-right corner rather than page titles.
 
-Set `siteUrl` to the actual deployed explorer root, including its deployment base. Dirwell emits absolute `og:image`, `og:url`, and canonical URLs when it is provided. Without it, image links remain portable relative URLs and canonical/og:url are omitted; set it before relying on social preview crawlers. A repository URL is not a deployment URL. Social platforms may cache previews independently of your build.
+Set `siteUrl` to the actual deployed explorer root, including its deployment base. Dirwell emits absolute `og:image`, `og:url`, and canonical URLs when it is provided. Without it, image links remain portable relative URLs and canonical/og:url are omitted; set it before relying on social preview crawlers. A repository URL is not a deployment URL. Image-enabled pages also emit `twitter:card=summary_large_image` and explicit Twitter title, description, image, and image-alt tags. Disabling the image omits these image-card tags. Social platforms may crop images, omit descriptions, and cache previews independently of your build; these tags do not guarantee a particular platform layout.
 
 The image presets use Ledger’s light paper, Plain’s white background, and Crosswave’s Azure background. Visitor appearance settings and Crosswave’s configured `color` do not recolor these static presets. Supply an image or image callback for a different image design.
 
@@ -40,7 +40,7 @@ The order is folders, files, links. Zero counts are omitted; all zero becomes `E
 
 Place `cover.png` beside the config for this example.
 
-A fixed title is used on every page. Fixed title/description values also feed the default generated image when you leave `image` unset. Text callbacks affect page metadata; the default image remains a whole-site image. To create per-folder images, provide an image callback.
+A fixed title is used on every page. Fixed title/description values also feed the default generated image when you leave `image` unset. Text callbacks affect page metadata; the default image remains a whole-site image with qualified archive totals. Default image alternative text includes its displayed title and description. To create per-folder images, provide an image callback.
 
 `image` accepts a Node `File`, a local path string, a `file:` URL, or `{ source, outputPath?, alt? }`. Local path strings resolve from the config/project directory; programmatic generation can set `metadataBaseDirectory` explicitly, otherwise it uses the working directory. Remote image downloads are not performed. Supported image filename extensions are PNG, JPEG, WebP, and GIF.
 

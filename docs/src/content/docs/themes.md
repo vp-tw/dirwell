@@ -153,7 +153,7 @@ file list, and flowing ribbon light. It is an optional packaged renderer:
 
 Crosswave’s header links to its theme documentation and to VdustR, its author.
 `project.name` controls your site’s display name; it does not rename the theme
-or change its author credit. The example’s “Sample files” is a configured display name. Crosswave browses and opens files; it does not provide a media player or previews.
+or change its author credit. The example’s “Sample media files” is a configured display name. Crosswave browses and opens files; it does not provide a media player or previews.
 
 ```ts
 import { createCrosswaveTheme, defineConfig } from "@vp-tw/dirwell";
@@ -161,7 +161,7 @@ import { createCrosswaveTheme, defineConfig } from "@vp-tw/dirwell";
 export default defineConfig({
   theme: createCrosswaveTheme({
     color: "azure",
-    project: { name: "Sample files" },
+    project: { name: "Sample media files" },
   }),
 });
 ```

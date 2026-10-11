@@ -2,9 +2,9 @@
 export const exampleCatalog = [
   {
     slug: "basic",
-    name: "Zero config",
-    description: "Publish a portable folder with the default settings.",
-    detail: "Portable output · no configuration",
+    name: "Sample downloads",
+    description: "Publish a portable release archive with content-specific link previews.",
+    detail: "Default theme · archive metadata",
   },
   {
     slug: "file-icons",

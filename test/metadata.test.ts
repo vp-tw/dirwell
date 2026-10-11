@@ -48,7 +48,26 @@ test("all built-in themes share one static image across SSG/MPA; symlink travers
         const nested = await readFile(path.join(f.outputDir, "docs/index.html"), "utf8");
         assert.match(root, /<title>Downloads<\/title>/);
         assert.match(nested, /<title>docs · Downloads<\/title>/);
-        assert.match(root, /content="2 folders · 2 files · 2 links"/);
+        assert.match(
+          root,
+          /content="Browse files in Downloads\. Archive totals: 2 folders · 2 files · 2 links\."/,
+        );
+        assert.match(
+          nested,
+          /content="Browse docs in Downloads\. This folder: 1 folder · 1 file\."/,
+        );
+        const empty = await readFile(path.join(f.outputDir, "docs/deep/index.html"), "utf8");
+        assert.match(empty, /This folder: Empty folder\./);
+        assert.match(root, /name="twitter:card" content="summary_large_image"/);
+        assert.match(nested, /name="twitter:title" content="docs · Downloads"/);
+        assert.match(
+          root,
+          /property="og:image:alt" content="[^"]+Archive totals: 2 folders · 2 files · 2 links"/,
+        );
+        assert.equal(
+          root.match(/name="twitter:image" content="([^"]+)/)?.[1],
+          root.match(/property="og:image" content="([^"]+)/)?.[1],
+        );
         assert.match(nested, /https:\/\/example.com\/catalog\/docs\//);
         assert.equal(
           root.match(/property="og:image" content="([^"]+)/)?.[1],
@@ -118,7 +137,10 @@ test("relative source paths resolve from config directory; image:false skips ass
     await generateExplorer(options);
     assert.equal((await readdir(path.join(f.outputDir, "__dirwell/metadata"))).length, 1);
     await generateExplorer({ ...f, metadata: { image: false } });
-    assert.doesNotMatch(await readFile(path.join(f.outputDir, "index.html"), "utf8"), /og:image/);
+    assert.doesNotMatch(
+      await readFile(path.join(f.outputDir, "index.html"), "utf8"),
+      /og:image|twitter:image|summary_large_image/,
+    );
   } finally {
     await rm(f.root, { recursive: true, force: true });
   }
