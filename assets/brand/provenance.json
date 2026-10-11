@@ -2,7 +2,7 @@
   "mascot": {
     "path": "docs/public/brand/paper-bird.png",
     "source": "Approved candidate 3A: original image_gen output, preserved byte for byte.",
-    "role": ["README", "website mascot", "documentation header"],
+    "role": ["website mascot", "documentation header"],
     "prompt": "Use case: logo-brand. Create an original charming editorial mascot logo for DIRWELL, a small tool that publishes directories of files as static websites. The concept is a paper scout: a curious little bird made from a folded index page, with a distinctive compact silhouette, oversized observant dark eye, a small confident beak, a single warm vermilion folded wing, and a cream page-body whose folded corner subtly suggests paper. It feels clever, welcoming and a little mischievous, never corporate or babyish. Aim for the quality of an independent publisher or Japanese stationery brand's character emblem: expressive flat cut-paper forms, purposeful asymmetry, warm curves with crisp fold edges. Give the character personality through its pose and eye, not through busy accessories. Palette: warm cream #f3f0e8, ink #171815, vermilion #dc5235. Thick enough outline only where needed to separate the cream body on light paper. No literal D, no stock folder, no glasses, no hats, no tools, no extra objects. Single mascot centered in a square with clear margins; occupies about 70% of canvas. Flat graphic illustration, no shadows, lighting, gradient, grain, 3D or photo realism. No text, no wordmark, no caption or surrounding frame. This is a brand character, its large shape and eye must remain clear as a small icon. Background: true alpha transparency everywhere outside the character and in the gaps. No white matte, no painted checkerboard, no grid."
   },
   "og": [

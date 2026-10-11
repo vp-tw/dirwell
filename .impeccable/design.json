@@ -46,17 +46,16 @@
       "paperBird": {
         "path": "docs/public/brand/paper-bird.png",
         "intrinsicSize": "1254 × 1254",
-        "purpose": "Canonical original official project mascot: README, landing page, and Starlight header. Favicon identity derives from this same bird.",
+        "purpose": "Canonical original official project mascot: landing page and Starlight header. Favicon identity derives from this same bird.",
         "invariant": "Preserve original bytes and full transparent canvas. Proportional display sizing only; no simplification, cropping, trimming, or redrawing.",
         "componentRefs": [
           "brand-header",
           "brand-hero",
-          "brand-hero-compact",
-          "brand-readme"
+          "brand-hero-compact"
         ]
       },
       "favicon": {
-        "source": "docs/brand/favicon-source.png",
+        "source": "assets/brand/favicon-source.png",
         "sourceSize": "1254 × 1254",
         "generation": "image_gen edit of the approved original bird.",
         "usage": "Landing declares 16px, 32px, and 48px exports; Starlight uses 48px.",
@@ -75,20 +74,23 @@
           }
         ],
         "invariant": "Only small-size framing and contour cleanup of the same complete bird; preserve pose, colors, wing, eye, beak, and feet. Original mascot is unchanged.",
-        "provenance": "docs/brand/favicon-provenance.json"
+        "provenance": "assets/brand/favicon-provenance.json"
       },
       "officialShare": {
         "path": "docs/public/brand/dirwell-og.png",
         "sourceSize": "1730 × 909",
         "outputSize": "1199 × 630",
-        "purpose": "Selected white publishing-poster default official-site link preview.",
+        "purpose": "Selected white publishing-poster default official-site link preview and README cover.",
+        "readmePath": "assets/brand/dirwell-og.png",
+        "readmeUsage": "Absolute GitHub raw URL; full available content width with proportional height. Repository and site copies must remain byte-identical.",
+        "componentRefs": ["brand-readme"],
         "invariant": "Typography, artwork, and layout generated together with the approved bird reference in one image_gen call per candidate. Only proportional resize and lossless PNG encoding afterward; the selected white asset remains byte-identical.",
-        "provenance": "docs/brand/provenance.json",
+        "provenance": "assets/brand/provenance.json",
         "metadata": "docs/site-branding.mjs",
         "alternate": "Dark alternate adds an approved warm-cream oval paper disk behind the feet through a localized image_gen edit; white publishing cover stays selected.",
         "alternateSourceSize": "1731 × 909",
         "alternateOutputSize": "1200 × 630",
-        "alternateProvenance": "docs/brand/dark-circle-provenance.json",
+        "alternateProvenance": "assets/brand/dark-circle-provenance.json",
         "alternatePostprocessing": "Proportional resize and lossless PNG encoding only; no manual compositing, cropping, relettering, or further layout changes."
       },
       "scope": "Official project identity extension. Existing UI palette and type remain fixed; generated explorers and custom themes retain independent assets and metadata."
@@ -124,7 +126,7 @@
   ],
   "narrative": {
     "northStar": "The Public Release Index",
-    "overview": "Dirwell uses the visual language of a maintained technical catalog: warm paper, precise rules, readable metadata, and a restrained deployment blue. The official site is editorial at the top and increasingly dense as it explains the product. The generated explorer remains a separate, compact inventory interface that third-party themes may replace without inheriting the official site's tokens.\n\nThe approved folded-paper bird is the official project identity. Its cream page-body, large observant eye, orange-red folded wing, and curious pose add a recognizable character to the catalog. The original illustration anchors the README, landing page, and documentation header; a minimal adaptation of the same bird supplies the favicon. Complete editorial share artwork extends it to link previews. This extension preserves the incumbent palette, typography, and layout.",
+    "overview": "Dirwell uses the visual language of a maintained technical catalog: warm paper, precise rules, readable metadata, and a restrained deployment blue. The official site is editorial at the top and increasingly dense as it explains the product. The generated explorer remains a separate, compact inventory interface that third-party themes may replace without inheriting the official site's tokens.\n\nThe approved folded-paper bird is the official project identity. Its cream page-body, large observant eye, orange-red folded wing, and curious pose add a recognizable character to the catalog. The original illustration anchors the landing page and documentation header; a minimal adaptation of the same bird supplies the favicon. Complete editorial share artwork extends it to link previews. This extension preserves the incumbent palette, typography, and layout.",
     "keyCharacteristics": [
       "Editorial display type leads; interface type carries actions and metadata.",
       "The paper bird identifies the project; real terminal and file-ledger content prove its behavior.",

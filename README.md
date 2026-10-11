@@ -1,6 +1,6 @@
-<img src="./docs/public/brand/paper-bird.png" alt="Dirwell paper bird" width="160" align="right" />
-
 # Dirwell
+
+![Dirwell — Turn a folder into a searchable website.](https://raw.githubusercontent.com/vp-tw/dirwell/main/assets/brand/dirwell-og.png)
 
 Turn a folder of downloads, reports, or build artifacts into a searchable website.
 Dirwell generates the file list, directory navigation, and links to the original
