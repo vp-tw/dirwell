@@ -1,6 +1,6 @@
 # Dirwell brand artwork
 
-The approved paper bird is the original transparent candidate 3A. The same original PNG is used in the README, website hero and header, and documentation header. Preserve its bytes and full canvas. The favicon uses a separate, minimally adjusted image-tool master of that same bird, with tighter framing and sturdier contours. Its transparent 16px, 32px, and 48px exports retain the complete character. See [favicon provenance](./favicon-provenance.json).
+The approved paper bird is the original transparent candidate 3A. The same original PNG is used in the website hero and header and documentation header. The README uses the approved white publishing cover below. Preserve its bytes and full canvas. The favicon uses a separate, minimally adjusted image-tool master of that same bird, with tighter framing and sturdier contours. Its transparent 16px, 32px, and 48px exports retain the complete character. See [favicon provenance](./favicon-provenance.json).
 
 ## Share images
 
@@ -10,7 +10,7 @@ The selected publishing source is 1730 × 909. Proportional scaling into a 1200 
 
 ### Publishing — selected
 
-![Dirwell publishing share image](../public/brand/dirwell-og.png)
+![Dirwell publishing share image](./dirwell-og.png)
 
 The sentence states the input and result directly: “Turn a folder into a searchable website.” The index sheets connect the bird to publishing files.
 
@@ -24,4 +24,10 @@ The sentence states the input and result directly: “Turn a folder into a searc
 
 The disk improves foot contrast without recoloring the bird. This is an optional alternate; the white publishing cover remains the default. The localized image-tool edit is recorded in [dark-circle provenance](./dark-circle-provenance.json).
 
-Exact prompts, the reference, and processing limits are recorded in [provenance.json](./provenance.json). The `*-source.png` files preserve every generated canvas for future proportional exports. Keep shared site metadata in `../site-branding.mjs`; explorer themes retain their own configurable share images.
+Exact prompts, the reference, and processing limits are recorded in [provenance.json](./provenance.json). The `*-source.png` files preserve every generated canvas for future proportional exports. Keep shared site metadata in [`docs/site-branding.mjs`](../../docs/site-branding.mjs); explorer themes retain their own configurable share images.
+
+## GitHub and npm README
+
+The root README embeds `assets/brand/dirwell-og.png` through its absolute GitHub raw URL. Both GitHub and npm can load the image without a local checkout or packaged artwork. The cover is byte-identical to [`docs/public/brand/dirwell-og.png`](../../docs/public/brand/dirwell-og.png), the official-site OG asset. Keep both copies synchronized when an approved cover replaces it.
+
+The dark cover stays available here as an alternate; the README and official-site metadata use the white cover. This folder is not included in the npm package. To update the README shown on npm, publish a new package version.

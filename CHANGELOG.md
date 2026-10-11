@@ -1,5 +1,11 @@
 # @vp-tw/dirwell
 
+## 0.1.3
+
+### Patch Changes
+
+- Show the approved paper-bird cover in the README using an absolute GitHub image URL so it loads on both GitHub and npm. Keep alternate covers and image provenance in the repository assets folder.
+
 ## 0.1.2
 
 ### Patch Changes

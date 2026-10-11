@@ -73,7 +73,7 @@ components:
     width: "48px"
     height: "48px"
   brand-readme:
-    width: "160px"
+    width: "100%"
     height: "auto"
 ---
 
@@ -91,7 +91,7 @@ themes may replace without inheriting the official site's tokens.
 
 The approved folded-paper bird is the official project identity. Its cream page-body,
 large observant eye, orange-red folded wing, and curious pose add a recognizable
-character to the catalog. The original illustration anchors the README, landing page,
+character to the catalog. The original illustration anchors the landing page
 and documentation header; a minimal adaptation of the same bird supplies the favicon.
 Complete editorial share artwork extends it to link previews. This extension preserves
 the incumbent palette, typography, and layout.
@@ -170,16 +170,16 @@ Tabs share one bordered paper surface. The active tab uses Deployment Blue text 
 
 The canonical identity asset is [the original paper bird](docs/public/brand/paper-bird.png),
 a transparent 1254px square PNG. Preserve its bytes, full canvas, silhouette, and
-expression. Display it proportionally: 160px in the README, 36px square beside
+expression. Display it proportionally: 36px square beside
 the landing-header name, and up to 330px above the hero terminal. At the existing
 850px stack breakpoint, the hero bird becomes at most 260px. The Starlight header
 uses the same original asset beside its title. Favicon exports are 16px, 32px, and
-48px transparent PNGs from [a separate 1254px square favicon master](docs/brand/favicon-source.png),
+48px transparent PNGs from [a separate 1254px square favicon master](assets/brand/favicon-source.png),
 created by an `image_gen` edit of the same approved bird. The landing page declares
 all three sizes; Starlight uses the 48px export.
 Only tighter framing and small-size contour cleanup are permitted; preserve the
 full bird, including its eye, orange wing, beak, and both feet. The original
-mascot remains unchanged. See [favicon provenance](docs/brand/favicon-provenance.json).
+mascot remains unchanged. See [favicon provenance](assets/brand/favicon-provenance.json).
 
 The selected white [official-site share image](docs/public/brand/dirwell-og.png) is a
 complete publishing-poster composition: Dirwell and the factual statement
@@ -190,8 +190,14 @@ crop, composite, reletter, or rebuild its layout after generation; the selected 
 remains byte-identical. The approved dark alternate uses a warm-cream oval paper disk
 behind the feet, added through a localized `image_gen` edit. Its 1731 × 909 edited
 source is proportionally resized to a lossless 1200 × 630 PNG; no manual compositing
-or further layout changes are permitted. See [dark-edit provenance](docs/brand/dark-circle-provenance.json).
-Alternate complete compositions and exact prompts are retained in [brand provenance](docs/brand/provenance.json).
+or further layout changes are permitted. See [dark-edit provenance](assets/brand/dark-circle-provenance.json).
+Alternate complete compositions and exact prompts are retained in [brand provenance](assets/brand/provenance.json).
+The README displays the same white cover at the available content width, preserving
+its aspect ratio. It uses an absolute GitHub raw URL to
+[the repository copy](assets/brand/dirwell-og.png), so npm can load it without
+packaging artwork. Keep that copy byte-identical to the official-site asset.
+The dark alternate remains in `assets/brand/`; it does not switch the README
+or site metadata automatically.
 [Shared site metadata](docs/site-branding.mjs) owns the description, share path,
 dimensions, and image alternative text for the landing page and documentation.
 This artwork and metadata apply to the official site; generated explorers keep
