@@ -305,6 +305,18 @@ h2 {
   max-width: 390px;
   margin-bottom: 3px;
 }
+.example-group + .example-group {
+  margin-top: 48px;
+}
+.example-group > h3 {
+  margin: 0 0 10px;
+  font-size: 1.7rem;
+}
+.example-group-description {
+  max-width: 70ch;
+  margin: 0 0 20px;
+  line-height: 1.6;
+}
 .example-list {
   border-top: 1px solid var(--ink);
 }
@@ -316,7 +328,7 @@ h2 {
   padding: 32px 0;
   border-bottom: 1px solid var(--line);
 }
-.example-list h3 {
+.example-list h4 {
   font-size: 1.45rem;
   margin-bottom: 8px;
   letter-spacing: -0.02em;

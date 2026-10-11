@@ -50,9 +50,9 @@ pnpm site:build
 pnpm docs:dev
 ```
 
-For one portable example, run `pnpm dirwell build files --cwd examples/basic -o dist` and open `examples/basic/dist/index.html`. Keep CLI output away from Vite-owned `docs/public/examples/`.
+For one portable example, run `pnpm dirwell build files --cwd examples/file-icons -o dist` and open `examples/file-icons/dist/index.html`. Keep CLI output away from Vite-owned `docs/public/examples/`.
 
-`examples/catalog.ts` provides the shared beginner-to-advanced order, descriptions, and directory names for the homepage, docs, and builder.
+`examples/catalog.ts` defines the shared theme and customization groups for the homepage and docs. The builder also retains the unlisted `basic` archive for existing links.
 
 `pnpm site:build` writes `site/`. `pnpm docs:dev` builds the examples, serves
 the docs, and watches source changes. `SITE_BASE=/dirwell/ pnpm site:build` checks the GitHub

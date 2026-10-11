@@ -1,4 +1,4 @@
-import { exampleCatalog } from "../examples/catalog.ts";
+import { publishedExampleSlugs } from "../examples/catalog.ts";
 import { randomUUID } from "node:crypto";
 import { access, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -9,7 +9,7 @@ import { loadDirwellConfig } from "../src/config.ts";
 import dirwellVite, { type DirwellViteOptions } from "../src/vite.ts";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const examples = exampleCatalog.map(({ slug }) => slug);
+const examples = publishedExampleSlugs;
 const siteBase = process.env.SITE_BASE ?? "/";
 process.env.DIRWELL_SITE_BASE = siteBase;
 const publishedExamples = path.join(root, "docs/public/examples");

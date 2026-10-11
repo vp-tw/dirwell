@@ -1,8 +1,10 @@
-# Portable SSG example
+# Legacy download archive
 
-Use this example when the published tree may move between paths. Its config
-only sets the source and output directories. SSG and relative URLs keep their
-defaults, so a nested file link resolves from the current page.
+This earlier Ledger archive is retained for existing links. Use the
+[Ledger example](../file-icons/) to compare the default theme with Plain and Crosswave.
+
+The config uses a sample download-library name and archive-specific link previews.
+SSG and relative URLs keep the output portable between deployment paths.
 
 From the repository root after installing dependencies:
 

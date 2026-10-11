@@ -1,7 +1,7 @@
-# Default theme preview
+# Ledger — the default theme
 
-The landing page embeds this generated build of Dirwell's unmodified default
-theme. Its sample files show the bundled vscode-icons artwork for common
+The landing page embeds this generated build of Ledger, Dirwell's default
+theme, with a configured sample-content name and link previews. Its sample files show the bundled vscode-icons artwork for common
 extensions, with a generic fallback for other files. The icons are self-hosted
 in the generated output. To change a theme's icons, see the
 [Catppuccin override example](../default-theme-override/).

@@ -65,6 +65,7 @@ test("Catppuccin override emits paired icons and palettes in SSG and MPA", async
 
 for (const [slug, name, child, childCounts] of [
   ["basic", "Sample downloads", "releases", "1 folder"],
+  ["file-icons", "Sample files", "docs", "1 file"],
   ["plain", "Sample downloads", "releases", "1 folder"],
   ["crosswave", "Sample media files", "Photos", "1 file"],
 ] as const) {
