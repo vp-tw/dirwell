@@ -3,23 +3,32 @@ title: Examples
 description: Pick a working build, inspect its config, and compare the result.
 ---
 
-import { exampleCatalog } from "../../../../examples/catalog.ts";
+import { exampleGroups } from "../../../../examples/catalog.ts";
 export const siteBase = import.meta.env.BASE_URL;
 export const repositoryUrl =
   import.meta.env.PUBLIC_REPOSITORY_URL ?? "https://github.com/vp-tw/dirwell";
 
-Open the example closest to your use case. Each item links to the live page
-and the source directory that generates it.
+Compare the three built-in themes first. Then choose a customization or
+deployment example for the behavior you want to change. Each item links to
+its live page and the source directory that generates it. Names such as
+“Sample files” and “Sample downloads” identify the demo content, not a theme.
 
-<ul>
-  {exampleCatalog.map((example) => (
-    <li>
-      <strong>{example.name}</strong>: {example.description}{" "}
-      <a href={`${siteBase}examples/${example.slug}/`}>Live example</a> ·{" "}
-      <a href={`${repositoryUrl}/tree/main/examples/${example.slug}`}>Source and instructions</a>
-    </li>
-  ))}
-</ul>
+{exampleGroups.map((group) => (
+
+  <section aria-labelledby={`examples-${group.id}`}>
+    <h2 id={`examples-${group.id}`}>{group.name}</h2>
+    <p>{group.description}</p>
+    <ul>
+      {group.examples.map((example) => (
+        <li>
+          <strong>{example.name}</strong>: {example.description}{" "}
+          <a href={`${siteBase}examples/${example.slug}/`}>Live example</a> ·{" "}
+          <a href={`${repositoryUrl}/tree/main/examples/${example.slug}`}>Source and instructions</a>
+        </li>
+      ))}
+    </ul>
+  </section>
+))}
 
 The source directories include their own `dirwell.config.ts` and input
 `files/` trees. The documentation build reads those configs and passes them
@@ -30,13 +39,13 @@ HTML and assets as the live example.
 
 ## Run one example
 
-After [setting up a checkout](https://github.com/vp-tw/dirwell/blob/main/CONTRIBUTING.md#set-up-a-checkout), run this from the repository root. Replace `basic` with an example’s source directory name:
+After [setting up a checkout](https://github.com/vp-tw/dirwell/blob/main/CONTRIBUTING.md#set-up-a-checkout), run this from the repository root. Replace `file-icons` with an example’s source directory name:
 
 ```bash
-pnpm dirwell build files --cwd examples/basic -o dist
+pnpm dirwell build files --cwd examples/file-icons -o dist
 ```
 
-This writes `examples/basic/dist/`. Portable examples can be opened through their `index.html`. The `base` example needs its configured HTTP mount; use the docs server below or run `pnpm dirwell serve files --cwd examples/base -o dist`. Keep CLI output separate from `docs/public/examples/`, which the Vite adapter owns.
+This writes `examples/file-icons/dist/`. Portable examples can be opened through their `index.html`. The `base` example needs its configured HTTP mount; use the docs server below or run `pnpm dirwell serve files --cwd examples/base -o dist`. Keep CLI output separate from `docs/public/examples/`, which the Vite adapter owns.
 
 ## Build and inspect the site locally
 

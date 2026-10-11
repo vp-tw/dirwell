@@ -2,19 +2,27 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
-import { exampleCatalog } from "../examples/catalog.ts";
+import { exampleCatalog, exampleGroups, publishedExampleSlugs } from "../examples/catalog.ts";
 
 const root = path.resolve(import.meta.dirname, "..");
 
 test("landing page exposes every live example and source directory", async () => {
   const source = await readFile(path.join(root, "docs/src/pages/index.astro"), "utf8");
-  assert.match(source, /const examples = exampleCatalog/);
+  assert.match(source, /exampleGroups\.map/);
   assert.match(source, /examplePath\(example\.slug\)/);
   assert.equal(new Set(exampleCatalog.map(({ slug }) => slug)).size, exampleCatalog.length);
-  assert.equal(exampleCatalog[0].slug, "basic");
+  assert.deepEqual(
+    exampleGroups[0].examples.map(({ name }) => name),
+    ["Ledger (default)", "Plain", "Crosswave"],
+  );
+  assert.equal(
+    exampleCatalog.some(({ slug }) => String(slug) === "basic"),
+    false,
+  );
+  assert.equal(publishedExampleSlugs.filter((slug) => slug === "basic").length, 1);
   assert.equal(exampleCatalog.at(-1)?.slug, "dynamic-og");
   const examplesDoc = await readFile(path.join(root, "docs/src/content/docs/examples.mdx"), "utf8");
-  assert.match(examplesDoc, /exampleCatalog\.map/);
+  assert.match(examplesDoc, /exampleGroups\.map/);
   for (const { slug } of exampleCatalog) {
     await readFile(path.join(root, `examples/${slug}/README.md`), "utf8");
   }
@@ -31,7 +39,7 @@ test("site build combines docs and examples in one publish directory", async () 
   assert.equal(packageJson.scripts["docs:dev"], "node scripts/dev-docs.ts");
 
   const buildScript = await readFile(path.join(root, "scripts/build-examples.ts"), "utf8");
-  assert.match(buildScript, /exampleCatalog\.map/);
+  assert.match(buildScript, /const examples = publishedExampleSlugs/);
   assert.match(buildScript, /plugins: dirwellVite\(options\)/);
   assert.match(buildScript, /loadDirwellConfig\(exampleRoot, "build"\)/);
   for (const { slug } of exampleCatalog) {
