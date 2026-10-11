@@ -5,7 +5,7 @@ description: Resolve common installation, generated-output, and deployment probl
 
 ## The command does not start
 
-Run `node --version`; Dirwell requires Node.js 26 or later. Use the scoped package
+Run `node --version`; Dirwell requires Node.js 22.12 or later. Use the scoped package
 name:
 
 ```bash

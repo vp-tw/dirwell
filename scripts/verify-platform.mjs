@@ -42,7 +42,15 @@ try {
   );
   execFileSync(
     process.execPath,
-    [npmCli, "install", "--ignore-scripts", "--no-audit", "--no-fund", packageSource],
+    [
+      npmCli,
+      "install",
+      "--engine-strict",
+      "--ignore-scripts",
+      "--no-audit",
+      "--no-fund",
+      packageSource,
+    ],
     {
       cwd: temporary,
       stdio: "inherit",

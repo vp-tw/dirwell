@@ -126,3 +126,27 @@ System Events also could not resolve the utility's window while it was
 unresponsive. No spoken-output result was obtained, so actual VoiceOver output
 remains unverified. A manual screen-reader test is still needed; physical iOS
 VoiceOver is a separate unverified environment.
+
+## Older Node runtime verification (2026-10-11)
+
+Installed consumers of the same 0.2.0 tarball passed on Node 22.12.0 and Node 26
+on six GitHub-hosted OS/architecture runners: Windows, Linux, and macOS, each in
+ARM64 and x64. Coverage includes three-theme SSG/MPA generation, minimal Plain
+output, native PNG images, async JavaScript/TypeScript config loading, all
+adapter entry-point imports, encoded filenames, symlinks, CLI build/serve, and
+live creation/modification/deletion. This is installed-package runtime coverage;
+full source, docs, and browser regression still run with Node 26.
+
+Node 20.19.0 passed on Linux/macOS but failed on both Windows architectures:
+the expected mirrored file was absent after generation. The underlying cause
+has not been isolated, and Node 20 is outside the supported range. See the
+[initial compatibility run](https://github.com/vp-tw/dirwell/actions/runs/38137043403).
+Node 18.20.8 on Linux also failed when loading unplugin, whose loader uses
+`import.meta.dirname`.
+
+The supported consumer minimum is Node 22.12.0. The package build explicitly
+targets Node 22.12, and consumer installs use `--engine-strict` so incompatible
+package or dependency engine declarations fail CI. The ongoing matrix includes
+Node 22.12.0, 24.1.0, and 26 across all six native runners. Adapter imports do not
+establish every host build/watch mode on every OS. Dependency packaging remains
+unchanged.
