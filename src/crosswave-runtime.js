@@ -163,7 +163,7 @@
             const base = new URL(payload.baseHref ?? ".", url);
             absoluteLinks(doc, base);
             for (const node of doc.head.querySelectorAll(
-              '[data-dirwell-metadata][property="og:image"], link[data-dirwell-metadata]',
+              '[data-dirwell-metadata][property="og:image"], [data-dirwell-metadata][name="twitter:image"], link[data-dirwell-metadata]',
             )) {
               const attribute = node.tagName === "LINK" ? "href" : "content";
               const value = node.getAttribute(attribute);

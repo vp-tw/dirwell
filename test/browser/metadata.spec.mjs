@@ -98,7 +98,7 @@ for (const [name, factory, family] of [
       await page.evaluate(() => document.fonts.ready);
       expect(await page.title()).toBe("Design kit");
       expect(await page.locator('meta[name="description"]').getAttribute("content")).toBe(
-        "2 folders · 2 files",
+        "Browse files in Design kit. Archive totals: 2 folders · 2 files.",
       );
       expect(
         await page.evaluate(
@@ -135,6 +135,14 @@ for (const [name, factory, family] of [
       }
       await page.goto(site.url + "docs/");
       expect(await page.title()).toBe("docs · Design kit");
+      await expect(page.locator('meta[name="description"]')).toHaveAttribute(
+        "content",
+        "Browse docs in Design kit. This folder: 1 folder · 1 file.",
+      );
+      await expect(page.locator('meta[name="twitter:card"]')).toHaveAttribute(
+        "content",
+        "summary_large_image",
+      );
       const nested = await page.locator('meta[property="og:image"]').getAttribute("content");
       expect(new URL(nested, page.url()).href).toBe(new URL(image, site.url).href);
     } finally {
@@ -162,6 +170,14 @@ for (const mode of ["ssg", "mpa"])
           "content",
           site.url + "og/docs.png",
         );
+        await expect(page.locator('meta[name="twitter:title"]')).toHaveAttribute(
+          "content",
+          "docs · Design kit",
+        );
+        await expect(page.locator('meta[name="twitter:image"]')).toHaveAttribute(
+          "content",
+          site.url + "og/docs.png",
+        );
         expect(
           await page.evaluate(() => window.__canvas === document.querySelector("canvas")),
         ).toBe(true);
@@ -171,9 +187,18 @@ for (const mode of ["ssg", "mpa"])
           "content",
           "1 folder · 1 file",
         );
+        await expect(page.locator('meta[name="twitter:title"]')).toHaveAttribute(
+          "content",
+          "Design kit",
+        );
+        await expect(page.locator('meta[name="twitter:image"]')).toHaveAttribute(
+          "content",
+          site.url + "og/root.png",
+        );
         await page.goForward();
         await expect(page).toHaveTitle("docs · Design kit");
         expect(await page.locator('meta[property="og:image"]').count()).toBe(1);
+        expect(await page.locator('meta[name="twitter:image"]').count()).toBe(1);
       } finally {
         await site.close();
       }

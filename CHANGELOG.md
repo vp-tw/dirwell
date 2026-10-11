@@ -1,5 +1,11 @@
 # @vp-tw/dirwell
 
+## 0.1.4
+
+### Patch Changes
+
+- Clarify link previews with archive totals on root pages and direct folder counts on child pages. Label the static cover's archive-wide counts, describe its text in image alternative text, and emit explicit Twitter large-image card metadata when an image is enabled.
+
 ## 0.1.3
 
 ### Patch Changes

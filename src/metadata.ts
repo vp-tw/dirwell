@@ -43,7 +43,7 @@ export interface MetadataOptions {
   readonly siteUrl?: string;
   /** Page title; defaults to site name at root and path · site name in child folders. */
   readonly title?: MetadataValue<string>;
-  /** Whole-site counts by default; use directory counts for per-folder descriptions. */
+  /** Root descriptions use archive totals; child descriptions use direct folder counts. */
   readonly description?: MetadataValue<string>;
   readonly image?: MetadataImageValue;
 }
@@ -142,6 +142,11 @@ export function createMetadataResolver(
     ),
   });
   const siteUrl = deployedRoot(options.siteUrl);
+  const presetTitle = typeof options.title === "string" ? options.title : site.name;
+  const presetDescription =
+    typeof options.description === "string"
+      ? options.description
+      : `Archive totals: ${describeContent(site)}`;
   const assets = new Map<string, Uint8Array>();
   let defaultImage: Promise<File> | undefined;
   // One source snapshot per build: fixed images should not reread or rehash per page.
@@ -196,9 +201,8 @@ export function createMetadataResolver(
         createShareImage({
           theme: preset,
           repositoryName: site.repositoryName,
-          title: typeof options.title === "string" ? options.title : site.name,
-          description:
-            typeof options.description === "string" ? options.description : describeContent(site),
+          title: presetTitle,
+          description: presetDescription,
         }),
       );
       image = await defaultImage;
@@ -224,12 +228,7 @@ export function createMetadataResolver(
     return {
       outputPath,
       alt: stringValue(
-        config.alt ??
-          (isPreset
-            ? typeof options.title === "string"
-              ? options.title
-              : site.name
-            : context.title),
+        config.alt ?? (isPreset ? `${presetTitle}. ${presetDescription}` : context.title),
         "metadata.image.alt",
       ),
     };
@@ -259,7 +258,10 @@ export function createMetadataResolver(
       const description = stringValue(
         typeof options.description === "function"
           ? await options.description(context)
-          : (options.description ?? describeContent(site)),
+          : (options.description ??
+              (relativePath
+                ? `Browse ${relativePath} in ${site.name}. This folder: ${describeContent(context.directory)}.`
+                : `Browse files in ${site.name}. Archive totals: ${describeContent(site)}.`)),
         "metadata.description",
       );
       const image = await imageFor(Object.freeze({ ...context, title, description }));
@@ -275,7 +277,14 @@ export function createMetadataResolver(
         const href = siteUrl
           ? new URL(image.outputPath.split("/").map(encodeURIComponent).join("/"), siteUrl).href
           : hrefForOutput(image.outputPath);
-        head += meta("og:image", href, true) + meta("og:image:alt", image.alt, true);
+        head +=
+          meta("og:image", href, true) +
+          meta("og:image:alt", image.alt, true) +
+          meta("twitter:card", "summary_large_image") +
+          meta("twitter:title", title) +
+          meta("twitter:description", description) +
+          meta("twitter:image", href) +
+          meta("twitter:image:alt", image.alt);
       }
       return { title, description, head };
     },

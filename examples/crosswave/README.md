@@ -8,7 +8,7 @@ ribbon lighting. No console firmware assets or external runtime dependencies.
 import { createCrosswaveTheme, defineConfig } from "@vp-tw/dirwell";
 
 export default defineConfig({
-  theme: createCrosswaveTheme({ color: "azure", project: { name: "Sample files" } }),
+  theme: createCrosswaveTheme({ color: "azure", project: { name: "Sample media files" } }),
 });
 ```
 

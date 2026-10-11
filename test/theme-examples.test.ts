@@ -62,3 +62,41 @@ test("Catppuccin override emits paired icons and palettes in SSG and MPA", async
     );
   }
 });
+
+for (const [slug, name, child, childCounts] of [
+  ["basic", "Sample downloads", "releases", "1 folder"],
+  ["plain", "Sample downloads", "releases", "1 folder"],
+  ["crosswave", "Sample media files", "Photos", "1 file"],
+] as const) {
+  test(`${slug}: previews identify content and distinguish folder counts from archive totals`, async (context) => {
+    const { loadDirwellConfig, resolveGenerateOptions } = await import("../src/config.ts");
+    const exampleRoot = path.join(examples, slug);
+    const { config } = await loadDirwellConfig(exampleRoot, "build");
+    const outputDir = await mkdtemp(path.join(tmpdir(), "dirwell-example-preview-"));
+    context.after(() => rm(outputDir, { recursive: true, force: true }));
+    for (const mode of ["ssg", "mpa"] as const) {
+      await generateExplorer(
+        resolveGenerateOptions(exampleRoot, {
+          ...config,
+          mode,
+          outDir: outputDir,
+          metadata: { ...config.metadata, siteUrl: `https://example.com/${slug}/` },
+        }),
+      );
+      const root = await readFile(path.join(outputDir, "index.html"), "utf8");
+      const nested = await readFile(path.join(outputDir, child, "index.html"), "utf8");
+      assert.ok(root.includes(`<title>${name} · `));
+      assert.ok(root.includes("Archive totals:"));
+      assert.ok(nested.includes(`<title>${child} · ${name}</title>`));
+      assert.ok(nested.includes(`This folder: ${childCounts}.`));
+      const image = (html: string) => html.match(/property="og:image" content="([^"]+)"/)?.[1];
+      assert.ok(image(root)?.startsWith(`https://example.com/${slug}/`));
+      assert.equal(image(root), image(nested));
+      assert.equal(
+        root.match(/property="og:image:alt" content="([^"]+)"/)?.[1],
+        nested.match(/property="og:image:alt" content="([^"]+)"/)?.[1],
+      );
+      assert.equal((await readdir(path.join(outputDir, "__dirwell/metadata"))).length, 1);
+    }
+  });
+}
