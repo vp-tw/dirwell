@@ -6,6 +6,7 @@ on:
       - .github/workflows/platforms.yml
       - scripts/verify-platform.mjs
       - scripts/platform-consumer.mjs
+      - scripts/workspace-packages.mjs
       - scripts/pack-workspace.mjs
       - scripts/verify-workspace-consumer.mjs
       - scripts/workspace-consumer.mjs

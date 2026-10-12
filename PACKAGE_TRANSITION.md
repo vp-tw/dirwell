@@ -1,6 +1,6 @@
 # Dirwell package transition
 
-This branch introduces an **unreleased** `@dirwell/*` alpha line, starting at exactly `0.0.1-alpha`. The published `@vp-tw/dirwell` compatibility line remains separate. The six new packages are currently private while their runtime/platform qualification and publication setup are completed.
+The repository contains an **unreleased** `@dirwell/*` alpha line, starting at exactly `0.0.1-alpha`. The published `@vp-tw/dirwell` compatibility line remains separate. The eight new packages are currently private while their runtime/platform qualification and publication setup are completed.
 
 | Package                    | Responsibility                                                                         | Runtime dependencies              |
 | -------------------------- | -------------------------------------------------------------------------------------- | --------------------------------- |
@@ -9,6 +9,8 @@ This branch introduces an **unreleased** `@dirwell/*` alpha line, starting at ex
 | `@dirwell/theme-ledger`    | Svelte server/client explorer                                                          | Core, Svelte                      |
 | `@dirwell/theme-crosswave` | Vue explorer, Node MIME categories and VueUse gamepad                                  | Core, Vue, VueUse, MIME           |
 | `@dirwell/server`          | Live HTML/JSON/files, authorization, HTTP caching, shared SSE and host adapters        | Core                              |
+| `@dirwell/share-image`     | Optional build metadata, PNG renderer and bundled fonts                                | Core, resvg-js, fontkit           |
+| `@dirwell/integrations`    | Explicit-theme build adapters with existing host lifecycles                            | Core, unplugin, Chokidar          |
 | `@dirwell/cli`             | Explicit-theme build/server commands and executable project config                     | Core, server, import-meta-resolve |
 
 Core and CLI never select a default theme. Plain has no JavaScript, image, font, icon, social metadata or archive-search asset by default. Frontend frameworks, image rendering, config loading and watchers are absent from core's dependency graph.
@@ -42,10 +44,10 @@ Server responses default to no-store and ETags. Custom header and authorization 
 
 The framework themes use native Svelte/Vue templates, state and lifecycle, not serialized UI trees or the legacy DOM controllers. Their alpha option surfaces intentionally differ from the old component/project overrides; no compatibility migration for those overrides is claimed. Third-party themes can implement `ExplorerTheme.render` and own their server/client build, using the framework-neutral public facts and core browser loader.
 
-Metadata remains an injected core provider. No image renderer is bundled in the new themes. The existing compatibility line retains its metadata/image implementation; extracting a dedicated image provider, separate build integrations, source-component customization and theme HMR remain subsequent work.
+Metadata remains an injected core provider. No image renderer is bundled in the new themes. The existing compatibility line retains its metadata/image implementation; the optional `@dirwell/share-image` provider and `@dirwell/integrations` adapters now isolate those dependencies. Source-component customization and theme HMR remain subsequent work. See [workspace releases](WORKSPACE_RELEASING.md) for offline preparation and the separate first-publication gate.
 
 ## Qualification boundary
 
 Local installed-tarball checks exercised all three themes in both static modes, CLI build, live HTML/listing, file transfer and Node 22.19/26. Native browser tests cover 1,200 files, complete search, sorting-related keyboard selection, dialogs, archive fuzzy search, History, no-script pagination, simulated gamepad behavior and live updates with a browser cache policy.
 
-The platform workflow additionally installs these six tarballs on the repository's Linux/Windows/macOS × ARM64/x64 × Node 22.12/24.1/26 matrix. Its current-head result must be read before claiming those new-package environments as verified. Physical gamepads, hostile filesystem mutation, distributed caching, retained historical snapshots and production-scale performance are unverified. Earlier seven-framework UI-tree measurements remain study evidence and are not an optimized native-framework ranking.
+The platform workflow additionally installs these eight tarballs on the repository's Linux/Windows/macOS × ARM64/x64 × Node 22.12/24.1/26 matrix. Its current-head result must be read before claiming those new-package environments as verified. Physical gamepads, hostile filesystem mutation, distributed caching, retained historical snapshots and production-scale performance are unverified. Earlier seven-framework UI-tree measurements remain study evidence and are not an optimized native-framework ranking.

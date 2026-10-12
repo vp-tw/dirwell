@@ -1,5 +1,6 @@
+import { workspacePackages } from "./workspace-packages.mjs";
 import assert from "node:assert/strict";
-import { mkdtemp, readFile, writeFile } from "node:fs/promises";
+import { mkdtemp, mkdir, readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -17,7 +18,7 @@ function run(command, args, cwd) {
     throw new Error(`${command} failed:\n${result.stdout}\n${result.stderr}`);
   return result.stdout;
 }
-const names = ["core", "theme-plain", "server", "theme-ledger", "theme-crosswave", "cli"];
+const names = workspacePackages;
 const tarballs = [];
 for (const name of names) {
   const folder = path.join(repo, "packages", name);
@@ -28,6 +29,29 @@ for (const name of names) {
   run(process.platform === "win32" ? "pnpm.cmd" : "pnpm", ["pack", "--out", tarball], folder);
   tarballs.push(tarball);
 }
+const lightweight = path.join(trial, "lightweight");
+await mkdir(lightweight);
+await writeFile(
+  path.join(lightweight, "package.json"),
+  JSON.stringify({ private: true, type: "module" }),
+);
+run(
+  process.platform === "win32" ? "npm.cmd" : "npm",
+  ["install", "--ignore-scripts", "--no-audit", "--no-fund", ...tarballs.slice(0, 2)],
+  lightweight,
+);
+const lightLock = JSON.parse(await readFile(path.join(lightweight, "package-lock.json"), "utf8"));
+assert.deepEqual(
+  Object.keys(lightLock.packages)
+    .filter((name) => name)
+    .sort(),
+  ["node_modules/@dirwell/core", "node_modules/@dirwell/theme-plain", "node_modules/picomatch"],
+);
+await writeFile(
+  path.join(lightweight, "consumer.mjs"),
+  `import {generateExplorer} from '@dirwell/core';import {createPlainTheme} from '@dirwell/theme-plain';import {mkdir,writeFile,readFile} from 'node:fs/promises';import assert from 'node:assert/strict';await mkdir('files');await writeFile('files/note.txt','file');await generateExplorer({sourceDir:'files',outputDir:'out',theme:createPlainTheme()});assert.doesNotMatch(await readFile('out/index.html','utf8'),/<script|og:image/);`,
+);
+run(process.execPath, ["consumer.mjs"], lightweight);
 await writeFile(
   path.join(trial, "package.json"),
   JSON.stringify({ private: true, type: "module" }),
@@ -52,6 +76,7 @@ const report = {
   checkedAt: new Date().toISOString(),
   trial,
   tarballs,
+  lightweightDependencies: ["@dirwell/core", "@dirwell/theme-plain", "picomatch"],
   reports,
   limits: [
     "Local private tarballs; no registry publication.",

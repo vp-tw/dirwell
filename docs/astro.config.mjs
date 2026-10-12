@@ -42,6 +42,7 @@ export default defineConfig({
             { label: "Getting started", slug: "getting-started" },
             { label: "Deployment", slug: "deployment" },
             { label: "Examples", slug: "examples" },
+            { label: "SDK alpha migration", slug: "sdk-alpha" },
           ],
         },
         {

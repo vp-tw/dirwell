@@ -1,0 +1,144 @@
+name: Prepare and publish verified workspace alpha
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/publish-workspace.yml
+      - scripts/workspace-release.mjs
+      - scripts/workspace-packages.mjs
+      - test/workspace-release.test.mjs
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Exact synchronized alpha version already merged into main
+        required: true
+        type: string
+      publish:
+        description: Publish using configured npm trusted publishers (false only prepares artifacts)
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: workspace-release-${{ github.event_name == 'workflow_dispatch' && 'release' || github.ref }}
+  cancel-in-progress: false
+
+env:
+  RELEASE_VERSION: ${{ inputs.version }}
+
+jobs:
+  validate:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 26
+          package-manager-cache: false
+      - run: node --test test/workspace-release.test.mjs
+
+  prepare:
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && github.repository == 'vp-tw/dirwell'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.sha }}
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 26
+          package-manager-cache: false
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm audit:dependencies
+      - run: pnpm check
+      - run: pnpm test
+      - run: pnpm exec playwright install --with-deps chromium firefox webkit
+      - run: pnpm test:browser
+      - run: pnpm test:compat
+      - run: pnpm build
+      - run: pnpm site:build
+      - run: pnpm verify:package
+      - run: node scripts/workspace-release.mjs prepare
+      - run: node scripts/verify-workspace-consumer.mjs .workspace-release
+      - run: node scripts/workspace-release.mjs verify
+      - uses: actions/upload-artifact@v4
+        with:
+          name: verified-workspace
+          path: .workspace-release/
+          include-hidden-files: true
+          if-no-files-found: error
+
+  publish:
+    if: inputs.publish
+    needs: prepare
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 26
+          package-manager-cache: false
+      - uses: actions/download-artifact@v4
+        with:
+          name: verified-workspace
+          path: .workspace-release/
+      - run: node scripts/workspace-release.mjs publish
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: workspace-registry-proof
+          path: .workspace-release/registry-proof.json
+          include-hidden-files: true
+          if-no-files-found: warn
+
+  verify-published:
+    needs: publish
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 26
+          package-manager-cache: false
+      - uses: actions/download-artifact@v4
+        with:
+          name: verified-workspace
+          path: .workspace-release/
+      - run: node scripts/workspace-release.mjs readback
+      - run: node scripts/verify-workspace-registry.mjs
+
+  release:
+    needs: verify-published
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.sha }}
+      - name: Bind the family prerelease to the verified source
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag="@dirwell/workspace@$RELEASE_VERSION"
+          if ! gh release view "$tag"; then
+            gh release create "$tag" --target "$GITHUB_SHA" --title "Dirwell SDK $RELEASE_VERSION" --prerelease --notes-file WORKSPACE_RELEASING.md
+          fi
+          test "$(gh release view "$tag" --json isPrerelease --jq .isPrerelease)" = true
+          git fetch origin "refs/tags/$tag:refs/tags/$tag"
+          test "$(git rev-parse "$tag^{commit}")" = "$GITHUB_SHA"

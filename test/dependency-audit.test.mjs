@@ -13,6 +13,7 @@ const advisory = {
       paths: [
         ".>@farmfe/core>chokidar>braces",
         ".>unplugin>@farmfe/core>fast-glob>micromatch>braces",
+        "packages__integrations>unplugin>@farmfe/core>chokidar>braces",
       ],
     },
   ],
@@ -29,6 +30,10 @@ test("audit retains only exact reviewed Farm findings and fails on changed expos
     { ...advisory, patched_versions: ">=3.0.4" },
     { ...advisory, findings: [{ version: "3.0.4", paths: advisory.findings[0].paths }] },
     { ...advisory, findings: [{ version: "3.0.3", paths: [".>c12>braces"] }] },
+    {
+      ...advisory,
+      findings: [{ version: "3.0.3", paths: ["packages__integrations>other>braces"] }],
+    },
     { ...advisory, findings: [] },
   ])
     assert.equal(evaluateAudit(report(changed)).rejected.length, 1);

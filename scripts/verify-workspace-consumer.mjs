@@ -1,3 +1,4 @@
+import { workspacePackages } from "./workspace-packages.mjs";
 import { mkdtemp, readdir, readFile, writeFile, access, mkdir } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -6,7 +7,8 @@ const directory = path.resolve(process.argv[2]);
 const tarballs = (await readdir(directory))
   .filter((name) => name.endsWith(".tgz"))
   .map((name) => path.join(directory, name));
-if (tarballs.length !== 6) throw new Error("Expected all six workspace tarballs");
+if (tarballs.length !== workspacePackages.length)
+  throw new Error("Expected all official workspace tarballs");
 const trial = await mkdtemp(path.join(tmpdir(), "dirwell-platform-workspace-"));
 await writeFile(
   path.join(trial, "package.json"),
