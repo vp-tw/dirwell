@@ -11,10 +11,10 @@ const artifactDirectory = ".release-artifact";
 export function releaseTag(version) {
   assert.match(
     version,
-    /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(-alpha\.(0|[1-9]\d*))?$/,
+    /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(-alpha(?:\.(0|[1-9]\d*))?)?$/,
     "Stable or alpha versions only",
   );
-  return version.includes("-alpha.") ? "alpha" : "latest";
+  return version.includes("-alpha") ? "alpha" : "latest";
 }
 
 export function releaseNotes(changelog, version) {

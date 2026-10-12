@@ -75,3 +75,15 @@ export type {
   PageMetadata,
   ThemeMetadataDefaults,
 } from "./metadata.ts";
+
+export { projectListingEntry, validateListingPlan } from "./listing.ts";
+export type {
+  ListingEntry,
+  ListingPlan,
+  ListingPolicy,
+  ListingPolicyContext,
+  ListingContext,
+  ListingPage,
+  ListingBlock,
+  ListingManifest,
+} from "./listing.ts";

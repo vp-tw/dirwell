@@ -1,0 +1,43 @@
+{
+  "name": "@dirwell/cli",
+  "version": "0.0.1-alpha",
+  "private": true,
+  "description": "Explicit-theme build and live-server commands for Dirwell.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vp-tw/dirwell.git",
+    "directory": "packages/cli"
+  },
+  "bin": {
+    "dirwell": "./dist/bin.mjs"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs"
+    }
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true,
+    "tag": "alpha"
+  },
+  "scripts": {
+    "build": "vp pack"
+  },
+  "dependencies": {
+    "@dirwell/core": "workspace:*",
+    "@dirwell/server": "workspace:*",
+    "import-meta-resolve": "4.2.0"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  }
+}

@@ -18,7 +18,17 @@
     "strict": true,
     "target": "ES2024",
     "types": ["node"],
-    "verbatimModuleSyntax": true
+    "verbatimModuleSyntax": true,
+    "paths": {
+      "@dirwell/core": ["./packages/core/src/index.ts"],
+      "@dirwell/core/client": ["./packages/core/src/client.ts"]
+    }
   },
-  "include": ["examples/**/*.ts", "scripts/**/*.ts", "src/**/*.ts", "test/**/*.ts"]
+  "include": [
+    "examples/**/*.ts",
+    "scripts/**/*.ts",
+    "src/**/*.ts",
+    "test/**/*.ts",
+    "packages/**/*.ts"
+  ]
 }

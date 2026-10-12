@@ -1,5 +1,5 @@
 import { contentTypes } from "./content-types.ts";
-import { watch } from "node:fs";
+import { watch } from "chokidar";
 import { open, stat, type FileHandle } from "node:fs/promises";
 import { createServer, type ServerResponse } from "node:http";
 import path from "node:path";
@@ -61,7 +61,12 @@ export async function createExplorerDevServer(
 
   await rebuild();
 
-  const fileWatcher = watch(options.sourceDir, { recursive: true }, () => {
+  const fileWatcher = watch(options.sourceDir, {
+    ignoreInitial: true,
+    followSymlinks: false,
+    ignored: (name) => name === outputDir || name.startsWith(outputDir + path.sep),
+  });
+  fileWatcher.on("all", () => {
     clearTimeout(timer);
     timer = setTimeout(() => {
       void rebuild().catch((error: unknown) => {
@@ -69,6 +74,25 @@ export async function createExplorerDevServer(
       });
     }, 60);
   });
+  // Do not return a usable server before the initial watcher scan is complete.
+  try {
+    await new Promise<void>((resolve, reject) => {
+      const ready = () => {
+        fileWatcher.off("error", failed);
+        resolve();
+      };
+      const failed = (error: unknown) => {
+        fileWatcher.off("ready", ready);
+        reject(error);
+      };
+      fileWatcher.once("ready", ready);
+      fileWatcher.once("error", failed);
+    });
+  } catch (error) {
+    clearTimeout(timer);
+    await fileWatcher.close();
+    throw error;
+  }
 
   const server = createServer(async (request, response) => {
     const requestUrl = new URL(request.url ?? "/", "http://localhost");
@@ -164,7 +188,7 @@ export async function createExplorerDevServer(
     url: `http://${options.host ?? "127.0.0.1"}:${port ?? 4173}${mountPath}`,
     async close(): Promise<void> {
       clearTimeout(timer);
-      fileWatcher.close();
+      await fileWatcher.close();
       for (const client of clients) client.end();
       await new Promise<void>((resolve, reject) =>
         server.close((error) => (error ? reject(error) : resolve())),

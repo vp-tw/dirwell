@@ -1,0 +1,45 @@
+{
+  "name": "@dirwell/theme-crosswave",
+  "version": "0.0.1-alpha",
+  "private": true,
+  "description": "Vue-owned media navigation with VueUse gamepad support.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vp-tw/dirwell.git",
+    "directory": "packages/theme-crosswave"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs"
+    }
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true,
+    "tag": "alpha"
+  },
+  "scripts": {
+    "build": "node ../../scripts/build-framework-theme.mjs theme-crosswave"
+  },
+  "dependencies": {
+    "@dirwell/core": "workspace:*",
+    "@vue/server-renderer": "3.5.43",
+    "@vueuse/core": "15.0.0",
+    "mime": "4.1.0",
+    "vue": "3.5.43"
+  },
+  "devDependencies": {
+    "@vue/compiler-sfc": "3.5.43"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  }
+}

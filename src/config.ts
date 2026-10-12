@@ -1,9 +1,11 @@
+import { validateListingPlan } from "./listing.ts";
 import { loadConfig } from "c12";
 import path from "node:path";
 import type { ExplorerTheme, GenerateOptions, SortOptions } from "./model.ts";
 import { normalizePathPatterns } from "./filters.ts";
 
 export interface DirwellConfig {
+  readonly listing?: GenerateOptions["listing"];
   readonly metadata?: GenerateOptions["metadata"];
   readonly base?: string;
   readonly include?: GenerateOptions["include"];
@@ -53,6 +55,8 @@ export function validateConfig(value: unknown): asserts value is DirwellConfig {
     throw new TypeError("Dirwell config must resolve to an object");
   }
   const config = value as Record<string, unknown>;
+  if (config.listing !== undefined && typeof config.listing !== "function")
+    validateListingPlan(config.listing);
   if (config.metadata !== undefined) {
     if (
       typeof config.metadata !== "object" ||
@@ -177,6 +181,7 @@ export function resolveGenerateOptions(
     sourceDir,
     outputDir,
     metadataBaseDirectory: cwd,
+    ...(config.listing === undefined ? {} : { listing: config.listing }),
     ...(config.metadata === undefined ? {} : { metadata: config.metadata }),
     ...(overrides.base === undefined && config.base === undefined
       ? {}
