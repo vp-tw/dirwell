@@ -127,3 +127,10 @@ test("release notes select the exact version without earlier alpha history", () 
   assert.equal(releaseNotes(changelog, "0.1.0-alpha.14"), "## 0.1.0-alpha.14\nAlpha notes");
   assert.throws(() => releaseNotes(changelog, "0.2.0"), /Missing release/);
 });
+
+test("the new package line starts at the exact unnumbered alpha label", () => {
+  assert.equal(releaseTag("0.0.1-alpha"), "alpha");
+  assert.equal(releaseTag("0.0.1-alpha.1"), "alpha");
+  for (const value of ["0.0.1-alpha.", "0.0.1-alphabet", "0.0.1-alpha.01"])
+    assert.throws(() => releaseTag(value));
+});

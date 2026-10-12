@@ -13,3 +13,9 @@ docs/public/examples/
 generated/
 site/
 node_modules/
+
+packages/*/.generated/
+packages/*/render-generated.mjs
+packages/*/render-generated.d.mts
+workspace-artifact/
+.workspace-platform-proof/

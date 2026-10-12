@@ -1,0 +1,50 @@
+{
+  "name": "@dirwell/server",
+  "version": "0.0.1-alpha",
+  "private": true,
+  "description": "Host-neutral directory listing Request/Response handler.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vp-tw/dirwell.git",
+    "directory": "packages/server"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs"
+    },
+    "./node": {
+      "types": "./dist/node.d.mts",
+      "import": "./dist/node.mjs"
+    },
+    "./express": {
+      "types": "./dist/express.d.mts",
+      "import": "./dist/express.mjs"
+    },
+    "./fastify": {
+      "types": "./dist/fastify.d.mts",
+      "import": "./dist/fastify.mjs"
+    }
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true,
+    "tag": "alpha"
+  },
+  "scripts": {
+    "build": "vp pack"
+  },
+  "dependencies": {
+    "@dirwell/core": "workspace:*"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  }
+}

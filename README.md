@@ -10,6 +10,8 @@ files. Publish the output on a static host; visitors do not need a Dirwell serve
 [Get started](https://vp-tw.github.io/dirwell/getting-started/) ·
 [Documentation](https://vp-tw.github.io/dirwell/overview/)
 
+> Unreleased package separation work is documented in [Package transition](PACKAGE_TRANSITION.md). The current published package and its API remain the compatibility line.
+
 ## Browse your first folder
 
 You need **Node.js 22.12 or later**, which includes npm. From a terminal, replace

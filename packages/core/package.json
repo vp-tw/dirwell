@@ -1,0 +1,42 @@
+{
+  "name": "@dirwell/core",
+  "version": "0.0.1-alpha",
+  "private": true,
+  "description": "Framework-neutral directory listing and static publication kernel.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vp-tw/dirwell.git",
+    "directory": "packages/core"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs"
+    },
+    "./client": {
+      "types": "./dist/client.d.mts",
+      "import": "./dist/client.mjs"
+    }
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true,
+    "tag": "alpha"
+  },
+  "scripts": {
+    "build": "vp pack"
+  },
+  "dependencies": {
+    "picomatch": "4.0.7"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  }
+}

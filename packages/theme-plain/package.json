@@ -1,0 +1,35 @@
+{
+  "name": "@dirwell/theme-plain",
+  "version": "0.0.1-alpha",
+  "private": true,
+  "description": "A minimal native HTML theme with no browser JavaScript.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vp-tw/dirwell.git",
+    "directory": "packages/theme-plain"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs"
+    }
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true,
+    "tag": "alpha"
+  },
+  "scripts": {
+    "build": "vp pack"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  }
+}

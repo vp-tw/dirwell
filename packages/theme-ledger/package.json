@@ -1,0 +1,43 @@
+{
+  "name": "@dirwell/theme-ledger",
+  "version": "0.0.1-alpha",
+  "private": true,
+  "description": "Svelte-owned searchable directory explorer.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vp-tw/dirwell.git",
+    "directory": "packages/theme-ledger"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs"
+    }
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true,
+    "tag": "alpha"
+  },
+  "scripts": {
+    "build": "node ../../scripts/build-framework-theme.mjs theme-ledger"
+  },
+  "dependencies": {
+    "@dirwell/core": "workspace:*",
+    "svelte": "5.57.2"
+  },
+  "devDependencies": {
+    "prettier": "3.9.10",
+    "prettier-plugin-svelte": "4.1.1"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  }
+}
