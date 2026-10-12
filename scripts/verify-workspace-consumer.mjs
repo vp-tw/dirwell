@@ -44,6 +44,10 @@ await writeFile(
   path.join(trial, "consumer.mjs"),
   await readFile(new URL("./workspace-consumer.mjs", import.meta.url), "utf8"),
 );
+await writeFile(
+  path.join(trial, "diagnose-file-identity.mjs"),
+  await readFile(new URL("./diagnose-file-identity.mjs", import.meta.url), "utf8"),
+);
 const proof = JSON.parse(run(process.execPath, ["consumer.mjs"]));
 const output = path.resolve(".workspace-platform-proof");
 await mkdir(output, { recursive: true });

@@ -41,6 +41,10 @@ await writeFile(
   path.join(trial, "consumer.mjs"),
   await readFile(new URL("./workspace-consumer.mjs", import.meta.url), "utf8"),
 );
+await writeFile(
+  path.join(trial, "diagnose-file-identity.mjs"),
+  await readFile(new URL("./diagnose-file-identity.mjs", import.meta.url), "utf8"),
+);
 const reports = [process.execPath, ...process.argv.slice(2)].map((executable) =>
   JSON.parse(run(executable, ["consumer.mjs"], trial)),
 );

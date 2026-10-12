@@ -69,6 +69,8 @@ try {
   assert.equal(changed.status, 200);
   assert.notEqual((await changed.json()).revision, data.revision);
   const active = await fetch(server.url + "/files/active.html");
+  if (active.status !== 200) await import("./diagnose-file-identity.mjs");
+  assert.equal(active.status, 200, await active.clone().text());
   assert.match(active.headers.get("content-disposition"), /^attachment/);
   await active.text();
   const picture = await fetch(server.url + "/files/picture.png", {
