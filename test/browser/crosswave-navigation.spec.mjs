@@ -278,7 +278,7 @@ test("cancel, timeout, reduced motion, and interruption do not strand an invisib
     await expect(page).toHaveURL(app.url);
     await page.getByRole("link", { name: /Documents\/ Folder/ }).click();
     await expect(page).toHaveURL(/Documents\/$/);
-    await expect(page.locator(".cw-browser")).toHaveCSS("opacity", "1");
+    await expect(page.locator(".cw-browser:not(.cw-transition-layer)")).toHaveCSS("opacity", "1");
     await expect(page.locator(".cw-transition-layer")).toHaveCount(0);
     await preserved(page);
   } finally {
