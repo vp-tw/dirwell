@@ -1,5 +1,6 @@
 import { readdir, realpath, open, type FileHandle } from "node:fs/promises";
 import { constants } from "node:fs";
+import { fileIdentityMatches } from "./file-identity.ts";
 import path from "node:path";
 import { describeEntry, isInsideRoot } from "./filesystem.ts";
 import { selectSourcePaths } from "./filters.ts";
@@ -121,8 +122,7 @@ export async function createDirectoryService(
         if (
           !stats.isFile() ||
           !isInsideRoot(root, resolved) ||
-          stats.dev !== entry.metadata.device ||
-          stats.ino !== entry.metadata.inode
+          !fileIdentityMatches(entry.metadata, stats)
         )
           throw new DirectoryAccessError("File changed before opening");
         return {
