@@ -12,6 +12,7 @@ export interface ThemePage {
   readonly version: 1;
   readonly theme: string;
   readonly title: string;
+  readonly metadataHead?: string;
   readonly path: string;
   readonly rootHref: string;
   readonly parentHref: string | null;
@@ -116,6 +117,7 @@ export function createThemePage(
   });
   return {
     version: 1,
+    ...(context.metadata === undefined ? {} : { metadataHead: context.metadata.head }),
     theme: theme.name,
     title: context.metadata?.title ?? (directoryPath ? `${directoryPath} · ${title}` : title),
     path: directoryPath,

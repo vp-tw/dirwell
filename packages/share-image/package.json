@@ -1,0 +1,41 @@
+{
+  "name": "@dirwell/share-image",
+  "version": "0.0.1-alpha",
+  "private": true,
+  "description": "Optional build-time metadata and PNG share-image rendering.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vp-tw/dirwell.git",
+    "directory": "packages/share-image"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "THIRD_PARTY_NOTICES.md"
+  ],
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs"
+    }
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true,
+    "tag": "alpha"
+  },
+  "scripts": {
+    "build": "vp pack && node ../../scripts/copy-share-image-assets.mjs"
+  },
+  "dependencies": {
+    "@dirwell/core": "workspace:*",
+    "@resvg/resvg-js": "2.6.2",
+    "fontkit": "2.0.4"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  }
+}

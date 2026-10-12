@@ -1,3 +1,4 @@
+import { workspacePackages } from "./workspace-packages.mjs";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -6,7 +7,7 @@ const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), ".."),
   destination = path.resolve(process.argv[2] ?? "workspace-artifact");
 await mkdir(destination, { recursive: true });
 const packages = [];
-for (const name of ["core", "theme-plain", "server", "theme-ledger", "theme-crosswave", "cli"]) {
+for (const name of workspacePackages) {
   const folder = path.join(repo, "packages", name),
     manifest = JSON.parse(await readFile(path.join(folder, "package.json"), "utf8"));
   const filename = `dirwell-${name}-${manifest.version}.tgz`;

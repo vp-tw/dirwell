@@ -1,5 +1,7 @@
 # Releasing Dirwell
 
+For the unreleased eight-package `@dirwell/*` alpha family, use [workspace release preparation](WORKSPACE_RELEASING.md). The procedure below belongs to the legacy compatibility package.
+
 The package is `@vp-tw/dirwell`; the executable is `dirwell`. Use the configured OIDC workflow. Stable versions publish to `latest` and create a normal GitHub release; `-alpha.N` versions publish to `alpha` and create a prerelease. The workflow filename remains `publish-alpha.yml` because npm's existing trusted publisher is bound to it.
 
 ## Prepare and verify

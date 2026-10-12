@@ -2,7 +2,12 @@ import { defineConfig } from "vite-plus";
 
 export default defineConfig({
   fmt: {
-    ignorePatterns: ["site/**", ".impeccable/**", "src/fonts/*LICENSE.md"],
+    ignorePatterns: [
+      "site/**",
+      ".impeccable/**",
+      "src/fonts/*LICENSE.md",
+      "packages/share-image/src/fonts/*LICENSE.md",
+    ],
   },
   pack: {
     deps: { resolveDepSubpath: true, dts: { neverBundle: ["vite", "unplugin"] } },

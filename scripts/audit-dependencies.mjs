@@ -47,7 +47,8 @@ export function evaluateAudit(report) {
             (dependencyPath) =>
               typeof dependencyPath === "string" &&
               (dependencyPath.startsWith(".>@farmfe/core>") ||
-                dependencyPath.startsWith(".>unplugin>@farmfe/core>")),
+                dependencyPath.startsWith(".>unplugin>@farmfe/core>") ||
+                dependencyPath.startsWith("packages__integrations>unplugin>@farmfe/core>")),
           ),
       );
     (matches ? accepted : rejected).push({

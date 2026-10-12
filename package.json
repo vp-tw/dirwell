@@ -26,7 +26,8 @@
     "THEMING.md",
     "THEME_PACKAGE_CONTRACT.md",
     "THEME_RUNTIME_CONTRACT.md",
-    "PACKAGE_TRANSITION.md"
+    "PACKAGE_TRANSITION.md",
+    "WORKSPACE_RELEASING.md"
   ],
   "type": "module",
   "exports": {

@@ -30,7 +30,7 @@ The actual Astro caller is `dist/assets/build/remote.js`: it creates its own out
 
 The observed paths are Farm's legacy Chokidar/fast-glob/micromatch graph and its proxy dependency. Chokidar 3 calls `braces.expand()` for its watch pattern. Farm builds watcher inputs and ignored patterns from project/configuration paths. The proxy matcher calls `micromatch([requestPath], configuredPattern)`: the HTTP pathname is a candidate, not the brace pattern it parses. Watch/proxy patterns and source project configuration remain operator-controlled trusted inputs.
 
-Dirwell's standalone server uses Node `fs.watch`; its own adapter watcher uses Chokidar 5. Core selection uses picomatch. None of those paths import braces. Generated static pages contain no Node dependency execution. Farm remains experimental; this retained scope does not certify arbitrary third-party Farm configurations or hostile projects.
+The legacy dev server and build adapters use Chokidar 5. The new live server polls directory facts without a filesystem watcher. Core selection uses picomatch. None of those paths import braces. Generated static pages contain no Node dependency execution. Farm remains experimental; this retained scope does not certify arbitrary third-party Farm configurations or hostile projects.
 
 Reopen the disposition if an untrusted input becomes a watch/proxy **pattern**, if the dependency leaves the Farm graph, or when an upstream fix appears. Do not expose a service accepting arbitrary user patterns under this exception.
 
@@ -45,3 +45,7 @@ Dirwell uses citty for its CLI and does not import this formatter. Reopen the di
 ## Recheck and closure
 
 [Dependency audit issue](https://github.com/vp-tw/dirwell/issues/56) is complete only after verified dependency installation, relevant config/docs/host tests, raw and guarded audit readback, and publication/site verification when required. The guarded gate retains the two warnings visibly; zero unreviewed findings must never be reported as zero vulnerabilities. Recheck the live upstream advisories at the stable release candidate.
+
+## Workspace extraction readback
+
+The integrations extraction adds the exact audit prefix `packages__integrations>unplugin>@farmfe/core>` to the existing two-advisory disposition. Farm is an optional unplugin host peer provided by this repository for host tests; it is not an integrations runtime dependency. The same pinned Farm graph and operator-controlled pattern/format assumptions apply. The guard still rejects non-Farm integrations paths, changed severity/version, newly patched versions and incomplete reports. Cold installed-package qualification must confirm that core and Plain do not install this host graph.

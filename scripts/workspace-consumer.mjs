@@ -7,6 +7,8 @@ import { createLedgerTheme } from "@dirwell/theme-ledger";
 import { createCrosswaveTheme } from "@dirwell/theme-crosswave";
 import { startExplorerServer } from "@dirwell/server/node";
 import { runCli } from "@dirwell/cli";
+import { createShareImage, createMetadataProvider } from "@dirwell/share-image";
+import integration from "@dirwell/integrations/rollup";
 import { createExpressMiddleware } from "@dirwell/server/express";
 import { createFastifyPlugin } from "@dirwell/server/fastify";
 assert.equal(typeof createExpressMiddleware, "function");
@@ -47,6 +49,25 @@ await runCli(
   process.cwd(),
   () => {},
 );
+const image = await createShareImage({
+  title: "Sample downloads",
+  description: "Archive totals: 5 files",
+  theme: "plain",
+});
+const imageBytes = Buffer.from(await image.arrayBuffer());
+assert.equal(imageBytes.readUInt32BE(16), 1200);
+assert.equal(imageBytes.readUInt32BE(20), 630);
+assert.equal(typeof integration, "function");
+await generateExplorer({
+  sourceDir: "source",
+  outputDir: "metadata-out",
+  theme: createPlainTheme(),
+  metadata: createMetadataProvider(
+    { image },
+    { siteName: "Downloads", repositoryName: "example/files" },
+  ),
+});
+assert.match(await readFile("metadata-out/index.html", "utf8"), /og:image/);
 const server = await startExplorerServer({
   root: "source",
   pageSize: 2,
@@ -90,5 +111,7 @@ console.log(
     modes: ["ssg", "mpa"],
     liveListing: true,
     fileTransport: true,
+    optionalImage: true,
+    integrationImports: true,
   }),
 );

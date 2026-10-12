@@ -1,0 +1,157 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+import { workspacePackages } from "../scripts/workspace-packages.mjs";
+import {
+  validateManifest,
+  publicationPlan,
+  validateWorkspaceProvenance,
+} from "../scripts/workspace-release.mjs";
+const version = "0.0.1-alpha";
+const environment = {
+  RELEASE_VERSION: version,
+  GITHUB_REPOSITORY: "vp-tw/dirwell",
+  GITHUB_REF: "refs/heads/main",
+  GITHUB_EVENT_NAME: "workflow_dispatch",
+  GITHUB_SHA: "a".repeat(40),
+};
+function fixture() {
+  return {
+    schemaVersion: 1,
+    repository: "vp-tw/dirwell",
+    workflow: "publish-workspace.yml",
+    commit: environment.GITHUB_SHA,
+    version,
+    packages: workspacePackages.map((name) => ({
+      filename: `dirwell-${name}-${version}.tgz`,
+      integrity: "sha512-" + Buffer.alloc(64).toString("base64"),
+      metadata: {
+        name: "@dirwell/" + name,
+        version,
+        private: true,
+        repository: {
+          url: "git+https://github.com/vp-tw/dirwell.git",
+          directory: "packages/" + name,
+        },
+        publishConfig: { access: "public", tag: "alpha", provenance: true },
+        engines: { node: ">=22.12.0" },
+        dependencies: name === "core" || name === "theme-plain" ? {} : { "@dirwell/core": version },
+      },
+    })),
+  };
+}
+test("offline private artifacts qualify; publishing keeps its private and exact-source gates", () => {
+  const manifest = fixture();
+  validateManifest(manifest, environment);
+  assert.throws(() => validateManifest(manifest, environment, { publish: true }), /Private/);
+  for (const item of manifest.packages) item.metadata.private = false;
+  validateManifest(manifest, environment, { publish: true });
+  for (const [key, value] of Object.entries({
+    GITHUB_REPOSITORY: "other/repo",
+    GITHUB_REF: "refs/heads/topic",
+    GITHUB_EVENT_NAME: "pull_request",
+    GITHUB_SHA: "b".repeat(40),
+    RELEASE_VERSION: "0.0.2-alpha",
+  }))
+    assert.throws(() =>
+      validateManifest(manifest, { ...environment, [key]: value }, { publish: true }),
+    );
+});
+test("reject unresolved dependencies, wrong order, omitted packages and unsafe filenames", () => {
+  for (const mutate of [
+    (m) => (m.packages[2].metadata.dependencies["@dirwell/core"] = "workspace:*"),
+    (m) => m.packages.reverse(),
+    (m) => m.packages.pop(),
+    (m) => (m.packages[0].filename = "../outside.tgz"),
+    (m) => (m.packages[0].metadata.version = "0.0.2-alpha"),
+    (m) => (m.packages[0].metadata.publishConfig.provenance = false),
+  ]) {
+    const manifest = fixture();
+    mutate(manifest);
+    assert.throws(() => validateManifest(manifest, environment));
+  }
+});
+test("partial publication skips identical versions and preflights the entire family", async () => {
+  const manifest = fixture();
+  const calls = [];
+  const plan = await publicationPlan(manifest, async (name, version) => {
+    calls.push(name);
+    return calls.length <= 2
+      ? { name, version, dist: { integrity: manifest.packages[0].integrity } }
+      : null;
+  });
+  assert.equal(calls.length, workspacePackages.length);
+  assert.deepEqual(
+    plan.map((p) => p.action),
+    ["skip", "skip", ...workspacePackages.slice(2).map(() => "publish")],
+  );
+  await assert.rejects(
+    publicationPlan(manifest, async (name, version) =>
+      name === "@dirwell/cli" ? { name, version, dist: { integrity: "different" } } : null,
+    ),
+    /Registry bytes differ/,
+  );
+});
+test("provenance binds workflow, source and this package payload", () => {
+  const manifest = fixture();
+  const item = manifest.packages[0];
+  const statement = {
+    predicateType: "https://slsa.dev/provenance/v1",
+    predicate: {
+      buildDefinition: {
+        externalParameters: {
+          workflow: {
+            ref: "refs/heads/main",
+            repository: "https://github.com/vp-tw/dirwell",
+            path: ".github/workflows/publish-workspace.yml",
+          },
+        },
+        resolvedDependencies: [
+          {
+            uri: "git+https://github.com/vp-tw/dirwell@refs/heads/main",
+            digest: { gitCommit: manifest.commit },
+          },
+        ],
+      },
+    },
+    subject: [{ digest: { sha512: Buffer.alloc(64).toString("hex") } }],
+  };
+  validateWorkspaceProvenance(statement, manifest, item);
+  statement.predicate.buildDefinition.externalParameters.workflow.path =
+    ".github/workflows/publish-alpha.yml";
+  assert.throws(() => validateWorkspaceProvenance(statement, manifest, item));
+});
+
+test("artifact verification rejects changed bytes and packed-metadata substitution", async (context) => {
+  const { mkdtemp, mkdir, writeFile, readFile, rm } = await import("node:fs/promises");
+  const { tmpdir } = await import("node:os");
+  const path = await import("node:path");
+  const { execFileSync } = await import("node:child_process");
+  const { createHash } = await import("node:crypto");
+  const { verifyArtifact } = await import("../scripts/workspace-release.mjs");
+  const root = await mkdtemp(path.join(tmpdir(), "dirwell-release-artifact-"));
+  context.after(() => rm(root, { recursive: true, force: true }));
+  await mkdir(path.join(root, "package"));
+  const metadata = fixture().packages[0].metadata;
+  await writeFile(path.join(root, "package/package.json"), JSON.stringify(metadata));
+  const filename = "dirwell-core-0.0.1-alpha.tgz";
+  execFileSync("tar", ["-czf", path.join(root, filename), "-C", root, "package"]);
+  const bytes = await readFile(path.join(root, filename));
+  const manifest = {
+    packages: [
+      {
+        filename,
+        metadata,
+        integrity: "sha512-" + createHash("sha512").update(bytes).digest("base64"),
+      },
+    ],
+  };
+  await verifyArtifact(root, manifest);
+  await assert.rejects(
+    verifyArtifact(root, {
+      packages: [{ ...manifest.packages[0], metadata: { ...metadata, version: "different" } }],
+    }),
+    /packed metadata/,
+  );
+  await writeFile(path.join(root, filename), Buffer.concat([bytes, Buffer.from("altered")]));
+  await assert.rejects(verifyArtifact(root, manifest), /Tarball changed/);
+});
