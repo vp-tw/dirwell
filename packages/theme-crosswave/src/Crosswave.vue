@@ -11,7 +11,7 @@ import {
 } from "vue";
 import { useGamepad } from "@vueuse/core";
 import { loadListing } from "@dirwell/core/client";
-import { fetchThemePage } from "../../shared-theme/src/navigation.ts";
+import { fetchThemePage, applyThemeMetadata } from "../../shared-theme/src/navigation.ts";
 import { entryIcon } from "../../shared-theme/src/icons.ts";
 import { directoryLike, size, modified } from "../../shared-theme/src/records.ts";
 import { createWave } from "./wave.mjs";
@@ -108,7 +108,7 @@ async function openFolder(dataHref, url, push, refresh = false) {
       category.value = "all";
     }
     if (push) history.pushState({ dataHref: next.dataHref }, "", url);
-    document.title = next.title;
+    applyThemeMetadata(next, url);
     await loadComplete();
   } catch (cause) {
     if (token === navigation && !local.signal.aborted)

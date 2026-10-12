@@ -2,7 +2,10 @@
   import { onMount, tick, untrack } from "svelte";
   import { entryIcon } from "../../shared-theme/src/icons.ts";
   import { loadListing } from "@dirwell/core/client";
-  import { fetchThemePage } from "../../shared-theme/src/navigation.ts";
+  import {
+    fetchThemePage,
+    applyThemeMetadata,
+  } from "../../shared-theme/src/navigation.ts";
   import {
     visibleRecords,
     directoryLike,
@@ -170,7 +173,7 @@
         scrollTop = 0;
       }
       if (push) history.pushState({ dataHref: next.dataHref }, "", url);
-      document.title = next.title;
+      applyThemeMetadata(next, url);
       await hydrateData();
       if (!refresh) window.scrollTo({ top: 0 });
     } catch (cause) {

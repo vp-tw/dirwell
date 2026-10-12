@@ -27,6 +27,8 @@ export async function fetchThemePage(
     !Array.isArray(data.breadcrumbs)
   )
     throw new ListingDataError("Unsupported folder snapshot");
+  if (data.metadataHead !== undefined && typeof data.metadataHead !== "string")
+    throw new ListingDataError("Invalid folder metadata");
   const base = document.querySelector("base")?.href ?? pageHref;
   const link = (raw: unknown): string | null => {
     if (raw === null) return null;
@@ -71,4 +73,47 @@ export async function fetchThemePage(
       return { name: raw.name, href: link(raw.href), dataHref: link(raw.dataHref) };
     }),
   };
+}
+
+/** Copy only inert metadata elements; never insert snapshot HTML or event attributes. */
+export function applyThemeMetadata(page: Record<string, unknown>, pageHref: string): void {
+  document.title = typeof page.title === "string" ? page.title : "";
+  const template = document.createElement("template");
+  template.innerHTML = typeof page.metadataHead === "string" ? page.metadataHead : "";
+  document.head.querySelectorAll("[data-dirwell-metadata]").forEach((element) => element.remove());
+  const base = document.querySelector("base")?.href ?? pageHref;
+  const url = (value: string): string | null => {
+    try {
+      const target = new URL(value, base);
+      return ["http:", "https:"].includes(target.protocol) ? target.href : null;
+    } catch {
+      return null;
+    }
+  };
+  for (const element of template.content.children) {
+    if (!element.hasAttribute("data-dirwell-metadata")) continue;
+    let next: HTMLElement;
+    if (element.tagName === "META") {
+      const attribute = element.hasAttribute("property") ? "property" : "name";
+      const key = element.getAttribute(attribute) ?? "";
+      if (!/^(?:description|og:[a-z_:]+|twitter:[a-z_:]+)$/i.test(key)) continue;
+      let content = element.getAttribute("content") ?? "";
+      if (["og:image", "og:url", "twitter:image"].includes(key)) {
+        const resolved = url(content);
+        if (resolved === null) continue;
+        content = resolved;
+      }
+      next = document.createElement("meta");
+      next.setAttribute(attribute, key);
+      next.setAttribute("content", content);
+    } else if (element.tagName === "LINK" && element.getAttribute("rel") === "canonical") {
+      const href = url(element.getAttribute("href") ?? "");
+      if (href === null) continue;
+      next = document.createElement("link");
+      next.setAttribute("rel", "canonical");
+      next.setAttribute("href", href);
+    } else continue;
+    next.setAttribute("data-dirwell-metadata", "");
+    document.head.append(next);
+  }
 }

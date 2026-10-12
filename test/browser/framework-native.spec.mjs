@@ -1,5 +1,5 @@
 import { createServer } from "node:http";
-import { mkdir, mkdtemp, readFile, rm, stat, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, readdir, rm, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { expect, test } from "@playwright/test";
@@ -286,3 +286,90 @@ for (const [name, creator] of [
     }
   });
 }
+
+for (const [name, creator] of [
+  ["ledger", createLedgerTheme],
+  ["crosswave", createCrosswaveTheme],
+])
+  test(`${name}: opt-in metadata follows framework navigation and History`, async ({ page }) => {
+    const { createMetadataProvider, createShareImage } =
+      await import("../../packages/share-image/dist/index.mjs");
+    const root = await mkdtemp(path.join(tmpdir(), "dirwell-native-metadata-"));
+    let server;
+    try {
+      await mkdir(path.join(root, "files/docs"), { recursive: true });
+      await writeFile(path.join(root, "files/docs/note.txt"), "file");
+      const image = await createShareImage({
+        title: "Sample downloads",
+        description: "Archive totals: 1 file",
+        theme: name,
+      });
+      await generateExplorer({
+        sourceDir: path.join(root, "files"),
+        outputDir: path.join(root, "out"),
+        theme: creator(),
+        metadata: createMetadataProvider(
+          {
+            siteName: "Sample downloads",
+            siteUrl: "https://example.com/files/",
+            image: { source: image, outputPath: "__dirwell/metadata/cover.png" },
+          },
+          { siteName: "Sample downloads", repositoryName: "" },
+        ),
+      });
+      for (const file of await readdir(path.join(root, "out"), { recursive: true })) {
+        if (!file.endsWith(".json")) continue;
+        const filename = path.join(root, "out", file);
+        const snapshot = JSON.parse(await readFile(filename, "utf8"));
+        if (snapshot.theme !== name || snapshot.path !== "docs") continue;
+        snapshot.metadataHead +=
+          '<script data-dirwell-metadata>window.__metadataInjected=true</script><img src="/unexpected-metadata-resource"><meta data-dirwell-metadata http-equiv="refresh" content="0;url=/unexpected"><link data-dirwell-metadata rel="canonical" href="javascript:alert(1)">';
+        await writeFile(filename, JSON.stringify(snapshot));
+      }
+      let unsafeRequests = 0;
+      page.on("request", (request) => {
+        if (request.url().includes("unexpected-metadata-resource")) unsafeRequests++;
+      });
+      server = await serve(path.join(root, "out"));
+      await page.goto(server.url);
+      await page.getByRole("link", { name: /docs/ }).first().click();
+      await expect(page).toHaveURL(/\/docs\//);
+      await expect(page.locator('meta[property="og:title"]')).toHaveAttribute(
+        "content",
+        "docs · Sample downloads",
+      );
+      await expect(page.locator('meta[name="description"]')).toHaveAttribute(
+        "content",
+        /Browse docs.*This folder: 1 file/,
+      );
+      await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+        "href",
+        "https://example.com/files/docs/",
+      );
+      await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
+        "content",
+        "https://example.com/files/__dirwell/metadata/cover.png",
+      );
+      await expect(page.locator('meta[property="og:image:alt"]')).toHaveAttribute(
+        "content",
+        "docs · Sample downloads",
+      );
+      expect(await page.evaluate(() => window.__metadataInjected)).toBeUndefined();
+      expect(unsafeRequests).toBe(0);
+      await expect(page.locator('link[rel="canonical"]')).toHaveCount(1);
+      await expect(page.locator('meta[http-equiv="refresh"]')).toHaveCount(0);
+      await page.getByRole("link", { name: "Home", exact: true }).click();
+      await expect(page.locator('meta[property="og:title"]')).toHaveAttribute(
+        "content",
+        "Sample downloads",
+      );
+      await page.goBack();
+      await expect(page.locator('meta[property="og:title"]')).toHaveAttribute(
+        "content",
+        "docs · Sample downloads",
+      );
+    } finally {
+      await server?.close();
+      await rm(root, { recursive: true, force: true });
+    }
+  });
