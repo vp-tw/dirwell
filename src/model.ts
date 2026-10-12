@@ -1,3 +1,4 @@
+import type { ListingContext, ListingPolicy } from "./listing.ts";
 import type { MetadataOptions, PageMetadata, ThemeMetadataDefaults } from "./metadata.ts";
 export type EntryKind = "directory" | "file" | "symlink" | "other";
 
@@ -72,6 +73,8 @@ export interface SortOptions {
 }
 
 export interface ThemeContext {
+  /** Present only when core listing publication is enabled. Entries are the current HTML slice. */
+  readonly listing?: ListingContext;
   readonly metadata?: PageMetadata;
   readonly documentBaseHref: string | null;
   readonly directory: DirectoryData;
@@ -86,6 +89,8 @@ export interface ThemeContext {
 }
 
 export interface ExplorerTheme {
+  /** Opt in only when the renderer handles listing.page and emits native pagination anchors. */
+  readonly listing?: { readonly pagination: boolean };
   readonly metadataDefaults?: ThemeMetadataDefaults;
   readonly name: string;
   /** Set to false when the theme does not offer global search. */
@@ -95,6 +100,8 @@ export interface ExplorerTheme {
 }
 
 export interface GenerateOptions {
+  /** Opt-in data publication and independently planned HTML pagination. */
+  readonly listing?: ListingPolicy;
   readonly metadata?: MetadataOptions;
   /** Base directory for local metadata image paths; defaults to process.cwd(). */
   readonly metadataBaseDirectory?: string;

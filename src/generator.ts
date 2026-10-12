@@ -1,3 +1,9 @@
+import {
+  listingRevision,
+  projectListingEntry,
+  validateListingPlan,
+  type ListingManifest,
+} from "./listing.ts";
 import { countKinds, createMetadataResolver } from "./metadata.ts";
 import {
   cp,
@@ -27,6 +33,7 @@ import type {
   OutputNameResolver,
   SortOptions,
   SymlinkMetadata,
+  ThemeContext,
 } from "./model.ts";
 import { defaultTheme } from "./theme-default.ts";
 import { selectSourcePaths } from "./filters.ts";
@@ -353,7 +360,11 @@ export async function generateExplorerSkippingPaths(
         }),
       ),
     );
-    entries.sort((left, right) => compareEntries(left, right, options.sort));
+    entries.sort(
+      (left, right) =>
+        compareEntries(left, right, options.sort) ||
+        (options.listing === undefined ? 0 : compareUnicode(left.relativePath, right.relativePath)),
+    );
 
     const describedCurrent = await describeEntry({
       absolutePath: physicalDir,
@@ -591,17 +602,7 @@ export async function generateExplorerSkippingPaths(
           entry.kind === "directory" || entry.symlink?.targetKind === "directory";
         return hrefForLogicalPath(targetLogicalPath, directoryLike);
       };
-      const metadata = await metadataResolver?.resolve(
-        directory,
-        (outputPath) => hrefForLogicalPath(outputPath, false),
-        name === "index.html"
-          ? logicalDir
-            ? `${logicalDir}/`
-            : ""
-          : path.posix.join(logicalDir, name),
-      );
-      const page = await theme.render({
-        ...(metadata === undefined ? {} : { metadata }),
+      const baseContext: ThemeContext = {
         directory,
         documentBaseHref: urlStrategy === "html-base" ? base : null,
         outputName: name,
@@ -632,21 +633,143 @@ export async function generateExplorerSkippingPaths(
             (!directoryLike || !generatedDirectories.has(targetLogicalPath))
           );
         },
-      });
+      };
       const targetDir = path.join(buildOutputDir, logicalDir);
       await mkdir(targetDir, { recursive: true });
-      await writeFile(path.join(targetDir, name), page.html);
-      for (const [assetName, contents] of Object.entries(page.assets ?? {})) {
-        assertSafeOutputName(assetName);
-        if (mode === "ssg") {
-          await writeFile(path.join(targetDir, assetName), contents);
-        } else {
-          const bytes = Buffer.from(contents);
-          const existing = sharedAssets.get(assetName);
-          if (existing !== undefined && !Buffer.from(existing).equals(bytes)) {
-            throw new Error(`Theme emitted conflicting shared asset: ${assetName}`);
+      const sort = baseContext.sort;
+      let revision = "";
+      let manifestHref = "";
+      let pageSize = Math.max(1, directory.entries.length);
+      if (options.listing !== undefined) {
+        const records = directory.entries.map((entry) => projectListingEntry(entry, baseContext));
+        const candidate =
+          typeof options.listing === "function"
+            ? options.listing({
+                directoryPath: logicalDir,
+                visibleCount: records.length,
+                dataBytes: Buffer.byteLength(JSON.stringify(records)),
+                mode,
+                supportsPagination: theme.listing?.pagination === true,
+              })
+            : options.listing;
+        validateListingPlan(candidate);
+        if (candidate.html.strategy === "paged") {
+          if (theme.listing?.pagination !== true)
+            throw new Error(`Theme ${theme.name} does not support listing pagination`);
+          pageSize = candidate.html.pageSize;
+        }
+        const directoryId = createHash("sha256").update(logicalDir).digest("hex");
+        const manifestDirectory = path.posix.join("__dirwell", "listing", directoryId);
+        // Relative records belong to the document directory, not to the JSON asset directory.
+        const hrefBase =
+          urlStrategy === "relative"
+            ? `../../../${encodeLogicalPath(logicalDir)}${logicalDir ? "/" : ""}`
+            : base;
+        const manifestPath = path.posix.join(manifestDirectory, "manifest.json");
+        manifestHref = hrefForLogicalPath(manifestPath, false);
+        const blocks: Array<ListingManifest["blocks"][number]> = [];
+        const blockSize =
+          candidate.data.strategy === "blocks"
+            ? candidate.data.blockSize
+            : Math.max(1, records.length);
+        revision = listingRevision(records, sort, hrefBase, blockSize);
+        const outputListingDir = path.join(buildOutputDir, manifestDirectory);
+        await mkdir(outputListingDir, { recursive: true });
+        for (let offset = 0; offset < records.length || offset === 0; offset += blockSize) {
+          const entries = records.slice(offset, offset + blockSize);
+          const filename = `${revision}-${blocks.length}.json`;
+          blocks.push({ href: filename, offset, count: entries.length });
+          await writeFile(
+            path.join(outputListingDir, filename),
+            JSON.stringify({ version: 1, revision, offset, total: records.length, entries }),
+          );
+        }
+        const manifest: ListingManifest = {
+          version: 1,
+          revision,
+          directory: logicalDir,
+          hrefBase,
+          total: records.length,
+          sort,
+          blocks,
+        };
+        await writeFile(path.join(outputListingDir, "manifest.json"), JSON.stringify(manifest));
+      }
+      const pageCount = Math.max(1, Math.ceil(directory.entries.length / pageSize));
+      const pagePrefix = `__dirwell-page-${createHash("sha256").update(name).digest("hex").slice(0, 16)}`;
+      const pageNames = Array.from({ length: pageCount }, (_, index) =>
+        index === 0 ? name : `${pagePrefix}-${index + 1}.html`,
+      );
+      for (const pageName of pageNames.slice(1)) {
+        if (directory.entries.some((entry) => entry.name.toLowerCase() === pageName.toLowerCase()))
+          throw new Error(
+            `Listing page conflicts with source entry: ${path.posix.join(logicalDir, pageName)}`,
+          );
+      }
+      const pagedAssets = new Map<string, Buffer>();
+      for (const [index, pageName] of pageNames.entries()) {
+        const pagePath = path.posix.join(logicalDir, pageName);
+        const metadata = await metadataResolver?.resolve(
+          directory,
+          (outputPath) => hrefForLogicalPath(outputPath, false),
+          pageName === "index.html" ? (logicalDir ? `${logicalDir}/` : "") : pagePath,
+        );
+        const pageHref = (number: number): string =>
+          hrefForLogicalPath(path.posix.join(logicalDir, pageNames[number] ?? name), false);
+        const page = await theme.render({
+          ...baseContext,
+          ...(metadata === undefined ? {} : { metadata }),
+          outputName: pageName,
+          directory:
+            options.listing === undefined
+              ? directory
+              : {
+                  ...directory,
+                  entries: directory.entries.slice(index * pageSize, (index + 1) * pageSize),
+                },
+          ...(options.listing === undefined
+            ? {}
+            : {
+                listing: {
+                  revision,
+                  manifestHref,
+                  page: {
+                    number: index + 1,
+                    count: pageCount,
+                    offset: index * pageSize,
+                    total: directory.entries.length,
+                    href: pageHref(index),
+                    previousHref: index === 0 ? null : pageHref(index - 1),
+                    nextHref: index + 1 === pageCount ? null : pageHref(index + 1),
+                  },
+                },
+              }),
+        });
+        await writeFile(path.join(targetDir, pageName), page.html);
+        for (const [assetName, contents] of Object.entries(page.assets ?? {})) {
+          assertSafeOutputName(assetName);
+          if (
+            options.listing !== undefined &&
+            pageNames.some((pageName) => pageName.toLowerCase() === assetName.toLowerCase())
+          )
+            throw new Error(`Theme asset conflicts with listing page: ${assetName}`);
+          if (options.listing !== undefined && pageCount > 1) {
+            const bytes = Buffer.from(contents);
+            const existing = pagedAssets.get(assetName);
+            if (existing !== undefined && !existing.equals(bytes))
+              throw new Error(`Theme emitted conflicting paginated asset: ${assetName}`);
+            pagedAssets.set(assetName, bytes);
           }
-          sharedAssets.set(assetName, bytes);
+          if (mode === "ssg") {
+            await writeFile(path.join(targetDir, assetName), contents);
+          } else {
+            const bytes = Buffer.from(contents);
+            const existing = sharedAssets.get(assetName);
+            if (existing !== undefined && !Buffer.from(existing).equals(bytes)) {
+              throw new Error(`Theme emitted conflicting shared asset: ${assetName}`);
+            }
+            sharedAssets.set(assetName, bytes);
+          }
         }
       }
     }

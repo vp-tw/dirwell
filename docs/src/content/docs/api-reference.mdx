@@ -225,3 +225,59 @@ HTML strings; call `escapeHtml()` for untrusted entry or project text.
 | `ShareImageOptions`       | Image `theme`, `title`, `description`, optional `repositoryName` and `directoryPath`.                   |
 
 See [Page metadata and share images](../metadata/) for defaults, path handling, counting, and complete examples.
+
+## Opt-in listing publication
+
+`GenerateOptions.listing` and `DirwellConfig.listing` accept a `ListingPlan` or
+`ListingPolicy` callback. HTML publication and data transport are independent:
+
+```ts
+listing: {
+  html: { strategy: "paged", pageSize: 100 },
+  data: { strategy: "blocks", blockSize: 200 },
+}
+```
+
+Use Plain or an independent theme that declares `listing: { pagination: true }`
+for paged HTML. Ledger and Crosswave currently reject paged plans because their
+existing local search and sorting require complete data. They can publish data
+with `html: { strategy: "all" }`. Nothing is published unless listing is enabled;
+Plain remains script-free and emits no default metadata images.
+
+`ListingPolicyContext` supplies `directoryPath`, filtered `visibleCount`,
+`dataBytes` (the UTF-8 JSON record-array size, excluding manifest/block envelopes),
+`mode`, and `supportsPagination`. The synchronous callback runs once per generated
+directory. Return a complete plan; `validateListingPlan` rejects invalid strategies
+and non-positive or unsafe integer sizes before output replacement. There is no
+built-in automatic threshold in this version. A threshold is application policy,
+not a universal recommendation.
+
+`projectListingEntry` takes `(entry, context)` and produces a `ListingEntry` using the core's
+prepared URL and exit flag. It omits absolute/resolved filesystem paths and private
+stat fields. Declared symlink target text is intentionally retained, matching
+existing theme and raw-link behavior. Its unavailable flag follows existing core
+navigation policy; a cycle is reported independently.
+
+When enabled, `ThemeContext.listing` is a `ListingContext` containing the revision,
+manifest URL and `ListingPage`. `directory.entries` contains the current HTML
+slice; use `listing.page.total` for directory-wide counts. Emit native anchors for
+`previousHref` and `nextHref`, when non-null. Each additional page is published
+beside the directory's initial HTML, including in MPA mode; metadata callbacks see
+the full directory and core canonical URLs identify the actual page. Local-only
+sorting of a slice must not be presented as directory-wide sorting.
+
+The `ListingManifest` uses version 1 and includes a directory, total, sort, revision,
+`hrefBase` and block descriptors. Resolve block URLs relative to the manifest URL.
+Resolve record URLs against `hrefBase`, itself resolved relative to the manifest
+URL, rather than against the JSON block's location. A `ListingBlock` contains the
+same revision, offset, total and an entry array. Empty directories publish one
+empty block and one HTML page.
+
+Block filenames contain a revision derived from the public records, URL base,
+sort and block size. HTML page filenames remain stable for the configured initial
+output filename. No stable-read promise is made across filesystem mutations.
+Build publication replaces the output tree and does not retain earlier revision
+assets. An asynchronous client must validate the schema and revision, and reload
+the manifest on missing/stale blocks; a coherent live-update/cache protocol is
+not implemented by these static build contracts. Publication alone does not
+configure HTTP caching, authentication or server queries.

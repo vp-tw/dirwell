@@ -70,6 +70,7 @@ export function createPlainTheme(options: PlainThemeOptions = {}): ExplorerTheme
   );
   return {
     name: "plain",
+    listing: { pagination: true },
     metadataDefaults: {
       siteName: project.name,
       repositoryName: repositoryName(project.repositoryUrl),
@@ -89,6 +90,15 @@ export function createPlainTheme(options: PlainThemeOptions = {}): ExplorerTheme
         parentHref === null ? "" : `<li><a href="${escapeHtml(parentHref)}">../</a></li>`;
       const rows = context.directory.entries.map((entry) => renderEntry(entry, context)).join("");
       const count = context.directory.entries.length;
+      const page = context.listing?.page;
+      const pagination =
+        page === undefined || page.count === 1
+          ? ""
+          : `<nav aria-label="Pagination">${page.previousHref === null ? "" : `<a rel="prev" href="${escapeHtml(page.previousHref)}">Previous</a> · `}Page ${page.number} of ${page.count}${page.nextHref === null ? "" : ` · <a rel="next" href="${escapeHtml(page.nextHref)}">Next</a>`}</nav>`;
+      const countLabel =
+        page === undefined || page.count === 1
+          ? `${count} ${count === 1 ? "entry" : "entries"}`
+          : `${page.total} entries · ${count} on this page`;
       const fallbackTitle =
         options.project?.name === undefined
           ? `Index of ${visiblePath}`
@@ -100,8 +110,8 @@ export function createPlainTheme(options: PlainThemeOptions = {}): ExplorerTheme
           ? ""
           : `<footer><hr><p>Repository: ${externalLink(project.name, repositoryHref)} by ${escapeHtml(project.author)} · ${externalLink(project.license, licenseHref)}</p></footer>`;
       const html = `<!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">${context.documentBaseHref === null ? "" : `<base href="${escapeHtml(context.documentBaseHref)}">`}${context.metadata?.head ?? `<title>${escapeHtml(fallbackTitle)}</title>`}<style>:root{color-scheme:light dark}body{max-width:72ch;margin:2rem auto;padding:0 1rem}h1,li,nav{overflow-wrap:anywhere}li{margin:.6rem 0}small{display:block}</style></head>
-<body><main>${renderBreadcrumbs(context)}<h1>Index of ${escapeHtml(visiblePath)}</h1><p>${count} ${count === 1 ? "entry" : "entries"}</p>${count === 0 ? "<p>This directory is empty.</p>" : ""}<ul>${parentRow}${rows}</ul></main>${footer}</body></html>`;
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">${context.documentBaseHref === null ? "" : `<base href="${escapeHtml(context.documentBaseHref)}">`}${context.metadata?.head ?? `<title>${escapeHtml(fallbackTitle)}${page === undefined || page.count === 1 ? "" : ` · page ${page.number}`}</title>`}<style>:root{color-scheme:light dark}body{max-width:72ch;margin:2rem auto;padding:0 1rem}h1,li,nav{overflow-wrap:anywhere}li{margin:.6rem 0}small{display:block}</style></head>
+<body><main>${renderBreadcrumbs(context)}<h1>Index of ${escapeHtml(visiblePath)}</h1><p>${countLabel}</p>${pagination}${count === 0 ? "<p>This directory is empty.</p>" : ""}<ul>${parentRow}${rows}</ul>${pagination}</main>${footer}</body></html>`;
       return { html };
     },
   };
