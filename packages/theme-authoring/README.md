@@ -1,6 +1,6 @@
 # @dirwell/theme-authoring
 
-Unreleased private `0.0.1-alpha`. Compile trusted Svelte/Vue wrapper components
+Compile trusted Svelte/Vue wrapper components
 into matching SSR and browser implementations. Plain and core do not depend on
 this package or its compilers.
 

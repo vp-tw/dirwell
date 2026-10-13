@@ -134,6 +134,9 @@ importers:
       '@dirwell/server':
         specifier: workspace:*
         version: link:../server
+      '@dirwell/theme-plain':
+        specifier: workspace:*
+        version: link:../theme-plain
       import-meta-resolve:
         specifier: 4.2.0
         version: 4.2.0

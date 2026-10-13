@@ -1,6 +1,6 @@
 # @dirwell/server
 
-Unreleased alpha workspace. `createExplorerHandler` returns an async `Request -> Response` handler for local filesystem roots. Pass a theme explicitly to enable HTML; no theme or HTTP framework is installed implicitly.
+`createExplorerHandler` returns an async `Request -> Response` handler for local filesystem roots. Pass a theme explicitly to enable HTML; no theme or HTTP framework is installed implicitly.
 
 ```js
 import { createExplorerHandler } from "@dirwell/server";

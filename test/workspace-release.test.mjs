@@ -194,3 +194,86 @@ test("artifact verification rejects changed bytes and packed-metadata substituti
   await writeFile(path.join(root, filename), Buffer.concat([bytes, Buffer.from("altered")]));
   await assert.rejects(verifyArtifact(root, manifest), /Tarball changed/);
 });
+
+test("registry readback waits for packument/tag propagation and keeps integrity failures fatal", async (context) => {
+  const { mkdtemp, readFile, rm } = await import("node:fs/promises");
+  const { tmpdir } = await import("node:os");
+  const path = await import("node:path");
+  const { createHash } = await import("node:crypto");
+  const { readback } = await import("../scripts/workspace-release.mjs");
+  const output = await mkdtemp(path.join(tmpdir(), "dirwell-registry-retry-"));
+  context.after(() => rm(output, { recursive: true, force: true }));
+  const bytes = Buffer.from("qualified published payload");
+  const digest = createHash("sha512").update(bytes).digest();
+  const manifest = fixture();
+  manifest.packages = [manifest.packages[0]];
+  manifest.packages[0].integrity = "sha512-" + digest.toString("base64");
+  const statement = {
+    predicateType: "https://slsa.dev/provenance/v1",
+    predicate: {
+      buildDefinition: {
+        externalParameters: {
+          workflow: {
+            ref: "refs/heads/main",
+            repository: "https://github.com/vp-tw/dirwell",
+            path: ".github/workflows/publish-workspace.yml",
+          },
+        },
+        resolvedDependencies: [
+          {
+            uri: "git+https://github.com/vp-tw/dirwell@refs/heads/main",
+            digest: { gitCommit: manifest.commit },
+          },
+        ],
+      },
+    },
+    subject: [{ digest: { sha512: digest.toString("hex") } }],
+  };
+  let tagCalls = 0,
+    damaged = false,
+    unavailable = false;
+  context.mock.method(globalThis, "setTimeout", (callback) => {
+    queueMicrotask(callback);
+    return 0;
+  });
+  context.mock.method(globalThis, "fetch", async (url) => {
+    if (url === "https://example.invalid/tarball")
+      return new Response(damaged ? "different bytes" : bytes);
+    if (url === "https://example.invalid/provenance")
+      return Response.json({
+        attestations: [
+          {
+            predicateType: statement.predicateType,
+            bundle: {
+              dsseEnvelope: { payload: Buffer.from(JSON.stringify(statement)).toString("base64") },
+            },
+          },
+        ],
+      });
+    if (url.endsWith("/" + version))
+      return Response.json({
+        dist: {
+          integrity: manifest.packages[0].integrity,
+          tarball: "https://example.invalid/tarball",
+          attestations: { url: "https://example.invalid/provenance" },
+        },
+      });
+    tagCalls++;
+    return unavailable || tagCalls === 1
+      ? new Response(null, { status: 404 })
+      : Response.json({ "dist-tags": { alpha: tagCalls === 2 ? "0.0.0-stage" : version } });
+  });
+  await readback(manifest, output);
+  assert.equal(tagCalls, 3);
+  assert.equal(
+    JSON.parse(await readFile(path.join(output, "registry-proof.json"), "utf8")).proofs.length,
+    1,
+  );
+  damaged = true;
+  await assert.rejects(readback(manifest, output));
+  assert.equal(tagCalls, 3, "damaged payload must fail before tags or retry");
+  damaged = false;
+  unavailable = true;
+  await assert.rejects(readback(manifest, output), /readback incomplete/);
+  assert.equal(tagCalls, 23, "packument absence must exhaust the existing 20-attempt bound");
+});

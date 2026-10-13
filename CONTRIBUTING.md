@@ -5,7 +5,7 @@ with [Getting started](https://vp-tw.github.io/dirwell/getting-started/).
 
 ## Set up a checkout
 
-Use Node.js 26 or later and the pnpm version recorded in `package.json`.
+Use Node.js 26 or later and the pnpm version recorded in `package.json`. The checkout CLI below exercises the compatibility package; SDK package work lives in `packages/` and is documented in [the SDK guide](docs/src/content/docs/sdk-alpha.md).
 
 ```bash
 git clone https://github.com/vp-tw/dirwell.git
@@ -83,8 +83,7 @@ TypeScript; test new commands against an installed package in a fresh project.
 Add a Changesets note for package changes, including packaged README updates.
 Review and merge the version before dispatching the
 OIDC workflow. The site deploys separately from `main` through GitHub Pages.
-Follow [RELEASING.md](RELEASING.md) for source, artifact, registry, and provenance
-verification. Do not republish an existing version.
+Use [RELEASING.md](RELEASING.md) for the compatibility package and [WORKSPACE_RELEASING.md](WORKSPACE_RELEASING.md) for the synchronized SDK alpha family. The root `release:version` Changesets command is not the SDK family version operation. Do not republish an existing version.
 
 Use `pnpm exec playwright install chromium firefox webkit` when the engine binaries are not installed. `test:compat` is a bounded theme-contract and IME suite; `test:browser:all` runs the full regression in Chromium, Firefox, and WebKit. Keep cross-engine tests capability-aware and distinguish scripted input from physical-device evidence. See [local verification](VERIFICATION.md) for additional environment checks.
 

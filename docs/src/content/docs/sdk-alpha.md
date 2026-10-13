@@ -19,9 +19,53 @@ Server mode handles file data without a Farm/compiler watcher. Theme source stil
 
 ## Install only the capabilities you need
 
-Core and CLI require an explicit theme. Plain emits native HTML with no JavaScript, image, font or icon assets by default. Ledger uses Svelte; Crosswave uses Vue and VueUse gamepad support. `@dirwell/share-image` supplies optional build-time metadata/PNG images. `@dirwell/integrations` supplies explicit-theme build adapters. Core and Plain do not depend on either optional package.
+Core requires an explicit theme. The next CLI alpha includes Plain by default; its behavior is described below. Plain emits native HTML with no JavaScript, image, font or icon assets by default. Ledger uses Svelte; Crosswave uses Vue and VueUse gamepad support. `@dirwell/share-image` supplies optional build-time metadata/PNG images. `@dirwell/integrations` supplies explicit-theme build adapters. Core and Plain do not depend on either optional package.
 
 The nine packages have separate dependency graphs, but share one official alpha version. The minimum **verified** Node version is 22.12; publishing tools use Node 26. Physical gamepads and production-scale performance remain unverified.
+
+## Next CLI alpha: minimal default and project configuration
+
+The next alpha includes Plain in the CLI. The currently published `0.0.1-alpha`
+still requires an explicit theme; the commands in this section target the next
+release. Core and integrated HTML continue to require an explicit theme.
+
+```sh
+npx @dirwell/cli@alpha server ./files
+npx @dirwell/cli@alpha build ./files --out ./generated
+```
+
+New and compatibility CLIs both expose `dirwell`; replace the old CLI dependency
+in a project rather than installing both. The CLI rejects legacy config discovery
+instead of silently dropping its rules. Use native `.mjs` or explicit `--config`.
+
+The CLI reads `dirwell.config.mjs` from the working directory without a config
+loader or TypeScript compiler. Install a rich theme locally before importing it:
+
+```sh
+npm install --save-dev @dirwell/cli@alpha @dirwell/theme-ledger@alpha
+```
+
+```mjs
+import { createLedgerTheme } from "@dirwell/theme-ledger";
+
+export default {
+  theme: createLedgerTheme({ title: "Downloads" }),
+  build: { exclude: ["drafts/**"] },
+  server: { exclude: ["drafts/**"], port: 3000 },
+};
+```
+
+Then `npx dirwell server ./files` uses that theme. `--config ./other.mjs` selects
+another native JavaScript module. Theme precedence is `--theme`, `config.theme`,
+then Plain; `--theme ledger` and `--theme crosswave` are explicit shortcuts.
+Explicit errors do not silently become Plain. Server port precedence is
+`--port`, `PORT`, `config.server.port`, then an ephemeral port. Use `--live` for
+automatic rich-client updates; refreshing/navigating Plain reads fresh data
+without any client script.
+
+Keep a dedicated `--out` for builds. Server-only flags fail in build mode and
+build-only flags fail in server mode. See the [CLI package guide](https://github.com/vp-tw/dirwell/blob/main/packages/cli/README.md)
+for custom module factories and full configuration behavior.
 
 ## Static output and listing policy
 

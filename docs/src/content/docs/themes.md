@@ -3,6 +3,8 @@ title: Themes
 description: Choose the default, plain, or complete renderer and configure its parts.
 ---
 
+This page documents the `@vp-tw/dirwell` compatibility package. For the new `@dirwell/*` packages, explicit SDK themes and live `server` mode, use the [SDK guide](../sdk-alpha/). Its CLI simplification is identified separately from the first published alpha.
+
 `theme` controls the generated HTML, styles, icons, and browser behavior.
 Choose a built-in theme before replacing components or writing a renderer:
 

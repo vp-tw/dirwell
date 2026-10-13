@@ -3,6 +3,8 @@ title: Build tool adapters
 description: Add Dirwell to an existing build and check each adapter's verified capabilities.
 ---
 
+This page documents the `@vp-tw/dirwell` compatibility package. For the new `@dirwell/*` packages, explicit SDK themes and live `server` mode, use the [SDK guide](../sdk-alpha/). Its CLI simplification is identified separately from the first published alpha.
+
 Use an adapter only when you already have an application build. For a standalone
 folder, the [CLI](../getting-started/) is simpler.
 

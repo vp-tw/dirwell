@@ -3,6 +3,8 @@ title: CLI
 description: Build once, watch locally, or run a detached explorer.
 ---
 
+This page documents the `@vp-tw/dirwell` compatibility package. For the new `@dirwell/*` packages, explicit SDK themes and live `server` mode, use the [SDK guide](../sdk-alpha/). Its CLI simplification is identified separately from the first published alpha.
+
 The examples use the published package and require Node.js 22.12 or later:
 
 ```bash

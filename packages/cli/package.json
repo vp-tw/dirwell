@@ -1,7 +1,7 @@
 {
   "name": "@dirwell/cli",
-  "version": "0.0.1-alpha",
-  "description": "Explicit-theme build and live-server commands for Dirwell.",
+  "version": "0.0.1-alpha.1",
+  "description": "Minimal file explorer build and live-server commands with Plain included.",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -34,6 +34,7 @@
   "dependencies": {
     "@dirwell/core": "workspace:*",
     "@dirwell/server": "workspace:*",
+    "@dirwell/theme-plain": "workspace:*",
     "import-meta-resolve": "4.2.0"
   },
   "engines": {

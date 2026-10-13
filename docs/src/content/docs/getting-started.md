@@ -3,6 +3,8 @@ title: Getting started
 description: Turn your first folder into a browsable website, then publish it.
 ---
 
+This page documents the `@vp-tw/dirwell` compatibility package. For the new `@dirwell/*` packages, explicit SDK themes and live `server` mode, use the [SDK guide](../sdk-alpha/). Its CLI simplification is identified separately from the first published alpha.
+
 You need **Node.js 22.12 or later**, which includes npm, and a folder to browse.
 Check your Node version with `node --version`. You do not need to clone Dirwell
 or choose a build tool.

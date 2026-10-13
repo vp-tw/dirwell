@@ -151,7 +151,7 @@ async function lookup(name, version) {
   return response.json();
 }
 
-async function readback(manifest) {
+export async function readback(manifest, directory = artifactDirectory) {
   const proofs = [];
   for (const item of manifest.packages) {
     let result;
@@ -168,19 +168,18 @@ async function readback(manifest) {
           const tags = await fetch(
             `https://registry.npmjs.org/${encodeURIComponent(item.metadata.name)}`,
           );
-          assert.ok(tags.ok);
-          assert.equal(
-            (await tags.json())["dist-tags"].alpha,
-            manifest.version,
-            "Alpha tag mismatch; do not silently move it",
-          );
-          result = {
-            name: item.metadata.name,
-            version: manifest.version,
-            integrity: item.integrity,
-            provenance: true,
-          };
-          break;
+          // Exact-version metadata can propagate before the packument and its alpha tag.
+          if (tags.ok && (await tags.json())["dist-tags"]?.alpha === manifest.version) {
+            result = {
+              name: item.metadata.name,
+              version: manifest.version,
+              integrity: item.integrity,
+              provenance: true,
+            };
+            break;
+          }
+          if (!tags.ok && tags.status !== 404 && tags.status !== 429 && tags.status < 500)
+            throw new Error(`Registry tag lookup failed: ${tags.status}`);
         }
       }
       if (metadata && metadata.dist?.integrity !== item.integrity)
@@ -190,7 +189,7 @@ async function readback(manifest) {
     assert.ok(result, `Registry/provenance readback incomplete: ${item.metadata.name}`);
     proofs.push(result);
     await writeFile(
-      path.join(artifactDirectory, "registry-proof.json"),
+      path.join(directory, "registry-proof.json"),
       JSON.stringify({ commit: manifest.commit, proofs }, null, 2) + "\n",
     );
   }

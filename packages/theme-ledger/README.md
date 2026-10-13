@@ -1,6 +1,6 @@
 # @dirwell/theme-ledger
 
-Private alpha workspace. Svelte owns the server markup, client state, keyed rows, search, sorting, dialogs, navigation and cleanup. No framework-neutral serialized UI tree or imperative theme controller is used.
+Svelte owns the server markup, client state, keyed rows, search, sorting, dialogs, navigation and cleanup. No framework-neutral serialized UI tree or imperative theme controller is used.
 
 Use `createLedgerTheme({ title: "Sample downloads" })` with `@dirwell/core` and an explicit listing policy. Paged HTML preserves native links without JavaScript. The browser loads and validates the complete compact listing before enabling directory-wide search and sorting; directories exceeding 500 visible rows use measured row virtualization. Folder snapshots resolve navigation URLs before updating History.
 

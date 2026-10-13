@@ -12,7 +12,7 @@ files. Publish the output on a static host; visitors do not need a Dirwell serve
 [Get started](https://vp-tw.github.io/dirwell/getting-started/) ·
 [Documentation](https://vp-tw.github.io/dirwell/overview/)
 
-> Unreleased package separation work is documented in [Package transition](PACKAGE_TRANSITION.md). The current published package and its API remain the compatibility line.
+> The examples below use the legacy `@vp-tw/dirwell` compatibility package. For the new CLI build/server modes, start with the [SDK guide](https://vp-tw.github.io/dirwell/sdk-alpha/) and [CLI guide](https://github.com/vp-tw/dirwell/blob/main/packages/cli/README.md).
 
 ## Browse your first folder
 

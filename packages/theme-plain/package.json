@@ -1,6 +1,6 @@
 {
   "name": "@dirwell/theme-plain",
-  "version": "0.0.1-alpha",
+  "version": "0.0.1-alpha.1",
   "description": "A minimal native HTML theme with no browser JavaScript.",
   "license": "MIT",
   "repository": {

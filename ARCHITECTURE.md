@@ -1,82 +1,123 @@
 # Architecture
 
-Dirwell is a static generator with a small progressive-enhancement runtime.
-Node.js performs filesystem access and emits ordinary files. Built-in themes keep resolved machine paths out of browser output. Custom themes
-receive trusted Node-side metadata and must preserve that boundary; the browser
-does not perform filesystem traversal.
+Dirwell has two execution paths: static publication and live Node HTTP serving.
+Both use the same filesystem facts, public listing records and theme contract.
+The `@dirwell/*` SDK is separate from the `@vp-tw/dirwell` compatibility facade;
+see [package responsibilities](PACKAGE_TRANSITION.md) and the
+[SDK guide](docs/src/content/docs/sdk-alpha.md).
 
-## Build pipeline
+## Package boundaries
 
-1. Resolve `dirwell.config.ts` with c12.
-2. Scan the source and serialize full file metadata into `DirectoryData`.
-3. Classify symlinks as internal, broken, outside-root, or ancestor cycles.
-4. Resolve every directory's output filename. `null` skips generation.
-5. Plan all pages before rendering so link policy knows which directories have
-   explorer pages.
-6. Count the selected source tree, resolve page title/description and image callbacks, then render into a sibling staging directory.
-7. Replace the output only after a complete successful build.
+- Core selects filesystem entries, prepares safe links, projects public records
+  and publishes static HTML/assets. It requires a theme and has no framework,
+  config loader, watcher or image renderer dependency.
+- Plain owns minimal native HTML, portable links and pagination. It has no
+  runtime npm dependencies, browser JavaScript, fonts or default metadata assets.
+- Ledger and Crosswave own their Svelte/Vue SSR and client state, DOM and
+  lifecycle. Framework dependencies belong to those themes.
+- Server owns live HTTP routes, authorization, headers, file transfer and optional
+  shared SSE polling. Host adapters remain small Node/Express/Fastify bridges;
+  Hono can forward its Request directly.
+- CLI owns command/config loading and defaults to Plain from `0.0.1-alpha.1`.
+  Explicit `--theme` or `config.theme` overrides that default. Other themes are
+  installed separately. Core and integrated HTML keep explicit theme selection.
+- Share-image, build integrations and theme authoring are optional capabilities.
+  Source authoring compiles paired SSR/client components; it is not a server-mode
+  filesystem cache or a generic frontend framework layer.
 
-A failed render leaves the last successful output intact.
+## Static publication
 
-## Output modes
+1. The caller supplies source/output paths, a theme and optional selection,
+   sorting, URL, symlink, listing and metadata policies.
+2. Core scans selected entries and classifies internal, excluded, outside-root,
+   broken and cyclic symlinks.
+3. It resolves generated filenames and plans pages before rendering, so URL
+   decisions know which directories have explorer pages.
+4. A per-directory listing policy independently chooses complete/paged HTML and
+   complete/blocked public data. Themes must explicitly support pagination.
+5. Theme and optional metadata provider render into a sibling staging tree.
+6. A successful complete build replaces the dedicated output tree; failed
+   rendering retains the previous successful output.
 
-SSG places any theme runtime assets beside every generated page and keeps
-complete listing HTML. MPA emits directly addressable HTML pages but shares
-runtime assets through the reserved output-root `__dirwell/` directory. With
-the interactive default theme and default row components, an MPA directory
-above the default threshold of 500 entries stores its rows in a per-directory
-data asset and renders a measured virtual list. The threshold is configurable.
-These rows require JavaScript; filtering and sorting use a Web Worker when
-available, with a main-thread fallback. Smaller MPA listings and SSG listings
-retain their entries in HTML and support browsing without JavaScript.
+SSG stores runtime assets beside generated pages; MPA shares them through the
+reserved `__dirwell/` output-root path. Source collisions with reserved paths
+fail. Relative links are portable; base/html-base layouts are explicit choices.
+Source files are mirrored by default, and existing source indexes are preserved.
 
-Both modes store default metadata images once under `__dirwell/metadata/`. They use `__dirwell/` for generated raw-link artifacts and, when enabled,
-the global search index. A source collision with that path is an error.
+Layout does not imply a particular DOM strategy. Plain's native pagination works
+without JavaScript. Rich themes can load a complete compact listing for
+full-directory search/sort; Ledger virtualizes large lists and Crosswave renders
+its filtered rows. HTML pagination and data blocks do not make a live directory
+scan constant-cost. The historical default-theme MPA/worker rule belongs to the
+compatibility package, not this SDK contract.
 
-Both modes mirror source files by default and preserve an existing
-`index.html` or `index.htm`.
+## Live serving
 
-## Theme boundary
+`createExplorerHandler` returns an async Request/Response handler over a trusted
+local root. Await creation before mounting it. `startExplorerServer` owns the
+standalone Node listener and defaults to loopback, an ephemeral port and safe
+media previews. Integrated file transfer is opt-in. The host owns shutdown when
+using an adapter; standalone callers await `server.close()`.
 
-`ExplorerTheme.render(context)` owns the complete document and optional
-assets. The default renderer is composed from eight typed HTML component
-functions. Component layers are shallow, ordered overrides; a component may
-wrap the exported default explicitly.
+Browse pages, page snapshots, listing manifests/blocks, theme assets, file routes
+and update events share `mountPath`. Listing requests read/sort current directory
+facts; they do not build an output tree. Requests are not transactional filesystem
+snapshots. Changed listing revisions return 410 and the client retries a fresh
+manifest with bounded retries. Rich live updates commit complete coherent data
+and preserve the active query.
 
-Core owns source-tree traversal. Themes receive prepared data and URL decisions and may read their own bundled styles, fonts, and runtime assets. Metadata callbacks receive public counts/names; full Node-side paths remain available only to trusted theme renderers. Tokens remain private to a theme, so a replacement may change
-markup, styling, icons, and browser behavior together.
+Optional SSE shares one polling group per canonical directory. It rechecks each
+subscriber's authorization, coalesces slow consumers and releases polling when
+the last subscriber leaves. On-request data freshness does not require SSE;
+Plain remains script-free and shows fresh data on navigation/reload.
 
-## Link and symlink policy
+There is no global HTTP response cache, retained historical snapshot, distributed
+invalidation or filesystem watcher in this execution path. Pagination still
+requires reading the directory; filtered selection can traverse physical names
+through the tree. Live server has no archive search or build metadata provider.
+Production-scale performance and adversarial concurrent filesystem replacement
+are not qualified.
 
-- Generated directories navigate in the same tab.
-- Files and preserved custom indexes open in a new tab.
-- Internal symlinks use canonical root-relative targets.
-- Broken, excluded, and outside-root targets open only their declared
-  `readlink()` text in a new tab; external target files are not published.
-- Ancestor cycles remain visible and navigable but are never expanded again.
-- Directory symlink traversal is opt-in; the default boundary is the source
-  root.
+## Trust and HTTP policy
 
-## Development server
+Themes execute trusted Node code and must escape source names before inserting
+HTML. Node inputs include private machine paths; browser records must come from
+public projection rather than spreading raw entries. Browser clients do not
+traverse filesystems.
 
-The foreground server watches the source recursively, debounces changes, and
-serializes rebuilds. Successful rebuilds notify browsers through server-sent
-events. Failed rebuilds are logged while the prior atomic output remains
-available. Requests wait for an active rebuild and use open file descriptors across output replacement. A queued source edit survives a failed async renderer; only the final failed attempt is reported. The daemon command launches this same server and records its PID and
-log under `.dirwell/`.
+Requested and canonical target paths are authorized before validators or bytes.
+Authorization is request-level, not child-row redaction. Scope roots/filters to
+avoid exposing child names through an allowed parent. Responses default to
+no-store; custom authorized policies cannot be public/shared caches.
 
-## Toolchain
+Files stream with backpressure and cancellation, range GET and metadata HEAD.
+Raster/audio/video may preview inline in standalone media mode. HTML, SVG and
+other files download with attachment and nosniff. Broken/outside/excluded links
+expose only declared target text, never outside-root bytes. Cycles remain visible
+without recursive expansion.
 
-- Vite+ for formatting, linting, and library packaging
-- TypeScript 7 with strict and additional safety flags
-- pnpm with exact dependency versions
-- Astro Starlight for the documentation site
-- Node's test runner for filesystem and integration tests
+## Configuration and customization
 
-## Build integrations
+CLI discovers only native `dirwell.config.mjs` in the working directory, or a
+module selected by `--config`. It exports `{theme, listing, build, server}` and
+is executable trusted project code. Ordinary API/integration callers configure
+options directly. No new config inheritance or TypeScript transpiler is required.
 
-Unplugin shares common build hooks; host-specific code handles output ownership,
-watch dependencies, and development serving. The [support policy](docs/src/content/docs/support.md)
-sets maintenance priority, and the [verification matrix](docs/src/content/docs/build-tools.md)
-bounds claims by tested behavior. Do not infer framework compatibility from its
-underlying build tool or add host-specific lifecycle helpers without a use case.
+Official source wrappers use Svelte snippets or Vue slots through the optional
+paired compiler. Production rebuilds need a fresh renderer/theme instance and
+module import URL when replacing cached modules. Its loopback development server
+supplies native framework HMR; file revision updates remain a separate SSE path.
+
+The compatibility facade retains c12 configuration, default legacy themes,
+watch/rebuild preview and daemon commands. Its existing adapters retain host
+lifecycles. Shared core behavior is reused where qualified; legacy component
+controllers and new framework templates remain separate APIs.
+
+## Toolchain and evidence
+
+The repository uses pinned pnpm/Vite+, strict TypeScript, Astro Starlight, Node
+unit/integration tests and Playwright. Installed tarballs and registry consumers
+are separate checks; platform qualification covers native OS/architecture/Node
+combinations. See [verification](VERIFICATION.md), [support](docs/src/content/docs/support.md)
+and [workspace releasing](WORKSPACE_RELEASING.md). A package export or common
+bundler does not establish every host/framework lifecycle as supported.

@@ -12,7 +12,7 @@ Dirwell is for developers and maintainers who need to publish or inspect a direc
 
 ## Product Purpose
 
-Dirwell turns a directory into a static, accessible file explorer. It should be useful from the first CLI command, while leaving URL layout, generated page strategy, symlink policy, naming, and rendering replaceable for projects with stricter deployment or brand requirements.
+Dirwell turns a directory into an accessible file explorer through static builds or a live Node server. It should be useful from the first CLI command, while leaving URL layout, generated page strategy, symlink policy, naming, and rendering replaceable for projects with stricter deployment or brand requirements.
 
 ## Positioning
 
@@ -20,23 +20,23 @@ Dirwell combines static output with file-explorer behavior: it builds plain depl
 
 ## Operating Context
 
-Users run Dirwell through a CLI or its TypeScript API. They may preview a directory with a watch server, build it for a static host, or keep a daemon running. Deployments may live at a domain root or a nested base path such as GitHub Pages. The documentation site and several independently built examples are published under one site base.
+Users run Dirwell through a CLI or its TypeScript API. They may serve directory data on request or build a dedicated output for a static host. The compatibility package retains its watch preview and daemon. Deployments may live at a domain root or a nested base path such as GitHub Pages. The documentation site and several independently built examples are published under one site base.
 
 ## Capabilities and Constraints
 
-- Zero-configuration `serve` and `build` commands, plus daemon operation.
+- The SDK CLI from `0.0.1-alpha.1` defaults to minimal Plain for `server` and `build`. Rich themes and executable configuration are opt-ins; the compatibility CLI retains `serve` and daemon commands.
 - SSG and MPA output modes.
 - Relative, deployment-base, and native HTML `<base>` URL strategies.
 - Directory-aware output naming that may skip generation by returning `null`; the default preserves existing `index.html` and `index.htm` files.
-- Watch mode with live reload.
+- Live server reads on request; optional shared SSE updates Svelte/Vue clients. The compatibility server and build adapters retain watch/rebuild lifecycles.
 - Ledger: local and global fuzzy search, type filters, configurable sorting, IME-safe keyboard input, Backspace parent navigation, linked breadcrumbs, and system/light/dark appearance controls.
-- The default theme keeps complete HTML listings in SSG mode. With its default settings, MPA directories above 500 entries use a data asset and a virtual list when the default row components are present; those listings require JavaScript.
+- SDK listing policy independently controls HTML pagination and compact data. Plain stays usable without scripts; rich themes load complete data for full-directory search. Ledger virtualizes large lists. The legacy default-theme MPA threshold remains a compatibility behavior.
 - Symlinks remain visible. Cycles are navigable without recursive generation. Broken, out-of-root, and excluded targets expose only their declared text through a safe raw-file route.
 - Build integrations are selective: Vite, Rollup, and webpack are primary; other existing adapters are experimental. Full Unplugin target coverage and dedicated framework adapters are not product goals. See [support policy](docs/src/content/docs/support.md).
 - Plain defaults to minimal listing HTML and system fonts, with no social metadata, image, branding footer, JavaScript, or search assets. Project attribution and metadata remain explicit opt-ins.
-- Three packaged themes: Ledger, Plain, and Crosswave. Built-in interfaces stay English; localization belongs to custom themes.
+- Three independently packaged themes: Ledger, Plain, and Crosswave. Built-in interfaces stay English; localization belongs to custom themes.
 - Configurable page metadata, static share images, and build-time per-folder image callbacks with public counts. Bundled font sources keep normal builds independent of remote font services.
-- Themes may replace typed components, add assets, wrap defaults, or replace the full document.
+- Official framework themes expose source snippets/slots through the optional paired compiler; third-party renderers own their complete document and assets. Legacy typed HTML component overrides remain a separate compatibility API.
 - Generated sites must work as static files without a required application server.
 - The public repository is [vp-tw/dirwell](https://github.com/vp-tw/dirwell), and the documentation site is deployed at [vp-tw.github.io/dirwell](https://vp-tw.github.io/dirwell/). Generated sites remain configurable for other hosts and base paths.
 
@@ -55,7 +55,7 @@ The public repository contains the CLI, generator, watch server, daemon, default
 - The first command should produce a useful result.
 - Static deployment must remain understandable and portable.
 - Filesystem edge cases stay visible instead of being silently discarded.
-- Defaults provide a finished experience; advanced users retain control over rendering and URLs.
+- CLI defaults provide a minimal usable listing; explicit themes add richer behavior. API callers retain control over rendering and URLs.
 - Examples prove behavior with runnable output and source, not marketing claims.
 
 ## Accessibility & Inclusion
