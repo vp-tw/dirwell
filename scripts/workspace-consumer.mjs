@@ -11,6 +11,8 @@ import { createShareImage, createMetadataProvider } from "@dirwell/share-image";
 import integration from "@dirwell/integrations/rollup";
 import { createExpressMiddleware } from "@dirwell/server/express";
 import { createFastifyPlugin } from "@dirwell/server/fastify";
+import { buildFrameworkTheme } from "@dirwell/theme-authoring";
+import { startAuthoringServer } from "@dirwell/theme-authoring/dev";
 assert.equal(typeof createExpressMiddleware, "function");
 assert.equal(typeof createFastifyPlugin, "function");
 assert.equal(typeof loadListing, "function");
@@ -103,6 +105,39 @@ try {
 } finally {
   await server.close();
 }
+// Compile exported sources from installed tarballs, with no repository paths.
+for (const framework of ["svelte", "vue"]) {
+  const component = framework === "svelte" ? "Custom.svelte" : "Custom.vue";
+  await writeFile(
+    component,
+    framework === "svelte"
+      ? `<script lang="ts">import Ledger from '@dirwell/theme-ledger/source';import type {ThemePage} from '@dirwell/theme-ledger/model';let {model}:{model:ThemePage}=$props();</script><Ledger {model}>{#snippet header({model:page})}<h1 data-custom-header>{page.title} Custom</h1>{/snippet}{#snippet row({entry})}<span data-custom-row>{entry.name}</span>{/snippet}</Ledger><style>h1{color:#315b85}</style>`
+      : `<script setup lang="ts">import Crosswave from '@dirwell/theme-crosswave/source';import type {ThemePage} from '@dirwell/theme-crosswave/model';defineProps<{model:ThemePage}>();</script><template><Crosswave :model="model"><template #header="{model:page}"><span data-custom-header>{{page.title}} Custom</span></template><template #row="{entry}"><span data-custom-row>{{entry.name}}</span></template></Crosswave></template><style scoped>[data-custom-header]{color:#315b85}</style>`,
+  );
+  const result = await buildFrameworkTheme({
+    framework,
+    component,
+    output: "compiled-" + framework,
+  });
+  const compiled = await import(result.themeUrl);
+  await generateExplorer({
+    sourceDir: "source",
+    outputDir: "authored-" + framework,
+    theme: compiled.createTheme(),
+  });
+  assert.match(
+    await readFile("authored-" + framework + "/index.html", "utf8"),
+    /data-custom-header/,
+  );
+  const dev = await startAuthoringServer({ framework, component, explorer: { root: "source" } });
+  try {
+    const response = await fetch(dev.url + "/browse/");
+    assert.equal(response.status, 200);
+    assert.match(await response.text(), /data-custom-header/);
+  } finally {
+    await dev.close();
+  }
+}
 console.log(
   JSON.stringify({
     node: process.version,
@@ -113,5 +148,7 @@ console.log(
     fileTransport: true,
     optionalImage: true,
     integrationImports: true,
+    sourceAuthoring: ["svelte", "vue"],
+    authoringDevSsr: true,
   }),
 );

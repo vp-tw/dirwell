@@ -7,3 +7,11 @@ Use `createLedgerTheme({ title: "Sample downloads" })` with `@dirwell/core` and 
 The current alpha surface includes directory type filtering, fuzzy search, name/size/modified sorting, natural/locale/Unicode names, color schemes, timestamp details, archive search, and keyboard selection. Legacy project/label/component overrides are not yet a migration contract. File URLs use native navigation and pagination.
 
 The package contains a separately compiled classic browser script and Node server renderer. Svelte is a dependency of this theme, not core or Plain. No Open Graph image implementation is bundled.
+
+## Component source
+
+Import the official component from this package's `/source` entry and model/row
+types from `/model`. Use `@dirwell/theme-authoring` to compile the same wrapper
+for SSR and client, or its `/dev` entry for trusted local HMR. Header, row content
+and footer are customizable; official navigation and interaction ownership is
+retained. See [the authoring guide](../theme-authoring/README.md).

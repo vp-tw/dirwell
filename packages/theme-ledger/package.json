@@ -19,6 +19,14 @@
     ".": {
       "types": "./dist/index.d.mts",
       "import": "./dist/index.mjs"
+    },
+    "./source": {
+      "types": "./dist/source/component.d.mts",
+      "default": "./dist/source/Ledger.svelte"
+    },
+    "./model": {
+      "types": "./dist/model.d.mts",
+      "import": "./dist/model.mjs"
     }
   },
   "publishConfig": {

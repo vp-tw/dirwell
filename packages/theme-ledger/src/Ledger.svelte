@@ -14,7 +14,7 @@
     modified,
     fuzzy,
   } from "../../shared-theme/src/records.ts";
-  let { model: initialModel } = $props();
+  let { model: initialModel, header, row, footer } = $props();
   const snapshot = untrack(() => initialModel);
   let model = $state.raw(snapshot),
     entries = $state.raw(snapshot.entries),
@@ -410,8 +410,8 @@
 />
 <header class="page-header">
   <div class="wordmark">
-    <h1>{model.title}</h1>
-    <span>File archive</span>
+    {#if header}{@render header({ model })}{:else}<h1>{model.title}</h1>
+      <span>File archive</span>{/if}
   </div>
   <nav aria-label="Breadcrumb">
     <a
@@ -549,12 +549,21 @@
                 rel={entry.exitsExplorer ? "noopener" : undefined}
                 onclick={(event) => navigate(event, entry)}
                 onfocus={() => (selected = entry.id)}
-                ><span class="file-icon" aria-hidden="true"
-                  >{@html entryIcon(entryType(entry))}</span
-                >
-                {entry.name}{isDirectory(entry) ? "/" : ""}</a
-              >{:else}<span>{entry.name}</span>{/if}{#if entry.link}<small
-                class="target"
+                >{#if row}{@render row({
+                    model,
+                    entry,
+                    selected: selected === entry.id,
+                  })}{:else}<span class="file-icon" aria-hidden="true"
+                    >{@html entryIcon(entryType(entry))}</span
+                  >
+                  {entry.name}{isDirectory(entry) ? "/" : ""}{/if}</a
+              >{:else}<span
+                >{#if row}{@render row({
+                    model,
+                    entry,
+                    selected: selected === entry.id,
+                  })}{:else}{entry.name}{/if}</span
+              >{/if}{#if entry.link}<small class="target"
                 >{entry.link.unavailable ? "Target unavailable · " : "→ "}{entry
                   .link.target}</small
               >{/if}</span
@@ -586,10 +595,10 @@
       {#if model.page.nextHref}<a rel="next" href={model.page.nextHref}>Next</a
         >{/if}
     </nav>{/if}
-  <p class="keyboard-help">
-    Arrow keys select files · Home / End jump · / searches · Backspace opens
-    parent
-  </p>
+  {#if footer}{@render footer({ model })}{:else}<p class="keyboard-help">
+      Arrow keys select files · Home / End jump · / searches · Backspace opens
+      parent
+    </p>{/if}
 </main>
 {#if timestamp}<dialog
     bind:this={timeDialog}

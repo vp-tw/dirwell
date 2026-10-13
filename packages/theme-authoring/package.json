@@ -1,0 +1,51 @@
+{
+  "name": "@dirwell/theme-authoring",
+  "version": "0.0.1-alpha",
+  "private": true,
+  "description": "Paired Svelte/Vue theme compilation and native development HMR.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vp-tw/dirwell.git",
+    "directory": "packages/theme-authoring"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs"
+    },
+    "./dev": {
+      "types": "./dist/dev.d.mts",
+      "import": "./dist/dev.mjs"
+    }
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true,
+    "tag": "alpha"
+  },
+  "scripts": {
+    "build": "vp pack"
+  },
+  "dependencies": {
+    "@dirwell/core": "workspace:*",
+    "@dirwell/server": "workspace:*",
+    "@dirwell/theme-crosswave": "workspace:*",
+    "@dirwell/theme-ledger": "workspace:*",
+    "@sveltejs/vite-plugin-svelte": "7.3.1",
+    "@vitejs/plugin-vue": "6.0.10",
+    "@vue/compiler-sfc": "3.5.43",
+    "svelte": "5.57.2",
+    "vite": "8.3.0",
+    "vue": "3.5.43"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  }
+}
