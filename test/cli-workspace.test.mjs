@@ -33,6 +33,10 @@ test("separate CLI defaults to Plain, builds dedicated static output and owns a 
   const defaultHtml = await readFile(path.join(cwd, "default-out", "index.html"), "utf8");
   assert.match(defaultHtml, /one.txt/);
   assert.doesNotMatch(defaultHtml, /<script|og:image/);
+  await assert.rejects(
+    runCli(["server", "source/one.txt"], cwd, log),
+    /Source must be an existing directory/,
+  );
   await assert.rejects(runCli(["build", "source", "--theme", theme], cwd, log), /requires --out/);
   await runCli(["build", "source", "--theme", theme, "--out", "out", "--page-size", "1"], cwd, log);
   assert.match(await readFile(path.join(cwd, "out", "index.html"), "utf8"), /one.txt/);

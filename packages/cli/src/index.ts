@@ -1,5 +1,5 @@
 import path from "node:path";
-import { access } from "node:fs/promises";
+import { access, stat } from "node:fs/promises";
 import { pathToFileURL } from "node:url";
 import { resolve as resolveModule } from "import-meta-resolve";
 import { parseArgs } from "node:util";
@@ -186,6 +186,8 @@ export async function runCli(
         }
       : config.listing;
   const root = path.resolve(cwd, source);
+  if (!(await stat(root)).isDirectory())
+    throw new TypeError("Source must be an existing directory");
   if (command === "build") {
     if (parsed.values.out === undefined)
       throw new TypeError("Build requires --out pointing to a dedicated generated output tree");
