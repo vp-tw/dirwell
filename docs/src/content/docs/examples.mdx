@@ -30,36 +30,22 @@ its live page and the source directory that generates it. Names such as
   </section>
 ))}
 
-The source directories include their own `dirwell.config.ts` and input
-`files/` trees. The documentation build reads those configs and passes them
-as one array to `Dirwell([...])` in a Vite build. It writes each explorer to
-`docs/public/examples/` before Astro copies them into the publish tree. The
-homepage embeds the generated `file-icons` page, so its preview uses the same
-HTML and assets as the live example.
+Each `config.ts` exports core `GenerateOptions` using the published SDK. The site build calls `generateExplorer` for each example before Astro copies the output to the publish tree. The Ledger source example compiles its wrapper with the optional authoring package first. These TypeScript API configs are not CLI configuration files.
 
 ## Run one example
 
-After [setting up a checkout](https://github.com/vp-tw/dirwell/blob/main/CONTRIBUTING.md#set-up-a-checkout), run this from the repository root. Replace `file-icons` with an example’s source directory name:
+From an [installed repository checkout](https://github.com/vp-tw/dirwell/blob/main/CONTRIBUTING.md):
 
-```bash
-pnpm dirwell build files --cwd examples/file-icons -o dist
+```sh
+node scripts/build-example.ts file-icons ./generated-example
 ```
 
-This writes `examples/file-icons/dist/`. Portable examples can be opened through their `index.html`. The `base` example needs its configured HTTP mount; use the docs server below or run `pnpm dirwell serve files --cwd examples/base -o dist`. Keep CLI output separate from `docs/public/examples/`, which the Vite adapter owns.
+Build replaces the dedicated output directory. Serve the complete result over HTTP. The base example requires its configured mount. For a standalone CLI project, use `dirwell.config.mjs` with `theme`, `build`, `server` and `listing` sections.
 
-## Build and inspect the site locally
+## Build the complete site
 
-From the repository root:
-
-```bash
-SITE_BASE=/dirwell/ pnpm run site:build
+```sh
+SITE_BASE=/dirwell/ pnpm site:build
 ```
 
-Open the resulting `site/examples/` directories with a local static server.
-`SITE_BASE` sets the documentation base path; the `base` example uses it for
-its generated links. For local iteration, `pnpm run docs:dev` builds the
-examples, starts Astro, watches source and example files, and reloads the
-embedded preview after a successful rebuild.
-
-`PUBLIC_REPOSITORY_URL` controls the source links on the landing page.
-GitHub Actions supplies the repository URL when it deploys Pages.
+`pnpm docs:dev` rebuilds examples, starts Astro and watches package/example inputs. `SITE_BASE` sets the documentation prefix. `PUBLIC_REPOSITORY_URL` controls source links; GitHub Actions supplies the repository URL.

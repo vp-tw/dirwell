@@ -1,26 +1,5 @@
-# External theme package proof
+# Independent theme package
 
-This private example is packed and installed separately from the Dirwell
-tarball by `pnpm verify:package`. Its peer dependency pins the Dirwell version it
-is tested against. It imports only `@vp-tw/dirwell`; there are no repository
-source imports or inherited design tokens.
+This private example exports a factory returning `ExplorerTheme` from `@dirwell/core`. It owns HTML/CSS and escapes names, uses context navigation helpers and preserves optional metadata. It does not install an image renderer or a rich theme.
 
-```ts
-import { defineConfig } from "@vp-tw/dirwell";
-import { createExampleTheme } from "dirwell-example-theme";
-
-export default defineConfig({
-  root: "files",
-  theme: createExampleTheme({ title: "Downloads" }),
-});
-```
-
-The factory owns its options and validates its title. It escapes entry names,
-uses the prepared navigation helpers, handles skipped/unavailable destinations,
-and owns a stylesheet referenced with `assetHref()`. It supplies a default share-image callback through `metadataDefaults.image`, reusing the public PNG helper. The renderer includes `context.metadata.head`; consumers can replace the image or disable it with `metadata.image: false` without invoking the theme callback. The same renderer works
-with SSG, MPA, relative URLs, and an HTML base.
-
-The example is private to prevent accidental publication. A real theme package
-should choose its own package name and publish configuration, test against each
-supported Dirwell version, and carry its own license and asset notices. See
-[the package contract](../../THEME_PACKAGE_CONTRACT.md).
+Publish your own package with a tested Core peer range, then import its factory into `dirwell.config.mjs` or pass it to `generateExplorer` / server handlers. Include your assets and public declarations in the package payload. Test packed installation, SSG/MPA and child navigation before widening a peer range. See [the theme package contract](../../THEME_PACKAGE_CONTRACT.md).

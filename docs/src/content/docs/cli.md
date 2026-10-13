@@ -1,97 +1,38 @@
 ---
 title: CLI
-description: Build once, watch locally, or run a detached explorer.
+description: Build static output or serve current files with Plain included.
 ---
 
-This page documents the `@vp-tw/dirwell` compatibility package. For the new `@dirwell/*` packages, explicit SDK themes and live `server` mode, use the [SDK guide](../sdk-alpha/). Its CLI simplification is identified separately from the first published alpha.
+Install nothing globally: use `npx @dirwell/cli@alpha`. For repeated project use, install `@dirwell/cli@alpha` as a dev dependency and run `npx dirwell`.
 
-The examples use the published package and require Node.js 22.12 or later:
-
-```bash
-npx @vp-tw/dirwell --help
+```sh
+npx @dirwell/cli@alpha --help
+npx @dirwell/cli@alpha server ./files
+npx @dirwell/cli@alpha build ./files --out ./generated
 ```
 
-After [installing it in a project](../getting-started/#3-save-project-settings-when-needed),
-use `npx dirwell` or an npm script. The executable is named `dirwell`.
+Both commands require an existing source directory. Build also requires a dedicated `--out`; it replaces the generated tree. Server owns its HTTP lifecycle, prints a URL and stops with Ctrl+C. It reads current data without generating static output or starting a filesystem watcher.
 
-| Command                            | Result and use                                                          |
-| ---------------------------------- | ----------------------------------------------------------------------- |
-| `dirwell [directory]`              | Starts `serve`, the default command, to browse a changing local folder. |
-| `dirwell build [directory]`        | Writes static files and exits so you can publish them.                  |
-| `dirwell serve [directory]`        | Watches and reloads browsers in a foreground server.                    |
-| `dirwell dev [directory]`          | Alias for `serve` when your scripts use `dev` naming.                   |
-| `dirwell daemon start [directory]` | Starts a detached server that stays up after the terminal closes.       |
-| `dirwell daemon status` / `stop`   | Reads or stops that server.                                             |
+## Options
 
-The positional `[directory]` defaults to `.` and takes precedence over config
-`root`. Pass the intended source path explicitly. Paths in config resolve
-from `--cwd`, whose default is the current working directory.
+| Scope  | Flags                                                                    |
+| ------ | ------------------------------------------------------------------------ |
+| Both   | `--theme`, `--config`, `--page-size`, `--block-size`, `--help`           |
+| Build  | `--out`, `--mode ssg\|mpa`, `--urls relative\|base\|html-base`, `--base` |
+| Server | `--host`, `--port`, `--mount`, `--live`                                  |
 
-## Build once
+Pass only options for the selected mode. Page/block sizes are positive integers. `--page-size` requests native HTML pagination from a capable theme; `--block-size` splits public data responses. Rich clients still load the complete directory before filtering or sorting.
 
-```bash
-npx @vp-tw/dirwell build ./public -o ./dist
+## Themes and configuration
+
+Plain is included. Install `@dirwell/theme-ledger@alpha` or `@dirwell/theme-crosswave@alpha` before selecting `--theme ledger` or `--theme crosswave`.
+
+```sh
+npm exec --package=@dirwell/cli@alpha --package=@dirwell/theme-ledger@alpha -- dirwell server ./files --theme ledger --live
 ```
 
-`build` writes a deployable tree. It defaults to SSG, relative URLs, and
-`dist/` output. A successful build replaces the generated output tree, so do
-not put unrelated files there. Existing source `index.html` or `index.htm`
-files remain; their directory explorer page uses `_dirwell.html` when free.
+Custom themes use `--theme './theme.mjs#createTheme'` or a module default export. Resolution prefers the working project, then packages supplied beside the CLI by npm exec. An explicit theme failure is an error.
 
-To publish beneath a fixed URL prefix:
+The CLI discovers `dirwell.config.mjs` in the working directory. `--config` selects another native JavaScript module. Precedence is `--theme` → `config.theme` → Plain. Server port precedence is `--port` → `PORT` → `config.server.port` → an available port. See [configuration](../configuration/).
 
-```bash
-npx @vp-tw/dirwell build ./public -o ./dist --mode mpa --base /downloads/ --urls base
-```
-
-Set `--base` to the path where the output will actually be served. See
-[deployment choices](../deployment/) for SSG, MPA, and URL trade-offs.
-
-## Watch locally
-
-```bash
-npx @vp-tw/dirwell serve ./public --host 127.0.0.1 --port 4173
-```
-
-`serve` defaults to `.dirwell-preview/` output, host `127.0.0.1`, and port
-`4173`. It watches source changes, rebuilds the explorer, and reloads
-connected browsers. `--port 0` requests an available port.
-
-## Shared options
-
-| Option           | Input and effect                                                                                            |
-| ---------------- | ----------------------------------------------------------------------------------------------------------- |
-| `[directory]`    | Source path; default `.`. Directory to scan; overrides config `root`.                                       |
-| `--cwd`          | Directory path; default current working directory. Finds `dirwell.config.ts` and keeps daemon state here.   |
-| `--mode`         | `ssg` or `mpa`; config or default `ssg`. Selects the output mode.                                           |
-| `--urls`         | `relative`, `base`, or `html-base`; config or default `relative`. Selects generated link form.              |
-| `--base`         | Root-relative path or HTTP(S) URL; config or default `/`. Public prefix for `base` and `html-base` URLs.    |
-| `-o`, `--outDir` | Directory path; default `dist/` for build or `.dirwell-preview/` for serve. Sets generated output location. |
-
-`serve`, `dev`, and `daemon start` also accept:
-
-| Option         | Input and effect                                                                                     |
-| -------------- | ---------------------------------------------------------------------------------------------------- |
-| `--host`       | Hostname or address; default `127.0.0.1`. Sets the listening interface.                              |
-| `-p`, `--port` | Integer from `0` to `65535`; default `4173`. Sets the listening port; `0` chooses an available port. |
-
-For host and port, a CLI option wins over `HOST` or `PORT`, then config
-`server.host` or `server.port`. The environment variables let a process
-supervisor assign the listener. Other behavior such as `include`, `exclude`,
-`sort`, and `theme` belongs in [configuration](../configuration/).
-
-## Detached server
-
-```bash
-npx @vp-tw/dirwell daemon start ./public
-npx @vp-tw/dirwell daemon status
-npx @vp-tw/dirwell daemon stop
-```
-
-`daemon` defaults to `start`. State and logs live under `.dirwell/` in
-`--cwd`. Use the same `--cwd` for `status` and `stop` that you used for
-`start`. A stale state file is reported as stopped and may be replaced by a
-new start.
-
-For exact spelling and installed-version options, run `dirwell build --help`
-or `dirwell serve --help`.
+There are two commands: `build` and `server`. Source-component HMR uses the optional [authoring API](../themes/#source-component-customization). Server defaults preview safe media and download HTML, SVG and other active formats.

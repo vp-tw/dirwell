@@ -1,23 +1,11 @@
-# Theme-owned localization
+# Theme-owned language switching
 
-This independent renderer demonstrates English, Traditional Chinese (`zh-TW`),
-and Japanese (`ja`) without adding localization to Dirwell's core or built-in
-themes. It owns the dictionaries, language selector, count messages, formatting,
-and optional browser preference.
+The config uses the published `@dirwell/*` API with an explicit theme. Input files live in `files/`.
 
-Run from the repository root:
+From an installed repository checkout:
 
 ```sh
-pnpm dirwell build files -o ../../generated-i18n --cwd examples/i18n
+node scripts/build-example.ts i18n ./generated-i18n
 ```
 
-The site build publishes the configured output beneath `examples/i18n/`.
-`translations.ts` checks that every language defines the same message keys.
-`runtime.js` applies messages as text, sets the document language and accessible
-labels, formats local dates and binary file sizes, and persists a valid language
-choice. Storage denial falls back to a working language selector.
-
-The static document contains a complete English listing and labeled UTC dates.
-Without JavaScript, language switching is hidden and navigation still works.
-The example intentionally does not reproduce Ledger's search, sorting, or
-virtualization. File names, contents, and links are independent of locale.
+`config.ts` exports core `GenerateOptions`; it is consumed by this SDK build script, not discovered by CLI. For a standalone CLI project, use `dirwell.config.mjs` with `{ theme, build, server, listing }`. Build replaces its dedicated output tree. Serve the complete result over HTTP. `SITE_BASE=/dirwell/ pnpm site:build` publishes every example for the documentation site.

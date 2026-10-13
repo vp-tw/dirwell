@@ -2,7 +2,7 @@
 
 Dirwell has two execution paths: static publication and live Node HTTP serving.
 Both use the same filesystem facts, public listing records and theme contract.
-The `@dirwell/*` SDK is separate from the `@vp-tw/dirwell` compatibility facade;
+The active user-facing API is the `@dirwell/*` SDK; the root facade is retained for historical regression checks;
 see [package responsibilities](PACKAGE_TRANSITION.md) and the
 [SDK guide](docs/src/content/docs/sdk-alpha.md).
 

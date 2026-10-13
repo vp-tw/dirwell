@@ -1,11 +1,13 @@
-import { createCrosswaveTheme, defaultCrosswaveCategories, defineConfig } from "../../src/index.ts";
+import path from "node:path";
+import type { GenerateOptions } from "@dirwell/core";
+import { createCrosswaveTheme, defaultCrosswaveCategories } from "@dirwell/theme-crosswave";
 
-export default defineConfig({
-  root: "files",
-  outDir: "../../docs/public/examples/crosswave-categories",
+export default {
+  sourceDir: path.join(import.meta.dirname, "files"),
+  outputDir: path.resolve(import.meta.dirname, "../../docs/public/examples/crosswave-categories"),
   theme: createCrosswaveTheme({
     color: "jade",
-    project: { name: "Project Library" },
+    title: "Project Library",
     categories: [
       ...defaultCrosswaveCategories.filter(
         (category) => category.id === "all" || category.id === "folder",
@@ -36,4 +38,4 @@ export default defineConfig({
       { id: "remaining", label: "Unsorted", icon: "other", match: "other" },
     ],
   }),
-});
+} satisfies GenerateOptions;

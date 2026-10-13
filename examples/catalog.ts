@@ -3,7 +3,7 @@ export const exampleCatalog = [
   {
     group: "themes",
     slug: "file-icons",
-    name: "Ledger (default)",
+    name: "Ledger",
     description: "Search, sort, and browse a folder with bundled file icons.",
     detail: "Built-in theme · search and sorting",
   },
@@ -32,9 +32,9 @@ export const exampleCatalog = [
   {
     group: "guides",
     slug: "default-theme-override",
-    name: "Customize Ledger components",
+    name: "Customize Ledger source",
     description: "Keep the explorer behavior while changing colors, icons, and its header.",
-    detail: "Ledger · palette and icon overrides",
+    detail: "Ledger · Svelte snippets and custom icons",
   },
   {
     group: "guides",
@@ -72,7 +72,7 @@ export const exampleGroups = [
     id: "themes",
     name: "Built-in themes",
     description:
-      "Choose an interface: Ledger is the default; Plain and Crosswave are alternatives.",
+      "Choose an interface: Plain is the CLI default; Ledger and Crosswave add interaction.",
     examples: exampleCatalog.filter(({ group }) => group === "themes"),
   },
   {

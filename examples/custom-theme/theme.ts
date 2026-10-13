@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises";
-import { escapeHtml } from "../../src/index.ts";
-import type { ExplorerTheme, FileSystemEntry, ThemeContext } from "../../src/index.ts";
+import { escapeHtml } from "@dirwell/core";
+import type { ExplorerTheme, FileSystemEntry, ThemeContext } from "@dirwell/core";
 
 const styles = await readFile(new URL("./theme.css", import.meta.url), "utf8");
 

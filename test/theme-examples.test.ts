@@ -3,9 +3,9 @@ import { mkdtemp, readFile, readdir, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
-import catppuccinConfig from "../examples/default-theme-override/dirwell.config.ts";
-import customConfig from "../examples/custom-theme/dirwell.config.ts";
-import { generateExplorer } from "../src/generator.ts";
+import catppuccinConfig from "../examples/default-theme-override/config.ts";
+import customConfig from "../examples/custom-theme/config.ts";
+import { generateExplorer } from "@dirwell/core";
 
 const examples = path.resolve(import.meta.dirname, "../examples");
 
@@ -43,19 +43,13 @@ test("Catppuccin override emits paired icons and palettes in SSG and MPA", async
     });
     const html = await readFile(path.join(outputDir, "index.html"), "utf8");
     assert.match(html, /Catppuccin explorer/);
-    assert.match(html, /--paper: #e6e9ef/);
-    assert.match(html, /--paper: #1e2030/);
+    assert.match(html, /--paper:\s*#e6e9ef/);
+    assert.match(html, /--paper:\s*#1e2030/);
     assert.match(html, /file-icon--light/);
     assert.match(html, /file-icon--dark/);
-    assert.match(html, /&quot;icons&quot;:\{&quot;light&quot;:/);
-    assert.match(html, /&quot;dark&quot;:\{&quot;file&quot;:/);
     const assetDir = path.join(outputDir, mode === "mpa" ? "__dirwell" : "");
     const assets = await readdir(assetDir);
-    assert.ok(assets.some((asset) => asset.startsWith("theme-icon-") && asset.endsWith(".svg")));
-    assert.equal(
-      assets.some((asset) => asset.startsWith("vscode-")),
-      false,
-    );
+    assert.ok(assets.some((asset) => asset.startsWith("ledger-client-") && asset.endsWith(".js")));
     assert.match(
       await readFile(path.join(assetDir, "theme-icons-NOTICE.txt"), "utf8"),
       /MIT License/,
@@ -69,20 +63,11 @@ for (const [slug, name, child, childCounts] of [
   ["crosswave", "Sample media files", "Photos", "1 file"],
 ] as const) {
   test(`${slug}: previews identify content and distinguish folder counts from archive totals`, async (context) => {
-    const { loadDirwellConfig, resolveGenerateOptions } = await import("../src/config.ts");
-    const exampleRoot = path.join(examples, slug);
-    const { config } = await loadDirwellConfig(exampleRoot, "build");
+    const { default: config } = await import(`../examples/${slug}/config.ts`);
     const outputDir = await mkdtemp(path.join(tmpdir(), "dirwell-example-preview-"));
     context.after(() => rm(outputDir, { recursive: true, force: true }));
     for (const mode of ["ssg", "mpa"] as const) {
-      await generateExplorer(
-        resolveGenerateOptions(exampleRoot, {
-          ...config,
-          mode,
-          outDir: outputDir,
-          metadata: { ...config.metadata, siteUrl: `https://example.com/${slug}/` },
-        }),
-      );
+      await generateExplorer({ ...config, mode, outputDir });
       const root = await readFile(path.join(outputDir, "index.html"), "utf8");
       const nested = await readFile(path.join(outputDir, child, "index.html"), "utf8");
       assert.ok(root.includes(`<title>${name} · `));
@@ -90,7 +75,7 @@ for (const [slug, name, child, childCounts] of [
       assert.ok(nested.includes(`<title>${child} · ${name}</title>`));
       assert.ok(nested.includes(`This folder: ${childCounts}.`));
       const image = (html: string) => html.match(/property="og:image" content="([^"]+)"/)?.[1];
-      assert.ok(image(root)?.startsWith(`https://example.com/${slug}/`));
+      assert.ok(image(root)?.startsWith(`https://vp-tw.github.io/examples/${slug}/`));
       assert.equal(image(root), image(nested));
       assert.equal(
         root.match(/property="og:image:alt" content="([^"]+)"/)?.[1],
@@ -102,16 +87,12 @@ for (const [slug, name, child, childCounts] of [
 }
 
 test("the public Plain example opts out of metadata and emits only listing pages", async (context) => {
-  const { loadDirwellConfig, resolveGenerateOptions } = await import("../src/config.ts");
-  const exampleRoot = path.join(examples, "plain");
-  const { config } = await loadDirwellConfig(exampleRoot, "build");
-  assert.equal(config.metadata, undefined);
+  const { default: config } = await import("../examples/plain/config.ts");
+  assert.equal("metadata" in config, false);
   const outputDir = await mkdtemp(path.join(tmpdir(), "dirwell-plain-minimal-"));
   context.after(() => rm(outputDir, { recursive: true, force: true }));
   for (const mode of ["ssg", "mpa"] as const) {
-    await generateExplorer(
-      resolveGenerateOptions(exampleRoot, { ...config, mode, mirror: false, outDir: outputDir }),
-    );
+    await generateExplorer({ ...config, mode, mirror: false, outputDir });
     assert.deepEqual(await readdir(outputDir), ["index.html", "releases"]);
     const html = await readFile(path.join(outputDir, "index.html"), "utf8");
     assert.match(html, /<title>Index of \/<\/title>/);

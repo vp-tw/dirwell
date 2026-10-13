@@ -1,6 +1,6 @@
-# Dirwell package transition
+# Dirwell packages
 
-The nine `@dirwell/*` packages are published at `0.0.1-alpha.1`, tagged `alpha`. The [SDK release](https://github.com/vp-tw/dirwell/releases/tag/%40dirwell/workspace%400.0.1-alpha.1) passed registry tarball integrity, signatures, provenance and installed-consumer verification. The published `@vp-tw/dirwell` compatibility line remains separate.
+The nine `@dirwell/*` packages are published at `0.0.1-alpha.1`, tagged `alpha`. The [SDK release](https://github.com/vp-tw/dirwell/releases/tag/%40dirwell/workspace%400.0.1-alpha.1) passed registry tarball integrity, signatures, provenance and installed-consumer verification.
 
 CLI `0.0.1-alpha.1` includes Plain as its lightweight default and automatically
 reads `dirwell.config.mjs`. Its theme precedence is `--theme`, `config.theme`,
@@ -41,18 +41,18 @@ Server mode renders through the same theme without replacing an output tree. Its
 
 Server responses default to no-store and ETags. Custom header and authorization hooks are asynchronous and run before conditional responses. Requested paths and canonical targets are both authorized. Optional SSE shares polling per directory, rechecks subscribers, coalesces slow consumers and releases the last subscription's timer. Rich clients load complete coherent data before enabling directory-wide filtering/sorting; live refreshes commit complete data while preserving search state.
 
-`dirwell server` handles file-data updates independently of Farm or a build plugin. Production theme source changes require compilation and a fresh renderer instance. The separate optional authoring server supplies native framework HMR. The new CLI does not silently translate legacy dev/daemon commands.
+`dirwell server` handles file-data updates independently of Farm or a build plugin. Production theme source changes require compilation and a fresh renderer instance. The separate optional authoring server supplies native framework HMR. The CLI offers build and server commands.
 
-## Migration and customization
+## Choosing packages and customization
 
 1. Choose the new core/CLI using the `alpha` dist-tag. Core requires a theme; CLI `0.0.1-alpha.1` includes Plain and installs no rich theme implicitly.
-2. Replace legacy optional-theme generation with `generateExplorer({ ...options, theme })`.
+2. Use `generateExplorer({ ...options, theme })`.
 3. Configure a listing policy deliberately. For example, publish 100 HTML rows and 200 data records per block for large directories; keep complete HTML when that suits the theme and archive.
 4. Use build for static output, or server for live HTML/file transport. Enable `--live` only when automatic Svelte/Vue updates are desired.
 
 The framework themes use native Svelte/Vue templates, state and lifecycle, not serialized UI trees or the legacy DOM controllers. Their alpha option surfaces intentionally differ from the old component/project overrides; no compatibility migration for those overrides is claimed. Third-party themes can implement `ExplorerTheme.render` and own their server/client build, using the framework-neutral public facts and core browser loader.
 
-Metadata remains an injected core provider. No image renderer is bundled in the new themes. The existing compatibility line retains its metadata/image implementation; the optional `@dirwell/share-image` provider and `@dirwell/integrations` adapters now isolate those dependencies. The optional authoring package supplies source-component customization and native framework HMR. See [workspace releases](WORKSPACE_RELEASING.md) for offline preparation and the separate first-publication gate.
+Metadata remains an injected core provider. No image renderer is bundled in the new themes. The optional `@dirwell/share-image` provider and `@dirwell/integrations` adapters now isolate those dependencies. The optional authoring package supplies source-component customization and native framework HMR. See [workspace releases](WORKSPACE_RELEASING.md) for offline preparation and the separate first-publication gate.
 
 ## Qualification boundary
 

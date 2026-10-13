@@ -27,7 +27,7 @@ function pack(cwd) {
 
 try {
   const core = pack(root);
-  const theme = pack(path.join(root, "examples/theme-package"));
+  const theme = pack(path.join(root, "test/fixtures/compatibility-theme-package"));
   assert.equal(core.artifact.name, metadata.name);
   assert.equal(core.artifact.version, metadata.version);
   await writeFile(

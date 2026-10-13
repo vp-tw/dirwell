@@ -5,17 +5,18 @@ with [Getting started](https://vp-tw.github.io/dirwell/getting-started/).
 
 ## Set up a checkout
 
-Use Node.js 26 or later and the pnpm version recorded in `package.json`. The checkout CLI below exercises the compatibility package; SDK package work lives in `packages/` and is documented in [the SDK guide](docs/src/content/docs/sdk-alpha.md).
+Use Node.js 26 or later and the pnpm version recorded in `package.json`. SDK code lives in `packages/`; the root retains historical compatibility tests.
 
 ```bash
 git clone https://github.com/vp-tw/dirwell.git
 cd dirwell
 pnpm install --frozen-lockfile
-pnpm dirwell serve ./fixture
+pnpm build:workspace
+pnpm dirwell server ./fixture
 ```
 
-Open the printed `Local:` URL; Ctrl+C stops the server. The repository's
-`pnpm dirwell` script runs the source CLI. User-facing instructions should use
+Open the printed server URL; Ctrl+C stops the server. The repository's
+`pnpm dirwell` script runs the built SDK CLI. User-facing instructions should use
 the published scoped package, not assume a checkout.
 
 ## Validate a change
@@ -51,7 +52,7 @@ pnpm site:build
 pnpm docs:dev
 ```
 
-For one portable example, run `pnpm dirwell build files --cwd examples/file-icons -o dist` and open `examples/file-icons/dist/index.html`. Keep CLI output away from Vite-owned `docs/public/examples/`.
+For one example, run `node scripts/build-example.ts file-icons ./generated-example` and serve its output over HTTP. Keep scratch output separate from `docs/public/examples/`.
 
 `examples/catalog.ts` defines the shared theme and customization groups for the homepage and docs. The builder also retains the unlisted `basic` archive for existing links.
 
@@ -83,7 +84,7 @@ TypeScript; test new commands against an installed package in a fresh project.
 Add a Changesets note for package changes, including packaged README updates.
 Review and merge the version before dispatching the
 OIDC workflow. The site deploys separately from `main` through GitHub Pages.
-Use [RELEASING.md](RELEASING.md) for the compatibility package and [WORKSPACE_RELEASING.md](WORKSPACE_RELEASING.md) for the synchronized SDK alpha family. The root `release:version` Changesets command is not the SDK family version operation. Do not republish an existing version.
+Use [WORKSPACE_RELEASING.md](WORKSPACE_RELEASING.md) for the synchronized SDK family. The root `release:version` Changesets command is not the SDK family version operation. Do not republish an existing version.
 
 Use `pnpm exec playwright install chromium firefox webkit` when the engine binaries are not installed. `test:compat` is a bounded theme-contract and IME suite; `test:browser:all` runs the full regression in Chromium, Firefox, and WebKit. Keep cross-engine tests capability-aware and distinguish scripted input from physical-device evidence. See [local verification](VERIFICATION.md) for additional environment checks.
 

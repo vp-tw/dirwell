@@ -1,44 +1,24 @@
 ---
 title: Overview
-description: Publish a folder as a searchable website, without building a file browser.
+description: Browse a folder live or publish it as a static website.
 ---
 
-Dirwell turns a folder into a website where visitors can browse directories,
-search for files, and open the original downloads. Use it for release files,
-reports, generated artifacts, or documentation attachments.
+Dirwell turns folders into browsable websites. Use live server mode for a local folder or build portable HTML for release downloads, reports and artifacts.
 
-[Try the live explorer](https://vp-tw.github.io/dirwell/examples/file-icons/) or
-[build your first explorer](../getting-started/).
+The published `@dirwell/*` packages are currently alpha. Use Node.js 22.12 or later and the `alpha` tag. The CLI includes Plain: native links and pagination without browser JavaScript. Install Ledger or Crosswave separately for search, sorting and keyboard navigation.
 
-## What you get
+[Start with the CLI](../getting-started/) or [compare working examples](../examples/).
 
-- A page for each directory, with breadcrumbs and links to its files.
-- Search, sorting, file icons, and keyboard navigation in the default theme.
-- A local server that updates as the source folder changes.
-- Static HTML and assets you can publish without running a Dirwell server.
+## Choose a path
 
-The first command needs no config. You need Node.js 22.12 or later to run Dirwell;
-visitors only need a browser. Use the published package without a prerelease tag.
+| Need                                 | Use                                                                    |
+| ------------------------------------ | ---------------------------------------------------------------------- |
+| Browse changing files                | [CLI server](../cli/)                                                  |
+| Publish a folder on a static host    | [Static build and deployment](../deployment/)                          |
+| Configure selection and URLs         | [Configuration](../configuration/)                                     |
+| Choose an interface                  | [Themes](../themes/)                                                   |
+| Add routes to a Node app             | [SDK server integration](../sdk-alpha/#standalone-and-integrated-http) |
+| Generate alongside an existing build | [Build adapters](../build-tools/)                                      |
+| Write a renderer                     | [API reference](../api-reference/)                                     |
 
-## Follow one path
-
-| Your next step                                   | Read                                   |
-| ------------------------------------------------ | -------------------------------------- |
-| Browse your folder and create your first website | [Getting started](../getting-started/) |
-| Publish the generated files                      | [Deployment](../deployment/)           |
-| Compare working examples                         | [Examples](../examples/)               |
-| Fix setup or broken links                        | [Troubleshooting](../troubleshooting/) |
-
-## Customize after the first build
-
-Keep the defaults until you need a different result. Configuration controls file
-selection and URL layout. Themes control appearance and browser behavior.
-Build adapters let Dirwell run alongside an existing application.
-
-| You need to                                | Read                                     |
-| ------------------------------------------ | ---------------------------------------- |
-| Select files or look up defaults           | [Configuration](../configuration/)       |
-| Change the interface or use plain HTML     | [Themes](../themes/)                     |
-| Add Dirwell to a build tool                | [Build tool adapters](../build-tools/)   |
-| Check integration promises and limitations | [Support and compatibility](../support/) |
-| Call the Node API or write a renderer      | [API reference](../api-reference/)       |
+Static output needs no Dirwell server. Live mode reads filesystem data on requests and does not generate an output tree. Optional rich-client updates use SSE; static builds must be rebuilt after source changes.

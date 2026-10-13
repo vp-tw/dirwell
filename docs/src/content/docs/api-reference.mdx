@@ -1,285 +1,96 @@
 ---
 title: API reference
-description: Find the exported TypeScript API, configuration defaults, and CLI options.
+description: Core filesystem, static publication, listing and optional package APIs.
 ---
 
-This page documents the `@vp-tw/dirwell` compatibility package. For the new `@dirwell/*` packages, explicit SDK themes and live `server` mode, use the [SDK guide](../sdk-alpha/). Its CLI simplification is identified separately from the first published alpha.
-
-import { Code } from "@astrojs/starlight/components";
-import zeroConfig from "../../../examples/api-reference/zero-config.ts?raw";
-import fixedOutputName from "../../../examples/api-reference/fixed-output-name.ts?raw";
-import outputName from "../../../examples/api-reference/output-name.ts?raw";
-import symlinksUrl from "../../../examples/api-reference/symlinks-url.ts?raw";
-import theme from "../../../examples/api-reference/theme.ts?raw";
-
-Use this page to find the TypeScript names. For accepted config values,
-defaults, results, and use cases, start with the [configuration guide](../configuration/).
-The `@vp-tw/dirwell` package root exports the values and types below from `src/index.ts`.
-The `@vp-tw/dirwell/theme` subpath exposes the component contracts from
-`src/theme-components.ts`, including the generic `ThemeComponent<Props>` type.
-The `@vp-tw/dirwell/vite` subpath exports the Vite adapter and its `DirwellViteOptions`
-type. `Dirwell(options)` returns one Vite plugin; `Dirwell([options, ...])`
-returns a plugin array. See [Vite adapter](../configuration/#vite-adapter).
-The command-line interface is described separately under [CLI](../cli/).
-Use the [configuration guide](../configuration/) and [theme guide](../themes/)
-for behavior and design examples. The code blocks on this page are imported from
-TypeScript files checked by the repository tests.
-
-## Run a Node build
-
-Install `@vp-tw/dirwell` in your project and create `build-explorer.mjs`:
+## Static build
 
 ```js
-import { generateExplorer } from "@vp-tw/dirwell";
-
-await generateExplorer({
-  sourceDir: "./downloads",
-  outputDir: "./site-downloads",
-});
+import { generateExplorer } from "@dirwell/core";
+import { createPlainTheme } from "@dirwell/theme-plain";
+await generateExplorer({ sourceDir: "files", outputDir: "generated", theme: createPlainTheme() });
 ```
 
-Run `node build-explorer.mjs` from the project directory. Await completion before
-serving or publishing the output. The generator replaces the output tree after a
-successful render; use a dedicated output directory. Use a [build adapter](../build-tools/)
-when another tool owns the application output.
+`GenerateOptions` requires source, dedicated output and an explicit theme. Build awaits renderers and metadata, validates assets, then replaces the output tree. It defaults to SSG, relative links and mirrored source files. `outputName` can return a filename or null per directory. `listing` controls HTML pages and data independently. See [configuration](../configuration/) and [deployment](../deployment/).
 
-The other adapter subpaths export their factory and `DirwellPluginOptions`.
-`@vp-tw/dirwell/unplugin` exposes the available factories as named properties.
-See [support and compatibility](../support/) before choosing an integration.
+## Core public contracts
 
-## Start without configuration
+All names below come from `@dirwell/core`. Source definitions live in [the Core package](https://github.com/vp-tw/dirwell/tree/main/packages/core/src).
 
-Run `dirwell .` to watch the current directory, or `dirwell build .` to write
-static output to `dist/`. The TypeScript API needs only source and output paths:
+| Symbol                          | Role                                                                                |
+| ------------------------------- | ----------------------------------------------------------------------------------- |
+| `ContentCounts`                 | Direct or archive folder, file and link counts.                                     |
+| `DirectoryAccessError`          | Unavailable or rejected logical filesystem path.                                    |
+| `DirectoryData`                 | Private root/current/parent facts and current-directory entries.                    |
+| `DirectoryService`              | Async path resolution, entry reads, directory reads and safe file handles.          |
+| `DirectoryServiceOptions`       | Physical root, include/exclude rules and sort policy for live reads.                |
+| `EntryKind`                     | Directory, file, symlink or other entry.                                            |
+| `ExplorerTheme`                 | Renderer, optional public entry data, pagination and search capabilities.           |
+| `FileMetadata`                  | Private stat facts: size, mode, device, ownership, inode and times.                 |
+| `FileSystemEntry`               | Private Node-side name/path, kind, metadata and link facts.                         |
+| `FileTimes`                     | ISO timestamps for access, change, creation and modification.                       |
+| `GenerateOptions`               | Required source/output/theme plus static selection, URLs, listing and metadata.     |
+| `ImageSource`                   | Local path, file URL or File used by a metadata provider.                           |
+| `JsonObject`                    | String-keyed JSON-compatible object for public custom data.                         |
+| `JsonValue`                     | Validated JSON primitive, array or object.                                          |
+| `ListingBlock`                  | Versioned public records with offset, total and coherent revision.                  |
+| `ListingContext`                | Current page, manifest URL and public revision passed to a theme.                   |
+| `ListingEntry`                  | Public name, kind, navigation, size, modification time and safe link state.         |
+| `ListingManifest`               | Coherent revision, URL base, sort policy and block descriptors.                     |
+| `ListingPage`                   | Page number/count, offset/total and native previous/next links.                     |
+| `ListingPlan`                   | Independent all/paged HTML and all/blocked data policy.                             |
+| `ListingPolicy`                 | Fixed plan or synchronous per-directory planner.                                    |
+| `ListingPolicyContext`          | Directory path/count/bytes, layout, operation and theme pagination capability.      |
+| `MetadataContext`               | Public site and current-directory names, paths and counts.                          |
+| `MetadataImage`                 | Image source with optional output-relative path and alt text.                       |
+| `MetadataImageValue`            | Fixed image, disabled image or async resolved-text callback.                        |
+| `MetadataOptions`               | Site URL/name, titles, descriptions and optional image selection.                   |
+| `MetadataProvider`              | Async directory metadata resolver and generated byte assets.                        |
+| `MetadataProviderFactory`       | Per-build provider created from source path and selected entry kinds.               |
+| `MetadataValue`                 | Fixed value or async public-count callback.                                         |
+| `NameSortMode`                  | Locale, natural or Unicode filename comparison.                                     |
+| `OutputNameResolver`            | Async per-directory filename or null to skip a generated page.                      |
+| `PageMetadata`                  | Resolved title, description and inert HTML head tags.                               |
+| `RenderedPage`                  | Complete document plus optional string/byte assets.                                 |
+| `ResolvedMetadataContext`       | Public counts and paths plus resolved title and description.                        |
+| `SortDirection`                 | Ascending or descending.                                                            |
+| `SortField`                     | Modified time, name or size.                                                        |
+| `SortOptions`                   | Direction, field, directory grouping and filename comparison.                       |
+| `SymlinkMetadata`               | Private declared/resolved target and boundary, broken, cycle and follow state.      |
+| `ThemeContext`                  | Private Node-side directory facts and prepared safe navigation/rendering functions. |
+| `ThemeMetadataDefaults`         | Optional provider defaults; image presets require the share-image package.          |
+| `compareEntries`                | Compare private entries with a resolved sort policy.                                |
+| `copyJsonObject`                | Validate and copy JSON-compatible custom public data.                               |
+| `createDirectoryService`        | Await live filesystem service creation; no output tree or watcher.                  |
+| `defaultOutputName`             | Preserve source index pages and choose an available explorer filename.              |
+| `escapeHtml`                    | Escape untrusted text before inserting it in HTML.                                  |
+| `generateExplorer`              | Await static publication; requires an explicit theme.                               |
+| `generateExplorerSkippingPaths` | Publish static output while skipping host-owned generated paths.                    |
+| `listingRevision`               | Hash public listing facts into a coherent revision.                                 |
+| `projectListingEntry`           | Convert private filesystem facts into public serializable records.                  |
+| `readGeneratedPage`             | Read an available generated directory page.                                         |
+| `validateListingPlan`           | Validate independent HTML/data policy and pagination support.                       |
 
-<Code code={zeroConfig} lang="ts" />
+## Browser listing loader
 
-`generateExplorer()` requires `sourceDir` and `outputDir`. It defaults to SSG,
-relative URLs, mirrored source files, the default theme, and no symlink
-traversal. It writes the complete output to a staging directory before
-replacing the previous output. In this API, `urlStrategy` is the field that
-corresponds to config `urls`.
+`@dirwell/core/client` exports `loadListing` and `parseListingEntries`. The loader fetches coherent public records and retries once when a live revision expires. Private filesystem objects never belong in browser payloads. Data splitting is independent of HTML pagination and row rendering.
 
-## Configure a build
+## Optional packages
 
-`defineConfig()` preserves the input type and accepts an object or a function
-receiving `{ command: "build" | "serve" | "daemon" }`. The function may be
-asynchronous. A `dirwell.config.ts` file is discovered from `--cwd`.
+| API                                                                           | Package/guide                                                                                            |
+| ----------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `runCli`, `CliConfig`                                                         | [CLI](../cli/) and `@dirwell/cli`                                                                        |
+| `createPlainTheme`                                                            | `@dirwell/theme-plain`                                                                                   |
+| `createLedgerTheme`, `LedgerThemeOptions`                                     | `@dirwell/theme-ledger`                                                                                  |
+| `createCrosswaveTheme`, `defaultCrosswaveCategories`, `CrosswaveThemeOptions` | `@dirwell/theme-crosswave`                                                                               |
+| `createExplorerHandler`                                                       | `@dirwell/server`; await creation before mounting                                                        |
+| `startExplorerServer`, `createNodeRequestListener`                            | `@dirwell/server/node`; the standalone server owns shutdown                                              |
+| `createMetadataProvider`, `createShareImage`, `describeContent`               | [Metadata](../metadata/) and `@dirwell/share-image`                                                      |
+| Default build adapter factories                                               | [Build tools](../build-tools/) and `@dirwell/integrations/*`                                             |
+| `buildFrameworkTheme`, `startAuthoringServer`                                 | [Source customization](../themes/#source-component-customization) and `@dirwell/theme-authoring` / `dev` |
 
-| Field        | Accepted input; default and effect                                                                                                   |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `root`       | Directory path; `.` for `resolveGenerateOptions()`. The CLI positional directory takes precedence and itself defaults to `.`.        |
-| `outDir`     | `dist/` for build; `.dirwell-preview/` for serve and daemon.                                                                         |
-| `mode`       | `"ssg"`; `"mpa"` shares runtime assets under `__dirwell/`.                                                                           |
-| `mirror`     | `true`; copy source files to the output.                                                                                             |
-| `include`    | All source entries; root-relative glob or array of globs. Matching directories include descendants.                                  |
-| `exclude`    | No exclusions; root-relative glob or array of globs. Exclusions win over inclusions.                                                 |
-| `base`       | `/`; root-relative path or HTTP(S) URL without query or fragment.                                                                    |
-| `urls`       | `"relative"`; also accepts `"base"` and `"html-base"`.                                                                               |
-| `outputName` | Safe filename or sync/async resolver; `defaultOutputName` uses `_dirwell.html` when an index exists and skips when both names exist. |
-| `sort`       | `field`, `nameMode`, `direction`, and `directoriesFirst`; name, natural comparison, ascending, directories first.                    |
-| `symlinks`   | `follow`, `boundary`, and `onCycle`; `{ follow: false, boundary: "root", onCycle: "skip" }`.                                         |
-| `metadata`   | Shared title/description and image settings; built-in themes supply defaults. See [metadata](../metadata/).                          |
-| `theme`      | `defaultTheme`.                                                                                                                      |
-| `server`     | Serve/daemon host `127.0.0.1`, port `4173`; `HOST` and `PORT` may override these.                                                    |
-| `extends`    | No inherited config; local path or array of local paths.                                                                             |
+See [SDK examples](../sdk-alpha/) for executed static/live/authorization examples. Package exports include TypeScript declarations. Theme `/source` and `/model` subpaths supply framework component and row contracts; they are compiled with paired SSR/client output rather than serialized function overrides.
 
-For an index rule, inspect the typed `DirectoryData` argument. Returning `null`
-skips generation for that directory:
+## Theme rendering
 
-<Code code={outputName} lang="ts" />
-
-Use a fixed name when every directory should get the same filename:
-
-<Code code={fixedOutputName} lang="ts" />
-
-To deploy under a path and follow only symlinks within the source root:
-
-<Code code={symlinksUrl} lang="ts" />
-
-`"relative"` uses depth-aware links, `"base"` prefixes the deployment base,
-and `"html-base"` emits an HTML `<base>` element. Broken symlinks expose their
-declared target through a raw-text view. Out-of-root and excluded targets also
-open only their declared text; the target file is not published. See
-[symlink behavior](../symlinks/) and [deployment](../deployment/).
-
-## Compose a theme
-
-`createDefaultTheme()` accepts `colorScheme`, `fuzzySearch`, `globalSearch`,
-`keyboardNavigation`, and `sorting` switches, all enabled by default. It also
-accepts `virtualizeAfter` (default `500`), `project` metadata, custom `icons`, and
-one or more ordered `components` overrides. The [theme guide](../themes/)
-explains each option and its trade-off. This example wraps the default footer
-and escapes added text before writing HTML:
-
-<Code code={theme} lang="ts" />
-
-`createPlainTheme()` renders complete browser-native HTML without icons,
-JavaScript, or a search index. Complete replacement themes implement
-`ExplorerTheme.render(context)` and may emit named assets with their HTML.
-
-## Exported values
-
-| Export                    | Purpose                                                                                           |
-| ------------------------- | ------------------------------------------------------------------------------------------------- |
-| `defineConfig`            | Preserve the type of a configuration object or function.                                          |
-| `loadDirwellConfig`       | Load and validate config for a working directory and command; return config and config-file path. |
-| `resolveGenerateOptions`  | Resolve config and CLI overrides into absolute generator paths and options.                       |
-| `generateExplorer`        | Generate a static explorer from `GenerateOptions`.                                                |
-| `createExplorerDevServer` | Build, watch, serve, and expose a `close()` method.                                               |
-| `readGeneratedPage`       | Read a generated HTML file as text.                                                               |
-| `defaultOutputName`       | Use `index.html`, then `_dirwell.html` if an index exists; skip when both names exist.            |
-| `compareEntries`          | Compare two entries with optional sort settings.                                                  |
-| `createDefaultTheme`      | Create the interactive default theme.                                                             |
-| `defaultTheme`            | Ready-made instance of the default theme.                                                         |
-| `defaultThemeComponents`  | The eight replaceable default HTML component functions.                                           |
-| `createCrosswaveTheme`    | Create the optional crossbar renderer with wave lighting and keyboard/gamepad navigation.         |
-| `createPlainTheme`        | Create a browser-native, no-script theme.                                                         |
-| `resolveThemeComponents`  | Apply ordered component override layers to a base set.                                            |
-| `escapeHtml`              | Escape untrusted text before inserting it into theme HTML.                                        |
-
-`src/index.ts` is the source of truth for this list. `src/config.ts`,
-`src/generator.ts`, `src/dev-server.ts`, `src/theme-default.ts`,
-`src/theme-components.ts`, and `src/theme-plain.ts` define the behavior.
-
-The Crosswave factory also exports `defaultCrosswaveCategories`, `CrosswaveThemeOptions`, `CrosswaveColor`, `CrosswaveCategory`, `CrosswaveCategoryMatch`, and `CrosswaveCategoryIcon`.
-See [Crosswave options](../themes/#crosswave).
-
-## Exported types
-
-| Type                             | Contract                                                                                                                                                  |
-| -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `DirwellConfig`                  | Config object fields listed above.                                                                                                                        |
-| `DirwellConfigContext`           | Command passed to a config function.                                                                                                                      |
-| `DirwellConfigInput`             | Config object or synchronous/asynchronous config function.                                                                                                |
-| `GenerateOptions`                | Generator source, output, URL, symlink, sort, theme, and metadata options. `metadataBaseDirectory` resolves local image paths; default working directory. |
-| `DirectoryData`                  | Root, current directory, parent, depth, and complete entries passed to output naming and themes.                                                          |
-| `FileSystemEntry`                | Entry name, paths, kind, metadata, and symlink state. `absolutePath` is for Node-side renderers; do not put it in public HTML.                            |
-| `FileMetadata`                   | Device, ownership, inode, size, mode, link count, and times.                                                                                              |
-| `FileTimes`                      | Access, change, creation, and modification ISO timestamps.                                                                                                |
-| `EntryKind`                      | Directory, file, symlink, or other.                                                                                                                       |
-| `SymlinkMetadata`                | Declared target, resolved and root-relative paths, target kind, and safety flags.                                                                         |
-| `OutputNameResolver`             | Sync or async function from `DirectoryData` to a filename or `null`.                                                                                      |
-| `SortField`                      | Name, modified time, or size.                                                                                                                             |
-| `NameSortMode`                   | Unicode, locale-aware, or natural name comparison.                                                                                                        |
-| `SortDirection`                  | Ascending or descending.                                                                                                                                  |
-| `SortOptions`                    | Field, name mode, direction, and directory grouping.                                                                                                      |
-| `ExplorerTheme`                  | Theme name, optional search-index policy and `metadataDefaults`, and renderer.                                                                            |
-| `ThemeContext`                   | Prepared directory, output mode, URL helpers, sort state, link decisions, and optional resolved page `metadata`.                                          |
-| `RenderedPage`                   | HTML plus optional named text or byte assets.                                                                                                             |
-| `PlainThemeOptions`              | Optional plain-theme project metadata.                                                                                                                    |
-| `DirwellThemeComponents`         | The eight typed HTML component functions.                                                                                                                 |
-| `DirwellThemeComponentOverrides` | Partial component layer.                                                                                                                                  |
-| `DefaultThemeIconSet`            | Light and optional dark SVG icon sets with attribution.                                                                                                   |
-| `DefaultThemeIconVariant`        | File, folder, and extension-specific SVG markup for one color scheme.                                                                                     |
-| `ThemeComponent<Props>`          | Function that renders typed props to an HTML string; available from `@vp-tw/dirwell/theme`.                                                               |
-| `DefaultThemeRuntimeConfig`      | Serialized default-theme browser controls and asset links.                                                                                                |
-| `BreadcrumbItem`                 | Label, link, and current-page state.                                                                                                                      |
-| `EntryNavigation`                | Link and whether navigation leaves the explorer.                                                                                                          |
-| `EntryListItem`                  | Entry, position, and navigation data.                                                                                                                     |
-| `PageShellProps`                 | Full-document component inputs, including optional `metadata` for the head.                                                                               |
-| `BreadcrumbsProps`               | Breadcrumb component inputs.                                                                                                                              |
-| `ToolbarProps`                   | Search, sorting, keyboard, and appearance-control inputs.                                                                                                 |
-| `EntryListProps`                 | List markup, directory, parent link, and sorting state.                                                                                                   |
-| `EntryRowProps`                  | One entry's data, navigation, and icon.                                                                                                                   |
-| `EmptyStateProps`                | Empty-state message.                                                                                                                                      |
-| `FooterProps`                    | Project metadata, shortcuts, and notice link.                                                                                                             |
-| `IconName`                       | Built-in control icon names.                                                                                                                              |
-| `IconProps`                      | Icon name, optional label, size, and file-type image source.                                                                                              |
-
-The types are re-exported from `src/model.ts`, `src/config.ts`,
-`src/theme-components.ts`, and `src/theme-plain.ts`. Component functions return
-HTML strings; call `escapeHtml()` for untrusted entry or project text.
-
-## CLI options
-
-| Option           | Commands                                | Default or effect                                                      |
-| ---------------- | --------------------------------------- | ---------------------------------------------------------------------- |
-| `[directory]`    | `build`, `serve`, `dev`, `daemon start` | `.`; positional source directory.                                      |
-| `--cwd`          | All commands                            | `.`; config discovery and daemon state directory.                      |
-| `--base`         | `build`, `serve`, `dev`, `daemon start` | Config `base`, otherwise `/`.                                          |
-| `--mode`         | `build`, `serve`, `dev`, `daemon start` | `ssg` or `mpa`; config or SSG default.                                 |
-| `--urls`         | `build`, `serve`, `dev`, `daemon start` | `relative`, `base`, or `html-base`; config or relative default.        |
-| `-o`, `--outDir` | `build`, `serve`, `dev`, `daemon start` | Output path; build defaults to `dist/`, server to `.dirwell-preview/`. |
-| `--host`         | `serve`, `dev`, `daemon start`          | `HOST`, config, or `127.0.0.1`.                                        |
-| `-p`, `--port`   | `serve`, `dev`, `daemon start`          | `PORT`, config, or `4173`.                                             |
-
-`daemon status` and `daemon stop` accept `--cwd`. `daemon` defaults to `start`;
-`dev` aliases `serve`, and a bare directory also invokes `serve`. Run
-`dirwell <command> --help` for generated help and current flag spelling.
-
-## Metadata and share images
-
-`describeContent` formats folders, files, and links in that order, omitting zero counts and returning `Empty folder` when all are zero. `createShareImage` asynchronously returns a PNG `File` with fixed bundled fonts and one of the `ledger`, `plain`, or `crosswave` styles.
-
-| Type                      | Contract                                                                                                |
-| ------------------------- | ------------------------------------------------------------------------------------------------------- |
-| `ContentCounts`           | `folderCount`, `fileCount`, and `linkCount`.                                                            |
-| `MetadataContext`         | Public `site` totals/name/repositoryName and immediate `directory` counts/name/relativePath.            |
-| `ResolvedMetadataContext` | The same context plus resolved `title` and `description`, passed to image callbacks.                    |
-| `MetadataValue`           | A fixed value or sync/async callback from `MetadataContext`.                                            |
-| `MetadataOptions`         | Site naming, deployment URL, text values/callbacks, and image source/callback.                          |
-| `ImageSource`             | A Node `File`, local path string, or `file:` URL.                                                       |
-| `MetadataImageValue`      | Fixed image, false, or sync/async image callback; shared by caller settings and theme defaults.         |
-| `MetadataImage`           | A `source` with optional output-root `outputPath` and `alt`.                                            |
-| `PageMetadata`            | Resolved title/description and escaped `head` HTML for custom themes.                                   |
-| `ThemeMetadataDefaults`   | A theme’s default site/repository naming, own image source/callback, and optional built-in image style. |
-| `ShareImageOptions`       | Image `theme`, `title`, `description`, optional `repositoryName` and `directoryPath`.                   |
-
-See [Page metadata and share images](../metadata/) for defaults, path handling, counting, and complete examples.
-
-## Opt-in listing publication
-
-`GenerateOptions.listing` and `DirwellConfig.listing` accept a `ListingPlan` or
-`ListingPolicy` callback. HTML publication and data transport are independent:
-
-```ts
-listing: {
-  html: { strategy: "paged", pageSize: 100 },
-  data: { strategy: "blocks", blockSize: 200 },
-}
-```
-
-Use Plain or an independent theme that declares `listing: { pagination: true }`
-for paged HTML. Ledger and Crosswave currently reject paged plans because their
-existing local search and sorting require complete data. They can publish data
-with `html: { strategy: "all" }`. Nothing is published unless listing is enabled;
-Plain remains script-free and emits no default metadata images.
-
-`ListingPolicyContext` supplies `directoryPath`, filtered `visibleCount`,
-`dataBytes` (the UTF-8 JSON record-array size, excluding manifest/block envelopes),
-`mode`, and `supportsPagination`. The synchronous callback runs once per generated
-directory. Return a complete plan; `validateListingPlan` rejects invalid strategies
-and non-positive or unsafe integer sizes before output replacement. There is no
-built-in automatic threshold in this version. A threshold is application policy,
-not a universal recommendation.
-
-`projectListingEntry` takes `(entry, context)` and produces a `ListingEntry` using the core's
-prepared URL and exit flag. It omits absolute/resolved filesystem paths and private
-stat fields. Declared symlink target text is intentionally retained, matching
-existing theme and raw-link behavior. Its unavailable flag follows existing core
-navigation policy; a cycle is reported independently.
-
-When enabled, `ThemeContext.listing` is a `ListingContext` containing the revision,
-manifest URL and `ListingPage`. `directory.entries` contains the current HTML
-slice; use `listing.page.total` for directory-wide counts. Emit native anchors for
-`previousHref` and `nextHref`, when non-null. Each additional page is published
-beside the directory's initial HTML, including in MPA mode; metadata callbacks see
-the full directory and core canonical URLs identify the actual page. Local-only
-sorting of a slice must not be presented as directory-wide sorting.
-
-The `ListingManifest` uses version 1 and includes a directory, total, sort, revision,
-`hrefBase` and block descriptors. Resolve block URLs relative to the manifest URL.
-Resolve record URLs against `hrefBase`, itself resolved relative to the manifest
-URL, rather than against the JSON block's location. A `ListingBlock` contains the
-same revision, offset, total and an entry array. Empty directories publish one
-empty block and one HTML page.
-
-Block filenames contain a revision derived from the public records, URL base,
-sort and block size. HTML page filenames remain stable for the configured initial
-output filename. No stable-read promise is made across filesystem mutations.
-Build publication replaces the output tree and does not retain earlier revision
-assets. An asynchronous client must validate the schema and revision, and reload
-the manifest on missing/stale blocks; a coherent live-update/cache protocol is
-not implemented by these static build contracts. Publication alone does not
-configure HTTP caching, authentication or server queries.
+`ExplorerTheme.render(ThemeContext)` owns a complete document and optional string/byte assets. Context contains private Node-side directory facts, safe link functions, sort settings, optional listing and metadata. Escape untrusted text. Use projected public entries for client data, never absolute paths or raw stat metadata. A theme may add JSON entry data, opt into native pagination and choose whether to generate an archive search index.

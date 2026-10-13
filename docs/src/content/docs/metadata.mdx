@@ -1,79 +1,63 @@
 ---
 title: Page metadata and share images
-description: Set page titles, descriptions, and static or per-folder share images.
+description: Opt into build-time titles, descriptions, canonical URLs and images.
 ---
 
-This page documents the `@vp-tw/dirwell` compatibility package. For the new `@dirwell/*` packages, explicit SDK themes and live `server` mode, use the [SDK guide](../sdk-alpha/). Its CLI simplification is identified separately from the first published alpha.
+Metadata and PNG rendering live in optional `@dirwell/share-image`. Core and themes do not install it. Plain emits no social metadata or image assets by default.
 
-import { Code } from "@astrojs/starlight/components";
-import site from "../../../examples/api-reference/metadata-site.ts?raw";
-import fixed from "../../../examples/api-reference/metadata-static.ts?raw";
-import themeImages from "../../../examples/api-reference/theme-images.ts?raw";
-import dynamic from "../../../examples/api-reference/metadata-dynamic.ts?raw";
+```sh
+npm install --save-dev @dirwell/core@alpha @dirwell/theme-plain@alpha @dirwell/share-image@alpha
+```
 
-Ledger and Crosswave provide page titles, descriptions, and one static 1200×630 share image per site. Plain defaults to a minimal directory title without metadata or generated assets. Set `metadata` explicitly to enable text metadata in Plain; supply `metadata.image` explicitly if you also want an image. Each image uses a fixed theme palette and bundled Source font family, with repository name and theme name above the site title.
+```js
+import { generateExplorer } from "@dirwell/core";
+import { createPlainTheme } from "@dirwell/theme-plain";
+import { createMetadataProvider } from "@dirwell/share-image";
 
-## Start with a site name
+await generateExplorer({
+  sourceDir: "files",
+  outputDir: "public/downloads",
+  theme: createPlainTheme(),
+  metadata: createMetadataProvider(
+    { siteName: "Downloads", siteUrl: "https://example.com/downloads/" },
+    { siteName: "Downloads", repositoryName: "you/downloads", imageTheme: "plain" },
+  ),
+});
+```
 
-<Code code={site} lang="ts" />
+`siteUrl` is the deployed explorer root, including its prefix. It supplies absolute canonical and share URLs. Use a content name, not just a theme name. Titles identify the current folder; describe direct folder contents separately from archive-wide totals shown on a shared cover.
 
-Save this as `dirwell.config.ts` after [installing Dirwell](../getting-started/#3-save-project-settings-when-needed), then run `npx dirwell build files -o dist`. Replace the sample repository and deployment URLs with your own. The CLI source argument remains explicit.
+## Text and fixed covers
 
-The homepage title is `Downloads`; a child page is `docs · Downloads`. The default root description explains the archive, such as `Browse files in Downloads. Archive totals: 3 folders · 6 files.` Child descriptions name the destination and use direct folder counts, such as `Browse docs in Downloads. This folder: 2 files.` The share image stays the same while browsing folders, and its default count line is labeled `Archive totals:`. Rebuilding refreshes its totals.
+`title` and `description` accept strings or async callbacks. Callbacks receive `site` archive counts and `directory` direct counts/path. Omit `imageTheme` for text-only metadata. `image: false` disables a preset. A local path, file URL or File supplies a custom image; an object adds `outputPath` and `alt`.
 
-The example sets the display name once in `project.name`. If omitted, page and image names come from the built-in theme's `project` settings. `metadata.siteName` controls page/image naming; `project.name` still controls the theme header or attribution. Set both when you want them to match. Theme names appear in the image's upper-right corner rather than page titles.
+When using relative image paths, pass the intended source directory as the third argument to `createMetadataProvider`. Metadata resolves before output replacement. Image bytes are deduplicated per build and conflicting output paths are rejected.
 
-Set `siteUrl` to the actual deployed explorer root, including its deployment base. Dirwell emits absolute `og:image`, `og:url`, and canonical URLs when it is provided. Without it, image links remain portable relative URLs and canonical/og:url are omitted; set it before relying on social preview crawlers. A repository URL is not a deployment URL. Image-enabled pages also emit `twitter:card=summary_large_image` and explicit Twitter title, description, image, and image-alt tags. Disabling the image omits these image-card tags. Social platforms may crop images, omit descriptions, and cache previews independently of your build; these tags do not guarantee a particular platform layout.
+## Per-folder images
 
-The image presets use Ledger’s light paper, Plain’s white background, and Crosswave’s Azure background. Visitor appearance settings and Crosswave’s configured `color` do not recolor these static presets. Supply an image or image callback for a different image design.
+```js
+import { createMetadataProvider, createShareImage, describeContent } from "@dirwell/share-image";
 
-## Counting folders, files, and links
+export const metadata = createMetadataProvider(
+  {
+    siteName: "Design kit",
+    siteUrl: "https://example.com/design/",
+    description: ({ directory }) => describeContent(directory),
+    image: async ({ directory, site, description }) => ({
+      source: await createShareImage({
+        theme: "crosswave",
+        title: directory.relativePath || site.name,
+        description,
+        directoryPath: directory.relativePath,
+      }),
+      outputPath: `og/${directory.relativePath || "root"}.png`,
+      alt: `${directory.relativePath || site.name}: ${description}`,
+    }),
+  },
+  { siteName: "Design kit", repositoryName: "you/design" },
+);
+```
 
-The order is folders, files, links. Zero counts are omitted; all zero becomes `Empty folder`.
+Use this provider as `build.metadata`, core `metadata` or adapter `metadata`. See the [dynamic image demo](../examples/). This is build-time rendering, not a live server image endpoint.
 
-- `site` counts the selected source tree recursively, after include/exclude rules. The root itself and generated HTML, fonts, search assets, and images are excluded. Preserved source HTML remains a source file.
-- `directory` counts immediate displayed entries, without descendants or the parent-navigation row.
-- A symbolic link counts once as a link, regardless of target type or availability. Following it does not count its target again in site totals. Broken links still count as links; the file list displays their status.
-- Hard-linked source files count by listed path, as ordinary files. Special filesystem entries do not contribute to these three counts.
-
-## Fixed text and an existing image
-
-<Code code={fixed} lang="ts" />
-
-Place `cover.png` beside the config for this example.
-
-A fixed title is used on every page. Fixed title/description values also feed the default generated image when you leave `image` unset. Text callbacks affect page metadata; the default image remains a whole-site image with qualified archive totals. Default image alternative text includes its displayed title and description. To create per-folder images, provide an image callback.
-
-`image` accepts a Node `File`, a local path string, a `file:` URL, or `{ source, outputPath?, alt? }`. Local path strings resolve from the config/project directory; programmatic generation can set `metadataBaseDirectory` explicitly, otherwise it uses the working directory. Remote image downloads are not performed. Supported image filename extensions are PNG, JPEG, WebP, and GIF.
-
-`File.name` is a filename hint, not a source path or published output path. Without `outputPath`, Dirwell uses a content hash under `__dirwell/metadata/` and deduplicates identical images. Explicit paths are relative to the generated output root and must not overlap source entries, theme output, or reserved internal assets. Different bytes at the same explicit path fail the build. Use a separate `og/` directory. Set `image: false` to disable image generation while retaining text metadata.
-
-## Generate an image per folder
-
-<Code code={dynamic} lang="ts" />
-
-[Open the dynamic example](https://vp-tw.github.io/dirwell/examples/dynamic-og/) or inspect [its complete config](https://github.com/vp-tw/dirwell/tree/main/examples/dynamic-og). The small tree shows nested-folder results without a large demo library.
-
-Title resolves first, then description, then the image callback receives both resolved strings. Callbacks may return promises and run at build time for each generated page. They receive public metadata, not absolute filesystem paths or owner IDs. A callback/image error stops generation before replacing the existing output.
-
-## Fonts and custom themes
-
-Ledger uses Source Sans 3 Regular, with Source Code Pro Regular for symlink target paths. Plain uses the browser’s system serif font without font files. The optional `createShareImage({ theme: "plain", ... })` renderer still uses bundled Source Serif 4 Regular. Crosswave uses Source Sans 3 Regular with Light for its brand title. WOFF2 files are served with Ledger and Crosswave; PNG rendering uses pinned OTF sources with system-font discovery disabled. Normal builds need no font download. The source versions and SIL-OFL licenses ship in the package. Themes that emit fonts include a `source-fonts-NOTICE.txt` asset alongside them; minimal Plain output has neither.
-
-The bundled fonts support their upstream character repertoire; built-in text is English and no CJK font bundle or localization system is included. Use a custom image renderer/font set for languages outside that repertoire. Browser rasterization can differ across environments; pinning font files does not guarantee identical pixels on every device.
-
-Theme packages can supply `metadataDefaults.image` as a fixed source or an async callback, with the same input/output types as caller `metadata.image`. Caller settings take precedence, including `false`, without running the theme callback. `imageTheme` is an optional built-in fallback preset; omit both defaults for text-only metadata. Set `metadataDefaults.enabledByDefault: false` to resolve these defaults only when the consumer explicitly supplies `metadata`; an omitted field preserves the existing default-on behavior. Theme-local files should use `new URL("./cover.png", import.meta.url)` or a `File`; a relative path string still resolves from the consumer config directory. See the [separately packed theme example](https://github.com/vp-tw/dirwell/tree/main/examples/theme-package).
-
-Assign the following object to your theme factory’s `metadataDefaults`. This is theme-author code; consumer configuration still uses `metadata.image`. The callback below creates per-page images; the separately packed theme example instead uses whole-site totals.
-
-<Code code={themeImages} lang="ts" />
-
-Custom themes can render `context.metadata?.head` inside their head element, or use its resolved title/description. Metadata does not inject HTML into arbitrary custom themes automatically. Ledger PageShell overrides receive `metadata` too. Crosswave updates managed metadata tags during persistent folder navigation, including browser history restoration.
-
-## Migrating Plain to 0.2
-
-Plain no longer emits fonts, a share image, social metadata, or a repository footer by default. Its document title is `Index of /` (or the current folder path), and native colors follow the system appearance. Directory links, breadcrumbs, file sizes, UTC timestamps, and safe symlink handling are unchanged.
-
-Provide `project` to `createPlainTheme()` to opt into the repository footer; a configured project name also supplies the fallback title. Provide `metadata` to opt into metadata using that project name. An empty `metadata: {}` enables text only. To restore an image, provide a local image or an explicit `createShareImage({ theme: "plain", ... })` callback. This adds the requested image asset and social-card tags without adding browser fonts or JavaScript.
-
-These changes reduce generated output and browser requests; installing Dirwell still includes the dependencies and assets needed by the other themes and optional image renderer.
+Presets generate 1200 × 630 PNGs using bundled fonts without network/system-font lookup. Unsupported glyphs fail rather than silently becoming missing characters. Use a custom renderer for other scripts. `createShareImage` returns a PNG File; optional image dependencies stay outside Core/Plain.

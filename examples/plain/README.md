@@ -1,22 +1,11 @@
-# Plain theme example
+# Plain native HTML
 
-This example generates plain HTML listings with browser-native links and no icons,
-JavaScript, web fonts, share images, social metadata, search index, or brand footer. Native colors follow the system appearance without controls. Both SSG and MPA output contain
-the complete listing; the theme does not use MPA virtualization.
-Use it when the source folders are small enough to render fully and visitors
-do not need client-side search or appearance controls.
+The config uses the published `@dirwell/*` API with an explicit theme. Input files live in `files/`.
 
-From the repository root after installing dependencies:
+From an installed repository checkout:
 
-```bash
-pnpm dirwell build files --cwd examples/plain -o dist
+```sh
+node scripts/build-example.ts plain ./generated-plain
 ```
 
-Open `examples/plain/dist/index.html` for this portable build. `pnpm examples:build` separately generates the Vite-owned published example under `docs/public/examples/plain/`. Keep CLI output in its own directory. See [all example workflows](https://vp-tw.github.io/dirwell/examples/).
-
-- [Live demo](https://vp-tw.github.io/dirwell/examples/plain/)
-- [Source code on GitHub](https://github.com/vp-tw/dirwell/tree/main/examples/plain)
-
-The example deliberately leaves `project` and `metadata` unset. With `mirror: false` and no symlinks requiring safe target-text stubs, both modes emit only the directory listing pages. Mirrored source files remain source content; broken-link target stubs are retained when needed for safe navigation.
-
-See the [Plain 0.2 migration guide](https://vp-tw.github.io/dirwell/metadata/#migrating-plain-to-02) to opt into project attribution or metadata.
+`config.ts` exports core `GenerateOptions`; it is consumed by this SDK build script, not discovered by CLI. For a standalone CLI project, use `dirwell.config.mjs` with `{ theme, build, server, listing }`. Build replaces its dedicated output tree. Serve the complete result over HTTP. `SITE_BASE=/dirwell/ pnpm site:build` publishes every example for the documentation site.
