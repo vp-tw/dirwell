@@ -61,7 +61,10 @@ using an adapter; standalone callers await `server.close()`.
 
 Browse pages, page snapshots, listing manifests/blocks, theme assets, file routes
 and update events share `mountPath`. Listing requests read/sort current directory
-facts; they do not build an output tree. Requests are not transactional filesystem
+facts; they do not build an output tree. Complete live data is the default because
+official rich clients require it. Explicit blocks remain available, with a fresh
+read per block. Children deleted between enumeration and metadata reads are
+omitted; permission and containment failures still propagate. Requests are not transactional filesystem
 snapshots. Changed listing revisions return 410 and the client retries a fresh
 manifest with bounded retries. Rich live updates commit complete coherent data
 and preserve the active query.

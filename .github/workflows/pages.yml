@@ -32,6 +32,13 @@ jobs:
       - run: pnpm test
       - run: pnpm exec playwright install --with-deps chromium --only-shell
       - run: pnpm test:browser
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: pages-browser-failure
+          path: .playwright-results/
+          include-hidden-files: true
+          if-no-files-found: ignore
       - name: Build documentation and examples
         env:
           PUBLIC_REPOSITORY_URL: https://github.com/${{ github.repository }}

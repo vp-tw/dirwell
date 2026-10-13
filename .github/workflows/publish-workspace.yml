@@ -78,6 +78,13 @@ jobs:
       - run: node scripts/verify-workspace-consumer.mjs .workspace-release
       - run: node scripts/workspace-release.mjs verify
       - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: workspace-browser-failure
+          path: .playwright-results/
+          include-hidden-files: true
+          if-no-files-found: ignore
+      - uses: actions/upload-artifact@v4
         with:
           name: verified-workspace
           path: .workspace-release/

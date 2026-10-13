@@ -19,7 +19,7 @@ const handler = await createExplorerHandler({
 
 `/browse/{directory}/` renders the current directory through the same theme used for static builds. Native `?page=2` links work without JavaScript. `/listing?path=docs&offset=0&limit=100` returns public records after sorting the complete directory. `/__dirwell/listing/manifest`, `/__dirwell/listing/block`, `/__dirwell/page` and `/__dirwell/asset` support framework clients. Prefix every route with `mountPath` when configured.
 
-The default HTML page size is 100 and data block size is 200 for pagination-capable themes. `listing` accepts the same fixed or synchronous per-directory policy as core; `operation` identifies `server`, while `mode: 'ssg'` describes directory-oriented layout. JSON `/listing` defaults to 100 records and caps requests at 1,000, configurable through `pageSize` and `maxPageSize`.
+The default HTML page size is 100 for pagination-capable themes. Live data defaults to one complete block because official rich clients need all entries for directory-wide search/sort. Set `blockSize` or an explicit `listing` policy to split responses; each block still reads the directory. `listing` accepts the same fixed or synchronous per-directory policy as core; `operation` identifies `server`, while `mode: 'ssg'` describes directory-oriented layout. JSON `/listing` defaults to 100 records and caps requests at 1,000, configurable through `pageSize` and `maxPageSize`.
 
 Live blocks carry a public projection revision. If a requested revision has changed, the endpoint returns 410; the core browser loader retries once with a fresh manifest. Historical snapshots are not retained. Archive search is currently unavailable in live server mode; directory search remains available in rich themes.
 

@@ -69,7 +69,10 @@ migration or explicit `--config` selection rather than ignoring selection rules.
 Automatic discovery uses only `.mjs`; explicit config must run as native JavaScript
 on your supported Node version.
 
-The config exports `{ theme, listing, build, server }`. Shared `listing` accepts
+The config exports only `{ theme, listing, build, server }`; unknown top-level
+keys fail instead of silently dropping legacy options. Put `exclude`/`include`
+in `build` and/or `server`. Export a resolved object, using top-level await
+for asynchronous setup. Shared `listing` accepts
 fixed plans or per-directory callbacks. `build` retains core filtering, sorting,
 metadata, symlinks and output-name policies. `server` provides filtering, sorting,
 authorization and header hooks; HTTP cache defaults to no-store. Build metadata

@@ -15,6 +15,10 @@ legacy package keeps its own [changelog](CHANGELOG.md).
   selection rules; clarify that new and compatibility CLIs share a bin name.
 - Respect `server.host`/`server.port` configuration, retain live polling settings
   when `--live` enables updates, and fail on flags belonging to the other mode.
+- Keep live directories available when an enumerated child disappears before
+  metadata reads. Preserve SSE subscriptions and permission/path failures.
+- Default live listing data to one complete block, avoiding repeated scans for
+  clients that need the whole directory; explicit block policies remain available.
 - Retain immutable CSS/client resources and hashes per rich-theme instance;
   keep filesystem listings fresh and retain authorization before responses.
 - Wait within existing bounds for registry packument/alpha-tag propagation,

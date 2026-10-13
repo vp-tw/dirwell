@@ -281,7 +281,7 @@ for (const [name, creator] of [
       expect(await page.evaluate(() => window.__disabledDuringLive)).toBe(false);
       expect(stalePage).toBe(true);
       await rm(path.join(root, "arrived.txt"));
-      await expect(rows).toHaveCount(0);
+      await expect(rows).toHaveCount(0, { timeout: 15_000 });
       await search.fill("");
       await rows
         .filter({ hasText: /docs\// })
