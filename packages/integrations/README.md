@@ -15,4 +15,4 @@ The `/rollup`, `/rolldown`, `/webpack`, `/rspack`, `/rsbuild`, `/esbuild`, `/far
 
 The adapters retain existing build/watch and Vite/Farm generated-preview behavior. They do not turn static build-watch into live server mode. For data that should update on requests without rebuilding, mount `@dirwell/server` in the host or proxy a standalone CLI server. Theme-source edits remain owned by the framework compiler. Farm standalone build-watch remains limited; package availability does not imply host feature parity.
 
-The legacy `@vp-tw/dirwell/*` adapters keep their existing default theme and config discovery. This package is an opt-in migration; all packages remain private until publication setup is completed.
+The legacy `@vp-tw/dirwell/*` adapters keep their existing default theme and config discovery. This package is an opt-in migration.

@@ -1,6 +1,6 @@
 # Dirwell package transition
 
-The repository contains an **unreleased** `@dirwell/*` alpha line, starting at exactly `0.0.1-alpha`. The published `@vp-tw/dirwell` compatibility line remains separate. The nine new packages have completed runtime/platform qualification and are prepared for their first public release. Registry availability remains unverified until publication and registry consumer checks complete.
+The nine `@dirwell/*` packages are published at exactly `0.0.1-alpha`, tagged `alpha`. The [first SDK release](https://github.com/vp-tw/dirwell/releases/tag/%40dirwell/workspace%400.0.1-alpha) passed registry tarball integrity, signatures, provenance and installed-consumer verification. The published `@vp-tw/dirwell` compatibility line remains separate.
 
 | Package                    | Responsibility                                                                         | Runtime dependencies                                         |
 | -------------------------- | -------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
