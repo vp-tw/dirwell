@@ -3,10 +3,23 @@ import { mkdtemp, mkdir, readFile, rm, stat, writeFile } from "node:fs/promises"
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { expect, test } from "@playwright/test";
-import catppuccinConfig from "../../examples/default-theme-override/config.ts";
+import { createCatppuccinTheme } from "../../examples/default-theme-override/theme.ts";
+import type { ExplorerTheme } from "@dirwell/core";
 import customConfig from "../../examples/custom-theme/config.ts";
 import { startExplorerServer } from "@dirwell/server/node";
 import { generateExplorer } from "@dirwell/core";
+
+let catppuccinTheme: ExplorerTheme;
+let compilerOutput: string;
+test.beforeAll(async () => {
+  const artifacts = path.resolve(import.meta.dirname, "../../.playwright-results");
+  await mkdir(artifacts, { recursive: true });
+  compilerOutput = await mkdtemp(path.join(artifacts, "catppuccin-"));
+  catppuccinTheme = await createCatppuccinTheme(path.join(compilerOutput, "compiled"));
+});
+test.afterAll(async () => {
+  if (compilerOutput) await rm(compilerOutput, { recursive: true, force: true });
+});
 
 async function serve(directory: string): Promise<{ url: string; close: () => Promise<void> }> {
   const server = createServer(async (request, response) => {
@@ -65,7 +78,7 @@ test("compiled Ledger wrapper preserves icons, search, appearance and narrow nav
         mode,
         base: "/catalog/",
         urlStrategy: "base",
-        theme: catppuccinConfig.theme,
+        theme: catppuccinTheme,
       });
       const server = await serve(outputDir);
       try {
@@ -103,7 +116,7 @@ test("compiled Ledger wrapper preserves icons, search, appearance and narrow nav
     for (let index = 0; index < 501; index++)
       await writeFile(path.join(sourceDir, `file-${index}.txt`), "x");
     const outputDir = path.join(temporary, "virtual");
-    await generateExplorer({ sourceDir, outputDir, theme: catppuccinConfig.theme });
+    await generateExplorer({ sourceDir, outputDir, theme: catppuccinTheme });
     const server = await serve(outputDir);
     try {
       await page.goto(server.url);
@@ -149,7 +162,7 @@ test("release catalog remains navigable at narrow widths", async ({ page }) => {
 test("compiled Ledger wrapper works in live server mode", async ({ browser }) => {
   const temporary = await mkdtemp(path.join(tmpdir(), "dirwell-catppuccin-server-"));
   await writeFile(path.join(temporary, "guide.md"), "Guide");
-  const server = await startExplorerServer({ root: temporary, theme: catppuccinConfig.theme });
+  const server = await startExplorerServer({ root: temporary, theme: catppuccinTheme });
   const page = await browser.newPage();
   try {
     await page.goto(server.url + "/browse/");
