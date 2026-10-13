@@ -1,11 +1,11 @@
 # Dirwell package transition
 
-The nine `@dirwell/*` packages are published at exactly `0.0.1-alpha`, tagged `alpha`. The [first SDK release](https://github.com/vp-tw/dirwell/releases/tag/%40dirwell/workspace%400.0.1-alpha) passed registry tarball integrity, signatures, provenance and installed-consumer verification. The published `@vp-tw/dirwell` compatibility line remains separate.
+The nine `@dirwell/*` packages are published at `0.0.1-alpha.1`, tagged `alpha`. The [SDK release](https://github.com/vp-tw/dirwell/releases/tag/%40dirwell/workspace%400.0.1-alpha.1) passed registry tarball integrity, signatures, provenance and installed-consumer verification. The published `@vp-tw/dirwell` compatibility line remains separate.
 
 CLI `0.0.1-alpha.1` includes Plain as its lightweight default and automatically
 reads `dirwell.config.mjs`. Its theme precedence is `--theme`, `config.theme`,
 then Plain. Core, server and build integrations still require an explicit theme
-for HTML. The published `0.0.1-alpha` CLI retains its explicit-theme behavior;
+for HTML. The previous `0.0.1-alpha` CLI retains its explicit-theme behavior;
 see [the CLI guide](packages/cli/README.md) for version-specific commands.
 
 | Package                    | Responsibility                                                                         | Runtime dependencies                                         |

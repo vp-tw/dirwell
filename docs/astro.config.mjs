@@ -38,11 +38,11 @@ export default defineConfig({
         {
           label: "Start here",
           items: [
-            { label: "Overview", slug: "overview" },
-            { label: "Getting started", slug: "getting-started" },
+            { label: "SDK quick start (alpha)", slug: "sdk-alpha" },
+            { label: "Overview (compatibility)", slug: "overview" },
+            { label: "Getting started (compatibility)", slug: "getting-started" },
             { label: "Deployment", slug: "deployment" },
             { label: "Examples", slug: "examples" },
-            { label: "SDK alpha migration", slug: "sdk-alpha" },
           ],
         },
         {
