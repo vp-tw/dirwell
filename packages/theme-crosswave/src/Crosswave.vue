@@ -11,13 +11,17 @@ import {
 } from "vue";
 import { useGamepad } from "@vueuse/core";
 import { loadListing } from "@dirwell/core/client";
-import { fetchThemePage, applyThemeMetadata } from "../../shared-theme/src/navigation.ts";
+import {
+  fetchThemePage,
+  applyThemeMetadata,
+  restoreThemePage,
+} from "../../shared-theme/src/navigation.ts";
 import { entryIcon } from "../../shared-theme/src/icons.ts";
 import { directoryLike, size, modified } from "../../shared-theme/src/records.ts";
 import { createWave } from "./wave.mjs";
 const props = defineProps({ model: { type: Object, required: true } }),
-  model = shallowRef(props.model),
-  entries = shallowRef(props.model.entries);
+  model = shallowRef(restoreThemePage(props.model, Boolean(import.meta.hot))),
+  entries = shallowRef(model.value.entries);
 const query = ref(""),
   category = ref("all"),
   selected = ref(null),
@@ -413,9 +417,13 @@ onBeforeUnmount(() => {
   </div>
   <header class="cw-top">
     <div class="cw-brand">
-      <a :href="model.rootHref" @click="navigateLink($event, model.rootHref, model.rootDataHref)">{{
-        model.title
-      }}</a>
+      <slot name="header" :model="model">
+        <a
+          :href="model.rootHref"
+          @click="navigateLink($event, model.rootHref, model.rootDataHref)"
+          >{{ model.title }}</a
+        ></slot
+      >
     </div>
     <nav class="cw-location" aria-label="Breadcrumb">
       <a :href="model.rootHref" @click="navigateLink($event, model.rootHref, model.rootDataHref)"
@@ -496,25 +504,35 @@ onBeforeUnmount(() => {
               :rel="entry.exitsExplorer ? 'noopener' : undefined"
               @click="openEntry($event, entry)"
               @focus="selected = entry.id"
-              ><span
-                class="cw-entry-icon"
-                aria-hidden="true"
-                v-html="
-                  entryIcon(
-                    entry.kind === 'symlink' ? 'link' : directoryLike(entry) ? 'directory' : 'file',
-                  )
-                "
-              ></span>
-              <span class="cw-entry-label">
-                <span class="cw-name">{{ entry.name }}{{ directoryLike(entry) ? "/" : "" }}</span>
-                <span v-if="entry.link" class="cw-target">{{ entry.link.target }}</span>
-                <span class="cw-row-meta"
-                  >{{ entry.link?.unavailable ? "Target unavailable" : entry.kind }} ·
-                  {{ directoryLike(entry) ? "Folder" : size(entry.size) }}</span
-                >
-                <span class="cw-row-date">Modified {{ modified(entry.modifiedAt) }}</span>
-              </span></a
-            ><span v-else class="cw-entry cw-unavailable">{{ entry.name }}</span>
+              ><slot name="row" :model="model" :entry="entry" :selected="selected === entry.id"
+                ><span
+                  class="cw-entry-icon"
+                  aria-hidden="true"
+                  v-html="
+                    entryIcon(
+                      entry.kind === 'symlink'
+                        ? 'link'
+                        : directoryLike(entry)
+                          ? 'directory'
+                          : 'file',
+                    )
+                  "
+                ></span>
+                <span class="cw-entry-label">
+                  <span class="cw-name">{{ entry.name }}{{ directoryLike(entry) ? "/" : "" }}</span>
+                  <span v-if="entry.link" class="cw-target">{{ entry.link.target }}</span>
+                  <span class="cw-row-meta"
+                    >{{ entry.link?.unavailable ? "Target unavailable" : entry.kind }} ·
+                    {{ directoryLike(entry) ? "Folder" : size(entry.size) }}</span
+                  >
+                  <span class="cw-row-date">Modified {{ modified(entry.modifiedAt) }}</span>
+                </span></slot
+              ></a
+            ><span v-else class="cw-entry cw-unavailable"
+              ><slot name="row" :model="model" :entry="entry" :selected="selected === entry.id">{{
+                entry.name
+              }}</slot></span
+            >
           </li>
         </ul>
         <p class="cw-empty" v-if="!rows.length">No matching files.</p>
@@ -534,7 +552,11 @@ onBeforeUnmount(() => {
     </nav>
   </main>
   <footer class="cw-bottom">
-    <div class="cw-key-help">Arrow keys navigate · Enter confirms · Backspace returns</div>
+    <div class="cw-key-help">
+      <slot name="footer" :model="model"
+        >Arrow keys navigate · Enter confirms · Backspace returns</slot
+      >
+    </div>
     <div class="cw-controller" v-if="pad">Controller · Confirm / Back</div>
     <label class="cw-appearance"
       >Color<select v-model="color" :disabled="!ready">

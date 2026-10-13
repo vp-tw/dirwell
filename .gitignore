@@ -21,3 +21,5 @@ workspace-artifact/
 .workspace-platform-proof/
 
 .workspace-release/
+
+examples/authoring/.generated-*/

@@ -8,4 +8,5 @@ export const workspacePackages = [
   "theme-ledger",
   "theme-crosswave",
   "cli",
+  "theme-authoring",
 ];

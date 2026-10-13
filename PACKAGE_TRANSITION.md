@@ -1,17 +1,18 @@
 # Dirwell package transition
 
-The repository contains an **unreleased** `@dirwell/*` alpha line, starting at exactly `0.0.1-alpha`. The published `@vp-tw/dirwell` compatibility line remains separate. The eight new packages are currently private while their runtime/platform qualification and publication setup are completed.
+The repository contains an **unreleased** `@dirwell/*` alpha line, starting at exactly `0.0.1-alpha`. The published `@vp-tw/dirwell` compatibility line remains separate. The nine new packages are currently private while their runtime/platform qualification and publication setup are completed.
 
-| Package                    | Responsibility                                                                         | Runtime dependencies              |
-| -------------------------- | -------------------------------------------------------------------------------------- | --------------------------------- |
-| `@dirwell/core`            | Filesystem facts, public listing contracts, static publication, browser listing loader | picomatch                         |
-| `@dirwell/theme-plain`     | Minimal native HTML and pagination                                                     | None                              |
-| `@dirwell/theme-ledger`    | Svelte server/client explorer                                                          | Core, Svelte                      |
-| `@dirwell/theme-crosswave` | Vue explorer, Node MIME categories and VueUse gamepad                                  | Core, Vue, VueUse, MIME           |
-| `@dirwell/server`          | Live HTML/JSON/files, authorization, HTTP caching, shared SSE and host adapters        | Core                              |
-| `@dirwell/share-image`     | Optional build metadata, PNG renderer and bundled fonts                                | Core, resvg-js, fontkit           |
-| `@dirwell/integrations`    | Explicit-theme build adapters with existing host lifecycles                            | Core, unplugin, Chokidar          |
-| `@dirwell/cli`             | Explicit-theme build/server commands and executable project config                     | Core, server, import-meta-resolve |
+| Package                    | Responsibility                                                                         | Runtime dependencies                                         |
+| -------------------------- | -------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| `@dirwell/core`            | Filesystem facts, public listing contracts, static publication, browser listing loader | picomatch                                                    |
+| `@dirwell/theme-plain`     | Minimal native HTML and pagination                                                     | None                                                         |
+| `@dirwell/theme-ledger`    | Svelte server/client explorer                                                          | Core, Svelte                                                 |
+| `@dirwell/theme-crosswave` | Vue explorer, Node MIME categories and VueUse gamepad                                  | Core, Vue, VueUse, MIME                                      |
+| `@dirwell/server`          | Live HTML/JSON/files, authorization, HTTP caching, shared SSE and host adapters        | Core                                                         |
+| `@dirwell/share-image`     | Optional build metadata, PNG renderer and bundled fonts                                | Core, resvg-js, fontkit                                      |
+| `@dirwell/integrations`    | Explicit-theme build adapters with existing host lifecycles                            | Core, unplugin, Chokidar                                     |
+| `@dirwell/theme-authoring` | Paired source compilation and loopback native HMR                                      | Core, server, themes, Svelte, Vue, Vite and official plugins |
+| `@dirwell/cli`             | Explicit-theme build/server commands and executable project config                     | Core, server, import-meta-resolve                            |
 
 Core and CLI never select a default theme. Plain has no JavaScript, image, font, icon, social metadata or archive-search asset by default. Frontend frameworks, image rendering, config loading and watchers are absent from core's dependency graph.
 
@@ -33,7 +34,7 @@ Server mode renders through the same theme without replacing an output tree. Its
 
 Server responses default to no-store and ETags. Custom header and authorization hooks are asynchronous and run before conditional responses. Requested paths and canonical targets are both authorized. Optional SSE shares polling per directory, rechecks subscribers, coalesces slow consumers and releases the last subscription's timer. Rich clients load complete coherent data before enabling directory-wide filtering/sorting; live refreshes commit complete data while preserving search state.
 
-`dirwell server` handles file-data updates independently of Farm or a build plugin. Editing theme source still needs its compiler and a server restart; this is not framework HMR. The new CLI does not silently translate legacy dev/daemon commands.
+`dirwell server` handles file-data updates independently of Farm or a build plugin. Production theme source changes require compilation and a fresh renderer instance. The separate optional authoring server supplies native framework HMR. The new CLI does not silently translate legacy dev/daemon commands.
 
 ## Migration and customization
 
@@ -50,4 +51,15 @@ Metadata remains an injected core provider. No image renderer is bundled in the 
 
 Local installed-tarball checks exercised all three themes in both static modes, CLI build, live HTML/listing, file transfer and Node 22.19/26. Native browser tests cover 1,200 files, complete search, sorting-related keyboard selection, dialogs, archive fuzzy search, History, no-script pagination, simulated gamepad behavior and live updates with a browser cache policy.
 
-The platform workflow additionally installs these eight tarballs on the repository's Linux/Windows/macOS × ARM64/x64 × Node 22.12/24.1/26 matrix. Its current-head result must be read before claiming those new-package environments as verified. Physical gamepads, hostile filesystem mutation, distributed caching, retained historical snapshots and production-scale performance are unverified. Earlier seven-framework UI-tree measurements remain study evidence and are not an optimized native-framework ranking.
+The platform workflow additionally installs these nine tarballs on the repository's Linux/Windows/macOS × ARM64/x64 × Node 22.12/24.1/26 matrix. Its current-head result must be read before claiming those new-package environments as verified. Physical gamepads, hostile filesystem mutation, distributed caching, retained historical snapshots and production-scale performance are unverified. Earlier seven-framework UI-tree measurements remain study evidence and are not an optimized native-framework ranking.
+
+## Official source customization
+
+`@dirwell/theme-authoring` is optional. It compiles an official `/source` wrapper
+into paired SSR/client implementations using pinned Svelte/Vue runtimes and
+native Vite plugins. Ledger exposes typed snippets; Crosswave exposes typed
+slots for header, row content and footer. `@dirwell/theme-authoring/dev` provides
+loopback-only source HMR alongside the server's file-revision SSE. Wrapper edits
+can remount children; CSS-only edits preserve state. See
+[the authoring guide](packages/theme-authoring/README.md) and
+[complete source examples](examples/authoring).

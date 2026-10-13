@@ -89,6 +89,7 @@ const clientBuild = await build({
   platform: "browser",
   target: "es2020",
   conditions: ["browser"],
+  define: { "import.meta.hot": "undefined" },
   outfile: path.join(output, "client.js"),
   minify: true,
 });
@@ -141,3 +142,37 @@ const packed = spawnSync("pnpm", ["exec", "vp", "pack"], { cwd: folder, encoding
 if (packed.status !== 0) throw new Error(packed.stdout + "\n" + packed.stderr);
 console.log(packed.stdout);
 console.log(`Built ${name} with framework-owned components`);
+// Source exports must resolve without the repository-only shared-theme directory.
+const sourceOutput = path.join(output, "source");
+await mkdir(path.join(sourceOutput, "shared"), { recursive: true });
+const componentName = framework === "svelte" ? "Ledger.svelte" : "Crosswave.vue";
+const componentSource = (await readFile(path.join(folder, "src", componentName), "utf8"))
+  .replaceAll("../../shared-theme/src/", "./shared/")
+  .replaceAll('icons.ts"', 'icons.mjs"')
+  .replaceAll('navigation.ts"', 'navigation.mjs"')
+  .replaceAll('records.ts"', 'records.mjs"');
+await writeFile(path.join(sourceOutput, componentName), componentSource);
+for (const helper of ["icons", "navigation", "records"]) {
+  await build({
+    entryPoints: [path.join(repo, "packages/shared-theme/src", `${helper}.ts`)],
+    bundle: true,
+    format: "esm",
+    platform: "browser",
+    packages: "external",
+    outfile: path.join(sourceOutput, "shared", `${helper}.mjs`),
+  });
+}
+if (framework === "vue")
+  await copyFile(path.join(folder, "src/wave.mjs"), path.join(sourceOutput, "wave.mjs"));
+await writeFile(
+  path.join(sourceOutput, "component.d.mts"),
+  framework === "svelte"
+    ? `import type {Component, Snippet} from 'svelte';
+import type {ThemePage, RowContext} from '../model.mjs';
+export interface LedgerProps {readonly model: ThemePage; readonly header?: Snippet<[{model: ThemePage}]>; readonly row?: Snippet<[RowContext]>; readonly footer?: Snippet<[{model: ThemePage}]>;}
+declare const Ledger: Component<LedgerProps>; export default Ledger;\n`
+    : `import type {DefineComponent, SlotsType, VNode, ComponentOptionsMixin, PublicProps} from 'vue';
+import type {ThemePage, RowContext} from '../model.mjs';
+export interface CrosswaveSlots {header?: (props: {model: ThemePage}) => VNode[]; row?: (props: RowContext) => VNode[]; footer?: (props: {model: ThemePage}) => VNode[];}
+declare const Crosswave: DefineComponent<{model: ThemePage}, {}, {}, {}, {}, ComponentOptionsMixin, ComponentOptionsMixin, {}, string, PublicProps, {model: ThemePage}, {}, SlotsType<CrosswaveSlots>>; export default Crosswave;\n`,
+);

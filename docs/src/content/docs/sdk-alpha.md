@@ -21,7 +21,7 @@ Server mode handles file data without a Farm/compiler watcher. Theme source stil
 
 Core and CLI require an explicit theme. Plain emits native HTML with no JavaScript, image, font or icon assets by default. Ledger uses Svelte; Crosswave uses Vue and VueUse gamepad support. `@dirwell/share-image` supplies optional build-time metadata/PNG images. `@dirwell/integrations` supplies explicit-theme build adapters. Core and Plain do not depend on either optional package.
 
-The eight packages have separate dependency graphs, but share one official alpha version. The minimum **verified** Node version is 22.12; publishing tools use Node 26. Physical gamepads and production-scale performance remain unverified.
+The nine packages have separate dependency graphs, but share one official alpha version. The minimum **verified** Node version is 22.12; publishing tools use Node 26. Physical gamepads and production-scale performance remain unverified.
 
 ## Static output and listing policy
 
@@ -96,6 +96,21 @@ Optional SSE shares a poll per canonical directory, rechecks subscribers, coales
 
 Metadata is opt-in through a core provider. `@dirwell/share-image` can supply titles, descriptions, canonical URLs and either a fixed/custom image or an explicit PNG preset. It is a build-time provider, not a live server image endpoint. Plain stays minimal when omitted.
 
-Legacy imports, config discovery, default Ledger and old metadata presets remain in `@vp-tw/dirwell`. New integrations take host options explicitly and do not discover legacy config or process `extends`. New CLI commands do not silently translate legacy dev/daemon commands. Native framework themes do not yet provide the old component overrides or an official source-component/HMR API.
+Legacy imports, config discovery, default Ledger and old metadata presets remain in `@vp-tw/dirwell`. New integrations take host options explicitly and do not discover legacy config or process `extends`. New CLI commands do not silently translate legacy dev/daemon commands. Legacy component overrides are not a migration contract. New official source components and HMR use the separate authoring API described below.
 
 The release workflow can prepare and qualify immutable tarballs without npm login. First publication and trusted-publisher setup remain a separate human-authenticated step. See the repository's [workspace release procedure](https://github.com/vp-tw/dirwell/blob/main/WORKSPACE_RELEASING.md).
+
+## Official component authoring
+
+The optional `@dirwell/theme-authoring` package compiles Ledger Svelte snippets or
+Crosswave Vue slots into matching SSR/client bundles. Import an official
+component from its theme's `/source` entry and model types from `/model`.
+`buildFrameworkTheme({framework, component, output})` returns a `themeUrl` whose
+`createTheme` factory works with the build API, CLI or production server.
+
+`startAuthoringServer` from `@dirwell/theme-authoring/dev` serves trusted source on
+loopback with native Vite HMR. It is separate from production server mode and
+from file-revision SSE. CSS-only changes preserve state; wrapper/template edits
+can remount children and reset search/selection. Core and Plain do not depend on
+these tools. The authoring package and all other alpha packages remain private
+until npm publication is explicitly completed.

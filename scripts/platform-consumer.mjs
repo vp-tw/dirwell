@@ -129,14 +129,25 @@ try {
   const url = log.match(/Local:\s+(https?:\/\/\S+)/)[1];
   assert.match(await (await fetch(url)).text(), /README.md/);
   await writeFile("files/live.txt", "watch update");
-  await wait(async () => (await (await fetch(url)).text()).includes("live.txt"));
-  assert.equal(await (await fetch(new URL("live.txt", url))).text(), "watch update");
+  await wait(async () => {
+    const response = await fetch(url);
+    return response.ok && (await response.text()).includes("live.txt");
+  });
+  // Separate requests can straddle another watch rebuild; qualify eventual byte delivery.
+  await wait(async () => {
+    const response = await fetch(new URL("live.txt", url));
+    return response.ok && (await response.text()) === "watch update";
+  });
   await writeFile("files/live.txt", "changed content");
-  await wait(
-    async () => (await (await fetch(new URL("live.txt", url))).text()) === "changed content",
-  );
+  await wait(async () => {
+    const response = await fetch(new URL("live.txt", url));
+    return response.ok && (await response.text()) === "changed content";
+  });
   await rm("files/live.txt");
-  await wait(async () => !(await (await fetch(url)).text()).includes("live.txt"));
+  await wait(async () => {
+    const response = await fetch(url);
+    return response.ok && !(await response.text()).includes("live.txt");
+  });
 } finally {
   cli.kill("SIGTERM");
   await exited;
