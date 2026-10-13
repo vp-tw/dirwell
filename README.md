@@ -1,6 +1,6 @@
 # Dirwell
 
-The unreleased `@dirwell/*` SDK alpha requires explicit themes and supports live server mode. See [the package transition](PACKAGE_TRANSITION.md) and [workspace release preparation](WORKSPACE_RELEASING.md). Registry installation and the examples below currently use the legacy compatibility package.
+The `@dirwell/*` SDK alpha is published at `0.0.1-alpha`, requires explicit themes and supports live server mode. See [the package transition](PACKAGE_TRANSITION.md) and [workspace release preparation](WORKSPACE_RELEASING.md). The examples below use the legacy compatibility package; the SDK guide documents the new package imports.
 
 ![Dirwell — Turn a folder into a searchable website.](https://raw.githubusercontent.com/vp-tw/dirwell/main/assets/brand/dirwell-og.png)
 

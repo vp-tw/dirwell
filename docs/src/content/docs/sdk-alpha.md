@@ -3,7 +3,7 @@ title: SDK alpha and package migration
 description: Explicit themes, static builds, live server mode and the optional package boundaries.
 ---
 
-The new `@dirwell/*` family is **unreleased** and prepared for its first publication at exactly `0.0.1-alpha`. The existing installation guides and public examples use the published `@vp-tw/dirwell` compatibility package. The examples below describe the qualified workspace API; do not expect registry installation to work before publication is announced.
+The nine `@dirwell/*` packages are published at `0.0.1-alpha`, tagged `alpha`. The [first SDK release](https://github.com/vp-tw/dirwell/releases/tag/%40dirwell/workspace%400.0.1-alpha) passed registry integrity, signatures, provenance and installed-consumer checks. The existing installation guides and public examples use the published `@vp-tw/dirwell` compatibility package; the examples below use the new SDK imports.
 
 ## Choose a mode
 
@@ -112,5 +112,4 @@ component from its theme's `/source` entry and model types from `/model`.
 loopback with native Vite HMR. It is separate from production server mode and
 from file-revision SSE. CSS-only changes preserve state; wrapper/template edits
 can remount children and reset search/selection. Core and Plain do not depend on
-these tools. The alpha packages are prepared for publication; registry availability remains
-unverified until the first release completes.
+these tools. The published alpha includes both framework compilers and their matching SSR/client output.
