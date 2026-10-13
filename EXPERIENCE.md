@@ -1,6 +1,6 @@
 # Experience design
 
-The interaction sections below describe Ledger. Plain provides complete no-script HTML; Crosswave owns its crossbar, local search, and persistent navigation. See the [theme guide](https://vp-tw.github.io/dirwell/themes/) for their different capabilities.
+The detailed interaction sections below record the legacy Ledger compatibility theme, including its worker and MPA thresholds. For the SDK Svelte/Vue clients, listing policy and source customization, use the [SDK guide](docs/src/content/docs/sdk-alpha.md). Plain provides complete no-script HTML; Crosswave owns its crossbar, local search, and persistent navigation. See the [theme guide](https://vp-tw.github.io/dirwell/themes/) for their different capabilities.
 
 ## Implemented
 
@@ -83,7 +83,7 @@ date/size formatting without adding a core localization setting.
 
 ## Shared page metadata and fonts
 
-The three built-in themes use bundled Source fonts and one static whole-site share image by default. Titles identify the site and folder path; descriptions order folders, files, and links. Image callbacks can use per-folder counts and run only at build time. Crosswave updates managed metadata on folder exchanges and history restoration. See [the metadata guide](https://vp-tw.github.io/dirwell/metadata/).
+Plain has no bundled font, social metadata or share image by default. The legacy rich themes retain their bundled-font/share-image defaults. SDK themes do not include an image renderer; optional build metadata belongs to `@dirwell/share-image`. Titles identify the site and folder path; descriptions order folders, files, and links. Image callbacks can use per-folder counts and run only at build time. Crosswave updates managed metadata on folder exchanges and history restoration. See [the metadata guide](https://vp-tw.github.io/dirwell/metadata/).
 
 ## Verification limits
 

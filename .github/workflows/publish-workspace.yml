@@ -148,9 +148,14 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          node --input-type=module <<'JS'
+          import { readFile, writeFile } from 'node:fs/promises';
+          import { releaseNotes } from './scripts/alpha-release.mjs';
+          await writeFile('workspace-release-notes.md', releaseNotes(await readFile('WORKSPACE_CHANGELOG.md', 'utf8'), process.env.RELEASE_VERSION));
+          JS
           tag="@dirwell/workspace@$RELEASE_VERSION"
           if ! gh release view "$tag"; then
-            gh release create "$tag" --target "$GITHUB_SHA" --title "Dirwell SDK $RELEASE_VERSION" --prerelease --notes-file WORKSPACE_RELEASING.md
+            gh release create "$tag" --target "$GITHUB_SHA" --title "Dirwell SDK $RELEASE_VERSION" --prerelease --notes-file workspace-release-notes.md
           fi
           test "$(gh release view "$tag" --json isPrerelease --jq .isPrerelease)" = true
           git fetch origin "refs/tags/$tag:refs/tags/$tag"

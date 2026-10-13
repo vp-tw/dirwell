@@ -1,6 +1,6 @@
 {
   "name": "@dirwell/theme-crosswave",
-  "version": "0.0.1-alpha",
+  "version": "0.0.1-alpha.1",
   "description": "Vue-owned media navigation with VueUse gamepad support.",
   "license": "MIT",
   "repository": {

@@ -46,11 +46,7 @@ for (const [name, theme] of [
       assert.ok(!html.includes("clientTree"));
     }
   }
-await runCli(
-  ["build", "source", "--out", "cli-out", "--theme", "@dirwell/theme-plain#createPlainTheme"],
-  process.cwd(),
-  () => {},
-);
+await runCli(["build", "source", "--out", "cli-out"], process.cwd(), () => {});
 const image = await createShareImage({
   title: "Sample downloads",
   description: "Archive totals: 5 files",

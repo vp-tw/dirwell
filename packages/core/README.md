@@ -1,6 +1,6 @@
 # @dirwell/core
 
-Private workspace prototype. Do not publish this package until consumer and platform qualification is complete.
+Framework-neutral filesystem, listing and static-publication SDK. Install with `npm install @dirwell/core@alpha` and a theme of your choice.
 
 Core owns filesystem selection, safe navigation, public listing projection and static publication. It requires an explicit theme and does not load a default theme, image renderer, frontend framework, config loader or watcher. The only runtime npm dependency is picomatch.
 

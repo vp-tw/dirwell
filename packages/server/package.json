@@ -1,6 +1,6 @@
 {
   "name": "@dirwell/server",
-  "version": "0.0.1-alpha",
+  "version": "0.0.1-alpha.1",
   "description": "Host-neutral directory listing Request/Response handler.",
   "license": "MIT",
   "repository": {

@@ -2,6 +2,12 @@
 
 The nine `@dirwell/*` packages are published at exactly `0.0.1-alpha`, tagged `alpha`. The [first SDK release](https://github.com/vp-tw/dirwell/releases/tag/%40dirwell/workspace%400.0.1-alpha) passed registry tarball integrity, signatures, provenance and installed-consumer verification. The published `@vp-tw/dirwell` compatibility line remains separate.
 
+CLI `0.0.1-alpha.1` includes Plain as its lightweight default and automatically
+reads `dirwell.config.mjs`. Its theme precedence is `--theme`, `config.theme`,
+then Plain. Core, server and build integrations still require an explicit theme
+for HTML. The published `0.0.1-alpha` CLI retains its explicit-theme behavior;
+see [the CLI guide](packages/cli/README.md) for version-specific commands.
+
 | Package                    | Responsibility                                                                         | Runtime dependencies                                         |
 | -------------------------- | -------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
 | `@dirwell/core`            | Filesystem facts, public listing contracts, static publication, browser listing loader | picomatch                                                    |
@@ -12,13 +18,14 @@ The nine `@dirwell/*` packages are published at exactly `0.0.1-alpha`, tagged `a
 | `@dirwell/share-image`     | Optional build metadata, PNG renderer and bundled fonts                                | Core, resvg-js, fontkit                                      |
 | `@dirwell/integrations`    | Explicit-theme build adapters with existing host lifecycles                            | Core, unplugin, Chokidar                                     |
 | `@dirwell/theme-authoring` | Paired source compilation and loopback native HMR                                      | Core, server, themes, Svelte, Vue, Vite and official plugins |
-| `@dirwell/cli`             | Explicit-theme build/server commands and executable project config                     | Core, server, import-meta-resolve                            |
+| `@dirwell/cli`             | Build/server commands, minimal Plain default and executable project config             | Core, server, Plain, import-meta-resolve                     |
 
-Core and CLI never select a default theme. Plain has no JavaScript, image, font, icon, social metadata or archive-search asset by default. Frontend frameworks, image rendering, config loading and watchers are absent from core's dependency graph.
+Core never selects a default theme. CLI `0.0.1-alpha.1` defaults to Plain; other themes remain separate installs. Plain has no JavaScript, image, font, icon, social metadata or archive-search asset by default. Frontend frameworks, image rendering, config loading and watchers are absent from core's dependency graph.
 
 ```mermaid
 flowchart LR
   CLI --> Core
+  CLI --> Plain
   CLI --> Server
   Server --> Core
   Ledger[Ledger / Svelte] --> Core
@@ -38,14 +45,14 @@ Server responses default to no-store and ETags. Custom header and authorization 
 
 ## Migration and customization
 
-1. Choose the new core/CLI and install a theme explicitly after the alpha packages are published, using their `alpha` dist-tag.
+1. Choose the new core/CLI using the `alpha` dist-tag. Core requires a theme; CLI `0.0.1-alpha.1` includes Plain and installs no rich theme implicitly.
 2. Replace legacy optional-theme generation with `generateExplorer({ ...options, theme })`.
 3. Configure a listing policy deliberately. For example, publish 100 HTML rows and 200 data records per block for large directories; keep complete HTML when that suits the theme and archive.
 4. Use build for static output, or server for live HTML/file transport. Enable `--live` only when automatic Svelte/Vue updates are desired.
 
 The framework themes use native Svelte/Vue templates, state and lifecycle, not serialized UI trees or the legacy DOM controllers. Their alpha option surfaces intentionally differ from the old component/project overrides; no compatibility migration for those overrides is claimed. Third-party themes can implement `ExplorerTheme.render` and own their server/client build, using the framework-neutral public facts and core browser loader.
 
-Metadata remains an injected core provider. No image renderer is bundled in the new themes. The existing compatibility line retains its metadata/image implementation; the optional `@dirwell/share-image` provider and `@dirwell/integrations` adapters now isolate those dependencies. Source-component customization and theme HMR remain subsequent work. See [workspace releases](WORKSPACE_RELEASING.md) for offline preparation and the separate first-publication gate.
+Metadata remains an injected core provider. No image renderer is bundled in the new themes. The existing compatibility line retains its metadata/image implementation; the optional `@dirwell/share-image` provider and `@dirwell/integrations` adapters now isolate those dependencies. The optional authoring package supplies source-component customization and native framework HMR. See [workspace releases](WORKSPACE_RELEASING.md) for offline preparation and the separate first-publication gate.
 
 ## Qualification boundary
 

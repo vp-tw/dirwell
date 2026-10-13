@@ -24,6 +24,7 @@ jobs:
         with:
           name: playwright-results
           path: .playwright-results/
+          include-hidden-files: true
           if-no-files-found: ignore
 
   compatibility:

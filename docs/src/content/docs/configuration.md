@@ -3,6 +3,8 @@ title: Configuration
 description: Choose output, URLs, filters, sorting, themes, and server settings.
 ---
 
+This page documents the `@vp-tw/dirwell` compatibility package. For the new `@dirwell/*` packages, explicit SDK themes and live `server` mode, use the [SDK guide](../sdk-alpha/). Its CLI simplification is identified separately from the first published alpha.
+
 Start with `ssg`, relative URLs, and the default theme. Change a setting when
 you need a specific result:
 

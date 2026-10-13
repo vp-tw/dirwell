@@ -14,6 +14,17 @@ export function createLedgerTheme(
   options: LedgerThemeOptions = {},
   renderer?: FrameworkRenderer,
 ): ExplorerTheme {
+  // Bundled resources are immutable for this theme instance; source rebuilds use a new instance.
+  let resources: Promise<{ script: string; scriptName: string; styles: string }> | undefined;
+  const loadResources = () =>
+    (resources ??= Promise.all([
+      renderer?.clientScript ?? readFile(new URL("./client.js", import.meta.url), "utf8"),
+      readFile(new URL("./styles.css", import.meta.url), "utf8"),
+    ]).then(([script, styles]) => ({
+      script,
+      styles,
+      scriptName: `ledger-client-${createHash("sha256").update(script).digest("hex").slice(0, 16)}.js`,
+    })));
   const theme: ExplorerTheme = {
     name: "ledger",
     listing: { pagination: true },
@@ -23,10 +34,7 @@ export function createLedgerTheme(
         ...createThemePage(context, theme, options.title ?? "Dirwell"),
         searchIndexHref: context.searchIndexHref,
       };
-      const script =
-        renderer?.clientScript ?? (await readFile(new URL("./client.js", import.meta.url), "utf8"));
-      const scriptName = `ledger-client-${createHash("sha256").update(script).digest("hex").slice(0, 16)}.js`;
-      const styles = await readFile(new URL("./styles.css", import.meta.url), "utf8");
+      const { script, scriptName, styles } = await loadResources();
       const json = JSON.stringify(model).replaceAll("<", "\\u003c");
       return {
         html: `<!doctype html><html lang="en" data-theme="system"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">${context.documentBaseHref === null ? "" : `<base href="${escapeHtml(context.documentBaseHref)}">`}${context.metadata?.head ?? `<title>${escapeHtml(model.title)}</title>`}<style>${styles}${renderer?.styles ?? ""}</style></head><body><div data-dirwell-theme="ledger">${await (renderer?.renderBody ?? renderBody)(model)}</div><script type="application/json" id="dirwell-page-data">${json}</script><script ${renderer?.clientType === "module" ? 'type="module"' : "defer"} src="${escapeHtml(context.assetHref(scriptName))}"></script></body></html>`,

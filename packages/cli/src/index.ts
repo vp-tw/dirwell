@@ -1,24 +1,28 @@
 import path from "node:path";
+import { access } from "node:fs/promises";
 import { pathToFileURL } from "node:url";
 import { resolve as resolveModule } from "import-meta-resolve";
 import { parseArgs } from "node:util";
 import { generateExplorer } from "@dirwell/core";
 import type { ExplorerTheme, ListingPolicy, GenerateOptions } from "@dirwell/core";
+import { createPlainTheme } from "@dirwell/theme-plain";
 import { startExplorerServer } from "@dirwell/server/node";
-import type { ExplorerHandlerOptions } from "@dirwell/server";
 
 export interface CliConfig {
   readonly build?: Omit<GenerateOptions, "sourceDir" | "outputDir" | "theme" | "listing">;
   readonly theme?: ExplorerTheme;
   readonly listing?: ListingPolicy;
-  readonly server?: Omit<ExplorerHandlerOptions, "root" | "theme" | "listing">;
+  readonly server?: Omit<Parameters<typeof startExplorerServer>[0], "root" | "theme" | "listing">;
 }
 const help = `Usage:
-  dirwell build <source> --out <output> --theme <module>#<factory>
-  dirwell server <source> --theme <module>#<factory> [--port 3000]
+  dirwell build <source> --out <output>
+  dirwell server <source> [--port 3000]
 
-Install your theme separately. No theme is installed or selected implicitly.
-Use --config <file.mjs> for a default export with theme, listing, and server hooks.
+Plain is included and selected by default. Install other themes separately.
+Official themes: --theme plain|ledger|crosswave
+Custom themes: --theme <module>#<factory>, or a module's default export.
+Reads dirwell.config.mjs in the working folder; --config <file.mjs> selects another file.
+Config exports theme, listing, build options, and server hooks.
 Build options: --mode ssg|mpa, --urls relative|base|html-base, --base <path>
 Server options: --host <host>, --port <port>, --mount <path>, --live
 Both modes: --page-size <n>, --block-size <n>
@@ -31,18 +35,7 @@ const positive = (value: string | undefined, name: string): number | undefined =
     throw new TypeError(`${name} must be a positive integer`);
   return number;
 };
-async function loadTheme(specifier: string, cwd: string): Promise<ExplorerTheme> {
-  const delimiter = specifier.lastIndexOf("#"),
-    name = delimiter < 0 ? specifier : specifier.slice(0, delimiter),
-    exported = delimiter < 0 ? "default" : specifier.slice(delimiter + 1);
-  if (!name || !exported) throw new TypeError("Theme needs a module and export name");
-  const moduleUrl =
-    name.startsWith(".") || path.isAbsolute(name)
-      ? pathToFileURL(path.resolve(cwd, name)).href
-      : resolveModule(name, pathToFileURL(path.join(cwd, "package.json")).href);
-  const module: Record<string, unknown> = await import(moduleUrl);
-  const candidate =
-    typeof module[exported] === "function" ? await module[exported]() : module[exported];
+function assertTheme(candidate: unknown): asserts candidate is ExplorerTheme {
   if (
     typeof candidate !== "object" ||
     candidate === null ||
@@ -51,8 +44,49 @@ async function loadTheme(specifier: string, cwd: string): Promise<ExplorerTheme>
     !("render" in candidate) ||
     typeof candidate.render !== "function"
   )
-    throw new TypeError("Theme export must be a theme or theme factory");
-  return candidate as ExplorerTheme;
+    throw new TypeError("Theme must be an object with name and render(context)");
+}
+async function loadTheme(specifier: string, cwd: string): Promise<ExplorerTheme> {
+  const official: Record<string, string> = {
+    plain: "@dirwell/theme-plain#createPlainTheme",
+    ledger: "@dirwell/theme-ledger#createLedgerTheme",
+    crosswave: "@dirwell/theme-crosswave#createCrosswaveTheme",
+  };
+  if (Object.hasOwn(official, specifier)) specifier = official[specifier]!;
+  const delimiter = specifier.lastIndexOf("#"),
+    name = delimiter < 0 ? specifier : specifier.slice(0, delimiter),
+    exported = delimiter < 0 ? "default" : specifier.slice(delimiter + 1);
+  if (!name || !exported) throw new TypeError("Theme needs a module and export name");
+  let moduleUrl: string;
+  if (name.startsWith(".") || path.isAbsolute(name)) {
+    moduleUrl = pathToFileURL(path.resolve(cwd, name)).href;
+  } else {
+    try {
+      moduleUrl = resolveModule(name, pathToFileURL(path.join(cwd, "package.json")).href);
+    } catch (error) {
+      if (!(error instanceof Error && "code" in error && error.code === "ERR_MODULE_NOT_FOUND"))
+        throw error;
+      // npm exec installs explicit --package entries beside the CLI, outside the user's folder.
+      try {
+        moduleUrl = resolveModule(name, import.meta.url);
+      } catch (fallbackError) {
+        if (
+          fallbackError instanceof Error &&
+          "code" in fallbackError &&
+          fallbackError.code === "ERR_MODULE_NOT_FOUND"
+        )
+          throw new TypeError(
+            `Theme package "${name}" was not found. Install it in your project or include it with npm exec --package=${name}.`,
+          );
+        throw fallbackError;
+      }
+    }
+  }
+  const module: Record<string, unknown> = await import(moduleUrl);
+  const candidate =
+    typeof module[exported] === "function" ? await module[exported]() : module[exported];
+  assertTheme(candidate);
+  return candidate;
 }
 /** Parse explicit commands; return server ownership to the caller for graceful shutdown. */
 export async function runCli(
@@ -87,21 +121,61 @@ export async function runCli(
   if (
     !["build", "server"].includes(command ?? "") ||
     source === undefined ||
+    source === "" ||
     parsed.positionals.length !== 2
   )
     throw new TypeError(help);
+  const otherModeOptions =
+    command === "build" ? ["host", "port", "mount", "live"] : ["out", "mode", "urls", "base"];
+  for (const option of otherModeOptions)
+    if (Object.hasOwn(parsed.values, option))
+      throw new TypeError(`--${option} is not supported in ${command} mode`);
   let config: CliConfig = {};
-  if (parsed.values.config) {
-    const module = await import(pathToFileURL(path.resolve(cwd, parsed.values.config)).href);
-    if (typeof module.default !== "object" || module.default === null)
+  const configPath = path.resolve(cwd, parsed.values.config ?? "dirwell.config.mjs");
+  let hasConfig = parsed.values.config !== undefined;
+  if (!hasConfig) {
+    try {
+      await access(configPath);
+      hasConfig = true;
+    } catch (error) {
+      if (!(error instanceof Error && "code" in error && error.code === "ENOENT")) throw error;
+    }
+  }
+  if (!hasConfig) {
+    for (const filename of [
+      "dirwell.config.ts",
+      "dirwell.config.js",
+      "dirwell.config.mts",
+      "dirwell.config.cjs",
+    ]) {
+      try {
+        await access(path.resolve(cwd, filename));
+      } catch (error) {
+        if (error instanceof Error && "code" in error && error.code === "ENOENT") continue;
+        throw error;
+      }
+      throw new TypeError(
+        `Found ${filename}. This CLI discovers dirwell.config.mjs only. Migrate the config or select a native JavaScript module with --config; existing rules will not be silently ignored.`,
+      );
+    }
+  }
+  if (hasConfig) {
+    const module = await import(pathToFileURL(configPath).href);
+    if (
+      typeof module.default !== "object" ||
+      module.default === null ||
+      Array.isArray(module.default)
+    )
       throw new TypeError("Config must export an object");
     config = module.default;
   }
-  const theme = parsed.values.theme ? await loadTheme(parsed.values.theme, cwd) : config.theme;
-  if (theme === undefined)
-    throw new TypeError(
-      "Choose an explicit --theme or config.theme. Install the theme package separately.",
-    );
+  const theme =
+    parsed.values.theme !== undefined
+      ? await loadTheme(parsed.values.theme, cwd)
+      : config.theme === undefined
+        ? createPlainTheme()
+        : config.theme;
+  assertTheme(theme);
   const pageSize = positive(parsed.values["page-size"], "page-size"),
     blockSize = positive(parsed.values["block-size"], "block-size");
   const listing: ListingPolicy | undefined =
@@ -133,12 +207,12 @@ export async function runCli(
     log(`Built ${parsed.values.out}`);
     return null;
   }
-  const port = Number(parsed.values.port ?? process.env.PORT ?? "0");
+  const port = Number(parsed.values.port ?? process.env.PORT ?? config.server?.port ?? 0);
   if (!Number.isSafeInteger(port) || port < 0 || port > 65535)
     throw new TypeError("port must be between 0 and 65535");
   const server = await startExplorerServer({
     ...config.server,
-    ...(parsed.values.live ? { live: {} } : {}),
+    ...(parsed.values.live ? { live: config.server?.live || {} } : {}),
     root,
     theme,
     port,
