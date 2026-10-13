@@ -3,7 +3,7 @@ title: SDK alpha and package migration
 description: Explicit themes, static builds, live server mode and the optional package boundaries.
 ---
 
-The nine `@dirwell/*` packages are published at `0.0.1-alpha`, tagged `alpha`. The [first SDK release](https://github.com/vp-tw/dirwell/releases/tag/%40dirwell/workspace%400.0.1-alpha) passed registry integrity, signatures, provenance and installed-consumer checks. The existing installation guides and public examples use the published `@vp-tw/dirwell` compatibility package; the examples below use the new SDK imports.
+The nine `@dirwell/*` packages are published at `0.0.1-alpha.1`, tagged `alpha`. The [SDK release](https://github.com/vp-tw/dirwell/releases/tag/%40dirwell/workspace%400.0.1-alpha.1) passed registry integrity, signatures, provenance and installed-consumer checks. The existing installation guides and public examples use the published `@vp-tw/dirwell` compatibility package; the examples below use the new SDK imports.
 
 ## Choose a mode
 
@@ -19,15 +19,15 @@ Server mode handles file data without a Farm/compiler watcher. Theme source stil
 
 ## Install only the capabilities you need
 
-Core requires an explicit theme. The next CLI alpha includes Plain by default; its behavior is described below. Plain emits native HTML with no JavaScript, image, font or icon assets by default. Ledger uses Svelte; Crosswave uses Vue and VueUse gamepad support. `@dirwell/share-image` supplies optional build-time metadata/PNG images. `@dirwell/integrations` supplies explicit-theme build adapters. Core and Plain do not depend on either optional package.
+Core requires an explicit theme. CLI `0.0.1-alpha.1` includes Plain by default; its behavior is described below. Plain emits native HTML with no JavaScript, image, font or icon assets by default. Ledger uses Svelte; Crosswave uses Vue and VueUse gamepad support. `@dirwell/share-image` supplies optional build-time metadata/PNG images. `@dirwell/integrations` supplies explicit-theme build adapters. Core and Plain do not depend on either optional package.
 
 The nine packages have separate dependency graphs, but share one official alpha version. The minimum **verified** Node version is 22.12; publishing tools use Node 26. Physical gamepads and production-scale performance remain unverified.
 
-## Next CLI alpha: minimal default and project configuration
+## CLI: minimal default and project configuration
 
-The next alpha includes Plain in the CLI. The currently published `0.0.1-alpha`
-still requires an explicit theme; the commands in this section target the next
-release. Core and integrated HTML continue to require an explicit theme.
+CLI `0.0.1-alpha.1` includes Plain by default. The commands below use the
+published `alpha` tag. Core and integrated HTML continue to require an explicit
+theme. The earlier `0.0.1-alpha` CLI required a project-installed theme.
 
 ```sh
 npx @dirwell/cli@alpha server ./files

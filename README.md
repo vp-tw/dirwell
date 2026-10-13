@@ -1,6 +1,6 @@
 # Dirwell
 
-The `@dirwell/*` SDK alpha is published at `0.0.1-alpha`, requires explicit themes and supports live server mode. See [the package transition](PACKAGE_TRANSITION.md) and [workspace release preparation](WORKSPACE_RELEASING.md). The examples below use the legacy compatibility package; the SDK guide documents the new package imports.
+The `@dirwell/*` SDK alpha is published at `0.0.1-alpha.1`. Its CLI includes minimal Plain and supports static build or live server mode without a project or theme install. Core and integrated HTML retain explicit themes. See [the SDK guide](https://vp-tw.github.io/dirwell/sdk-alpha/) and [package transition](PACKAGE_TRANSITION.md).
 
 ![Dirwell — Turn a folder into a searchable website.](https://raw.githubusercontent.com/vp-tw/dirwell/main/assets/brand/dirwell-og.png)
 
@@ -9,12 +9,29 @@ Dirwell generates the file list, directory navigation, and links to the original
 files. Publish the output on a static host; visitors do not need a Dirwell server.
 
 [Try the live explorer](https://vp-tw.github.io/dirwell/examples/file-icons/) ·
-[Get started](https://vp-tw.github.io/dirwell/getting-started/) ·
+[Get started with the SDK](https://vp-tw.github.io/dirwell/sdk-alpha/) ·
 [Documentation](https://vp-tw.github.io/dirwell/overview/)
+
+## Use the SDK CLI
+
+With Node.js 22.12 or later and an existing folder:
+
+```sh
+npx @dirwell/cli@alpha server ./downloads
+npx @dirwell/cli@alpha build ./downloads --out ./site-downloads
+```
+
+Server prints its URL and reads fresh data on requests; Ctrl+C stops it. Plain
+is the no-script default. Build replaces a dedicated output tree and copies the
+selected source files; keep unrelated files out of it. Install Ledger or
+Crosswave for rich search/interaction, and use `dirwell.config.mjs` to customize
+the theme, selection or server. The [SDK guide](https://vp-tw.github.io/dirwell/sdk-alpha/)
+includes the configuration and integration examples. Use the `alpha` dist-tag
+for this prerelease; it is separate from the compatibility package below.
 
 > The examples below use the legacy `@vp-tw/dirwell` compatibility package. For the new CLI build/server modes, start with the [SDK guide](https://vp-tw.github.io/dirwell/sdk-alpha/) and [CLI guide](https://github.com/vp-tw/dirwell/blob/main/packages/cli/README.md).
 
-## Browse your first folder
+## Compatibility package: browse your first folder
 
 You need **Node.js 22.12 or later**, which includes npm. From a terminal, replace
 `./downloads` with a folder that already exists:
