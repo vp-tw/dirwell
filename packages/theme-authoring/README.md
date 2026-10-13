@@ -59,7 +59,9 @@ proxy it publicly. The production server remains `@dirwell/server`.
 Source edits use official framework HMR; file changes use the explorer's separate
 SSE revision protocol. CSS-only edits preserve the current component state. Wrapper template/snippet
 edits and script changes can remount child components and reset search/selection;
-HMR does not guarantee state persistence for those edits. Compiler errors
+HMR retains the current directory model, but does not guarantee filter/selection
+persistence for those edits. Source writes are coalesced until stable for 100 ms
+before compilation, so partial editor writes can recover cleanly. Compiler errors
 produce Vite's overlay and recover after a valid edit. Development CSS loads
 through Vite's client, so production output is the no-JavaScript/CSS acceptance
 path. No Farm watcher is involved.

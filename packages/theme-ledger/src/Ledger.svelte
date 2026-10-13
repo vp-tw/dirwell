@@ -5,6 +5,7 @@
   import {
     fetchThemePage,
     applyThemeMetadata,
+    restoreThemePage,
   } from "../../shared-theme/src/navigation.ts";
   import {
     visibleRecords,
@@ -15,7 +16,9 @@
     fuzzy,
   } from "../../shared-theme/src/records.ts";
   let { model: initialModel, header, row, footer } = $props();
-  const snapshot = untrack(() => initialModel);
+  const snapshot = untrack(() =>
+    restoreThemePage(initialModel, Boolean(import.meta.hot)),
+  );
   let model = $state.raw(snapshot),
     entries = $state.raw(snapshot.entries),
     query = $state(""),

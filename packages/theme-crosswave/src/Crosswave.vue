@@ -11,13 +11,17 @@ import {
 } from "vue";
 import { useGamepad } from "@vueuse/core";
 import { loadListing } from "@dirwell/core/client";
-import { fetchThemePage, applyThemeMetadata } from "../../shared-theme/src/navigation.ts";
+import {
+  fetchThemePage,
+  applyThemeMetadata,
+  restoreThemePage,
+} from "../../shared-theme/src/navigation.ts";
 import { entryIcon } from "../../shared-theme/src/icons.ts";
 import { directoryLike, size, modified } from "../../shared-theme/src/records.ts";
 import { createWave } from "./wave.mjs";
 const props = defineProps({ model: { type: Object, required: true } }),
-  model = shallowRef(props.model),
-  entries = shallowRef(props.model.entries);
+  model = shallowRef(restoreThemePage(props.model, Boolean(import.meta.hot))),
+  entries = shallowRef(model.value.entries);
 const query = ref(""),
   category = ref("all"),
   selected = ref(null),

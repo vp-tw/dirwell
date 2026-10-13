@@ -75,8 +75,25 @@ export async function fetchThemePage(
   };
 }
 
+// HMR can remount a wrapper while the outer explorer root stays mounted.
+// Keep only its current public model; production imports never register roots.
+const hotModels = new WeakMap<Element, Record<string, unknown>>();
+export function restoreThemePage(
+  initial: Record<string, unknown>,
+  hot: boolean,
+): Record<string, unknown> {
+  if (!hot || typeof document === "undefined") return initial;
+  const root = document.querySelector("[data-dirwell-theme]");
+  if (!root) return initial;
+  const snapshot = hotModels.get(root) ?? initial;
+  hotModels.set(root, snapshot);
+  return snapshot;
+}
+
 /** Copy only inert metadata elements; never insert snapshot HTML or event attributes. */
 export function applyThemeMetadata(page: Record<string, unknown>, pageHref: string): void {
+  const root = document.querySelector("[data-dirwell-theme]");
+  if (root && hotModels.has(root)) hotModels.set(root, page);
   document.title = typeof page.title === "string" ? page.title : "";
   const template = document.createElement("template");
   template.innerHTML = typeof page.metadataHead === "string" ? page.metadataHead : "";

@@ -89,6 +89,7 @@ const clientBuild = await build({
   platform: "browser",
   target: "es2020",
   conditions: ["browser"],
+  define: { "import.meta.hot": "undefined" },
   outfile: path.join(output, "client.js"),
   minify: true,
 });

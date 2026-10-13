@@ -39,6 +39,7 @@ export async function startAuthoringServer(options: AuthoringServerOptions) {
       host: "127.0.0.1",
       port: options.port ?? 0,
       strictPort: true,
+      watch: { awaitWriteFinish: { stabilityThreshold: 100, pollInterval: 20 } },
       fs: {
         allow: [
           searchForWorkspaceRoot(path.dirname(component)),

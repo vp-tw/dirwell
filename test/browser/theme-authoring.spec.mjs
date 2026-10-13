@@ -52,6 +52,7 @@ for (const framework of ["svelte", "vue"]) {
         .filter({ has: page.locator("[data-custom-row]") })
         .filter({ hasText: "docs" })
         .click();
+      await expect(page.locator("[data-custom-row]")).toHaveCount(1);
       await expect(page.locator("[data-custom-row]")).toContainText("nested.txt");
       await expect(page.locator("[data-custom-footer]")).toContainText("1 entries");
       await page.goBack();
@@ -111,6 +112,21 @@ for (const framework of ["svelte", "vue"]) {
       await writeFile(path.join(fixture.files, "hello-live.txt"), "new");
       await expect(page.locator("[data-custom-row]")).toHaveCount(2);
       expect(await readFile(fixture.component, "utf8")).toContain("Recovered");
+      await search.fill("");
+      await page
+        .locator("a")
+        .filter({ has: page.locator("[data-custom-row]") })
+        .filter({ hasText: "docs" })
+        .click();
+      await expect(page.locator("[data-custom-row]")).toHaveCount(1);
+      await expect(page.locator("[data-custom-row]")).toContainText("nested.txt");
+      await writeFile(fixture.component, styled.replace("Edited", "Folder edited"));
+      await expect(page.locator("[data-custom-header]")).toContainText("Folder edited");
+      await expect(page.locator("[data-custom-row]")).toHaveCount(1);
+      await expect(page.locator("[data-custom-row]")).toContainText("nested.txt");
+      await expect(page.locator("[data-custom-footer]")).toContainText("1 entries");
+      await expect(page).toHaveURL(/browse\/docs\//);
+      expect(await page.evaluate(() => globalThis.__authoringDocument)).toBe("original");
     } finally {
       if (server) await server.close();
       await fixture.close();
