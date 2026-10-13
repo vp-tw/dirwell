@@ -20,6 +20,7 @@ export interface ThemePage {
   readonly rootDataHref: string;
   readonly dataHref: string;
   readonly manifestHref: string | null;
+  readonly listingRevision?: string;
   readonly updatesHref: string | null;
   readonly total: number;
   readonly entries: readonly ListingEntry[];
@@ -135,6 +136,7 @@ export function createThemePage(
       context.pageDataHref?.(theme.name, directoryPath, context.listing?.page.number ?? 1) ??
       context.assetHref(pageAsset(theme.name, directoryPath, context.listing?.page.number ?? 1)),
     manifestHref: context.listing?.manifestHref ?? null,
+    ...(context.listing ? { listingRevision: context.listing.revision } : {}),
     updatesHref: context.updatesHref ?? null,
     total: context.listing?.page.total ?? entries.length,
     entries,

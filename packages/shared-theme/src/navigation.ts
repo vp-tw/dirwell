@@ -1,4 +1,4 @@
-import { parseListingEntries, ListingDataError } from "@dirwell/core/client";
+import { loadListing, parseListingEntries, ListingDataError } from "@dirwell/core/client";
 
 /** Folder snapshots resolve relative URLs before History changes the document URL. */
 export async function fetchThemePage(
@@ -7,6 +7,7 @@ export async function fetchThemePage(
   theme: string,
   signal: AbortSignal,
   fresh = false,
+  attempt = 0,
 ): Promise<Record<string, unknown>> {
   const source = new URL(dataHref, document.baseURI);
   if (source.origin !== location.origin)
@@ -50,7 +51,7 @@ export async function fetchThemePage(
       : {}),
   }));
   if (entries.length > Number(data.total)) throw new ListingDataError("Invalid folder count");
-  return {
+  const result = {
     ...data,
     updatesHref: link(data.updatesHref ?? null),
     entries,
@@ -73,6 +74,19 @@ export async function fetchThemePage(
       return { name: raw.name, href: link(raw.href), dataHref: link(raw.dataHref) };
     }),
   };
+  // Keep the current UI until independently fetched page and listing revisions agree.
+  if (fresh && result.manifestHref) {
+    const loaded = await loadListing(result.manifestHref, { signal, cache: "no-store" });
+    if (
+      loaded.manifest.total !== data.total ||
+      (data.listingRevision !== undefined && loaded.manifest.revision !== data.listingRevision)
+    ) {
+      if (attempt < 2) return fetchThemePage(dataHref, pageHref, theme, signal, true, attempt + 1);
+      throw new ListingDataError("Folder changed while refreshing");
+    }
+    result.entries = [...loaded.entries];
+  }
+  return result;
 }
 
 // HMR can remount a wrapper while the outer explorer root stays mounted.

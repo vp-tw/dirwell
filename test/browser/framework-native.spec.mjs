@@ -262,10 +262,23 @@ for (const [name, creator] of [
         });
         observer.observe(input, { attributes: true, attributeFilter: ["disabled"] });
       });
+      // Simulate a page response from just before the manifest's next revision.
+      const dataHref = await page.evaluate(() => history.state.dataHref);
+      let stalePages = 0;
+      await page.route(dataHref, async (route) => {
+        const response = await route.fetch();
+        const data = await response.json();
+        if (stalePages < 2 && data.total === 252) {
+          if (stalePages++ === 0) data.total = 251;
+          else data.listingRevision = "previous-revision";
+        }
+        await route.fulfill({ response, json: data });
+      });
       await writeFile(path.join(root, "arrived.txt"), "new");
       await expect(rows).toHaveCount(1);
       await expect(search).toHaveValue("arrived");
       expect(await page.evaluate(() => window.__disabledDuringLive)).toBe(false);
+      expect(stalePages).toBe(2);
       await rm(path.join(root, "arrived.txt"));
       await expect(rows).toHaveCount(0);
       await search.fill("");
