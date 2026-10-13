@@ -14,10 +14,18 @@ on:
         required: true
         type: string
       publish:
-        description: Publish using configured npm trusted publishers (false only prepares artifacts)
+        description: Publish verified tarballs (false only prepares artifacts)
         required: true
         default: false
         type: boolean
+      authentication:
+        description: One-time bootstrap token for 0.0.1-alpha; OIDC for subsequent releases
+        required: true
+        default: oidc
+        type: choice
+        options:
+          - oidc
+          - bootstrap-token
 
 permissions:
   contents: read
@@ -91,11 +99,16 @@ jobs:
         with:
           node-version: 26
           package-manager-cache: false
+          registry-url: ${{ inputs.authentication == 'bootstrap-token' && 'https://registry.npmjs.org' || '' }}
       - uses: actions/download-artifact@v4
         with:
           name: verified-workspace
           path: .workspace-release/
-      - run: node scripts/workspace-release.mjs publish
+      - name: Publish with explicit authentication and provenance
+        env:
+          DIRWELL_PUBLISH_AUTH: ${{ inputs.authentication }}
+          NODE_AUTH_TOKEN: ${{ inputs.authentication == 'bootstrap-token' && secrets.NPM_BOOTSTRAP_TOKEN || '' }}
+        run: node scripts/workspace-release.mjs publish
       - uses: actions/upload-artifact@v4
         if: always()
         with:

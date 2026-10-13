@@ -5,6 +5,7 @@ import {
   validateManifest,
   publicationPlan,
   validateWorkspaceProvenance,
+  validatePublicationAuthentication,
 } from "../scripts/workspace-release.mjs";
 const version = "0.0.1-alpha";
 const environment = {
@@ -14,6 +15,44 @@ const environment = {
   GITHUB_EVENT_NAME: "workflow_dispatch",
   GITHUB_SHA: "a".repeat(40),
 };
+test("bootstrap authentication is explicit, first-alpha-only and still requires provenance", () => {
+  const oidc = {
+    GITHUB_ACTIONS: "true",
+    ACTIONS_ID_TOKEN_REQUEST_URL: "https://example.invalid/oidc",
+  };
+  validatePublicationAuthentication(oidc, version);
+  const bootstrap = {
+    ...oidc,
+    DIRWELL_PUBLISH_AUTH: "bootstrap-token",
+    NODE_AUTH_TOKEN: "test-only",
+  };
+  validatePublicationAuthentication(bootstrap, version);
+  assert.throws(
+    () => validatePublicationAuthentication({ ...bootstrap, NODE_AUTH_TOKEN: "" }, version),
+    /Missing NPM_BOOTSTRAP_TOKEN/,
+  );
+  assert.throws(() => validatePublicationAuthentication(bootstrap, "0.0.1-alpha.1"), /first alpha/);
+  assert.throws(
+    () =>
+      validatePublicationAuthentication(
+        { ...bootstrap, ACTIONS_ID_TOKEN_REQUEST_URL: "" },
+        version,
+      ),
+    /provenance/,
+  );
+  assert.throws(
+    () => validatePublicationAuthentication({ ...bootstrap, GITHUB_ACTIONS: "false" }, version),
+    /qualified/,
+  );
+  assert.throws(
+    () => validatePublicationAuthentication({ ...oidc, NODE_AUTH_TOKEN: "test-only" }, version),
+    /must not receive/,
+  );
+  assert.throws(
+    () => validatePublicationAuthentication({ ...oidc, DIRWELL_PUBLISH_AUTH: "unknown" }, version),
+    /Unknown/,
+  );
+});
 function fixture() {
   return {
     schemaVersion: 1,

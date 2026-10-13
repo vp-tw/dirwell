@@ -225,7 +225,7 @@ for (const [name, creator] of [
   test(`${name}: live server revisions update framework rows without replacing the document`, async ({
     page,
   }) => {
-    test.setTimeout(30_000);
+    test.setTimeout(60_000);
     const { startExplorerServer } = await import("../../packages/server/dist/node.mjs");
     const root = await mkdtemp(path.join(tmpdir(), "dirwell-live-browser-"));
     let server;
@@ -262,10 +262,24 @@ for (const [name, creator] of [
         });
         observer.observe(input, { attributes: true, attributeFilter: ["disabled"] });
       });
+      // Simulate a page response from just before the manifest's next revision.
+      const dataHref = await page.evaluate(() => history.state.dataHref);
+      let stalePage = false;
+      await page.route(dataHref, async (route) => {
+        const response = await route.fetch();
+        const data = await response.json();
+        if (!stalePage && data.total === 252) {
+          stalePage = true;
+          if (name === "ledger") data.total = 251;
+          else data.listingRevision = "previous-revision";
+        }
+        await route.fulfill({ response, json: data });
+      });
       await writeFile(path.join(root, "arrived.txt"), "new");
-      await expect(rows).toHaveCount(1);
+      await expect(rows).toHaveCount(1, { timeout: 15_000 });
       await expect(search).toHaveValue("arrived");
       expect(await page.evaluate(() => window.__disabledDuringLive)).toBe(false);
+      expect(stalePage).toBe(true);
       await rm(path.join(root, "arrived.txt"));
       await expect(rows).toHaveCount(0);
       await search.fill("");
