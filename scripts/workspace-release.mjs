@@ -12,6 +12,26 @@ export const workflow = "publish-workspace.yml";
 export const artifactDirectory = process.env.DIRWELL_RELEASE_DIR ?? ".workspace-release";
 const integrity = (bytes) => "sha512-" + createHash("sha512").update(bytes).digest("base64");
 
+export function validatePublicationAuthentication(environment, version) {
+  assert.equal(
+    environment.GITHUB_ACTIONS,
+    "true",
+    "Publishing requires the qualified GitHub workflow",
+  );
+  assert.ok(environment.ACTIONS_ID_TOKEN_REQUEST_URL, "Missing provenance OIDC environment");
+  const authentication = environment.DIRWELL_PUBLISH_AUTH ?? "oidc";
+  assert.ok(
+    ["oidc", "bootstrap-token"].includes(authentication),
+    "Unknown publication authentication",
+  );
+  if (authentication === "bootstrap-token") {
+    assert.equal(version, "0.0.1-alpha", "Bootstrap credentials are limited to the first alpha");
+    assert.ok(environment.NODE_AUTH_TOKEN, "Missing NPM_BOOTSTRAP_TOKEN secret");
+  } else {
+    assert.ok(!environment.NODE_AUTH_TOKEN, "OIDC publication must not receive an npm token");
+  }
+}
+
 export function validatePackage(metadata, version, { publish = false } = {}) {
   assert.match(
     version,
@@ -259,6 +279,7 @@ async function main(mode) {
     await readback(manifest);
     return;
   }
+  if (mode === "publish") validatePublicationAuthentication(process.env, manifest.version);
   const plan = await publicationPlan(manifest, lookup);
   console.log(
     JSON.stringify(
@@ -268,12 +289,6 @@ async function main(mode) {
     ),
   );
   if (mode === "plan") return;
-  assert.equal(
-    process.env.GITHUB_ACTIONS,
-    "true",
-    "Publishing requires the qualified GitHub workflow",
-  );
-  assert.ok(process.env.ACTIONS_ID_TOKEN_REQUEST_URL, "Missing OIDC environment");
   // A partial release reruns against the same artifact. Never repack during publication.
   for (const { item, action } of plan) {
     if (action === "skip") continue;

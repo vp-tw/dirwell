@@ -1,7 +1,6 @@
 {
   "name": "@dirwell/cli",
   "version": "0.0.1-alpha",
-  "private": true,
   "description": "Explicit-theme build and live-server commands for Dirwell.",
   "license": "MIT",
   "repository": {

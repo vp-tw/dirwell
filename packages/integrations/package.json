@@ -1,7 +1,6 @@
 {
   "name": "@dirwell/integrations",
   "version": "0.0.1-alpha",
-  "private": true,
   "description": "Explicit-theme build adapters for Vite and unplugin hosts.",
   "license": "MIT",
   "repository": {

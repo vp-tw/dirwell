@@ -1,6 +1,6 @@
 # Dirwell package transition
 
-The repository contains an **unreleased** `@dirwell/*` alpha line, starting at exactly `0.0.1-alpha`. The published `@vp-tw/dirwell` compatibility line remains separate. The nine new packages are currently private while their runtime/platform qualification and publication setup are completed.
+The repository contains an **unreleased** `@dirwell/*` alpha line, starting at exactly `0.0.1-alpha`. The published `@vp-tw/dirwell` compatibility line remains separate. The nine new packages have completed runtime/platform qualification and are prepared for their first public release. Registry availability remains unverified until publication and registry consumer checks complete.
 
 | Package                    | Responsibility                                                                         | Runtime dependencies                                         |
 | -------------------------- | -------------------------------------------------------------------------------------- | ------------------------------------------------------------ |

@@ -1,7 +1,6 @@
 {
   "name": "@dirwell/core",
   "version": "0.0.1-alpha",
-  "private": true,
   "description": "Framework-neutral directory listing and static publication kernel.",
   "license": "MIT",
   "repository": {

@@ -1,7 +1,6 @@
 {
   "name": "@dirwell/share-image",
   "version": "0.0.1-alpha",
-  "private": true,
   "description": "Optional build-time metadata and PNG share-image rendering.",
   "license": "MIT",
   "repository": {

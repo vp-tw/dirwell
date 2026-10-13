@@ -1,7 +1,6 @@
 {
   "name": "@dirwell/theme-ledger",
   "version": "0.0.1-alpha",
-  "private": true,
   "description": "Svelte-owned searchable directory explorer.",
   "license": "MIT",
   "repository": {

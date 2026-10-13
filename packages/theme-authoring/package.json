@@ -1,7 +1,6 @@
 {
   "name": "@dirwell/theme-authoring",
   "version": "0.0.1-alpha",
-  "private": true,
   "description": "Paired Svelte/Vue theme compilation and native development HMR.",
   "license": "MIT",
   "repository": {

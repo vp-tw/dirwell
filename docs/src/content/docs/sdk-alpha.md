@@ -3,7 +3,7 @@ title: SDK alpha and package migration
 description: Explicit themes, static builds, live server mode and the optional package boundaries.
 ---
 
-The new `@dirwell/*` family is **unreleased** and remains private at exactly `0.0.1-alpha`. The existing installation guides and public examples use the published `@vp-tw/dirwell` compatibility package. The examples below describe the qualified workspace API; do not expect registry installation to work before publication is announced.
+The new `@dirwell/*` family is **unreleased** and prepared for its first publication at exactly `0.0.1-alpha`. The existing installation guides and public examples use the published `@vp-tw/dirwell` compatibility package. The examples below describe the qualified workspace API; do not expect registry installation to work before publication is announced.
 
 ## Choose a mode
 
@@ -112,5 +112,5 @@ component from its theme's `/source` entry and model types from `/model`.
 loopback with native Vite HMR. It is separate from production server mode and
 from file-revision SSE. CSS-only changes preserve state; wrapper/template edits
 can remount children and reset search/selection. Core and Plain do not depend on
-these tools. The authoring package and all other alpha packages remain private
-until npm publication is explicitly completed.
+these tools. The alpha packages are prepared for publication; registry availability remains
+unverified until the first release completes.
