@@ -13,7 +13,7 @@ test("landing page exposes every live example and source directory", async () =>
   assert.equal(new Set(exampleCatalog.map(({ slug }) => slug)).size, exampleCatalog.length);
   assert.deepEqual(
     exampleGroups[0].examples.map(({ name }) => name),
-    ["Ledger (default)", "Plain", "Crosswave"],
+    ["Ledger", "Plain", "Crosswave"],
   );
   assert.equal(
     exampleCatalog.some(({ slug }) => String(slug) === "basic"),
@@ -40,10 +40,10 @@ test("site build combines docs and examples in one publish directory", async () 
 
   const buildScript = await readFile(path.join(root, "scripts/build-examples.ts"), "utf8");
   assert.match(buildScript, /const examples = publishedExampleSlugs/);
-  assert.match(buildScript, /plugins: dirwellVite\(options\)/);
-  assert.match(buildScript, /loadDirwellConfig\(exampleRoot, "build"\)/);
+  assert.match(buildScript, /await generateExplorer\(options\)/);
+  assert.match(buildScript, /examples\/\$\{example\}\/config\.ts/);
   for (const { slug } of exampleCatalog) {
-    const config = await readFile(path.join(root, `examples/${slug}/dirwell.config.ts`), "utf8");
+    const config = await readFile(path.join(root, `examples/${slug}/config.ts`), "utf8");
     assert.match(config, new RegExp(`docs/public/examples/${slug}`));
   }
   assert.match(buildScript, /path\.join\(publishedExamples, "\.build-id"\)/);
@@ -52,7 +52,7 @@ test("site build combines docs and examples in one publish directory", async () 
 test("landing preview embeds generated default theme instead of duplicate markup", async () => {
   const source = await readFile(path.join(root, "docs/src/pages/index.astro"), "utf8");
   assert.match(source, /src=\{examplePath\("file-icons"\)\}/);
-  assert.match(source, /title="Interactive Dirwell default theme preview"/);
+  assert.match(source, /title="Interactive Dirwell Ledger preview"/);
   assert.match(source, /data-build-id-url=\{path\("examples\/\.build-id"\)\}/);
   assert.doesNotMatch(source, /class="file-row"/);
 });
@@ -73,7 +73,7 @@ test("explorer preview build is scoped to the fixture directory", async () => {
   };
   assert.equal(
     packageJson.scripts["build:explorer"],
-    "node src/bin.ts build fixture --out-dir generated",
+    "node packages/cli/dist/bin.mjs build fixture --out generated",
   );
 });
 

@@ -23,3 +23,5 @@ workspace-artifact/
 .workspace-release/
 
 examples/authoring/.generated-*/
+
+examples/default-theme-override/.generated-theme/

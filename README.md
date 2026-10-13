@@ -1,109 +1,60 @@
 # Dirwell
 
-The `@dirwell/*` SDK alpha is published at `0.0.1-alpha.1`. Its CLI includes minimal Plain and supports static build or live server mode without a project or theme install. Core and integrated HTML retain explicit themes. See [the SDK guide](https://vp-tw.github.io/dirwell/sdk-alpha/) and [package transition](PACKAGE_TRANSITION.md).
+Turn a folder into a browsable website, or serve current files directly. The published `@dirwell/*` packages are alpha; use Node.js 22.12 or later.
 
 ![Dirwell — Turn a folder into a searchable website.](https://raw.githubusercontent.com/vp-tw/dirwell/main/assets/brand/dirwell-og.png)
 
-Turn a folder of downloads, reports, or build artifacts into a searchable website.
-Dirwell generates the file list, directory navigation, and links to the original
-files. Publish the output on a static host; visitors do not need a Dirwell server.
+[Try Ledger](https://vp-tw.github.io/dirwell/examples/file-icons/) · [Get started](https://vp-tw.github.io/dirwell/getting-started/) · [Documentation](https://vp-tw.github.io/dirwell/overview/)
 
-[Try the live explorer](https://vp-tw.github.io/dirwell/examples/file-icons/) ·
-[Get started with the SDK](https://vp-tw.github.io/dirwell/sdk-alpha/) ·
-[Documentation](https://vp-tw.github.io/dirwell/overview/)
-
-## Use the SDK CLI
-
-With Node.js 22.12 or later and an existing folder:
+## Open or publish a folder
 
 ```sh
 npx @dirwell/cli@alpha server ./downloads
 npx @dirwell/cli@alpha build ./downloads --out ./site-downloads
 ```
 
-Server prints its URL and reads fresh data on requests; Ctrl+C stops it. Plain
-is the no-script default. Build replaces a dedicated output tree and copies the
-selected source files; keep unrelated files out of it. Install Ledger or
-Crosswave for rich search/interaction, and use `dirwell.config.mjs` to customize
-the theme, selection or server. The [SDK guide](https://vp-tw.github.io/dirwell/sdk-alpha/)
-includes the configuration and integration examples. Use the `alpha` dist-tag
-for this prerelease; it is separate from the compatibility package below.
+No project or config is required. Plain is included: native links and pagination, no browser JavaScript, fonts or share images. Server prints its URL and reads fresh data on requests; Ctrl+C stops it. Build replaces a dedicated output tree and copies selected source files. Publish the complete tree on a static host; keep unrelated files out of that directory.
 
-> The examples below use the legacy `@vp-tw/dirwell` compatibility package. For the new CLI build/server modes, start with the [SDK guide](https://vp-tw.github.io/dirwell/sdk-alpha/) and [CLI guide](https://github.com/vp-tw/dirwell/blob/main/packages/cli/README.md).
+For a searchable interface, install a rich theme:
 
-## Compatibility package: browse your first folder
-
-You need **Node.js 22.12 or later**, which includes npm. From a terminal, replace
-`./downloads` with a folder that already exists:
-
-```bash
-npx @vp-tw/dirwell serve ./downloads
+```sh
+npm install --save-dev @dirwell/cli@alpha @dirwell/theme-ledger@alpha
+npx dirwell server ./downloads --theme ledger --live
 ```
 
-Accept npm's installation prompt on first use. Open the `Local:` URL printed by
-Dirwell. Add or change a file to see the list update. Press Ctrl+C to stop.
-No repository clone or config file is required.
+Use `dirwell.config.mjs` to configure themes, selection and server/build options. Ledger uses Svelte; Crosswave uses Vue. Both remain separate optional installs. Core and integrations require explicit themes.
 
-## Publish the folder
+## Packages
 
-```bash
-npx @vp-tw/dirwell build ./downloads -o ./site-downloads
-```
+| Need                                        | Package                    |
+| ------------------------------------------- | -------------------------- |
+| Minimal build/server commands               | `@dirwell/cli`             |
+| Filesystem, listing and static build API    | `@dirwell/core`            |
+| Native HTML                                 | `@dirwell/theme-plain`     |
+| Search, sort and keyboard navigation        | `@dirwell/theme-ledger`    |
+| Media categories and controller navigation  | `@dirwell/theme-crosswave` |
+| Node HTTP routes and live file transport    | `@dirwell/server`          |
+| Build-time metadata and PNG images          | `@dirwell/share-image`     |
+| Static generation inside build tools        | `@dirwell/integrations`    |
+| Svelte/Vue source compilation and local HMR | `@dirwell/theme-authoring` |
 
-Upload the complete `site-downloads/` directory to a static host. The default
-output uses relative links so it can move between URL paths as one tree. The
-command replaces that output directory; keep unrelated files elsewhere.
-Existing source `index.html` and `index.htm` files are preserved, with the
-explorer written to `_dirwell.html` when that name is free.
+All nine share version `0.0.1-alpha.1` and the `alpha` tag. Pin the tested version for reproducible builds. Core and Plain stay free of framework/image/font/watch dependencies. See the [SDK guide](https://vp-tw.github.io/dirwell/sdk-alpha/) for API, live server and listing policy examples.
 
-The default Ledger theme includes search, sorting, file icons, and keyboard
-navigation. Files open in a new tab; directory navigation stays in the explorer.
-Default output includes the listing in HTML and remains browsable without
-JavaScript. Advanced MPA output can use JavaScript for large directory lists.
+## Learn more
 
-## Use it in a project
-
-Install the package when you need a reusable config, a theme, or a build adapter:
-
-```bash
-npm install --save-dev @vp-tw/dirwell
-```
-
-Create `dirwell.config.ts` beside your project's `package.json`:
-
-```ts
-import { defineConfig } from "@vp-tw/dirwell";
-
-export default defineConfig({
-  exclude: ["drafts/**"],
-});
-```
-
-Run `npx dirwell build ./downloads -o ./site-downloads`. Pass the source folder
-explicitly: the CLI defaults to the current directory even if config sets `root`.
-Pin your tested version when you need reproducible builds.
+| Task                               | Guide                                                                                                                 |
+| ---------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| Configure files, themes and URLs   | [Configuration](https://vp-tw.github.io/dirwell/configuration/)                                                       |
+| Publish under a fixed URL prefix   | [Deployment](https://vp-tw.github.io/dirwell/deployment/)                                                             |
+| Choose or customize an interface   | [Themes](https://vp-tw.github.io/dirwell/themes/)                                                                     |
+| Add titles and share images        | [Metadata](https://vp-tw.github.io/dirwell/metadata/)                                                                 |
+| Integrate with a build or Node app | [Build adapters](https://vp-tw.github.io/dirwell/build-tools/) · [SDK](https://vp-tw.github.io/dirwell/sdk-alpha/)    |
+| Understand API and limits          | [API reference](https://vp-tw.github.io/dirwell/api-reference/) · [Support](https://vp-tw.github.io/dirwell/support/) |
+| Fix setup or links                 | [Troubleshooting](https://vp-tw.github.io/dirwell/troubleshooting/)                                                   |
 
 ## Verified scope
 
-Tests run with Node.js 26. Full regression has passed in Chromium, Firefox, and Playwright WebKit; CI runs Chromium plus a bounded cross-engine suite. Installed-consumer checks cover Node 22.12, 24.1, and 26 on Windows, Linux, and macOS in ARM64/x64 variants: three-theme SSG/MPA output, CLI build/serve and live updates, encoded names, symlinks, and matching fixed-font share images. Primary Vite/Rollup/webpack paths, native macOS Safari navigation, and iPhone/iPad simulators' layout and scripted controls are also exercised. A user-reported Windows/Xbox controller smoke found no major issue; it is not a complete hardware mapping test. Physical iOS and real screen-reader output remain unverified. See the [verification record](https://github.com/vp-tw/dirwell/blob/main/VERIFICATION.md) and [adapter capabilities](https://vp-tw.github.io/dirwell/build-tools/#development-and-verification).
-
-## Choose your next step
-
-| Need                                                 | Read                                                                                                            |
-| ---------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| Publish under a fixed path, such as GitHub Pages     | [Deployment](https://vp-tw.github.io/dirwell/deployment/)                                                       |
-| Select files, change output names, or configure URLs | [Configuration](https://vp-tw.github.io/dirwell/configuration/)                                                 |
-| Change the interface or use a no-script listing      | [Themes](https://vp-tw.github.io/dirwell/themes/)                                                               |
-| Set page titles, descriptions, or share images       | [Page metadata](https://vp-tw.github.io/dirwell/metadata/)                                                      |
-| Generate alongside an existing application           | [Build tool adapters](https://vp-tw.github.io/dirwell/build-tools/)                                             |
-| Check supported integrations and limitations         | [Support policy](https://vp-tw.github.io/dirwell/support/)                                                      |
-| Call Dirwell from Node.js or write a theme package   | [API reference](https://vp-tw.github.io/dirwell/api-reference/) · [Theme contract](./THEME_PACKAGE_CONTRACT.md) |
-| Resolve setup, output, or link problems              | [Troubleshooting](https://vp-tw.github.io/dirwell/troubleshooting/)                                             |
-
-Build-tool support is selective. Vite, Rollup, and webpack are the primary
-integrations; the other existing adapters are experimental. Unplugin supplies
-shared plugin interfaces, not a promise that every tool or website framework
-has identical behavior. See the support policy before choosing an adapter.
+SDK installed-consumer checks cover Linux, Windows and macOS, ARM64/x64 and Node 22.12/24.1/26: three-theme SSG/MPA, CLI, live listing/files and source authoring. Browser tests cover native pagination, search/sort, history, live updates and simulated gamepads. Physical controller mappings, physical iOS, real screen-reader output and production-scale performance remain unqualified. See [verification](VERIFICATION.md) for evidence boundaries.
 
 ## Contribute
 

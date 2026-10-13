@@ -1,18 +1,11 @@
-# Legacy download archive
+# Sample downloads
 
-This earlier Ledger archive is retained for existing links. Use the
-[Ledger example](../file-icons/) to compare the default theme with Plain and Crosswave.
+The config uses the published `@dirwell/*` API with an explicit theme. Input files live in `files/`.
 
-The config uses a sample download-library name and archive-specific link previews.
-SSG and relative URLs keep the output portable between deployment paths.
+From an installed repository checkout:
 
-From the repository root after installing dependencies:
-
-```bash
-pnpm dirwell build files --cwd examples/basic -o dist
+```sh
+node scripts/build-example.ts basic ./generated-basic
 ```
 
-Open `examples/basic/dist/index.html` for this portable build. `pnpm examples:build` separately generates the Vite-owned published example under `docs/public/examples/basic/`. Keep CLI output in its own directory. See [all example workflows](https://vp-tw.github.io/dirwell/examples/).
-
-- [Live demo](https://vp-tw.github.io/dirwell/examples/basic/)
-- [Source code on GitHub](https://github.com/vp-tw/dirwell/tree/main/examples/basic)
+`config.ts` exports core `GenerateOptions`; it is consumed by this SDK build script, not discovered by CLI. For a standalone CLI project, use `dirwell.config.mjs` with `{ theme, build, server, listing }`. Build replaces its dedicated output tree. Serve the complete result over HTTP. `SITE_BASE=/dirwell/ pnpm site:build` publishes every example for the documentation site.

@@ -1,16 +1,11 @@
-# Ledger — the default theme
+# Ledger file explorer
 
-The landing page embeds this generated build of Ledger, Dirwell's default
-theme, with a configured sample-content name and link previews. Its sample files show the bundled vscode-icons artwork for common
-extensions, with a generic fallback for other files. The icons are self-hosted
-in the generated output. To change a theme's icons, see the
-[Catppuccin override example](../default-theme-override/).
+The config uses the published `@dirwell/*` API with an explicit theme. Input files live in `files/`.
 
-Build from the repository root with `pnpm run examples:build`.
-The command builds the live examples through one Vite adapter configuration;
-the resulting preview is written to `docs/public/examples/file-icons/`.
-Use this example to inspect the bundled icons before deciding whether to
-provide a custom `icons` set.
+From an installed repository checkout:
 
-- [Live demo](https://vp-tw.github.io/dirwell/examples/file-icons/)
-- [Source code on GitHub](https://github.com/vp-tw/dirwell/tree/main/examples/file-icons)
+```sh
+node scripts/build-example.ts file-icons ./generated-file-icons
+```
+
+`config.ts` exports core `GenerateOptions`; it is consumed by this SDK build script, not discovered by CLI. For a standalone CLI project, use `dirwell.config.mjs` with `{ theme, build, server, listing }`. Build replaces its dedicated output tree. Serve the complete result over HTTP. `SITE_BASE=/dirwell/ pnpm site:build` publishes every example for the documentation site.

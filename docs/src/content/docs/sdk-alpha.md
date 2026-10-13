@@ -1,9 +1,9 @@
 ---
-title: SDK alpha and package migration
+title: SDK and live server
 description: Explicit themes, static builds, live server mode and the optional package boundaries.
 ---
 
-The nine `@dirwell/*` packages are published at `0.0.1-alpha.1`, tagged `alpha`. The [SDK release](https://github.com/vp-tw/dirwell/releases/tag/%40dirwell/workspace%400.0.1-alpha.1) passed registry integrity, signatures, provenance and installed-consumer checks. The existing installation guides and public examples use the published `@vp-tw/dirwell` compatibility package; the examples below use the new SDK imports.
+The nine `@dirwell/*` packages are published at `0.0.1-alpha.1`, tagged `alpha`. The [SDK release](https://github.com/vp-tw/dirwell/releases/tag/%40dirwell/workspace%400.0.1-alpha.1) passed registry integrity, signatures, provenance and installed-consumer checks. The CLI, guides and public examples use this package family.
 
 ## Choose a mode
 
@@ -34,7 +34,7 @@ npx @dirwell/cli@alpha server ./files
 npx @dirwell/cli@alpha build ./files --out ./generated
 ```
 
-New and compatibility CLIs both expose `dirwell`; replace the old CLI dependency
+Install only one package providing `dirwell`; replace any previous CLI dependency
 in a project rather than installing both. The CLI rejects legacy config discovery
 instead of silently dropping its rules. Use native `.mjs` or explicit `--config`.
 
@@ -140,9 +140,7 @@ Optional SSE shares a poll per canonical directory, rechecks subscribers, coales
 
 Metadata is opt-in through a core provider. `@dirwell/share-image` can supply titles, descriptions, canonical URLs and either a fixed/custom image or an explicit PNG preset. It is a build-time provider, not a live server image endpoint. Plain stays minimal when omitted.
 
-Legacy imports, config discovery, default Ledger and old metadata presets remain in `@vp-tw/dirwell`. New integrations take host options explicitly and do not discover legacy config or process `extends`. New CLI commands do not silently translate legacy dev/daemon commands. Legacy component overrides are not a migration contract. New official source components and HMR use the separate authoring API described below.
-
-The release workflow can prepare and qualify immutable tarballs without npm login. First publication and trusted-publisher setup remain a separate human-authenticated step. See the repository's [workspace release procedure](https://github.com/vp-tw/dirwell/blob/main/WORKSPACE_RELEASING.md).
+CLI configuration uses `dirwell.config.mjs`; build adapters take host options explicitly. Source customization uses the official authoring package. See [configuration](../configuration/), [themes](../themes/) and the [release procedure](https://github.com/vp-tw/dirwell/blob/main/WORKSPACE_RELEASING.md).
 
 ## Official component authoring
 

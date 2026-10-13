@@ -1,67 +1,13 @@
 # Theme package contract
 
-An independent theme package exports a factory returning `ExplorerTheme` from
-`@vp-tw/dirwell`. Consumers import that factory in `dirwell.config.ts`. Complete
-renderer replacement is the smallest contract: the package owns its HTML,
-styles, assets, options, language controls, and browser behavior.
+An independent package returns `ExplorerTheme` from `@dirwell/core`. Consumers pass it to `generateExplorer`, server handlers or `dirwell.config.mjs`. It owns its complete HTML, CSS, assets, options and browser behavior.
 
-The [external package example](https://github.com/vp-tw/dirwell/tree/main/examples/theme-package) exercises this boundary
-from packed distributions rather than repository source aliases. The
-[i18n example](https://github.com/vp-tw/dirwell/tree/main/examples/i18n) separately demonstrates theme-owned localization.
+`render(context)` is sync or async and returns `{ html, assets? }`. Use `hrefFor`, `hrefForDirectory`, `assetHref` and `exitsExplorerFor` rather than reconstructing URLs. Render unavailable text when a link is null, preserve `documentBaseHref`, and include optional `metadata.head` deliberately.
 
-## Public surface
+Private Node-side `DirectoryData` contains source paths and raw metadata. Never serialize those into browser data. Use public `ListingEntry` projections; escape names, target text and other untrusted strings. Optional entry data must be JSON-compatible. Themes execute trusted Node code and own their asset licensing.
 
-| Surface                  | Contract                                                                                                                               |
-| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
-| `ExplorerTheme`          | A name, optional `searchIndex` and `metadataDefaults`, and sync/async `render(context)`.                                               |
-| `ThemeContext`           | Prepared `DirectoryData`, output mode/name, sort policy, optional HTML base/page `metadata`, asset/index URLs, and navigation helpers. |
-| `RenderedPage`           | A complete HTML document and optional map of safe asset filenames to strings or bytes.                                                 |
-| Default theme components | Optional typed overrides and ordered layers from `@vp-tw/dirwell/theme`; a full renderer can operate independently.                    |
+Opt into `listing.pagination` only when native page links are rendered. HTML pagination is independent of client DOM windowing. Set `searchIndex: false` when archive search is absent. Styles and language controls belong to the theme.
 
-Use `hrefFor()`, `hrefForDirectory()`, and `exitsExplorerFor()` instead of
-reconstructing filesystem or deployment URLs. `hrefFor()` can return `null`;
-render an unavailable label in that case. Preserve the caller's HTML base when
-`documentBaseHref` is present.
+Assets use validated filenames. MPA shared filenames must have identical bytes across pages; collisions fail. Refer to assets using context links. Optional share metadata/images are injected through `@dirwell/share-image`, not implicitly bundled in a theme.
 
-Set `searchIndex: false` when the theme has no global search. Otherwise the
-generator can emit index assets, but the theme still owns how they are used.
-Styles and tokens remain private to each renderer. Core does not supply a locale
-setting; Ledger, Plain, and Crosswave keep their English interfaces.
-
-## Page metadata
-
-A custom theme may include `context.metadata?.head` in its document head, or use the resolved title and description. The generator does not insert tags into custom HTML. `metadataDefaults` is optional. A theme can provide its own `image` source/callback or choose an `imageTheme` preset. Caller `metadata.image` wins, including `false`; callbacks receive resolved page text. Omitting both theme image settings produces text metadata only. Theme-owned local files should use a `file:` URL from `import.meta.url` or a Node `File`; relative strings resolve from the consumer’s config directory. These callbacks receive public counts and names, rather than full Node-side filesystem entries. See [metadata](https://vp-tw.github.io/dirwell/metadata/).
-
-## Assets and trust
-
-The generator validates asset filenames and deploys them beside each SSG page
-or in the shared MPA `__dirwell/` directory. Refer to them with `assetHref()`.
-For MPA, every use of the same asset filename must provide identical bytes;
-conflicting shared assets fail the build. Choose names that do not collide with
-selected source files, generated page names, or other theme assets.
-
-Theme packages execute as trusted Node code. Rendering needs prepared source
-data rather than a second source-tree traversal; packages may load their own
-bundled styles/assets. Treat entry names, declared symlink targets, and visible
-paths as untrusted text and escape them before HTML insertion. Avoid serializing
-machine-absolute `absolutePath` or `resolvedPath` into browser output. A theme
-owns its asset licenses and notices.
-
-## Package compatibility
-
-Declare the Dirwell versions verified by the theme in `peerDependencies`. Test public imports, rendering, navigation and assets before widening that range. The private proof package uses an exact version for reproducible consumption tests.
-
-The proof package deliberately replaces the full renderer. Component overrides
-remain supported, but their authors must also verify the default runtime's DOM
-expectations, keyboard behavior, virtualization, and theme assets against their
-selected Dirwell version. The [Ledger runtime contract](THEME_RUNTIME_CONTRACT.md) lists the hooks and verification procedure.
-
-## Consumer verification
-
-`pnpm verify:package` packs Dirwell and this private theme separately, installs
-them into a fresh project, and exercises their public imports. It verifies the
-CLI, an external renderer with SSG/MPA assets and encoded names, public types,
-a real Rollup build, and an async CommonJS webpack build. Successful local tarball consumption does not prove npm
-publication or a registry install; release readback must verify those separately.
-
-Themes may set `metadataDefaults.enabledByDefault: false` to avoid automatic metadata and image generation. Consumer `metadata` opts back into those defaults; explicit `metadata.image` overrides remain supported. Ledger and Crosswave stay default-on. Plain uses this opt-in policy and has no fallback image preset in 0.2.
+Declare and test the supported Core version in peer dependencies. Verify imports/types, SSG/MPA, encoded names, child navigation, asset loading and unavailable symlinks in an installed consumer. Official Svelte/Vue source customization instead uses the [paired source compiler](THEME_RUNTIME_CONTRACT.md).

@@ -1,4 +1,4 @@
-import type { ExplorerTheme } from "@vp-tw/dirwell";
+import type { ExplorerTheme } from "@dirwell/core";
 
 export interface ExampleThemeOptions {
   readonly title?: string;

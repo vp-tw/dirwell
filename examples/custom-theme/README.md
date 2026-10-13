@@ -1,19 +1,11 @@
-# Build a release catalog
+# Independent release catalog
 
-This example supplies its own HTML and CSS through a complete Dirwell theme. It
-uses the prepared directory data and link decisions, so it does not need to
-reimplement file scanning or safe navigation. The release files are synthetic.
-The listing intentionally has no client-side search or JavaScript. Use this
-pattern when the whole page should look unlike the default explorer; use
-component overrides when only a few parts need to change.
+The config uses the published `@dirwell/*` API with an explicit theme. Input files live in `files/`.
 
-From the repository root after installing dependencies:
+From an installed repository checkout:
 
-```bash
-pnpm dirwell build files --cwd examples/custom-theme -o dist
+```sh
+node scripts/build-example.ts custom-theme ./generated-custom-theme
 ```
 
-Open `examples/custom-theme/dist/index.html` for this portable build. `pnpm examples:build` separately generates the Vite-owned published example under `docs/public/examples/custom-theme/`. Keep CLI output in its own directory. See [all example workflows](https://vp-tw.github.io/dirwell/examples/).
-
-- [Live demo](https://vp-tw.github.io/dirwell/examples/custom-theme/)
-- [Source code on GitHub](https://github.com/vp-tw/dirwell/tree/main/examples/custom-theme)
+`config.ts` exports core `GenerateOptions`; it is consumed by this SDK build script, not discovered by CLI. For a standalone CLI project, use `dirwell.config.mjs` with `{ theme, build, server, listing }`. Build replaces its dedicated output tree. Serve the complete result over HTTP. `SITE_BASE=/dirwell/ pnpm site:build` publishes every example for the documentation site.

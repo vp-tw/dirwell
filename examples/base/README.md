@@ -1,16 +1,11 @@
-# Base URL example
+# Deploy under a URL prefix
 
-Use this example for a known project-site path. MPA shares runtime assets in
-`__dirwell/`; `urls: "base"` prefixes generated links with the published mount.
-Set `DIRWELL_SITE_BASE` to the site's base path before building.
+This example uses MPA and rooted links under `/examples/base/`. Serve it at the matching mount; do not open it from an arbitrary file URL.
 
-From the repository root after installing dependencies:
+From an installed repository checkout:
 
-```bash
-pnpm dirwell serve files --cwd examples/base -o dist
+```sh
+node scripts/build-example.ts base ./generated-base
 ```
 
-Open the printed `Local:` URL, which includes the configured `/examples/base/` mount. Stop with Ctrl+C. To build once, use `pnpm dirwell build files --cwd examples/base -o dist`; serve that output beneath its configured HTTP prefix, rather than opening it as a local file. `pnpm examples:build` separately generates the Vite-owned published example. See [example workflows](https://vp-tw.github.io/dirwell/examples/).
-
-- [Live demo](https://vp-tw.github.io/dirwell/examples/base/)
-- [Source code on GitHub](https://github.com/vp-tw/dirwell/tree/main/examples/base)
+`config.ts` exports core `GenerateOptions`; it is consumed by this SDK build script, not discovered by CLI. For a standalone CLI project, use `dirwell.config.mjs` with `{ theme, build, server, listing }`. Build replaces its dedicated output tree. Serve the complete result over HTTP. `SITE_BASE=/dirwell/ pnpm site:build` publishes every example for the documentation site.

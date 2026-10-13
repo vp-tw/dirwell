@@ -38,11 +38,11 @@ export default defineConfig({
         {
           label: "Start here",
           items: [
-            { label: "SDK quick start (alpha)", slug: "sdk-alpha" },
-            { label: "Overview (compatibility)", slug: "overview" },
-            { label: "Getting started (compatibility)", slug: "getting-started" },
+            { label: "Overview", slug: "overview" },
+            { label: "Getting started", slug: "getting-started" },
             { label: "Deployment", slug: "deployment" },
             { label: "Examples", slug: "examples" },
+            { label: "SDK and live server (alpha)", slug: "sdk-alpha" },
           ],
         },
         {
@@ -51,7 +51,7 @@ export default defineConfig({
             { label: "Themes", slug: "themes" },
             { label: "Page metadata and share images", slug: "metadata" },
             { label: "Build tool adapters", slug: "build-tools" },
-            { label: "Support and compatibility", slug: "support" },
+            { label: "Support and verification", slug: "support" },
           ],
         },
         {

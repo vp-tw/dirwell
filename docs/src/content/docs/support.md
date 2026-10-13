@@ -1,94 +1,24 @@
 ---
-title: Support and compatibility
-description: Understand supported integrations and verified limits.
+title: Support and verification
+description: Choose packages and integrations using their tested boundaries.
 ---
 
-Use the CLI for a folder you want to browse or publish. You only need a build
-adapter when Dirwell must run alongside an existing application's build.
+Use the published `@dirwell/*` alpha family. All nine packages share `0.0.1-alpha.1`; use the `alpha` tag and pin the version you tested for reproducible builds. Node.js 22.12 or later is required.
 
-Install `@vp-tw/dirwell` for the current release. Pin the version you tested for repeatable builds. The sections below describe tested capabilities and known limits.
+## Package boundaries
 
-## Build-tool support policy
+CLI includes Plain. Core, integrated HTML and build adapters require an explicit theme. Ledger uses Svelte; Crosswave uses Vue and VueUse. Share metadata/image rendering and source authoring are optional packages. Core and Plain do not install frameworks, fonts, image renderers or watchers.
 
-Dirwell prioritizes a small set of integrations. It does not aim to cover every
-target available in Unplugin or make all targets behave identically.
+## Verified scope
 
-| Tier         | Tools                                         | What to expect                                                                                                                                                                               |
-| ------------ | --------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Primary      | Vite, Rollup, webpack                         | Maintained integration paths with build tests and source-watch tests. Vite also has development-server and browser-reload tests.                                                             |
-| Experimental | Rolldown, Rspack, Rsbuild, esbuild, Farm, Bun | Existing adapters remain available. Use only the behaviors listed in the [verification matrix](../build-tools/#development-and-verification); additional modes may be unverified or limited. |
-| Not provided | Unloader                                      | The pinned Unplugin 3.4.0 has an entry, but Dirwell has no public adapter or verification for it.                                                                                            |
+The SDK release passed installed-package checks on Linux, Windows and macOS in ARM64/x64 variants across Node 22.12, 24.1 and 26. Checks exercise three themes, SSG/MPA, live listing and file transfer, CLI and paired source compilation. Browser coverage exercises pagination without JavaScript, search/sort, navigation/history, live refreshes and simulated gamepad input. See the [verification record](https://github.com/vp-tw/dirwell/blob/main/VERIFICATION.md) for evidence and qualifications.
 
-These tiers describe maintenance priority, not a guarantee that
-all modes or versions of a primary tool work. The verification matrix states
-what is actually tested. We do not remove an existing adapter simply because it
-is experimental. Promotion needs a real use case, repeatable tests, and a clean
-way to stop any resources the adapter starts. New adapters and special watch
-helpers are not automatic backlog items.
+Native Node, Express 5, Fastify 5 and Hono 4 server integrations have executed tests. Fetch interfaces do not qualify other hosts or edge runtimes: filesystem access requires Node.
 
-### Why Unplugin does not mean identical support
+## Build adapters
 
-Unplugin shares plugin interfaces for code transformation and build hooks.
-Dirwell also generates files, observes directory creation and deletion, mounts
-output in development servers, and removes stale output. Those behaviors depend
-on each host's APIs and lifecycle. A supported Unplugin target provides an
-integration entry; it does not supply every directory-explorer behavior.
-See [Unplugin's hook comparison](https://unplugin.unjs.io/guide/#supported-hooks).
+Vite, Rollup and webpack are primary paths. Rolldown, Rspack, Rsbuild, esbuild, Farm and Bun use existing host-specific adapters with varying qualification. Consult [build tools](../build-tools/) before relying on watch behavior. Farm standalone build-watch is limited for non-module file changes; an adapter being available does not prove host feature parity.
 
-Farm illustrates the boundary: its Dirwell build and development serving are
-tested, but native standalone watch leaves explorer source output stale after
-additions, modifications, and deletions. This remains a
-[documented limitation](https://github.com/vp-tw/dirwell/issues/43).
-No separate Dirwell-managed Farm watch helper is provided.
+## Limits
 
-### Website frameworks
-
-Astro, Docusaurus, Nuxt, and other website frameworks can expose an underlying
-build tool's plugin configuration. That makes integration possible; it does
-not establish Dirwell compatibility. Dirwell does not currently publish dedicated
-framework adapters or claim end-to-end framework support. The Astro documentation
-site in this repository copies prebuilt explorer examples; that is not proof of
-a Dirwell adapter running inside Astro's own build or development lifecycle.
-
-## Runtime and browser expectations
-
-The package requires Node.js 22.12 or later. Generated websites need a static file
-host, not Node.js. Ledger is the default theme; its normal SSG listing remains
-usable without JavaScript. Search, sorting controls, appearance preferences,
-and large MPA virtualized lists need JavaScript. Plain renders complete HTML
-without a runtime in either mode.
-
-Full regression has passed locally in Chromium, Firefox, and Playwright WebKit.
-CI runs the full Chromium suite and a bounded cross-engine suite for theme
-contracts and global-search IME behavior. Additional local checks cover native
-macOS Safari navigation and iPhone/iPad Safari simulators' layout and scripted
-controls. These checks do not establish physical iOS behavior or full engine
-parity. See the [verification record](https://github.com/vp-tw/dirwell/blob/main/VERIFICATION.md)
-for versions, methods, and limits. Choose plain HTML or validate your target
-browsers when those environments matter.
-
-Installed-package consumer checks also run on native Windows, Linux, and macOS
-ARM64/x64 runners on Node 22.12, 24.1, and 26. They cover async JavaScript/TypeScript
-config loading, adapter entry-point imports, CLI build/serve and live updates,
-all three themes in SSG/MPA, encoded names, symlinks, and matching fixed-font PNG
-output. They do
-not establish every build-adapter mode on Windows. A maintainer-reported Windows
-and Xbox controller smoke found no major issue; its browser/version and complete
-button/axis coverage were not specified.
-
-## Themes and language
-
-Themes own presentation, browser behavior, and localization. Ledger, Plain, and Crosswave
-use English. The [i18n example](../examples/) demonstrates English, Traditional
-Chinese, and Japanese in an independent theme. Copy controls and file previews
-are optional theme features, not promised basic-theme functionality.
-
-Independent theme packages should pin the versions they have tested and
-retest before widening that range. See [theme packages](../themes/#independent-theme-packages).
-
-## Report a problem
-
-[Open an issue](https://github.com/vp-tw/dirwell/issues) with the Dirwell and Node
-versions, command or config, operating system, build tool if any, and a small
-source tree that demonstrates the problem. State the expected output and what
-actually happened. Remove private file contents and paths from the reproduction.
+Physical gamepad mappings, physical iOS, real screen-reader output, hostile filesystem mutation, distributed caching and production-scale performance are not fully qualified. Rich clients load the complete directory; Crosswave renders filtered rows while Ledger virtualizes large lists. Live mode has directory search but no archive-wide search index. Source HMR and file-data refresh are separate mechanisms.

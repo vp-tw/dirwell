@@ -20,11 +20,11 @@ Dirwell combines static output with file-explorer behavior: it builds plain depl
 
 ## Operating Context
 
-Users run Dirwell through a CLI or its TypeScript API. They may serve directory data on request or build a dedicated output for a static host. The compatibility package retains its watch preview and daemon. Deployments may live at a domain root or a nested base path such as GitHub Pages. The documentation site and several independently built examples are published under one site base.
+Users run Dirwell through a CLI or its TypeScript API. They may serve directory data on request or build a dedicated output for a static host. Deployments may live at a domain root or a nested base path such as GitHub Pages. The documentation site and several independently built examples are published under one site base.
 
 ## Capabilities and Constraints
 
-- The SDK CLI from `0.0.1-alpha.1` defaults to minimal Plain for `server` and `build`. Rich themes and executable configuration are opt-ins; the compatibility CLI retains `serve` and daemon commands.
+- The SDK CLI from `0.0.1-alpha.1` defaults to minimal Plain for `server` and `build`. Rich themes and executable configuration are opt-ins.
 - SSG and MPA output modes.
 - Relative, deployment-base, and native HTML `<base>` URL strategies.
 - Directory-aware output naming that may skip generation by returning `null`; the default preserves existing `index.html` and `index.htm` files.
@@ -48,7 +48,7 @@ The official project identity uses the approved folded-paper bird, preserved as 
 
 ## Evidence on Hand
 
-The public repository contains the CLI, generator, watch server, daemon, default theme, component theme API, tests, a fixture directory, architecture and experience documents, and a Starlight documentation site. There are no verified customer quotes, adoption metrics, or customer logos; the website must not fabricate them.
+The public repository contains the CLI, core generator, live server, optional themes, source authoring API, tests, a fixture directory, architecture and experience documents, and a Starlight documentation site. There are no verified customer quotes, adoption metrics, or customer logos; the website must not fabricate them.
 
 ## Product Principles
 

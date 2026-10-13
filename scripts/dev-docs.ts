@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 import chokidar from "chokidar";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const inputs = [path.join(root, "src"), path.join(root, "examples")];
+const inputs = [path.join(root, "packages"), path.join(root, "examples")];
 let server: ChildProcess | undefined;
 let building = false;
 let pending = false;
@@ -13,7 +13,7 @@ let debounce: ReturnType<typeof setTimeout> | undefined;
 
 function buildExamples(): Promise<void> {
   return new Promise((resolve, reject) => {
-    const child = spawn(process.execPath, [path.join(root, "scripts/build-examples.ts")], {
+    const child = spawn("pnpm", ["run", "examples:build"], {
       cwd: root,
       stdio: "inherit",
     });
@@ -48,9 +48,12 @@ await buildExamples();
 const watcher = chokidar.watch(inputs, {
   ignoreInitial: true,
   ignored: [
+    /[/\\]render-generated\.(mjs|d\.mts)$/,
+    /[/\\]packages[/\\][^/\\]+[/\\]\.generated([/\\]|$)/,
     /(^|[/\\])node_modules([/\\]|$)/,
     /(^|[/\\])\.dirwell([/\\]|$)/,
-    /[/\\]examples[/\\][^/\\]+[/\\](dist|\.dirwell-preview)([/\\]|$)/,
+    /[/\\]dist([/\\]|$)/,
+    /[/\\]\.generated-theme([./\\]|$)/,
   ],
 });
 

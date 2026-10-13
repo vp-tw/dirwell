@@ -20,9 +20,7 @@ simple default experience and typed extension points.
 
 ## Preserve these invariants
 
-- Generated pages and directory links work without a client router. Default-theme
-  SSG listings and smaller MPA listings work without JavaScript; virtualized
-  large MPA listings need JavaScript to show rows.
+- Generated pages and directory links work without a client router. Plain stays script-free; rich themes retain native HTML pagination independently of client virtualization.
 - Existing `index.html` and `index.htm` documents are preserved by default.
 - `outputName(directory)` may return `null` to skip a directory.
 - Symlink cycles remain visible and link to their canonical generated target;
@@ -42,9 +40,9 @@ simple default experience and typed extension points.
 Treat these as coordinated public contracts:
 
 - `DirectoryData`, file metadata, navigation decisions, and theme context.
-- `dirwell.config.ts` and `defineConfig()`.
-- `dirwell`, `build`, `serve`/`dev`, and `daemon` CLI help.
-- Public alpha theme component names and their props.
+- `dirwell.config.mjs` with `{ theme, build, server, listing }`.
+- `@dirwell/cli` build/server CLI help.
+- `@dirwell/core` contracts and paired Svelte/Vue source extension contexts.
 - Documentation examples.
 
 When one surface changes, update its runtime validation, tests, help, and docs in

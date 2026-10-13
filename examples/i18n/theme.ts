@@ -4,7 +4,7 @@ import {
   type ExplorerTheme,
   type FileSystemEntry,
   type ThemeContext,
-} from "../../src/index.ts";
+} from "@dirwell/core";
 import { translations } from "./translations.ts";
 
 const styles = await readFile(new URL("./theme.css", import.meta.url), "utf8");

@@ -95,12 +95,12 @@ const shareImageUrl = new URL(path(shareImagePath), Astro.site);
 
         <div class="explorer-sample">
           <div class="sample-caption">
-            <span>Ledger · the default theme</span>
+            <span>Ledger · optional Svelte theme</span>
             <a href={examplePath("file-icons")} target="_blank" rel="noopener">Open full explorer</a>
           </div>
           <iframe
             id="default-theme-preview"
-            title="Interactive Dirwell default theme preview"
+            title="Interactive Dirwell Ledger preview"
             src={examplePath("file-icons")}
             data-build-id-url={path("examples/.build-id")}
             loading="lazy"
@@ -111,11 +111,11 @@ const shareImageUrl = new URL(path(shareImagePath), Astro.site);
       <section class="quick-start" aria-labelledby="quick-title">
         <div class="section-heading">
           <h2 id="quick-title">Browse your folder. Then publish it.</h2>
-          <p>Requires Node.js 22.12 or later. Use the published package; no clone or config file is needed.</p>
+          <p>Requires Node.js 22.12 or later. Use the published alpha CLI; Plain is included and no config file is needed.</p>
         </div>
         <div class="command-pair">
-          <div><span>Preview and watch</span><code>npx @vp-tw/dirwell serve ./downloads</code></div>
-          <div><span>Build static output</span><code>npx @vp-tw/dirwell build ./downloads -o ./site-downloads</code></div>
+          <div><span>Serve current files</span><code>npx @dirwell/cli@alpha server ./downloads</code></div>
+          <div><span>Build static output</span><code>npx @dirwell/cli@alpha build ./downloads --out ./site-downloads</code></div>
         </div>
         <a class="text-action" href={path("getting-started/")}>Follow the getting-started guide</a>
       </section>
@@ -168,7 +168,7 @@ const shareImageUrl = new URL(path(shareImagePath), Astro.site);
         <div class="depth-intro">
           <h2 id="depth-title">Customize when your project needs it.</h2>
           <p>
-            Start with the default explorer. Later, change its theme, choose a deployment path,
+            Start with Plain. Later, install a rich theme, choose a deployment path,
             or connect it to an existing build.
           </p>
         </div>
@@ -190,9 +190,9 @@ const shareImageUrl = new URL(path(shareImagePath), Astro.site);
         </div>
         <div class="depth-links">
           <a href={path("configuration/")}>Configuration reference</a>
-          <a href={path("themes/")}>Theme components</a>
+          <a href={path("themes/")}>Theme source customization</a>
           <a href={path("deployment/")}>Deployment patterns</a>
-          <a href={path("support/")}>Support and compatibility</a>
+          <a href={path("support/")}>Support and verification</a>
         </div>
       </section>
 
