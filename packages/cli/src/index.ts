@@ -167,6 +167,15 @@ export async function runCli(
       Array.isArray(module.default)
     )
       throw new TypeError("Config must export an object");
+    for (const key of Object.keys(module.default))
+      if (!["theme", "listing", "build", "server"].includes(key))
+        throw new TypeError(
+          `Unsupported config key "${key}". Use { theme, listing, build, server }; selection rules belong in build/server.`,
+        );
+    if (typeof module.default.then === "function")
+      throw new TypeError(
+        "Config must export a resolved object; use top-level await for async setup",
+      );
     config = module.default;
   }
   const theme =

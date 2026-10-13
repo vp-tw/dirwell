@@ -105,3 +105,24 @@ test("live HTML and private snapshots authorize before validators and filesystem
     304,
   );
 });
+
+test("live data defaults to a complete block and explicit block sizes remain available", async (context) => {
+  const root = await mkdtemp(path.join(tmpdir(), "dirwell-live-data-plan-"));
+  context.after(() => rm(root, { recursive: true, force: true }));
+  await Promise.all(
+    Array.from({ length: 5 }, (_, index) => writeFile(path.join(root, `${index}.txt`), "file")),
+  );
+  const { createExplorerHandler } = await import("../packages/server/dist/index.mjs");
+  for (const [options, expected] of [
+    [{}, [5]],
+    [{ blockSize: 2 }, [2, 2, 1]],
+  ]) {
+    const handler = await createExplorerHandler({ root, theme: createPlainTheme(), ...options });
+    const response = await handler(new Request("http://test/__dirwell/listing/manifest?path="));
+    assert.equal(response.status, 200);
+    assert.deepEqual(
+      (await response.json()).blocks.map((block) => block.count),
+      expected,
+    );
+  }
+});

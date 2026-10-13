@@ -154,6 +154,19 @@ test("legacy configuration cannot silently lose its selection rules", async (con
     runCli(["build", "source", "--out", "out"], cwd, () => {}),
     /existing rules will not be silently ignored/,
   );
+  await writeFile(path.join(cwd, "legacy-shape.mjs"), 'export default {exclude:["private.txt"]};');
+  await assert.rejects(
+    runCli(["build", "source", "--out", "out", "--config", "legacy-shape.mjs"], cwd, () => {}),
+    /Unsupported config key "exclude"/,
+  );
+  await writeFile(
+    path.join(cwd, "unresolved.mjs"),
+    'export default Promise.resolve({build:{exclude:["private.txt"]}});',
+  );
+  await assert.rejects(
+    runCli(["build", "source", "--out", "out", "--config", "unresolved.mjs"], cwd, () => {}),
+    /Config must export a resolved object/,
+  );
   await writeFile(
     path.join(cwd, "dirwell.config.mjs"),
     'export default {build:{exclude:["private.txt"]}};',

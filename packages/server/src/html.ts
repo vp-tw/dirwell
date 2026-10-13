@@ -138,7 +138,11 @@ export async function themeResponse(
     html: theme.listing?.pagination
       ? { strategy: "paged", pageSize: options.pageSize ?? 100 }
       : { strategy: "all" },
-    data: { strategy: "blocks", blockSize: options.blockSize ?? 200 },
+    // Official rich clients need the complete directory; avoid rescanning it once per default block.
+    data:
+      options.blockSize === undefined
+        ? { strategy: "all" }
+        : { strategy: "blocks", blockSize: options.blockSize },
   };
   const plan =
     typeof options.listing === "function"

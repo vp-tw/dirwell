@@ -149,11 +149,20 @@ export async function createDirectoryService(
       const names = (await readdir(physical)).filter(
         (name) => logicalPath !== "" || name !== "__dirwell",
       );
-      const entries = await Promise.all(
+      const described = await Promise.all(
         names
           .filter((name) => selection === null || selection.has(path.posix.join(logicalPath, name)))
-          .map((name) => describe(path.posix.join(logicalPath, name), selection)),
+          .map(async (name) => {
+            try {
+              return await describe(path.posix.join(logicalPath, name), selection);
+            } catch (error) {
+              // An enumerated child may disappear before stat; the directory is still available.
+              if (error instanceof Error && "code" in error && error.code === "ENOENT") return null;
+              throw error;
+            }
+          }),
       );
+      const entries = described.filter((entry): entry is FileSystemEntry => entry !== null);
       entries.sort(
         (left, right) =>
           compareEntries(left, right, options.sort) ||
