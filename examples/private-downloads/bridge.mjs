@@ -36,6 +36,7 @@ export async function startPrivateDownloads(handler) {
   });
   return {
     url: `http://127.0.0.1:${server.address().port}`,
+    disconnectClients: () => server.closeAllConnections(),
     close: () =>
       new Promise((resolve, reject) => {
         server.close((error) => (error ? reject(error) : resolve()));
