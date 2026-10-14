@@ -4,7 +4,7 @@ Dirwell has two execution paths: static publication and live Node HTTP serving.
 Both use the same filesystem facts, public listing records and theme contract.
 The active user-facing API is the `@dirwell/*` SDK; the root facade is retained for historical regression checks;
 see [package responsibilities](PACKAGE_TRANSITION.md) and the
-[SDK guide](docs/src/content/docs/sdk-alpha.md).
+[SDK guide](docs/src/content/docs/sdk.md).
 
 ## Package boundaries
 

@@ -20,10 +20,7 @@ test("SDK guide code exercises threshold pagination, server shutdown and handler
       writeFile(path.join(root, "files", `${index}.txt`), "file"),
     ),
   );
-  const guide = await readFile(
-    new URL("../docs/src/content/docs/sdk-alpha.md", import.meta.url),
-    "utf8",
-  );
+  const guide = await readFile(new URL("../docs/src/content/docs/sdk.md", import.meta.url), "utf8");
   const snippets = [...guide.matchAll(/```js\n([\s\S]*?)\n```/g)].map((match) => match[1]);
   assert.equal(snippets.length, 3);
   for (let snippet of snippets) {

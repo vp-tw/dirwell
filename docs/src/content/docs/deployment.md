@@ -37,4 +37,4 @@ Source `index.html` and `index.htm` are preserved. The default output-name resol
 
 ## Live hosting
 
-Use [server mode](../sdk-alpha/#standalone-and-integrated-http) when data must update on requests. A Node host owns authentication, mounting and shutdown. Standalone defaults preview media and download active formats. Static hosting and live file transport have different execution and access-control boundaries.
+Use [server mode](../sdk/#standalone-and-integrated-http) when data must update on requests. A Node host owns authentication, mounting and shutdown. Standalone defaults preview media and download active formats. Static hosting and live file transport have different execution and access-control boundaries.

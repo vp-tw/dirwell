@@ -146,6 +146,15 @@ for (const [name, creator] of [
       await writeFile(path.join(root, "arrived.txt"), "arrived");
       await expect(rows).toHaveCount(3);
       expect(await page.evaluate(() => window.__violations)).toEqual([]);
+      await page.evaluate(() => (window.__documentLifetime = "same document"));
+      const reconnect = page.waitForRequest((request) =>
+        request.url().includes("/__dirwell/updates"),
+      );
+      server.disconnectClients();
+      await reconnect;
+      await writeFile(path.join(root, "reconnected.txt"), "after disconnect");
+      await expect(rows).toHaveCount(4);
+      expect(await page.evaluate(() => window.__documentLifetime)).toBe("same document");
       expect(errors).toEqual([]);
       const reloaded = await page.reload();
       expect(reloaded.headers()["content-security-policy"]).not.toBe(policy);

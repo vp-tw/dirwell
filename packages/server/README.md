@@ -1,6 +1,6 @@
 # @dirwell/server
 
-Requires Node.js 22.12 or later. [Read the guide](https://vp-tw.github.io/dirwell/sdk-alpha/).
+Requires Node.js 22.12 or later. [Read the guide](https://vp-tw.github.io/dirwell/sdk/).
 
 `createExplorerHandler` returns an async `Request -> Response` handler for local filesystem roots. Pass a theme explicitly to enable HTML; no theme or HTTP framework is installed implicitly.
 

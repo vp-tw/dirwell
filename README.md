@@ -38,7 +38,7 @@ Use `dirwell.config.mjs` to configure themes, selection and server/build options
 | Static generation inside build tools        | `@dirwell/integrations`    |
 | Svelte/Vue source compilation and local HMR | `@dirwell/theme-authoring` |
 
-All nine share version `0.0.1-alpha.1` and the `alpha` tag. Pin the tested version for reproducible builds. Core and Plain stay free of framework/image/font/watch dependencies. See the [SDK guide](https://vp-tw.github.io/dirwell/sdk-alpha/) for API, live server and listing policy examples.
+All nine share version `0.0.1-alpha.1` and the `alpha` tag. Pin the tested version for reproducible builds. Core and Plain stay free of framework/image/font/watch dependencies. See the [SDK guide](https://vp-tw.github.io/dirwell/sdk/) for API, live server and listing policy examples.
 
 ## Learn more
 
@@ -48,7 +48,7 @@ All nine share version `0.0.1-alpha.1` and the `alpha` tag. Pin the tested versi
 | Publish under a fixed URL prefix   | [Deployment](https://vp-tw.github.io/dirwell/deployment/)                                                             |
 | Choose or customize an interface   | [Themes](https://vp-tw.github.io/dirwell/themes/)                                                                     |
 | Add titles and share images        | [Metadata](https://vp-tw.github.io/dirwell/metadata/)                                                                 |
-| Integrate with a build or Node app | [Build adapters](https://vp-tw.github.io/dirwell/build-tools/) · [SDK](https://vp-tw.github.io/dirwell/sdk-alpha/)    |
+| Integrate with a build or Node app | [Build adapters](https://vp-tw.github.io/dirwell/build-tools/) · [SDK](https://vp-tw.github.io/dirwell/sdk/)          |
 | Understand API and limits          | [API reference](https://vp-tw.github.io/dirwell/api-reference/) · [Support](https://vp-tw.github.io/dirwell/support/) |
 | Fix setup or links                 | [Troubleshooting](https://vp-tw.github.io/dirwell/troubleshooting/)                                                   |
 
