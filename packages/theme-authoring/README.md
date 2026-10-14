@@ -1,19 +1,52 @@
 # @dirwell/theme-authoring
 
+Requires Node.js 22.12 or later. [Read the guide](https://vp-tw.github.io/dirwell/themes/#source-component-customization).
+
 Compile trusted Svelte/Vue wrapper components
 into matching SSR and browser implementations. Plain and core do not depend on
 this package or its compilers.
 
+## Compile and publish a Vue wrapper
+
+```sh
+npm install @dirwell/theme-authoring@alpha @dirwell/theme-crosswave@alpha @dirwell/core@alpha
+```
+
+Create `files/note.txt`. Save this as `Downloads.vue`:
+
+```vue
+<script setup>
+import Crosswave from "@dirwell/theme-crosswave/source";
+defineProps({ model: { type: Object, required: true } });
+</script>
+<template>
+  <Crosswave :model="model">
+    <template #header="{ model: page }"
+      ><span>{{ page.title }} · Project downloads</span></template
+    >
+  </Crosswave>
+</template>
+```
+
+Save this as `build.mjs`, then run `node build.mjs`:
+
 ```js
 import { buildFrameworkTheme } from "@dirwell/theme-authoring";
+import { generateExplorer } from "@dirwell/core";
 const result = await buildFrameworkTheme({
-  framework: "svelte", // 'vue' for Crosswave
-  component: "./Ledger.svelte",
+  framework: "vue",
+  component: "./Downloads.vue",
   output: "./generated-theme",
 });
 const { createTheme } = await import(result.themeUrl);
-// Pass createTheme({title: 'Downloads'}) to generateExplorer or createExplorerHandler.
+await generateExplorer({
+  sourceDir: "./files",
+  outputDir: "./generated",
+  theme: createTheme({ title: "Downloads" }),
+});
 ```
+
+Serve the complete `generated` folder over HTTP and open its root. Compilation is awaited before importing the matching SSR/client theme. Ledger wrappers use `framework: 'svelte'` and `@dirwell/theme-ledger/source`; install Ledger in place of Crosswave. See the [complete paired source wrappers](https://github.com/vp-tw/dirwell/tree/main/examples/authoring).
 
 Import Ledger from `@dirwell/theme-ledger/source`, or Crosswave from
 `@dirwell/theme-crosswave/source`. Your wrapper accepts the `model` prop; public
@@ -26,7 +59,7 @@ nest links, buttons, or other interactive controls inside it. The separate `acti
 identity, keyboard selection, link actions, virtualization, pagination, dialogs,
 appearance controls and gamepad lifecycle remain owned by the theme.
 
-See `examples/authoring` in the repository for complete wrappers. These are source
+See the linked source wrappers for complete examples. These are source
 customizations, not serializable CLI options. The output's `theme.mjs#createTheme`
 can be selected with the CLI's existing explicit module-factory argument.
 

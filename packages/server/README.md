@@ -1,6 +1,30 @@
 # @dirwell/server
 
+Requires Node.js 22.12 or later. [Read the guide](https://vp-tw.github.io/dirwell/sdk-alpha/).
+
 `createExplorerHandler` returns an async `Request -> Response` handler for local filesystem roots. Pass a theme explicitly to enable HTML; no theme or HTTP framework is installed implicitly.
+
+## Run a live folder
+
+```sh
+npm install @dirwell/server@alpha @dirwell/theme-plain@alpha
+```
+
+Create `files/note.txt`, save this as `server.mjs`, then run `node server.mjs`:
+
+```js
+import { startExplorerServer } from "@dirwell/server/node";
+import { createPlainTheme } from "@dirwell/theme-plain";
+const server = await startExplorerServer({ root: "./files", theme: createPlainTheme() });
+console.log(`${server.url}/browse/`);
+process.once("SIGINT", async () => {
+  await server.close();
+});
+```
+
+Open the printed URL. It reads current files and serves selected bytes on loopback; Ctrl+C closes its connections. The Fetch handler below integrates into a Node application, where the host owns request forwarding and shutdown.
+
+## Mount a Fetch handler
 
 ```js
 import { createExplorerHandler } from "@dirwell/server";

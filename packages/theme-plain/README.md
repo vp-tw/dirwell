@@ -16,7 +16,7 @@ import { createPlainTheme } from "@dirwell/theme-plain";
 await generateExplorer({
   sourceDir: "./files",
   outputDir: "./generated",
-  theme: createPlainTheme({ title: "Sample downloads" }),
+  theme: createPlainTheme(),
 });
 ```
 

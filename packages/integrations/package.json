@@ -2,6 +2,10 @@
   "name": "@dirwell/integrations",
   "version": "0.0.1-alpha.1",
   "description": "Explicit-theme build adapters for Vite and unplugin hosts.",
+  "homepage": "https://vp-tw.github.io/dirwell/build-tools/",
+  "bugs": {
+    "url": "https://github.com/vp-tw/dirwell/issues"
+  },
   "license": "MIT",
   "repository": {
     "type": "git",

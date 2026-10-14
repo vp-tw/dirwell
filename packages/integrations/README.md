@@ -1,6 +1,16 @@
 # @dirwell/integrations
 
+Requires Node.js 22.12 or later. [Read the guide](https://vp-tw.github.io/dirwell/build-tools/).
+
 Explicit-theme static build adapters for Vite and unplugin hosts. No default theme, framework theme, image renderer or implicit config loader is installed. Configure the adapter in the host's configuration file; this package does not discover `dirwell.config.*` or process `extends`.
+
+## Build with Vite
+
+```sh
+npm install --save-dev vite @dirwell/integrations@alpha @dirwell/theme-plain@alpha
+```
+
+Create `files/note.txt` and an `index.html` for your host page. Save the following as `vite.config.mjs`, then run `npx vite build`:
 
 ```js
 import dirwell from "@dirwell/integrations/vite";
@@ -10,6 +20,8 @@ export default {
   plugins: [dirwell({ root: "files", outputPath: "downloads", theme: createPlainTheme() })],
 };
 ```
+
+The host output now contains `dist/downloads/index.html` and the selected file. Serve the complete `dist` directory over HTTP and open `/downloads/`. Vite needs its normal host entry page; Dirwell supplies the explorer subtree.
 
 The `/rollup`, `/rolldown`, `/webpack`, `/rspack`, `/rsbuild`, `/esbuild`, `/farm` and `/bun` exports use the existing host lifecycles and a dedicated `outputPath`. A `theme` is always required; `metadata` accepts a core MetadataProviderFactory. Array configurations must use non-overlapping output paths. Output ownership, symlink containment and stale-asset protections remain enabled.
 

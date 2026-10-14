@@ -15,7 +15,7 @@ Implementation is authorized through auto development. Treat the SDK family as t
 
 The accepted implementation plan is [STABLE-DESIGN.md](STABLE-DESIGN.md). Publish `0.0.1` only after the accepted TODOs and validation are complete.
 
-Checkboxes represent this backlog's complete acceptance criteria. B2/B3/B4/C1/C3/C4 are accepted and delivered in source and deployed guides; registry publication belongs to A3/E6. Implemented slices and remaining evidence are recorded below; an open item does not mean all of its capabilities are missing.
+Checkboxes represent this backlog's complete acceptance criteria. B1/B2/B3/B4/C1/C3/C4 are accepted and delivered in source and deployed guides; registry publication belongs to A3/E6. Implemented slices and remaining evidence are recorded below; an open item does not mean all of its capabilities are missing.
 
 ## User intents and entry points
 
@@ -67,7 +67,7 @@ Checkboxes represent this backlog's complete acceptance criteria. B2/B3/B4/C1/C3
 
 ### B1 · G · Reject misspelled nested configuration keys
 
-- [ ] **Intent:** exclude private or irrelevant files and trust a successful command.
+- [x] **Intent:** exclude private or irrelevant files and trust a successful command.
 - **Confirmed defect:** a temporary fixture with `export default { build: { exlcude: [".env"] } }` builds successfully and copies its dummy `.env` into output. The CLI validates top-level keys but spreads nested build/server objects without rejecting unknown keys. This probe used fixture text only; it does not establish a real credential leak.
 - **Change:** validate recognized nested options and value shapes at public CLI/API boundaries. Report the full option path and a likely correction. Offer a typed `defineConfig` or documented `@satisfies CliConfig` path without importing integrations' different configuration contract.
 - **Acceptance:** misspelled `build.exclude`, `server.exclude`, listing and theme option keys fail before output replacement or socket creation. Invalid nested types fail clearly. JS and TS users receive usable completion; valid callbacks/hooks remain supported.
@@ -237,7 +237,8 @@ Checkboxes represent this backlog's complete acceptance criteria. B2/B3/B4/C1/C3
 - Local qualification: 198 Node tests, checks/types, nine packed SDK consumers and Pages-prefix site generation passed. External ignore-file Rollup watch is exercised. Exact-head CI passed, including 18 platform/Node consumer jobs; the PR was merged and Pages deployment succeeded. Live documentation readback remains pending.
 - Theme customization was delivered in [the customization PR](https://github.com/vp-tw/dirwell/pull/79): shared labels/branding/columns, independent actions, public annotations and static CDN mapping. Acceptance passed: 206 Node tests, clean packed consumers and the release-download recipe, types/checks, docs generation, desktop/mobile customization, native fallback, paired source actions and exact-head platform/browser CI. Deployed guide readback passed. No package version has changed and no release has been dispatched.
 - Browsing continuity and Crosswave windowing are implemented locally: shared controls, Back/Forward selection/scroll, failed-target retry, malformed snapshot rejection, skipped-parent native links and 10,000-row desktop/mobile scroll coverage. Local acceptance passed: 206 Node tests, 25 browser scenarios, nine clean packed consumers, types/lint/format, subpath site build and the current packed benchmark in [BENCHMARKS.md](BENCHMARKS.md). Delivered in [the browsing PR](https://github.com/vp-tw/dirwell/pull/80), with all 23 exact-head CI checks passing.
-- Direct API validation is implemented locally: Core/DirectoryService/Server reject unknown keys and invalid nested values before initialization; build adapters reject config/sort/symlink/listing typos before publication, and listing callback results are checked before output replacement. Local acceptance passed: 212 Node tests, 21 Chromium scenarios, nine clean packed consumers, types/lint/format and subpath site build. PR delivery remains pending.
+- Direct API validation was delivered in [the configuration validation PR](https://github.com/vp-tw/dirwell/pull/81): Core/DirectoryService/Server/build-adapter validation, listing callback result checks and nearest-key diagnostics. Local acceptance passed: 212 Node tests, 21 Chromium scenarios, nine clean packed consumers, types/lint/format and subpath site build; all 23 exact-head CI checks passed. Deployed API/support guide readback passed.
+- Discovery is implemented locally: complete quick starts and absolute guides for nine package entry points, matching npm metadata, preview-specific Ledger commands, three website task paths and a theme capability matrix. All nine README programs passed isolated candidate consumers with only their documented root dependencies; a minimum-Node CI job now repeats this proof. Desktop/mobile inspection found no overflow. Public registry/npm rendering remains release follow-up.
 - Physical-controller testing is not a release gate by user decision: Crosswave uses VueUse `useGamepad`; simulated integration regressions remain required. Physical iOS and real screen-reader behavior remain unqualified.
 
 ## Suggested execution order
