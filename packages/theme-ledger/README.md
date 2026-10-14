@@ -5,7 +5,7 @@ Searchable Svelte directory listings with sorting, keyboard selection and row vi
 Requires Node.js 22.12 or newer. Install the first stable family:
 
 ```sh
-npm install @dirwell/core@0.0.1 @dirwell/theme-ledger@0.0.1
+npm install @dirwell/core@0.0.2 @dirwell/theme-ledger@0.0.2
 ```
 
 Create `files/note.txt`, save this as `build.mjs`, then run `node build.mjs`:
@@ -46,4 +46,4 @@ Stable shares directory query/sort/type controls through URL parameters and rest
 
 The 0.0.x API may evolve. Pin your qualified version and upgrade the official family together. See [support and verification](https://vp-tw.github.io/dirwell/support/) for host, browser and device boundaries.
 
-The next release also uses an opt-in Server `search` query endpoint for live archive search. The archive dialog remains separate from current-directory filtering; `archiveSearch: false` hides both static and live archive controls. Open live dialogs refresh every two seconds by default, with request cancellation and retry states. See the Server package for scan budgets and authorization boundaries.
+Version 0.0.2 also uses an opt-in Server `search` query endpoint for live archive search. The archive dialog remains separate from current-directory filtering; `archiveSearch: false` hides both static and live archive controls. Open live dialogs refresh every two seconds by default, with request cancellation and retry states. See the Server package for scan budgets and authorization boundaries.

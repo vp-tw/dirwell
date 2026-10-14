@@ -5,7 +5,7 @@ Native HTML, links and pagination with no browser JavaScript or runtime dependen
 Requires Node.js 22.12 or newer. Install the first stable family:
 
 ```sh
-npm install @dirwell/core@0.0.1 @dirwell/theme-plain@0.0.1
+npm install @dirwell/core@0.0.2 @dirwell/theme-plain@0.0.2
 ```
 
 Create `files/note.txt`, save this as `build.mjs`, then run `node build.mjs`:
@@ -30,7 +30,7 @@ A native HTML renderer with no runtime npm dependencies, browser JavaScript, ico
 
 `createPlainTheme` returns a structurally compatible core theme. It handles independently generated static pages with native Previous/Next anchors and directory-wide counts. A page remains usable without JavaScript over HTTP and file URLs. Project attribution is optional; metadata appears only when the caller supplies a provider through core.
 
-Install with `npm install @dirwell/core@0.0.1 @dirwell/theme-plain@0.0.1` for API use. CLI `0.0.1` includes Plain as its minimal default.
+Install with `npm install @dirwell/core@0.0.2 @dirwell/theme-plain@0.0.2` for API use. CLI `0.0.1` includes Plain as its minimal default.
 
 Standalone Plain uses explicit generated index filenames for portable no-JavaScript directory links, including breadcrumbs and parent navigation. Set `portableLinks: false` to prefer native directory URLs.
 

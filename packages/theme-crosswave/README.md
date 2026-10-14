@@ -5,7 +5,7 @@ Vue categories, directory search and keyboard navigation with optional VueUse ga
 Requires Node.js 22.12 or newer. Install the first stable family:
 
 ```sh
-npm install @dirwell/core@0.0.1 @dirwell/theme-crosswave@0.0.1
+npm install @dirwell/core@0.0.2 @dirwell/theme-crosswave@0.0.2
 ```
 
 Create `files/note.txt`, save this as `build.mjs`, then run `node build.mjs`:
@@ -46,4 +46,4 @@ Stable windows more than 500 visible rows using measured heights and a bounded d
 
 The 0.0.x API may evolve. Pin your qualified version and upgrade the official family together. See [support and verification](https://vp-tw.github.io/dirwell/support/) for host, browser and device boundaries.
 
-The next release exposes live archive search when Server `search: {}` is enabled. `archiveSearch: false` hides this dialog without changing directory filtering or categories. Search uses native result links, keyboard Escape/focus restoration, cancellation and retry. Static Crosswave remains directory-oriented and does not build an archive index. See the Server package for fresh-query budgets and permissions.
+Version 0.0.2 exposes live archive search when Server `search: {}` is enabled. `archiveSearch: false` hides this dialog without changing directory filtering or categories. Search uses native result links, keyboard Escape/focus restoration, cancellation and retry. Static Crosswave remains directory-oriented and does not build an archive index. See the Server package for fresh-query budgets and permissions.

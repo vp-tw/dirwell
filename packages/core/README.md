@@ -1,6 +1,6 @@
 # @dirwell/core
 
-Framework-neutral filesystem, listing and static-publication SDK. Requires Node.js 22.12 or newer. For this quick start, install `npm install @dirwell/core@0.0.1 @dirwell/theme-plain@0.0.1`.
+Framework-neutral filesystem, listing and static-publication SDK. Requires Node.js 22.12 or newer. For this quick start, install `npm install @dirwell/core@0.0.2 @dirwell/theme-plain@0.0.2`.
 
 Core owns filesystem selection, safe navigation, public listing projection and static publication. It requires an explicit theme and does not load a default theme, image renderer, frontend framework, config loader or watcher. Runtime matching uses picomatch for globs and ignore for Git-style ignore files.
 

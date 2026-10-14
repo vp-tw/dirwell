@@ -7,7 +7,7 @@ Requires Node.js 22.12 or later. [Read the guide](https://vp-tw.github.io/dirwel
 ## Run a live folder
 
 ```sh
-npm install @dirwell/server@0.0.1 @dirwell/theme-plain@0.0.1
+npm install @dirwell/server@0.0.2 @dirwell/theme-plain@0.0.2
 ```
 
 Create `files/note.txt`, save this as `server.mjs`, then run `node server.mjs`:
@@ -80,7 +80,7 @@ Handler configuration rejects unknown keys, invalid callbacks and malformed list
 
 The 0.0.x API may evolve. Pin your qualified version and upgrade the official family together. See [support and verification](https://vp-tw.github.io/dirwell/support/) for host, browser and device boundaries.
 
-## Bounded live archive search (next release)
+## Bounded live archive search (0.0.2)
 
 Set `search: {}` on the handler or Node server to enable `GET /__dirwell/search?q=report&path=docs&limit=25`. It searches normalized, case-insensitive logical names/paths, not file contents or annotations. `path` optionally limits results to a subtree. The same settings work under `server.search` in CLI configuration. Search is off by default; Ledger and Crosswave expose it when enabled. Their `archiveSearch: false` factory option hides that UI.
 
