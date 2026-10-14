@@ -63,7 +63,8 @@ const archiveOpen = ref(false),
   archiveInput = ref();
 let archiveAbort,
   archiveRequest = 0,
-  archivePending = false;
+  archivePending = false,
+  archiveDebouncing = false;
 async function searchArchive() {
   const token = ++archiveRequest;
   archiveAbort?.abort();
@@ -104,8 +105,15 @@ watch([archiveOpen, archiveQuery], (_, __, cleanup) => {
   archiveRequest++;
   archivePending = false;
   if (!archiveOpen.value) return;
-  const debounce = setTimeout(searchArchive, 300);
-  cleanup(() => clearTimeout(debounce));
+  archiveDebouncing = true;
+  const debounce = setTimeout(() => {
+    archiveDebouncing = false;
+    searchArchive();
+  }, 300);
+  cleanup(() => {
+    clearTimeout(debounce);
+    archiveDebouncing = false;
+  });
 });
 watch(archiveOpen, async (open, _, cleanup) => {
   if (!open) {
@@ -118,7 +126,12 @@ watch(archiveOpen, async (open, _, cleanup) => {
   archiveDialog.value?.showModal();
   archiveInput.value?.focus();
   const timer = setInterval(() => {
-    if (document.visibilityState === "visible" && archiveQuery.value.trim() && !archivePending)
+    if (
+      document.visibilityState === "visible" &&
+      archiveQuery.value.trim() &&
+      !archivePending &&
+      !archiveDebouncing
+    )
       searchArchive();
   }, model.value.searchRefreshIntervalMs ?? 2000);
   cleanup(() => {

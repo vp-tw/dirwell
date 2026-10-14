@@ -415,7 +415,10 @@
     archiveRequest++;
     archivePending = false;
     clearTimeout(archiveDebounce);
-    archiveDebounce = setTimeout(searchArchive, 300);
+    archiveDebounce = setTimeout(() => {
+      archiveDebounce = undefined;
+      searchArchive();
+    }, 300);
   }
   $effect(() => {
     if (!globalOpen || !model.searchQueryHref) return;
@@ -423,13 +426,16 @@
       if (
         document.visibilityState === "visible" &&
         globalQuery.trim() &&
-        !archivePending
+        !archivePending &&
+        archiveDebounce === undefined
       )
         searchArchive();
     }, model.searchRefreshIntervalMs ?? 2000);
     return () => {
       clearInterval(timer);
       clearTimeout(archiveDebounce);
+      archiveDebounce = undefined;
+      archivePending = false;
       archiveAbort?.abort();
       archiveRequest++;
     };

@@ -109,3 +109,34 @@ test("capacity rejects overload and releases on cancellation", () =>
     hold = false;
     assert.equal((await handler(request("?q=txt"))).status, 200);
   }));
+
+test("CLI configuration enables bounded queries and timeout releases capacity", () =>
+  fixture(async (root) => {
+    const { runCli } = await import("../packages/cli/dist/index.mjs");
+    await writeFile(
+      join(root, "dirwell.config.mjs"),
+      "export default {server:{search:{maxResults:5}}};\n",
+    );
+    const server = await runCli(["server", root], root, () => {});
+    try {
+      const response = await fetch(server.url + "/__dirwell/search?q=日本語");
+      assert.equal(response.status, 200);
+      assert.equal((await response.json()).results[0].path, "nested/日本語 #%.txt");
+    } finally {
+      await server.close();
+    }
+    let slow = true;
+    const handler = await createExplorerHandler({
+      root,
+      search: { timeoutMs: 5, maxConcurrent: 1 },
+      authorize: async () => {
+        if (slow) await new Promise((resolve) => setTimeout(resolve, 30));
+        return true;
+      },
+    });
+    const timed = await handler(request("?q=txt"));
+    assert.equal(timed.status, 503);
+    assert.match(await timed.text(), /timed out/);
+    slow = false;
+    assert.equal((await handler(request("?q=txt"))).status, 200);
+  }));
