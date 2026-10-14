@@ -42,6 +42,29 @@ for (const [name, create] of [
       await input.fill("failure");
       await expect(dialog.getByRole("button", { name: "Retry", exact: true })).toBeVisible();
       await page.unroute("**/__dirwell/search?**");
+      let oldStarted;
+      const started = new Promise((resolve) => (oldStarted = resolve));
+      await page.route("**/__dirwell/search?**", async (route) => {
+        if (new URL(route.request().url()).searchParams.get("q") !== "old") return route.continue();
+        oldStarted();
+        await new Promise((resolve) => setTimeout(resolve, 700));
+        await route
+          .fulfill({
+            contentType: "application/json",
+            body: JSON.stringify({
+              version: 1,
+              results: [{ name: "old.txt", path: "old.txt", kind: "file", href: null }],
+              truncated: false,
+            }),
+          })
+          .catch(() => {});
+      });
+      await input.fill("old");
+      await started;
+      await input.fill("日本語");
+      await expect(dialog.getByRole("link")).toHaveText("nested/日本語 #%.txt");
+      await page.unroute("**/__dirwell/search?**");
+
       await input.fill("日本語");
       await expect(dialog.getByRole("link")).toHaveText("nested/日本語 #%.txt");
 

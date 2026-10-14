@@ -8,6 +8,7 @@ export async function createPrivateDownloads({
   getSession,
   intervalMs = 1000,
   exclude = [],
+  search = false,
 }) {
   if (typeof getSession !== "function") throw new TypeError("getSession must be a function");
   const allowed = async (request) => {
@@ -25,6 +26,7 @@ export async function createPrivateDownloads({
     mountPath: "/downloads",
     files: "attachment",
     exclude,
+    search,
     live: { intervalMs, maxClients: 8 },
     authorize: allowed,
     headers: () => ({ "cache-control": "private, no-store" }),

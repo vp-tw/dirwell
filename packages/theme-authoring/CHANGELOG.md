@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.0.2
+
+### Patch Changes
+
+- Updated dependencies [7044c88]
+  - @dirwell/core@0.0.2
+  - @dirwell/server@0.0.2
+  - @dirwell/theme-ledger@0.0.2
+  - @dirwell/theme-crosswave@0.0.2
+
 ## 0.0.1
 
 First non-prerelease SDK family. Includes validated configuration, publication/selection controls, documented customization and installed-consumer qualification. Keep family versions synchronized; the 0.0.x API may evolve.

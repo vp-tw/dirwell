@@ -2,6 +2,13 @@
 
 The nine official `@dirwell/*` packages use synchronized versions. `0.0.1` is the first non-prerelease family; the 0.0.x API may evolve, so pin the version qualified by your application.
 
+## 0.0.2
+
+- Accept local body/headline TTF/OTF fonts for deterministic branded/CJK share images, with bounded reads, role-specific glyph errors and cache invalidation by font bytes. Preserve default PNG bytes and optional dependency isolation.
+- Add opt-in bounded fresh archive name/path queries in Server and CLI, applying authorization and selection before traversal. Omit aliases, return explicit budget/overload errors and keep results request-local.
+- Connect Ledger/Crosswave archive dialogs with debounce, visible-dialog refresh, cancellation, retry, keyboard focus restoration and mobile layouts; retain directory filtering and native links.
+- Qualify licensed font fixtures, fresh query workloads, source exports, packed consumers and browser/OS contracts. Distributed caches and file-content search remain deferred.
+
 ## 0.0.1
 
 - Validate direct Core/Server/CLI/build configuration and callback listing plans before initialization or output replacement, with complete paths and nearest-key suggestions.
