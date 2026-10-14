@@ -17,7 +17,7 @@ CLI includes Plain. Core and integrations require a theme explicitly. Install on
 | ---------------------------------------------- | ------------------------- | -------------------------------- | --------------------------------------------- |
 | Native links and pagination without JavaScript | Yes                       | Yes                              | Yes                                           |
 | Current-directory search                       | No                        | Yes                              | Yes                                           |
-| Archive-wide search                            | No                        | Static only; opt out available   | No                                            |
+| Archive-wide search                            | No                        | Static and opt-in live queries   | Opt-in live queries                           |
 | Sorting                                        | Configured in Core/server | Interactive and configured       | Configured in Core/server                     |
 | Categories and controller input                | No                        | No                               | Configurable categories; VueUse gamepad input |
 | Common labels, branding and columns            | Yes                       | Yes                              | Yes                                           |
@@ -70,7 +70,7 @@ Columns retain the configured order and must include `name`. Custom columns disp
 
 Actions are opt-in and separate from the primary navigation link. `copy-link` copies the resolved public URL; `copy-path` copies the logical path relative to the explorer root. Clipboard requires browser permission/support and reports failure. Plain supports only `download`, preserving its script-free contract. An HTML download hint does not override a cross-origin host's headers. Official themes do not include media previews.
 
-Ledger's `archiveSearch: false` hides its archive control and omits the generated index. Directory filtering remains available. Static archive search covers names/paths, not file contents or public annotations; live mode offers directory search only. Loaded archive data is reused for up to 60 seconds, with a 100,000-entry safety limit and at most 100 displayed results. Retry is available after loading failure.
+Ledger's `archiveSearch: false` hides its archive control and omits the generated index. Directory filtering remains available. Static archive search covers names/paths, not file contents or public annotations; live archive queries are available when Server `search` is enabled. Loaded archive data is reused for up to 60 seconds, with a 100,000-entry safety limit and at most 100 displayed results. Retry is available after loading failure. Crosswave exposes a live archive dialog with the same Server query capability; `archiveSearch: false` hides it. Both retain current-directory filtering. Live queries scan fresh names/paths under server budgets and refresh open visible dialogs every two seconds by default; they do not download a static archive index. See [live query configuration](../configuration/#live-archive-search).
 
 See the [release annotation example](https://github.com/vp-tw/dirwell/tree/main/examples/release-downloads) for build and live use without a theme fork.
 

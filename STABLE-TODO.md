@@ -141,7 +141,7 @@ Checkboxes record accepted source/contract dispositions; the postpublication por
 
 ### C5 · F · Support custom font coverage for share images
 
-- [ ] **Intent:** generate a share image containing Chinese, Japanese or another unsupported script.
+- [x] **Intent:** generate a share image containing Chinese, Japanese or another unsupported script.
 - **Confirmed limitation:** the image package deliberately fails when bundled fonts lack glyph coverage; documentation directs the user to a custom renderer.
 - **Proposal:** expose a documented local font/custom renderer recipe or supported font injection, with clear missing-glyph errors. Avoid remote font fetching or mandatory CJK weight for normal installs.
 - **Acceptance:** generate and visually inspect Latin and CJK examples, prove deterministic offline rendering, and document memory/output impact. Keep default examples theme-appropriate rather than assuming a CJK audience.
@@ -284,4 +284,4 @@ The public guide switch removes alpha install commands, retains durable SDK and 
 
 ## Post-0.0.1 authorized follow-up
 
-Custom font injection (C5) and bounded live archive queries (the query slice of E2) are now implemented for the next release; candidate acceptance and measured workload evidence are in [FOLLOWUP-DESIGN.md](./FOLLOWUP-DESIGN.md). This does not change the historical 0.0.1 qualification above. Latin/CJK licensed-font rendering, default-byte preservation, fresh authorized results and both rich-theme interactions have local evidence. Full current-head CI, packaged consumers and registry release readback remain delivery gates. Distributed response/snapshot caching remains deferred.
+Custom font injection (C5) and bounded live archive queries (the query slice of E2) are delivered in 0.0.2; candidate acceptance and measured workload evidence are in [FOLLOWUP-DESIGN.md](./FOLLOWUP-DESIGN.md). This does not change the historical 0.0.1 qualification above. Latin/CJK licensed-font rendering, default-byte preservation, fresh authorized results and both rich-theme interactions have local evidence. Exact-source CI, packaged consumers and registry release readback passed before publication. The local image/scan workloads, negative font inputs, async-hook cancellation and theme palette/touch/accessibility-name checks are retained in FOLLOWUP-DESIGN.md. Distributed response/snapshot caching remains deferred.

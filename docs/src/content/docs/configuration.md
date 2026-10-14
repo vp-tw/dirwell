@@ -44,7 +44,7 @@ HTML pagination and public data publication are independent. The synchronous cal
 
 CLI flags override the corresponding configuration settings. Build adapters take explicit host options and do not discover this file. No config loader, inheritance or implicit TypeScript compilation is included in the CLI.
 
-## Live archive search (next release)
+## Live archive search
 
 Enable `server: { search: {} }` to add fresh cross-directory filename/path queries. It is off by default. Ledger and Crosswave distinguish the archive dialog from their current-directory filter; either factory accepts `archiveSearch: false` to hide the dialog. Plain keeps native browsing.
 

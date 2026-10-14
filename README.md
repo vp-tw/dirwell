@@ -38,7 +38,7 @@ Use `dirwell.config.mjs` to configure themes, selection and server/build options
 | Static generation inside build tools        | `@dirwell/integrations`    |
 | Svelte/Vue source compilation and local HMR | `@dirwell/theme-authoring` |
 
-All nine share version `0.0.1` and the `latest` tag. Pin the tested version for reproducible builds. Core and Plain stay free of framework/image/font/watch dependencies. See the [SDK guide](https://vp-tw.github.io/dirwell/sdk/) for API, live server and listing policy examples.
+All nine share version `0.0.2` and the `latest` tag. Pin the tested version for reproducible builds. Core and Plain stay free of framework/image/font/watch dependencies. See the [SDK guide](https://vp-tw.github.io/dirwell/sdk/) for API, live server and listing policy examples.
 
 ## Learn more
 
