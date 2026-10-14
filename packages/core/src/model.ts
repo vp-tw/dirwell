@@ -92,6 +92,8 @@ export interface SortOptions {
 export interface ThemeContext {
   readonly operation?: "build" | "server";
   readonly updatesHref?: string;
+  readonly searchQueryHref?: string;
+  readonly searchRefreshIntervalMs?: number;
   /** Optional host route for live framework page snapshots. */
   readonly pageDataHref?: (theme: string, directoryPath: string, page: number) => string;
   /** Present only when core listing publication is enabled. Entries are the current HTML slice. */

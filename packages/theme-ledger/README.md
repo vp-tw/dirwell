@@ -45,3 +45,5 @@ retained. See [the authoring guide](https://vp-tw.github.io/dirwell/themes/#sour
 Stable shares directory query/sort/type controls through URL parameters and restores per-entry History selection/scroll. Failed navigation retains the previous view and offers retry/native navigation. See [view behavior](https://vp-tw.github.io/dirwell/themes/#returning-to-a-view-upcoming-stable).
 
 The 0.0.x API may evolve. Pin your qualified version and upgrade the official family together. See [support and verification](https://vp-tw.github.io/dirwell/support/) for host, browser and device boundaries.
+
+The next release also uses an opt-in Server `search` query endpoint for live archive search. The archive dialog remains separate from current-directory filtering; `archiveSearch: false` hides both static and live archive controls. Open live dialogs refresh every two seconds by default, with request cancellation and retry states. See the Server package for scan budgets and authorization boundaries.

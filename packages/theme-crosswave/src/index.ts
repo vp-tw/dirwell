@@ -37,13 +37,21 @@ export interface CrosswaveThemeOptions extends ThemeCustomization {
   readonly categories?: readonly CrosswaveCategory[];
   readonly color?: "azure" | "violet" | "amber" | "rose" | "jade" | "graphite";
   readonly gamepad?: boolean;
+  readonly archiveSearch?: boolean;
   readonly backgroundMotion?: boolean;
 }
 export function createCrosswaveTheme(
   options: CrosswaveThemeOptions = {},
   renderer?: FrameworkRenderer,
 ): ExplorerTheme {
-  assertThemeOptions(options, ["title", "categories", "color", "gamepad", "backgroundMotion"]);
+  assertThemeOptions(options, [
+    "title",
+    "categories",
+    "color",
+    "gamepad",
+    "backgroundMotion",
+    "archiveSearch",
+  ]);
   if (options.title !== undefined && (typeof options.title !== "string" || !options.title))
     throw new TypeError("title must be a non-empty string");
   if (
@@ -51,7 +59,7 @@ export function createCrosswaveTheme(
     !["azure", "violet", "amber", "rose", "jade", "graphite"].includes(options.color)
   )
     throw new TypeError("Unsupported Crosswave color");
-  for (const key of ["gamepad", "backgroundMotion"] as const)
+  for (const key of ["gamepad", "backgroundMotion", "archiveSearch"] as const)
     if (options[key] !== undefined && typeof options[key] !== "boolean")
       throw new TypeError(`${key} must be a boolean`);
   const ui = resolveCustomization(options);
@@ -96,6 +104,7 @@ export function createCrosswaveTheme(
       const model = {
         ...createThemePage(context, theme, options.title ?? ui.brand.name ?? "Dirwell"),
         ...(publishedUi === undefined ? {} : { ui: publishedUi }),
+        searchQueryHref: options.archiveSearch === false ? null : (context.searchQueryHref ?? null),
         categories: categories.map(({ id, label, svg }) => ({ id, label, svg })),
         color: options.color ?? "azure",
         gamepad: options.gamepad ?? true,

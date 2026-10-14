@@ -55,6 +55,12 @@ const image = await createShareImage({
 const imageBytes = Buffer.from(await image.arrayBuffer());
 assert.equal(imageBytes.readUInt32BE(16), 1200);
 assert.equal(imageBytes.readUInt32BE(20), 630);
+const customImage = await createShareImage({
+  title: "資料下載 日本語",
+  description: "Sample files",
+  fonts: { body: "font-fixture.ttf" },
+});
+assert.equal(Buffer.from(await customImage.arrayBuffer()).readUInt32BE(16), 1200);
 assert.equal(typeof integration, "function");
 await generateExplorer({
   sourceDir: "source",
@@ -71,11 +77,15 @@ const server = await startExplorerServer({
   pageSize: 2,
   theme: createLedgerTheme(),
   live: { intervalMs: 50 },
+  search: {},
 });
 try {
   const html = await fetch(server.url + "/browse/");
   assert.equal(html.status, 200);
   assert.match(await html.text(), /data-dirwell-theme/);
+  const query = await fetch(server.url + "/__dirwell/search?q=one");
+  assert.equal(query.status, 200);
+  assert.equal((await query.json()).results[0].path, "one.txt");
   const first = await fetch(server.url + "/listing");
   assert.equal(first.status, 200);
   const data = await first.json();
@@ -143,6 +153,8 @@ console.log(
     liveListing: true,
     fileTransport: true,
     optionalImage: true,
+    customFontImage: true,
+    liveArchiveSearch: true,
     integrationImports: true,
     sourceAuthoring: ["svelte", "vue"],
     authoringDevSsr: true,

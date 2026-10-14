@@ -2,6 +2,7 @@ import { validateHandlerOptions } from "./validation.ts";
 import { fileResponse, type FileServingMode } from "./files.ts";
 import { themeResponse } from "./html.ts";
 import { createUpdatesHandler } from "./updates.ts";
+import { createSearchHandler, type LiveSearchOptions } from "./search.ts";
 import { resolveAuthorizedDirectory } from "./authorization.ts";
 import { createHash } from "node:crypto";
 import { createDirectoryService, DirectoryAccessError, projectListingEntry } from "@dirwell/core";
@@ -13,6 +14,7 @@ import type {
 } from "@dirwell/core";
 
 export interface ExplorerHandlerOptions extends DirectoryServiceOptions {
+  readonly search?: false | LiveSearchOptions;
   /** Opt-in SSE revision notifications. No filesystem watcher is required. */
   readonly live?: false | { readonly intervalMs?: number; readonly maxClients?: number };
   /** HTML is opt-in and always requires an explicit theme. */
@@ -94,6 +96,7 @@ export async function createExplorerHandler(
   const targetFor = (entry: FileSystemEntry): string =>
     entry.symlink?.targetRelativePath ?? entry.relativePath;
   const updates = createUpdatesHandler(options, service, headersFor);
+  const search = createSearchHandler(options, service, headersFor);
   return async (request) => {
     const url = new URL(request.url);
     if (mount && url.pathname !== mount && !url.pathname.startsWith(mount + "/"))
@@ -101,6 +104,7 @@ export async function createExplorerHandler(
     const route = url.pathname.slice(mount.length) || "/";
     try {
       if (route === "/__dirwell/updates") return await updates(request);
+      if (route === "/__dirwell/search") return await search(request);
       const response = await themeResponse(request, route, options, service, headersFor);
       if (response !== null) return response;
     } catch (error) {
@@ -233,3 +237,4 @@ export async function createExplorerHandler(
 }
 
 export type { FileServingMode };
+export type { LiveSearchOptions };

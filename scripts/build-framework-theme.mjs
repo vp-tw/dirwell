@@ -152,9 +152,17 @@ const componentSource = (await readFile(path.join(folder, "src", componentName),
   .replaceAll('navigation.ts"', 'navigation.mjs"')
   .replaceAll('records.ts"', 'records.mjs"')
   .replaceAll('view-state.ts"', 'view-state.mjs"')
+  .replaceAll('live-search.ts"', 'live-search.mjs"')
   .replaceAll('customization.ts"', 'customization.mjs"');
 await writeFile(path.join(sourceOutput, componentName), componentSource);
-for (const helper of ["icons", "navigation", "records", "customization", "view-state"]) {
+for (const helper of [
+  "icons",
+  "navigation",
+  "records",
+  "customization",
+  "view-state",
+  "live-search",
+]) {
   await build({
     entryPoints: [path.join(repo, "packages/shared-theme/src", `${helper}.ts`)],
     bundle: true,

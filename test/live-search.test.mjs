@@ -1,0 +1,111 @@
+import { test } from "node:test";
+import assert from "node:assert/strict";
+import { mkdtemp, mkdir, writeFile, rm, rename, symlink } from "node:fs/promises";
+import { join } from "node:path";
+import { tmpdir } from "node:os";
+import { createExplorerHandler } from "../packages/server/dist/index.mjs";
+async function fixture(run) {
+  const root = await mkdtemp(join(tmpdir(), "dirwell-live-search-"));
+  try {
+    await mkdir(join(root, "nested"));
+    await mkdir(join(root, "private"));
+    await writeFile(join(root, "nested", "日本語 #%.txt"), "download");
+    await writeFile(join(root, "private", "secret.txt"), "private");
+    await writeFile(join(root, "hidden.txt"), "excluded");
+    await symlink("nested", join(root, "alias"));
+    await symlink("/etc", join(root, "outside"));
+    await symlink(".", join(root, "cycle"));
+    await run(root);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+}
+const request = (query = "", options = {}) =>
+  new Request("http://localhost/__dirwell/search" + query, options);
+test("live queries are opt-in and validate request bounds", () =>
+  fixture(async (root) => {
+    assert.equal((await (await createExplorerHandler({ root }))(request("?q=txt"))).status, 404);
+    const handler = await createExplorerHandler({ root, search: {} });
+    for (const query of [
+      "",
+      "?q=",
+      "?q=x&limit=0",
+      "?q=x&limit=101",
+      "?q=" + "x".repeat(257),
+      "?q=x&unknown=y",
+    ])
+      assert.equal((await handler(request(query))).status, 400);
+    assert.equal((await handler(request("?q=x", { method: "POST" }))).status, 405);
+  }));
+test("fresh encoded results exclude denied/ignored paths and canonical aliases", () =>
+  fixture(async (root) => {
+    await writeFile(join(root, ".gitignore"), "hidden.txt\n");
+    const paths = [];
+    const handler = await createExplorerHandler({
+      root,
+      files: "media",
+      ignoreFiles: [join(root, ".gitignore")],
+      search: {},
+      authorize: (_, path) => {
+        paths.push(path);
+        return !path.startsWith("private");
+      },
+    });
+    const response = await handler(request("?q=txt"));
+    const data = await response.json();
+    assert.equal(response.status, 200);
+    assert.equal(response.headers.get("cache-control"), "private, no-store");
+    assert.deepEqual(
+      data.results.map((x) => x.path),
+      ["nested/日本語 #%.txt"],
+    );
+    assert.equal(data.results[0].href, "/files/nested/%E6%97%A5%E6%9C%AC%E8%AA%9E%20%23%25.txt");
+    assert(!JSON.stringify(data).includes(root));
+    assert(!paths.includes("private/secret.txt"));
+    await writeFile(join(root, "nested", "new.txt"), "new");
+    assert.equal((await (await handler(request("?q=new"))).json()).results.length, 1);
+    await rename(join(root, "nested", "new.txt"), join(root, "nested", "renamed.txt"));
+    assert.equal((await (await handler(request("?q=new"))).json()).results.length, 0);
+    assert.equal(
+      (await (await handler(request("?q=renamed&path=nested"))).json()).results.length,
+      1,
+    );
+    await rm(join(root, "nested", "renamed.txt"));
+    assert.equal((await (await handler(request("?q=renamed"))).json()).results.length, 0);
+    assert.equal((await handler(request("?q=secret&path=private"))).status, 403);
+  }));
+test("scan budget errors never masquerade as complete results; result limits are explicit", () =>
+  fixture(async (root) => {
+    const bounded = await createExplorerHandler({ root, search: { maxEntries: 1 } });
+    const response = await bounded(request("?q=txt"));
+    assert.equal(response.status, 503);
+    assert.match(await response.text(), /budget/);
+    const handler = await createExplorerHandler({ root, search: { maxResults: 1 } });
+    const data = await (await handler(request("?q=txt"))).json();
+    assert.equal(data.results.length, 1);
+    assert.equal(data.truncated, true);
+  }));
+test("capacity rejects overload and releases on cancellation", () =>
+  fixture(async (root) => {
+    let release;
+    let hold = false;
+    const gate = new Promise((resolve) => (release = resolve));
+    const handler = await createExplorerHandler({
+      root,
+      search: { maxConcurrent: 1 },
+      authorize: async (_, path) => {
+        if (hold && path === "nested") await gate;
+        return true;
+      },
+    });
+    hold = true;
+    const controller = new AbortController();
+    const first = handler(request("?q=txt", { signal: controller.signal }));
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    assert.equal((await handler(request("?q=txt"))).status, 429);
+    controller.abort();
+    assert.equal((await first).status, 503);
+    release();
+    hold = false;
+    assert.equal((await handler(request("?q=txt"))).status, 200);
+  }));

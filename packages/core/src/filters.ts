@@ -1,4 +1,4 @@
-import { readdir, readlink, readFile, realpath } from "node:fs/promises";
+import { opendir, readlink, readFile, realpath } from "node:fs/promises";
 import path from "node:path";
 import picomatch from "picomatch";
 import ignore from "ignore";
@@ -110,6 +110,15 @@ export interface SourceSelection {
   readonly symlinks: ReadonlySet<string>;
   readonly mirroredSymlinks: ReadonlySet<string>;
 }
+export interface SelectionBudget {
+  readonly maxEntries: number;
+  readonly maxDirectories: number;
+  readonly signal: AbortSignal;
+  readonly allowPath: (logicalPath: string) => Promise<boolean>;
+}
+export class SelectionBudgetError extends Error {
+  override readonly name = "SelectionBudgetError";
+}
 
 /** Select physical source paths; parent directories remain when a descendant matches. */
 export async function selectSourcePaths(
@@ -120,6 +129,7 @@ export async function selectSourcePaths(
   ignoredPaths: readonly string[] = [],
   ignoreFiles: readonly IgnoreFile[] = [],
   preparedIgnore?: Awaited<ReturnType<typeof createIgnoreMatcher>>,
+  budget?: SelectionBudget,
 ): Promise<SourceSelection> {
   const isIgnored = preparedIgnore ?? (await createIgnoreMatcher(ignoreFiles));
   const canonicalRoot = await realpath(sourceDir);
@@ -132,14 +142,29 @@ export async function selectSourcePaths(
   );
   const selected = new Set<string>([""]);
   const symlinks = new Map<string, string>();
+  let entries = 0;
+  let directories = 0;
 
   async function visit(
     directory: string,
     relativeDir: string,
     inheritedInclude: boolean,
   ): Promise<boolean> {
+    budget?.signal.throwIfAborted();
+    if (budget) {
+      const physical = await realpath(directory);
+      if (!isWithin(canonicalRoot, physical)) return false;
+      if (path.relative(canonicalRoot, physical).split(path.sep).join("/") !== relativeDir)
+        return false;
+    }
+    if (budget && !(await budget.allowPath(relativeDir))) return false;
+    if (budget && ++directories > budget.maxDirectories)
+      throw new SelectionBudgetError("Directory scan budget exceeded");
     let hasSelected = false;
-    for (const entry of await readdir(directory, { withFileTypes: true })) {
+    for await (const entry of await opendir(directory)) {
+      budget?.signal.throwIfAborted();
+      if (budget && ++entries > budget.maxEntries)
+        throw new SelectionBudgetError("Entry scan budget exceeded");
       const absolutePath = path.join(directory, entry.name);
       if (
         isWithin(outputDir, absolutePath) ||
@@ -147,6 +172,7 @@ export async function selectSourcePaths(
       )
         continue;
       const relativePath = path.posix.join(relativeDir, entry.name);
+      if (budget && !(await budget.allowPath(relativePath))) continue;
       const directoryLike = entry.isDirectory();
       const matches = (matcher: (value: string) => boolean) =>
         matcher(relativePath) || (directoryLike && matcher(`${relativePath}/`));

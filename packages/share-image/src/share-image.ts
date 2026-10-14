@@ -1,11 +1,16 @@
 import { escapeHtml } from "@dirwell/core";
-import { readFile } from "node:fs/promises";
+import { readFile, open } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { createHash } from "node:crypto";
 import { create, type Font } from "fontkit";
 import { Resvg } from "@resvg/resvg-js";
 
+export interface ShareImageFonts {
+  readonly body?: string | URL;
+  readonly headline?: string | URL;
+}
 export interface ShareImageOptions {
+  readonly fonts?: ShareImageFonts;
   readonly theme?: "ledger" | "plain" | "crosswave";
   readonly title: string;
   readonly description: string;
@@ -56,8 +61,66 @@ const themes = {
 } as const;
 const segmenter = new Intl.Segmenter("en", { granularity: "grapheme" });
 
-function width(text: string, face: number, size: number): number {
-  const font = fonts[face]!;
+interface ImageFace {
+  readonly font: Font;
+  readonly custom: boolean;
+  readonly role: "body" | "headline";
+}
+async function loadFace(source: string | URL, role: ImageFace["role"]) {
+  if (
+    (typeof source !== "string" && !(source instanceof URL)) ||
+    (typeof source === "string" && (!source || /^[a-z][a-z0-9+.-]*:\/\//i.test(source))) ||
+    (source instanceof URL &&
+      (source.protocol !== "file:" || (source.hostname && source.hostname !== "localhost")))
+  )
+    throw new TypeError(`fonts.${role} must be a local path or file URL`);
+  const handle = await open(source, "r").catch((cause: unknown) => {
+    throw new TypeError(`Cannot read fonts.${role}`, { cause });
+  });
+  let bytes: Buffer;
+  try {
+    const size = (await handle.stat()).size;
+    if (size < 12 || size > 32 * 1024 * 1024)
+      throw new TypeError(`fonts.${role} must be at most 32 MiB`);
+    const bounded = Buffer.alloc(size + 1);
+    let received = 0;
+    while (received < bounded.length) {
+      const result = await handle.read(bounded, received, bounded.length - received, null);
+      if (!result.bytesRead) break;
+      received += result.bytesRead;
+    }
+    if (received !== size) throw new TypeError(`fonts.${role} changed while being read`);
+    bytes = bounded.subarray(0, received);
+  } finally {
+    await handle.close();
+  }
+  if (bytes.readUInt32BE(0) !== 0x00010000 && bytes.toString("ascii", 0, 4) !== "OTTO")
+    throw new TypeError(`fonts.${role} must be a single TTF or OTF font`);
+  let font: Font;
+  try {
+    font = create(bytes) as Font;
+  } catch (cause) {
+    throw new TypeError(`Invalid fonts.${role}`, { cause });
+  }
+  if (
+    typeof font.layout !== "function" ||
+    !Number.isFinite(font.unitsPerEm) ||
+    font.unitsPerEm <= 0
+  )
+    throw new TypeError(`Invalid fonts.${role}`);
+  return { face: { font, custom: true, role } satisfies ImageFace, bytes };
+}
+function requireGlyphs(value: string, face: ImageFace) {
+  for (const character of value) {
+    const codePoint = character.codePointAt(0)!;
+    if (!face.font.hasGlyphForCodePoint(codePoint))
+      throw new Error(
+        `${face.custom ? `Share-image ${face.role}` : "Bundled share-image"} font lacks U+${codePoint.toString(16).toUpperCase()}; supply a font with glyph coverage or metadata.image: false`,
+      );
+  }
+}
+function width(text: string, face: ImageFace, size: number): number {
+  const font = face.font;
   return (
     (font.layout(text).positions.reduce((sum, position) => sum + position.xAdvance, 0) * size) /
     font.unitsPerEm
@@ -65,7 +128,7 @@ function width(text: string, face: number, size: number): number {
 }
 function fit(
   value: string,
-  face: number,
+  face: ImageFace,
   sizes: readonly number[],
   limit: number,
   maxLines = 2,
@@ -76,13 +139,7 @@ function fit(
     (part) => part.segment,
   );
   const bounded = text.slice(0, 2048);
-  for (const character of bounded.join("")) {
-    const codePoint = character.codePointAt(0)!;
-    if (!fonts[face]!.hasGlyphForCodePoint(codePoint))
-      throw new Error(
-        `Bundled share-image font lacks U+${codePoint.toString(16).toUpperCase()}; use a custom image renderer or metadata.image: false`,
-      );
-  }
+  requireGlyphs(bounded.join(""), face);
   for (const size of sizes) {
     let position = 0;
     const lines: string[] = [];
@@ -102,6 +159,7 @@ function fit(
         while (graphemes.length && width(graphemes.join("") + "…", face, size) > limit)
           graphemes.pop();
         line = graphemes.join("") + "…";
+        requireGlyphs(line, face);
       }
       lines.push(line);
       position = end;
@@ -119,7 +177,31 @@ function text(
   family: string,
   weight = 400,
   anchor = "start",
+  face?: ImageFace,
 ): string {
+  if (face?.custom)
+    return value.lines
+      .map((line, index) => {
+        requireGlyphs(line, face);
+        const run = face.font.layout(line),
+          scale = value.size / face.font.unitsPerEm;
+        const total = run.positions.reduce((sum, position) => sum + position.xAdvance, 0);
+        let advance = 0;
+        const paths = run.glyphs
+          .map((glyph, position) => {
+            const offset = run.positions[position]!;
+            const data = glyph.path.toSVG();
+            const translatedX =
+              x + (advance + offset.xOffset - (anchor === "end" ? total : 0)) * scale;
+            advance += offset.xAdvance;
+            return data
+              ? `<path d="${data}" transform="translate(${translatedX} ${y + index * gap - offset.yOffset * scale}) scale(${scale} ${-scale})" fill="${fill}"/>`
+              : "";
+          })
+          .join("");
+        return paths;
+      })
+      .join("");
   return value.lines
     .map(
       (line, index) =>
@@ -129,13 +211,43 @@ function text(
 }
 const wave = `<defs><linearGradient id="bg" x2=".2" y2="1"><stop stop-color="#2b4f85"/><stop offset="1" stop-color="#091a3a"/></linearGradient><linearGradient id="ribbon"><stop stop-color="#80afff" stop-opacity=".02"/><stop offset=".5" stop-color="#b7d6ff" stop-opacity=".24"/><stop offset="1" stop-color="#e6f2ff" stop-opacity=".03"/></linearGradient></defs><rect width="1200" height="630" fill="url(#bg)"/><path d="M-80 470C170 270 330 560 630 435S980 290 1280 470" stroke="url(#ribbon)" stroke-width="32" fill="none"/><path d="M-80 495C170 590 370 315 690 465S1020 580 1280 390" stroke="url(#ribbon)" stroke-width="14" fill="none"/>`;
 const cache = new Map<string, File>();
-/** Build-time PNG generation with bundled fonts; no network or system-font search. */
-export function renderShareImage(options: ShareImageOptions): File {
+/** Build-time PNG generation with bundled or supplied local fonts; no network or system-font search. */
+export async function renderShareImage(options: ShareImageOptions): Promise<File> {
   const theme = options.theme ?? "ledger";
   const t = themes[theme];
   if (!t) throw new TypeError("Unknown share image theme");
-  const regular = theme === "plain" ? 2 : 0;
-  const headline = fit(options.title, t.face, [96, 88, 80, 72, 64, 56], 1064);
+  if (
+    options.fonts !== undefined &&
+    (typeof options.fonts !== "object" ||
+      options.fonts === null ||
+      Array.isArray(options.fonts) ||
+      Object.keys(options.fonts).some((key) => !["body", "headline"].includes(key)))
+  )
+    throw new TypeError("fonts must contain only body/headline local font paths");
+  const body =
+    options.fonts?.body === undefined ? null : await loadFace(options.fonts.body, "body");
+  const customHeadline =
+    options.fonts?.headline === undefined
+      ? body
+      : await loadFace(options.fonts.headline, "headline");
+  const regular: ImageFace = body?.face ?? {
+    font: fonts[theme === "plain" ? 2 : 0]!,
+    custom: false,
+    role: "body",
+  };
+  const headlineFace: ImageFace = customHeadline
+    ? { ...customHeadline.face, role: "headline" }
+    : { font: fonts[t.face]!, custom: false, role: "headline" };
+  const digest = createHash("sha256")
+    .update(
+      JSON.stringify([
+        fontDigest,
+        body ? createHash("sha256").update(body.bytes).digest("hex") : null,
+        customHeadline ? createHash("sha256").update(customHeadline.bytes).digest("hex") : null,
+      ]),
+    )
+    .digest("hex");
+  const headline = fit(options.title, headlineFace, [96, 88, 80, 72, 64, 56], 1064);
   const header = fit(options.repositoryName ?? "", regular, [30, 28, 26], 800, 1);
   const description = fit(options.description, regular, [34, 30, 26], 1064, 1);
   const directory = fit(
@@ -145,8 +257,8 @@ export function renderShareImage(options: ShareImageOptions): File {
     1064,
     1,
   );
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630"><rect width="1200" height="630" fill="${t.bg}"/>${theme === "crosswave" ? wave : ""}${text(header, 68, 86, 0, t.fg, t.family)}${text({ size: 30, lines: [t.name] }, 1130, 86, 0, t.fg, t.family, 400, "end")}${theme === "crosswave" ? "" : `<path d="M64 126H1136" stroke="${t.rule}"/>`}${text(headline, 68, 276, 112, t.fg, t.family, t.weight)}${text(description, 68, 480, 0, t.muted, t.family)}${text(directory, 68, 572, 0, t.muted, t.family)}</svg>`;
-  const key = createHash("sha256").update(fontDigest).update(svg).digest("hex");
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630"><rect width="1200" height="630" fill="${t.bg}"/>${theme === "crosswave" ? wave : ""}${text(header, 68, 86, 0, t.fg, t.family, 400, "start", regular)}${text({ size: 30, lines: [t.name] }, 1130, 86, 0, t.fg, t.family, 400, "end", regular)}${theme === "crosswave" ? "" : `<path d="M64 126H1136" stroke="${t.rule}"/>`}${text(headline, 68, 276, 112, t.fg, t.family, t.weight, "start", headlineFace)}${text(description, 68, 480, 0, t.muted, t.family, 400, "start", regular)}${text(directory, 68, 572, 0, t.muted, t.family, 400, "start", regular)}</svg>`;
+  const key = createHash("sha256").update(digest).update(svg).digest("hex");
   const previous = cache.get(key);
   if (previous) return previous;
   const png = new Resvg(svg, {

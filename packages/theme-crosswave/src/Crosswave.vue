@@ -9,6 +9,7 @@ import {
   watch,
   nextTick,
 } from "vue";
+import { queryLiveArchive } from "../../shared-theme/src/live-search.ts";
 import { useGamepad } from "@vueuse/core";
 import { loadListing } from "@dirwell/core/client";
 import {
@@ -52,6 +53,80 @@ const query = ref(""),
   viewportHeight = ref(400),
   retryRequest = shallowRef(null),
   heights = shallowRef(new Map());
+const archiveOpen = ref(false),
+  archiveQuery = ref(""),
+  archiveRows = shallowRef([]),
+  archiveStatus = ref(""),
+  archiveFailed = ref(false),
+  archiveTrigger = ref(),
+  archiveDialog = ref(),
+  archiveInput = ref();
+let archiveAbort,
+  archiveRequest = 0,
+  archivePending = false;
+async function searchArchive() {
+  const token = ++archiveRequest;
+  archiveAbort?.abort();
+  const local = (archiveAbort = new AbortController());
+  archiveFailed.value = false;
+  if (!archiveQuery.value.trim()) {
+    archiveRows.value = [];
+    archiveStatus.value = ui.value.labels.beginArchive;
+    return;
+  }
+  archiveStatus.value = ui.value.labels.searchingArchive;
+  archivePending = true;
+  try {
+    const result = await queryLiveArchive(
+      model.value.searchQueryHref,
+      archiveQuery.value.trim(),
+      local.signal,
+    );
+    if (local.signal.aborted || token !== archiveRequest) return;
+    archiveRows.value = result.records;
+    archiveStatus.value = result.truncated
+      ? label(ui.value, "truncatedResults", {
+          shown: result.records.length,
+          count: result.records.length + "+",
+        })
+      : label(ui.value, "archiveResults", { count: result.records.length });
+  } catch {
+    if (local.signal.aborted || token !== archiveRequest) return;
+    archiveRows.value = [];
+    archiveStatus.value = ui.value.labels.archiveError;
+    archiveFailed.value = true;
+  } finally {
+    if (token === archiveRequest) archivePending = false;
+  }
+}
+watch([archiveOpen, archiveQuery], (_, __, cleanup) => {
+  archiveAbort?.abort();
+  archiveRequest++;
+  archivePending = false;
+  if (!archiveOpen.value) return;
+  const debounce = setTimeout(searchArchive, 300);
+  cleanup(() => clearTimeout(debounce));
+});
+watch(archiveOpen, async (open, _, cleanup) => {
+  if (!open) {
+    await nextTick();
+    archiveTrigger.value?.focus();
+    return;
+  }
+  await nextTick();
+  if (!archiveOpen.value) return;
+  archiveDialog.value?.showModal();
+  archiveInput.value?.focus();
+  const timer = setInterval(() => {
+    if (document.visibilityState === "visible" && archiveQuery.value.trim() && !archivePending)
+      searchArchive();
+  }, model.value.searchRefreshIntervalMs ?? 2000);
+  cleanup(() => {
+    clearInterval(timer);
+    archiveAbort?.abort();
+    archiveRequest++;
+  });
+});
 const complete = computed(() => entries.value.length === model.value.total),
   membership = (entry) =>
     Array.isArray(entry.presentation?.categories) ? entry.presentation.categories : [];
@@ -369,6 +444,7 @@ function parent() {
   }
 }
 function keyboard(event) {
+  if (archiveOpen.value) return;
   if (event.isComposing || event.altKey || event.ctrlKey || event.metaKey) return;
   if (event.target?.closest?.("[data-dirwell-actions]")) return;
   const editing = /INPUT|TEXTAREA|SELECT/.test(event.target?.tagName ?? "");
@@ -401,6 +477,7 @@ function keyboard(event) {
   }
 }
 function controller(value) {
+  if (archiveOpen.value) return;
   pad.value = !!value;
   if (!value) {
     pressed.clear();
@@ -628,6 +705,7 @@ watchEffect(() => {
   }
 });
 onBeforeUnmount(() => {
+  archiveAbort?.abort();
   disposed = true;
   document.body.removeAttribute("data-cw-enhanced");
   abort?.abort();
@@ -725,6 +803,14 @@ onBeforeUnmount(() => {
           ><span>{{ ui.labels.search }}</span
           ><input ref="search" type="search" v-model="query" :disabled="!ready || !complete"
         /></label>
+        <button
+          ref="archiveTrigger"
+          v-if="model.searchQueryHref"
+          :disabled="!ready"
+          @click="archiveOpen = true"
+        >
+          {{ ui.labels.searchArchive }}
+        </button>
       </div>
       <div
         class="cw-list-scroll"
@@ -914,4 +1000,34 @@ onBeforeUnmount(() => {
       {{ paused ? ui.labels.resumeMotion : ui.labels.pauseMotion }}
     </button>
   </footer>
+  <dialog
+    v-if="archiveOpen"
+    ref="archiveDialog"
+    class="cw-archive"
+    @close="archiveOpen = false"
+    @keydown.esc.prevent.stop="archiveOpen = false"
+  >
+    <h2>{{ ui.labels.searchArchive }}</h2>
+    <input
+      ref="archiveInput"
+      type="search"
+      v-model="archiveQuery"
+      :aria-label="ui.labels.archiveSearchInput"
+    />
+    <p role="status">{{ archiveStatus }}</p>
+    <button v-if="archiveFailed" @click="searchArchive">{{ ui.labels.retry }}</button>
+    <ul>
+      <li v-for="record in archiveRows" :key="record.path">
+        <a
+          v-if="record.href"
+          :href="record.href"
+          :target="record.exitsExplorer ? '_blank' : undefined"
+          :rel="record.exitsExplorer ? 'noopener' : undefined"
+          >{{ record.path }}</a
+        >
+        <span v-else>{{ record.path }}</span>
+      </li>
+    </ul>
+    <button @click="archiveOpen = false">{{ ui.labels.close }}</button>
+  </dialog>
 </template>

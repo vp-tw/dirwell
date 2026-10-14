@@ -111,6 +111,7 @@ export async function fetchThemePage(
     resolveCustomization(data.ui as Parameters<typeof resolveCustomization>[0]);
   const result = {
     ...data,
+    searchQueryHref: link(data.searchQueryHref ?? null),
     updatesHref: link(data.updatesHref ?? null),
     entries,
     dataHref: source.href,

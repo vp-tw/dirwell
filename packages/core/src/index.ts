@@ -11,6 +11,8 @@ export type * from "./model.ts";
 export type * from "./listing.ts";
 export type * from "./metadata.ts";
 export { createDirectoryService, DirectoryAccessError } from "./service.ts";
+export { SelectionBudgetError } from "./filters.ts";
+export type { SelectionBudget } from "./filters.ts";
 export type { DirectoryService, DirectoryServiceOptions } from "./service.ts";
 export { copyJsonObject } from "./json.ts";
 export { resolveIgnoreFiles } from "./filters.ts";

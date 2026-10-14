@@ -9,6 +9,7 @@ import {
   resolveIgnoreFiles,
   createIgnoreMatcher,
   normalizePathPatterns,
+  type SelectionBudget,
 } from "./filters.ts";
 import { compareEntries } from "./generator.ts";
 import { entryDataFacts } from "./listing.ts";
@@ -30,6 +31,8 @@ export interface DirectoryServiceOptions {
   readonly sort?: SortOptions;
 }
 export interface DirectoryService {
+  /** Bounded fresh enumeration; authorization runs before directory traversal. */
+  readonly scan: (budget: SelectionBudget) => Promise<readonly FileSystemEntry[]>;
   readonly resolvePath: (logicalPath: string) => Promise<string>;
   readonly openFile: (logicalPath: string) => Promise<{
     readonly entry: FileSystemEntry;
@@ -113,6 +116,46 @@ export async function createDirectoryService(
     });
   }
   return {
+    async scan(budget) {
+      if (
+        !budget ||
+        !Number.isSafeInteger(budget.maxEntries) ||
+        budget.maxEntries < 1 ||
+        !Number.isSafeInteger(budget.maxDirectories) ||
+        budget.maxDirectories < 1 ||
+        !(budget.signal instanceof AbortSignal) ||
+        typeof budget.allowPath !== "function"
+      )
+        throw new TypeError(
+          "scan requires positive entry/directory limits, an AbortSignal and allowPath",
+        );
+      const selection = (
+        await selectSourcePaths(
+          root,
+          path.join(root, "__dirwell"),
+          options.include,
+          options.exclude,
+          [],
+          ignoreFiles,
+          undefined,
+          budget,
+        )
+      ).selected;
+      const entries: FileSystemEntry[] = [];
+      for (const logical of [...selection].sort()) {
+        budget.signal.throwIfAborted();
+        if (!logical) continue;
+        try {
+          const entry = await describe(logical, selection);
+          // Canonical physical entries cover safe aliases once, without following cycles.
+          if (entry.kind === "file" || entry.kind === "directory") entries.push(entry);
+        } catch (error) {
+          if (error instanceof Error && "code" in error && error.code === "ENOENT") continue;
+          throw error;
+        }
+      }
+      return entries;
+    },
     async resolvePath(logicalPath) {
       const selection = await selected();
       const entry = await describe(logicalPath, selection);

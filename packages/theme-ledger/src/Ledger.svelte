@@ -1,5 +1,6 @@
 <script>
   import { onMount, tick, untrack } from "svelte";
+  import { queryLiveArchive } from "../../shared-theme/src/live-search.ts";
   import {
     readView,
     createViewHistory,
@@ -346,7 +347,7 @@
     if (globalOpen) {
       if (event.key === "Escape") {
         event.preventDefault();
-        globalOpen = false;
+        closeArchive();
       }
       return;
     }
@@ -401,6 +402,38 @@
       localStorage.setItem("dirwell-color-scheme", value);
     } catch {}
   }
+  let archiveDebounce,
+    archiveTrigger,
+    archivePending = false;
+  async function closeArchive() {
+    globalOpen = false;
+    await tick();
+    archiveTrigger?.focus();
+  }
+  function scheduleArchiveSearch() {
+    archiveAbort?.abort();
+    archiveRequest++;
+    archivePending = false;
+    clearTimeout(archiveDebounce);
+    archiveDebounce = setTimeout(searchArchive, 300);
+  }
+  $effect(() => {
+    if (!globalOpen || !model.searchQueryHref) return;
+    const timer = setInterval(() => {
+      if (
+        document.visibilityState === "visible" &&
+        globalQuery.trim() &&
+        !archivePending
+      )
+        searchArchive();
+    }, model.searchRefreshIntervalMs ?? 2000);
+    return () => {
+      clearInterval(timer);
+      clearTimeout(archiveDebounce);
+      archiveAbort?.abort();
+      archiveRequest++;
+    };
+  });
   async function searchArchive() {
     const token = ++archiveRequest;
     archiveAbort?.abort();
@@ -413,7 +446,24 @@
       return;
     }
     globalStatus = ui.labels.searchingArchive;
+    archivePending = true;
     try {
+      if (model.searchQueryHref) {
+        const result = await queryLiveArchive(
+          model.searchQueryHref,
+          query,
+          local.signal,
+        );
+        if (token !== archiveRequest || local.signal.aborted) return;
+        globalRows = result.records;
+        globalStatus = result.truncated
+          ? label(ui, "truncatedResults", {
+              shown: result.records.length,
+              count: result.records.length + "+",
+            })
+          : label(ui, "archiveResults", { count: result.records.length });
+        return;
+      }
       const url = new URL(model.searchIndexHref, document.baseURI);
       let all =
         archiveCacheHref === url.href && Date.now() - archiveCacheAt < 60000
@@ -488,6 +538,8 @@
         globalStatus = ui.labels.archiveError;
         archiveFailed = true;
       }
+    } finally {
+      if (token === archiveRequest) archivePending = false;
     }
   }
   onMount(() => {
@@ -681,9 +733,10 @@
         ><option value="dark">{ui.labels.dark}</option></select
       ></label
     >
-    {#if model.searchIndexHref}
+    {#if model.searchIndexHref || model.searchQueryHref}
       <button
-        disabled={!ready || !model.searchIndexHref}
+        bind:this={archiveTrigger}
+        disabled={!ready}
         onclick={() => (globalOpen = true)}>{ui.labels.searchArchive}</button
       >
     {/if}
@@ -882,7 +935,14 @@
   </dialog>{/if}
 {#if globalOpen}<dialog
     bind:this={globalDialog}
-    onclose={() => (globalOpen = false)}
+    onclose={closeArchive}
+    onkeydown={(event) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        event.stopPropagation();
+        closeArchive();
+      }
+    }}
   >
     <h2>{ui.labels.searchArchive}</h2>
     <input
@@ -890,7 +950,7 @@
       bind:this={globalInput}
       type="search"
       bind:value={globalQuery}
-      oninput={searchArchive}
+      oninput={scheduleArchiveSearch}
     />
     <p role="status">{globalStatus}</p>
     {#if archiveFailed}<button onclick={searchArchive}>{ui.labels.retry}</button
@@ -905,5 +965,5 @@
             >{:else}{record.path}{/if}
         </li>{/each}
     </ul>
-    <button onclick={() => (globalOpen = false)}>{ui.labels.close}</button>
+    <button onclick={closeArchive}>{ui.labels.close}</button>
   </dialog>{/if}

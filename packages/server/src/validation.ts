@@ -52,6 +52,7 @@ const handlerKeys = {
   ignoreFiles: true,
   entryData: true,
   live: true,
+  search: true,
   theme: true,
   listing: true,
   blockSize: true,
@@ -84,6 +85,26 @@ export function validateHandlerOptions(value: unknown, node = false): void {
     keys(live, ["intervalMs", "maxClients"], "options.live");
     integer(live.intervalMs, 25, "options.live.intervalMs");
     integer(live.maxClients, 1, "options.live.maxClients");
+  }
+  if (options.search !== undefined && options.search !== false) {
+    const search = object(options.search, "options.search");
+    keys(
+      search,
+      [
+        "maxEntries",
+        "maxDirectories",
+        "maxConcurrent",
+        "maxResults",
+        "timeoutMs",
+        "refreshIntervalMs",
+      ],
+      "options.search",
+    );
+    for (const key of ["maxEntries", "maxDirectories", "maxConcurrent", "maxResults", "timeoutMs"])
+      integer(search[key], 1, `options.search.${key}`);
+    integer(search.refreshIntervalMs, 1000, "options.search.refreshIntervalMs");
+    if (typeof search.maxResults === "number" && search.maxResults > 10000)
+      throw new TypeError("options.search.maxResults must not exceed 10000");
   }
   if (options.theme !== undefined) {
     const theme = object(options.theme, "options.theme");
