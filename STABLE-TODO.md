@@ -2,7 +2,7 @@
 
 This backlog follows a user from discovering Dirwell to maintaining a deployed explorer. Stable should mean that users can choose the right package, complete the advertised task, predict publication and access boundaries, and customize common needs without replacing an entire theme.
 
-Audited on October 14, 2026 against the current main checkout, the published `0.0.1-alpha.1` tarballs for Core/CLI/Ledger/Crosswave, npm registry tags, and the live homepage, theme guide and API reference. This is a source and task-path audit with two focused runtime probes, not a new full browser/device qualification or customer study. The scenarios below are plausible needs, not measured adoption.
+Initially audited on October 14, 2026 against the current main checkout, the published `0.0.1-alpha.1` tarballs for Core/CLI/Ledger/Crosswave, npm registry tags, and the live homepage, theme guide and API reference. The findings below retain that initial snapshot as context; delivery dispositions are recorded at the end. This is a source and task-path audit with two focused runtime probes, not a new full browser/device qualification or customer study. The scenarios below are plausible needs, not measured adoption.
 
 Implementation is authorized through auto development. Treat the SDK family as the only product; user-facing work covers the current SDK and needs no announcement.
 
@@ -57,8 +57,8 @@ Checkboxes record accepted source/contract dispositions; the postpublication por
 
 ### A3 · G · Coordinate stable tags, examples and support policy
 
-- [ ] **Intent:** install without knowing release-channel terminology and keep a working installation reproducible.
-- **Confirmed release state:** inspected npm packages have `latest: 0.0.1-alpha` and `alpha: 0.0.1-alpha.1`; the default tag currently selects a different CLI contract. This is the current prerelease state, not evidence that a stable release has failed. Public examples intentionally use `@alpha` today.
+- [x] **Intent:** install without knowing release-channel terminology and keep a working installation reproducible.
+- **Initial registry snapshot:** the audit found `latest: 0.0.1-alpha` and `alpha: 0.0.1-alpha.1`, selecting different CLI contracts. That baseline motivated coordinated version/tag/instruction delivery; the final 0.0.1 source/registry disposition is below.
 - **Change:** define the first stable version, package compatibility policy and supported Node/host range. Publish and verify all required packages before switching default commands and guides. Move the active SDK guide to a durable URL and preserve `/sdk-alpha/` links. Use durable product terminology.
 - **Acceptance:** clean untagged CLI/Core/theme installs resolve the intended stable family; exact-version installs also work. Verify `latest`, dependencies, types, provenance, docs and examples after publication. Document prerelease use separately.
 - **Evidence:** [package manifests](packages/core/package.json), [support guide](docs/src/content/docs/support.md), [SDK guide](docs/src/content/docs/sdk.md), current registry readback.
@@ -225,7 +225,7 @@ Checkboxes record accepted source/contract dispositions; the postpublication por
 
 ### E6 · G · Run a stable candidate proof, not only repository tests
 
-- [ ] **Intent:** depend on the library with confidence that the published installation matches documentation.
+- [x] **Intent:** depend on the library with confidence that the published installation matches documentation.
 - **Confirmed need:** current repository tests and prior platform proof do not establish the correctness of a future stable tarball, registry tags or changed APIs. Dependency security notes explicitly require a fresh release-candidate audit and distinguish retained development findings from installed consumers.
 - **Change:** maintain a release checklist tied to the exact candidate: packed public exports/types, runtime dependencies, Node/platform installs, primary user journeys, current-theme benchmarks, browser/device evidence, licenses/security, coherent package versions, registry/provenance and deployed docs.
 - **Acceptance:** demonstrate clean npm consumers for CLI static/live, Core generation, custom options, a primary adapter, authenticated server and source authoring. After publication independently verify tags and package integrity, then smoke the public docs/examples. Do not call workspace overrides consumer fixes or turn known retained findings into a clean-audit claim.
@@ -235,7 +235,7 @@ Checkboxes record accepted source/contract dispositions; the postpublication por
 
 - Foundation delivered in [the publication controls PR](https://github.com/vp-tw/dirwell/pull/78): nested CLI validation, typed config, shared ordered ignore-file selection, explicit output ownership/force, canonical containment, rollback, concurrent-output locks and write-free dry-run reports.
 - Local qualification: 198 Node tests, checks/types, nine packed SDK consumers and Pages-prefix site generation passed. External ignore-file Rollup watch is exercised. Exact-head CI passed, including 18 platform/Node consumer jobs; the PR was merged and Pages deployment succeeded. Live documentation readback remains pending.
-- Theme customization was delivered in [the customization PR](https://github.com/vp-tw/dirwell/pull/79): shared labels/branding/columns, independent actions, public annotations and static CDN mapping. Acceptance passed: 206 Node tests, clean packed consumers and the release-download recipe, types/checks, docs generation, desktop/mobile customization, native fallback, paired source actions and exact-head platform/browser CI. Deployed guide readback passed. No package version has changed and no release has been dispatched.
+- Theme customization was delivered in [the customization PR](https://github.com/vp-tw/dirwell/pull/79): shared labels/branding/columns, independent actions, public annotations and static CDN mapping. Acceptance passed: 206 Node tests, clean packed consumers and the release-download recipe, types/checks, docs generation, desktop/mobile customization, native fallback, paired source actions and exact-head platform/browser CI. Deployed guide readback passed. At that slice's delivery, versions and publication were unchanged. The final release disposition is below.
 - Browsing continuity and Crosswave windowing are implemented locally: shared controls, Back/Forward selection/scroll, failed-target retry, malformed snapshot rejection, skipped-parent native links and 10,000-row desktop/mobile scroll coverage. Local acceptance passed: 206 Node tests, 25 browser scenarios, nine clean packed consumers, types/lint/format, subpath site build and the current packed benchmark in [BENCHMARKS.md](BENCHMARKS.md). Delivered in [the browsing PR](https://github.com/vp-tw/dirwell/pull/80), with all 23 exact-head CI checks passing.
 - Direct API validation was delivered in [the configuration validation PR](https://github.com/vp-tw/dirwell/pull/81): Core/DirectoryService/Server/build-adapter validation, listing callback result checks and nearest-key diagnostics. Local acceptance passed: 212 Node tests, 21 Chromium scenarios, nine clean packed consumers, types/lint/format and subpath site build; all 23 exact-head CI checks passed. Deployed API/support guide readback passed.
 - Discovery is implemented locally: complete quick starts and absolute guides for nine package entry points, matching npm metadata, preview-specific Ledger commands, three website task paths and a theme capability matrix. All nine README programs passed isolated candidate consumers with only their documented root dependencies; a minimum-Node CI job now repeats this proof. Desktop/mobile inspection found no overflow. Public registry/npm rendering remains release follow-up.
@@ -249,7 +249,7 @@ Checkboxes record accepted source/contract dispositions; the postpublication por
 4. **Prove integration and access journeys:** E1/E4/E5; apply E3's accepted preview boundary. Leave C5/E2 deferred unless the selected stable audience needs them.
 5. **Release only against the candidate:** A3/E6, after the chosen contract decisions and release gates are satisfied.
 
-## Acceptance of this audit
+## Initial audit scope
 
 - Reviewed npm registry metadata and actual published README contents for four entry packages; the other five still need their release-candidate consumer path exercised under A1/E6.
 - Read current product/docs, package APIs, official theme source, CLI loading, listing transport, publication and server boundaries. Inspected current GitHub issue/PR listings: no open issues or PRs were returned. Closed topics such as previews, copy actions, scale and Farm watch are context, not proof of current SDK feature parity.
@@ -257,21 +257,27 @@ Checkboxes record accepted source/contract dispositions; the postpublication por
 - Retrieved the live homepage, theme guide and API reference successfully. npm HTML browsing was unavailable through the web fetcher; tarballs and registry metadata supplied primary package evidence. Public npm link rendering remains an A1 acceptance check.
 - Did not rerun the full test suite, browser journeys, performance suite, consumer security audit or physical-device checks for this audit. Items requiring those checks remain open instead of being described as regressions.
 
-## Private integration acceptance in progress
+## Private integration acceptance
 
-The private-downloads example composes an existing application session, approved root, response nonce CSP and typed document/style asset extension. Six Chromium/Firefox/WebKit cases passed for Ledger/Crosswave: denial across route surfaces and ranges/conditionals, selected-byte access, outside/excluded aliases, encoded folder navigation/Back, live updates, current-session revocation and SSE closure, fresh document nonces, preserved application head/styles and no unexpected CSP violations. These are synthetic sessions/local files, not a production identity or hostile-filesystem proof. PR delivery remains pending.
+The private-downloads example composes an existing application session, approved root, response nonce CSP and typed document/style asset extension. Six Chromium/Firefox/WebKit cases passed for Ledger/Crosswave: denial across route surfaces and ranges/conditionals, selected-byte access, outside/excluded aliases, encoded folder navigation/Back, live updates, current-session revocation and SSE closure, fresh document nonces, preserved application head/styles and no unexpected CSP violations. These are synthetic sessions/local files, not a production identity or hostile-filesystem proof. Delivery completed in [the private integration PR](https://github.com/vp-tw/dirwell/pull/83).
 
 ## Prepublication dispositions
 
 - A1/E4 local candidate instructions and isolation passed in [the discovery PR](https://github.com/vp-tw/dirwell/pull/82), including the minimum-Node README CI job. Registry installs/npm rendering remain A3/E6 postpublication readback, rather than an excuse to skip the candidate proof.
 - C2/E1 were delivered in [the private downloads/CSP PR](https://github.com/vp-tw/dirwell/pull/83). The synthetic root/session, nonce CSP, typed stylesheet/head extension and encoded navigation passed all three browser engines; no production identity or row-level redaction guarantee is implied.
-- D1 is qualified by the current packed workload and explicit complete-data/network/heap limits. D2 keeps current-directory search and optional bounded static Ledger archive search; live archive query loading is deferred. D3 uses the documented URL/History contract. D4's additional interrupted-transport reconnect proof passed all three engines and is pending delivery.
+- D1 is qualified by the current packed workload and explicit complete-data/network/heap limits. D2 keeps current-directory search and optional bounded static Ledger archive search; live archive query loading is deferred. D3 uses the documented URL/History contract. D4's additional interrupted-transport reconnect proof passed all three engines and was delivered in the qualification PR.
 - E3 retains native open/download and transport-controlled response headers; embedded official previews are excluded by user decision. A disposable preview-theme demo is optional and is not a stable gate.
 - C5 is deferred: bundled-image glyph coverage remains bounded; custom image/file/callback providers are the supported escape hatch. Font injection/CJK renderer qualification needs a separate licensed-font workload, and no selected 0.0.1 task requires that expansion.
 - E2 is deferred: there is no response/snapshot/distributed cache or live archive query promise. Existing tests prove shared canonical-directory polling, limits, cancellation and shutdown. Large/concurrent live deployments still require host-specific workload qualification.
 - E5 records keyboard/browser/mobile-viewport/native paths and pending physical iOS/screen-reader qualification in the public support guide. Physical controllers are not a separate gate by user decision. This is a qualified support boundary, not a conformance or physical-device claim.
-- A3/E6 remain open: durable SDK URL, candidate source/version/package/security/platform proof, then registry tags/provenance/default-install/docs readback. No version has been advanced and no publication dispatched.
+- At this intermediate checkpoint, A3/E6 still awaited the candidate and registry/default-install/docs proof. The final source/registry disposition is below.
 
 ## Qualification acceptance
 
-Installed primary-host create/delete/stale-output verification passed Vite 8.3.0, Rollup 4.64.2 and webpack 5.111.1 using candidate Integrations/Plain and their declared Core dependency. Six protected transport-interruption cases passed all three browser engines without document replacement; ten encoded static/live browsing cases passed. `/sdk/` redirect preserves the deployment prefix, query and fragment. [VERIFICATION.md](VERIFICATION.md) is now the current SDK evidence entry point. These additional source/docs dispositions still await PR delivery; A3/E6 remain open until exact candidate and publication readback.
+Installed primary-host create/delete/stale-output verification passed Vite 8.3.0, Rollup 4.64.2 and webpack 5.111.1 using candidate Integrations/Plain and their declared Core dependency. Six protected transport-interruption cases passed all three browser engines without document replacement; ten encoded static/live browsing cases passed. `/sdk/` redirect preserves the deployment prefix, query and fragment. [VERIFICATION.md](VERIFICATION.md) is now the current SDK evidence entry point. These source/docs dispositions were delivered in [the qualification PR](https://github.com/vp-tw/dirwell/pull/85); the subsequent candidate/publication disposition is below.
+
+## 0.0.1 source and registry disposition
+
+Accepted source/contract gates are complete; C5 and E2 remain explicitly deferred follow-ups. [The candidate](https://github.com/vp-tw/dirwell/pull/86), [preparation-only run](https://github.com/vp-tw/dirwell/actions/runs/38552394410) and [OIDC publication](https://github.com/vp-tw/dirwell/actions/runs/38553763885) passed. All nine registry versions/tags/integrity/provenance and exact/untagged installed behavior are qualified in [VERIFICATION.md](VERIFICATION.md). No physical iOS/reader guarantee or separate controller gate was added.
+
+The public guide switch removes alpha install commands, retains durable SDK and fragment links, and keeps the support boundaries visible. Final deployed-site and default npm-page readback is a delivery check recorded in the guide PR after publication; source/contract checkboxes do not substitute for that check. No announcement or additional compatibility product is introduced.
