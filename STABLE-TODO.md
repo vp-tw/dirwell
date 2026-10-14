@@ -61,7 +61,7 @@ Checkboxes record accepted source/contract dispositions; the postpublication por
 - **Confirmed release state:** inspected npm packages have `latest: 0.0.1-alpha` and `alpha: 0.0.1-alpha.1`; the default tag currently selects a different CLI contract. This is the current prerelease state, not evidence that a stable release has failed. Public examples intentionally use `@alpha` today.
 - **Change:** define the first stable version, package compatibility policy and supported Node/host range. Publish and verify all required packages before switching default commands and guides. Move the active SDK guide to a durable URL and preserve `/sdk-alpha/` links. Use durable product terminology.
 - **Acceptance:** clean untagged CLI/Core/theme installs resolve the intended stable family; exact-version installs also work. Verify `latest`, dependencies, types, provenance, docs and examples after publication. Document prerelease use separately.
-- **Evidence:** [package manifests](packages/core/package.json), [support guide](docs/src/content/docs/support.md), [SDK guide](docs/src/content/docs/sdk-alpha.md), current registry readback.
+- **Evidence:** [package manifests](packages/core/package.json), [support guide](docs/src/content/docs/support.md), [SDK guide](docs/src/content/docs/sdk.md), current registry readback.
 
 ## Batch B — Predictable configuration and publication
 
