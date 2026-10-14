@@ -37,6 +37,16 @@ The host's output contains the dedicated explorer subtree. Adapters require an e
 
 These subpaths expose default adapter factories using the host's lifecycle. Arrays require non-overlapping output paths. Output ownership, containment and stale-asset checks remain enabled. Vite/Rollup/webpack are primary qualified paths; other adapters have bounded installed-consumer checks, not identical dev/watch guarantees.
 
+## Executed primary host modes
+
+| Host    | Version | Executed behavior                                                                                                 |
+| ------- | ------- | ----------------------------------------------------------------------------------------------------------------- |
+| Vite    | 8.3.0   | Isolated installed build and generated development preview; ordinary source creation/deletion updates the preview |
+| Rollup  | 4.64.2  | Isolated installed build/watch; creation/deletion updates listing and removes stale mirrored files                |
+| webpack | 5.111.1 | Isolated installed build/watch; creation/deletion updates listing and removes stale mirrored files                |
+
+These specific modes are qualified; other host/version/framework combinations need their own proof. See [the current SDK verification record](https://github.com/vp-tw/dirwell/blob/main/VERIFICATION.md). Source compiler HMR and server data SSE are separate below.
+
 ## Pick the update mechanism
 
 Static build-watch follows the host lifecycle and rebuilds generated output. It does not become live server mode. For files that should update on requests, mount `@dirwell/server` or proxy a standalone CLI server. For Svelte/Vue source changes, use `@dirwell/theme-authoring/dev`.

@@ -124,3 +124,9 @@ Use an application-owned session resolver and a fixed approved root. The outer a
 Compose a fresh response nonce after rendering trusted explorer HTML, apply it to script/style elements, and send a nonce/strict-dynamic script policy. Keep inline style attributes explicitly allowed for measured row positioning; that permission does not allow inline scripts or event handlers. Browse documents use private/no-store and do not reuse pre-nonce validators. JSON/assets/byte streams retain their transport, and active files download. The host owns CSP and session policy; no general HTML sanitizer or revoked-download guarantee is implied.
 
 Acceptance: unauthenticated/expired requests cannot read any route surface, range or conditional response; selected approved names/bytes work after login; aliases cannot leave the approved root; SSE closes after revocation. Both rich themes hydrate, filter, navigate/back and refresh under CSP without script/style violations. Verify independent styling/head assets through the existing typed renderer asset contract. Preserve Plain's minimal default.
+
+## Stable qualification and deferred proposals
+
+Treat source acceptance and postpublication readback as separate stages. Retain the alpha commands until registry delivery is verified. Make `/sdk/` the durable guide and redirect existing `/sdk-alpha/` links. Prepare `0.0.1` only after accepted behavior and support dispositions are delivered.
+
+Defer C5 font injection and E2 live archive/distributed-cache expansion: current tasks have supported custom-image providers and bounded current-directory/static search, while those proposals need separate font/workload evidence. Document physical iOS/reader qualification as pending. Controller integration uses VueUse and simulated regressions; physical hardware is not a separate release gate by user decision. No unsupported path becomes a support promise.

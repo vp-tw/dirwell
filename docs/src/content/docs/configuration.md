@@ -27,7 +27,7 @@ Install the imported theme in the working project. Run `npx dirwell build ./file
 
 `server` accepts Node server options except `root`, `theme` and `listing`. Configure `host`, `port`, `mountPath`, selection, sorting, headers, authorization, file transport and `live`. Standalone defaults bind loopback and use safe media previews. Integrated handlers disable file transport unless configured.
 
-Authorization runs before conditional responses and byte transfer. It controls requests, not individual child-name redaction. Allowing a directory listing exposes its selected child names. See [server behavior](../sdk-alpha/#headers-authorization-and-freshness).
+Authorization runs before conditional responses and byte transfer. It controls requests, not individual child-name redaction. Allowing a directory listing exposes its selected child names. See [server behavior](../sdk/#headers-authorization-and-freshness).
 
 ## Listing policy
 

@@ -15,7 +15,7 @@ Implementation is authorized through auto development. Treat the SDK family as t
 
 The accepted implementation plan is [STABLE-DESIGN.md](STABLE-DESIGN.md). Publish `0.0.1` only after the accepted TODOs and validation are complete.
 
-Checkboxes represent this backlog's complete acceptance criteria. B1/B2/B3/B4/C1/C3/C4 are accepted and delivered in source and deployed guides; registry publication belongs to A3/E6. Implemented slices and remaining evidence are recorded below; an open item does not mean all of its capabilities are missing.
+Checkboxes record accepted source/contract dispositions; the postpublication portions of A1/E4 are tracked by A3/E6. Deferred F proposals are explicit below. B1/B2/B3/B4/C1/C3/C4 are accepted and delivered in source and deployed guides; registry publication belongs to A3/E6. Implemented slices and remaining evidence are recorded below; an open item does not mean all of its capabilities are missing.
 
 ## User intents and entry points
 
@@ -41,7 +41,7 @@ Checkboxes represent this backlog's complete acceptance criteria. B1/B2/B3/B4/C1
 
 ### A1 · G · Make every npm package independently usable
 
-- [ ] **Intent:** land directly on Core, a theme, Server or an integration package and complete its smallest task.
+- [x] **Intent:** land directly on Core, a theme, Server or an integration package and complete its smallest task.
 - **Confirmed gap:** the published Core README describes contracts but has no complete generation example. Theme READMEs begin with framework internals and factory calls rather than an install-and-run path. Their `../theme-authoring/README.md` link depends on repository layout and is not an appropriate npm-page documentation link. The inspected registry metadata points to the root GitHub README rather than the matching guide.
 - **Change:** add purpose, exact package installs, one complete example, expected result, Node requirement and absolute guide links to each of the nine package READMEs. Keep advanced internals after the first task.
 - **Acceptance:** exercise each package's quick start in a clean consumer folder using the release-candidate tarball; inspect its packed README and public npm rendering after publication. Verify documentation links from npm, not only GitHub. An absent registry `readme` field alone is not proof that npm fails to render a README.
@@ -49,7 +49,7 @@ Checkboxes represent this backlog's complete acceptance criteria. B1/B2/B3/B4/C1
 
 ### A2 · G · Align the promise, demo and first command
 
-- [ ] **Intent:** see the searchable Ledger preview on the website and reproduce it.
+- [x] **Intent:** see the searchable Ledger preview on the website and reproduce it.
 - **Confirmed friction:** the homepage features Ledger, while its first command starts Plain. The page labels Ledger optional, so this is an expectation gap rather than a false claim. Nine packages and three themes still require several decisions before users know which combination they need.
 - **Change:** provide three task paths: browse locally, publish static downloads, integrate in an app. Pair Plain and rich-theme commands with their actual output. Add one theme capability matrix covering search scope, sorting, previews/actions, customization, JavaScript and scale boundaries.
 - **Acceptance:** from npm, GitHub and the website, a reader can reach a complete command for their intended task without guessing a package. Following each command produces the interface pictured beside it.
@@ -99,7 +99,7 @@ Checkboxes represent this backlog's complete acceptance criteria. B1/B2/B3/B4/C1
 
 ### B5 · G · Exercise existing-page and nested-host journeys
 
-- [ ] **Intent:** add an explorer to a site that already contains `index.html`, or deploy under a prefix.
+- [x] **Intent:** add an explorer to a site that already contains `index.html`, or deploy under a prefix.
 - **Confirmed behavior needing clearer guidance:** the resolver uses `_dirwell.html` when a source index is occupied, and omits the explorer page when both names are occupied. Existing pages are intentionally preserved; the user still needs an exact explorer entry URL and an explanation of skipped directories.
 - **Change:** show the final entry URL and skipped-page reasons in build output. Provide complete HTTP deployment recipes for a domain root, GitHub Pages prefix, existing CDN tree and Plain `file://` use. State rich-theme HTTP requirements.
 - **Acceptance:** direct child entry, refresh, breadcrumbs, search result, pagination, file download and assets work in each supported recipe. Include both occupied filenames and custom `outputName: null`; do not infer a navigation defect without executing it.
@@ -117,7 +117,7 @@ Checkboxes represent this backlog's complete acceptance criteria. B1/B2/B3/B4/C1
 
 ### C2 · D · Offer a small stable branding and appearance surface
 
-- [ ] **Intent:** change a site title, logo, footer, typography or accent while keeping official behavior.
+- [x] **Intent:** change a site title, logo, footer, typography or accent while keeping official behavior.
 - **Confirmed limitation:** Ledger's factory options contain only `title`; Crosswave adds fixed color presets, categories and controls. Plain has separate attribution options. Header/footer slots exist, but using them requires paired source compilation. Rich-theme HTML/style ownership also makes favicon and strict CSP integration a custom-renderer concern.
 - **Recommendation:** agree on shared project identity and documented CSS tokens, plus a safe document asset/head extension. Keep advanced layouts in source wrappers. Choose supported external styles or CSP hashes/nonces rather than recommending weaker policies by default.
 - **Acceptance:** a small plain configuration changes common branding without Svelte/Vue source compilation. Theme switching retains project identity. Document which tokens/head extensions are stable and qualify an example strict CSP configuration; preserve Plain's minimal default.
@@ -151,7 +151,7 @@ Checkboxes represent this backlog's complete acceptance criteria. B1/B2/B3/B4/C1
 
 ### D1 · G · Qualify the SDK scale claim and fallback
 
-- [ ] **Intent:** use a rich interface for a large archive on a slower phone or connection.
+- [x] **Intent:** use a rich interface for a large archive on a slower phone or connection.
 - **Confirmed limitation:** rich themes load complete directory data; blocks do not bound total loading. Ledger virtualizes after 500 rows; Crosswave renders filtered rows. The loader caps default total entries at 100,000. Existing benchmark notes do not all measure the current SDK themes, so they are not sufficient proof for the new SDK themes.
 - **Change:** benchmark current packed Plain/Ledger/Crosswave at representative sizes and define supported limits. Measure initial HTML, total transfer, parse/hydration, memory, search/sort and navigation under throttling. Expose a loading-limit/fallback policy if needed. Progressive/query loading is a separate design choice, not an assumed fix.
 - **Acceptance:** publish reproducible workloads and budgets; demonstrate useful native pagination when data is too large, unavailable or invalid. Pick whether Crosswave needs windowing from measurements. Explain HTML pages, data blocks and rendered rows separately.
@@ -159,7 +159,7 @@ Checkboxes represent this backlog's complete acceptance criteria. B1/B2/B3/B4/C1
 
 ### D2 · D · Make search scope and cost configurable
 
-- [ ] **Intent:** find a file anywhere, limit search to a folder, or avoid building/downloading an archive index.
+- [x] **Intent:** find a file anywhere, limit search to a folder, or avoid building/downloading an archive index.
 - **Confirmed limitation:** Ledger offers static archive search; live mode does not. Crosswave is directory-oriented. Ledger's archive search fetches its manifest and all shards for each query, checks a 100,000-entry limit and displays at most 100 matches. Browser HTTP caching may reduce transfer, but there is no in-memory loaded-index reuse in this path. Ledger options do not expose archive-search enablement.
 - **Recommendation:** expose search capability and scope visibly, with an off switch and bounded index reuse. Define name/path/annotation versus file-content search explicitly. Evaluate a host query provider for live/large archives after measuring the current path.
 - **Acceptance:** users can distinguish directory from archive results and understand limits. Disabled archive search emits no unwanted search assets. Repeated queries reuse qualified data; changed builds/live data invalidate correctly. Live archive search may be explicitly deferred, but the UI/docs must not imply it exists.
@@ -167,7 +167,7 @@ Checkboxes represent this backlog's complete acceptance criteria. B1/B2/B3/B4/C1
 
 ### D3 · D · Decide view-state and shareable URL behavior
 
-- [ ] **Intent:** open a result, return to the folder, or send a colleague the current filtered view.
+- [x] **Intent:** open a result, return to the folder, or send a colleague the current filtered view.
 - **Confirmed behavior:** folder navigation restores a directory model through history but resets Ledger query, selection and scroll on non-refresh navigation. That establishes a state reset, not a verified browser-history failure. Sort/category/search state has no documented shareable URL contract.
 - **Recommendation:** define per-directory history state for query, sort/category, selection and scroll. Decide which parameters belong in a shareable URL and how native pagination interacts with them. Preference persistence and shareable state are different concerns.
 - **Acceptance:** test folder → file/folder → Back/Forward, refresh and a fresh-tab shared URL in both rich themes. Preserve state only according to the chosen policy; cover missing files and live changes without losing usable focus.
@@ -175,7 +175,7 @@ Checkboxes represent this backlog's complete acceptance criteria. B1/B2/B3/B4/C1
 
 ### D4 · G · Finish the interruption and failure journey
 
-- [ ] **Intent:** continue browsing after a network failure, expired listing revision or disconnected live feed.
+- [x] **Intent:** continue browsing after a network failure, expired listing revision or disconnected live feed.
 - **Confirmed partial support:** themes show loading/error statuses and retain native links; the loader retries a stale listing once. Rich theme live-disconnection messages tell users to refresh. These mechanisms exist; their full user recovery flow remains to be qualified.
 - **Change:** exercise explicit retry, cancellation, stale-build assets, offline transitions, rapid folder changes and recovery after SSE reconnect. Keep existing usable content while a refresh fails. Provide a visible action when an error tells the user to retry.
 - **Acceptance:** failed navigation does not replace a good view or misreport its URL; obsolete responses cannot overwrite a newer selection. Native links/pagination remain reachable, retries recover without a restart, and status announcements distinguish empty, no-match, loading and error.
@@ -185,7 +185,7 @@ Checkboxes represent this backlog's complete acceptance criteria. B1/B2/B3/B4/C1
 
 ### E1 · G · Demonstrate private-folder integration with honest boundaries
 
-- [ ] **Intent:** mount Dirwell behind authentication without exposing protected child names or file bytes.
+- [x] **Intent:** mount Dirwell behind authentication without exposing protected child names or file bytes.
 - **Confirmed boundary:** request authorization checks requested/canonical paths; allowing a directory exposes selected child names. Global filters are not identity-dependent row redaction. This is documented behavior, not proof that authorization is broken.
 - **Change:** provide an executable authenticated mount example that scopes roots/filters appropriately, checks bytes and aliases, and explains cache identity/freshness. Include unauthorized and expired-session behavior for HTML, listing, page data, assets, files and SSE.
 - **Acceptance:** denied roots/targets reveal neither protected names nor bytes under the supported recipe. Validate conditional/range requests and logout/expiry on a live subscription. If per-user row ACLs are promised, implement a coherent identity-aware listing contract first; otherwise explicitly defer them.
@@ -201,7 +201,7 @@ Checkboxes represent this backlog's complete acceptance criteria. B1/B2/B3/B4/C1
 
 ### E3 · D · Define preview/download scope before advertising media use
 
-- [ ] **Intent:** inspect an image/audio/video or obtain a file without leaving the explorer unexpectedly.
+- [x] **Intent:** inspect an image/audio/video or obtain a file without leaving the explorer unexpectedly.
 - **Confirmed boundary:** live safe-media transport serves selected formats inline and active formats as attachments. Official themes use native file navigation; HTTP transport support is not an in-explorer viewer. Static hosts own response headers.
 - **Recommendation:** document the current behavior precisely. In-explorer previews are out of scope for official themes. An illustrative custom-theme example may demonstrate them without a long-term support promise. Qualify separate action regions and native download/open behavior. Defer active HTML/SVG/PDF/text rendering until its isolation policy is qualified.
 - **Acceptance:** test preview and download on static and live paths, with large/ranged files and unsupported types. No accidental inline active content, no assumption that a cross-origin `download` attribute overrides host headers, and no mandatory preview dependency for Plain/Core.
@@ -209,7 +209,7 @@ Checkboxes represent this backlog's complete acceptance criteria. B1/B2/B3/B4/C1
 
 ### E4 · G · Make adapter and authoring examples runnable outside the repo
 
-- [ ] **Intent:** add Dirwell to Vite/another build, or customize a theme without learning repository scripts.
+- [x] **Intent:** add Dirwell to Vite/another build, or customize a theme without learning repository scripts.
 - **Confirmed friction:** source wrappers are present, but many example READMEs run repository build scripts. Adapter availability has different watch qualifications; Farm's standalone non-module watch limit is already known and documented, not a new bug.
 - **Change:** add clean consumer examples for the primary adapters and a complete source-authoring project with installs, compile, run, rebuild and shutdown. Publish a tested host/version feature matrix and keep experimental adapters visibly separate.
 - **Acceptance:** build and change an ordinary source file in each claimed primary host; verify deletion/stale assets, output overlap and recovery. Run the authoring example using only published packages; demonstrate production SSR/client pairing and the documented HMR reset limits.
@@ -217,7 +217,7 @@ Checkboxes represent this backlog's complete acceptance criteria. B1/B2/B3/B4/C1
 
 ### E5 · G · Qualify accessibility and physical-device essentials
 
-- [ ] **Intent:** use native keyboard focus, a screen reader, touch, reduced motion or a controller.
+- [x] **Intent:** use native keyboard focus, a screen reader, touch, reduced motion or a controller.
 - **Unqualified scope:** the current support guide explicitly leaves real screen-reader output, physical iOS and physical gamepad mappings unqualified. Existing automated keyboard, IME, browser and simulated-controller coverage is valuable but does not replace those paths.
 - **Change:** execute the core browsing/search/sort/pagination/dialog/recovery journey with a real screen reader and iOS device. Check rich row virtualization announcements and focus, mobile long names, zoom, reduced motion and source action extensions. Keep controller qualification theme-specific.
 - **Acceptance:** record device/browser/assistive-tool evidence and remaining limits. Controller input delegates to VueUse `useGamepad`; the user does not require a separate physical-controller gate for `0.0.1`. Retain the existing simulated input regression and distinguish its evidence from a hardware test.
@@ -260,3 +260,18 @@ Checkboxes represent this backlog's complete acceptance criteria. B1/B2/B3/B4/C1
 ## Private integration acceptance in progress
 
 The private-downloads example composes an existing application session, approved root, response nonce CSP and typed document/style asset extension. Six Chromium/Firefox/WebKit cases passed for Ledger/Crosswave: denial across route surfaces and ranges/conditionals, selected-byte access, outside/excluded aliases, encoded folder navigation/Back, live updates, current-session revocation and SSE closure, fresh document nonces, preserved application head/styles and no unexpected CSP violations. These are synthetic sessions/local files, not a production identity or hostile-filesystem proof. PR delivery remains pending.
+
+## Prepublication dispositions
+
+- A1/E4 local candidate instructions and isolation passed in [the discovery PR](https://github.com/vp-tw/dirwell/pull/82), including the minimum-Node README CI job. Registry installs/npm rendering remain A3/E6 postpublication readback, rather than an excuse to skip the candidate proof.
+- C2/E1 were delivered in [the private downloads/CSP PR](https://github.com/vp-tw/dirwell/pull/83). The synthetic root/session, nonce CSP, typed stylesheet/head extension and encoded navigation passed all three browser engines; no production identity or row-level redaction guarantee is implied.
+- D1 is qualified by the current packed workload and explicit complete-data/network/heap limits. D2 keeps current-directory search and optional bounded static Ledger archive search; live archive query loading is deferred. D3 uses the documented URL/History contract. D4's additional interrupted-transport reconnect proof passed all three engines and is pending delivery.
+- E3 retains native open/download and transport-controlled response headers; embedded official previews are excluded by user decision. A disposable preview-theme demo is optional and is not a stable gate.
+- C5 is deferred: bundled-image glyph coverage remains bounded; custom image/file/callback providers are the supported escape hatch. Font injection/CJK renderer qualification needs a separate licensed-font workload, and no selected 0.0.1 task requires that expansion.
+- E2 is deferred: there is no response/snapshot/distributed cache or live archive query promise. Existing tests prove shared canonical-directory polling, limits, cancellation and shutdown. Large/concurrent live deployments still require host-specific workload qualification.
+- E5 records keyboard/browser/mobile-viewport/native paths and pending physical iOS/screen-reader qualification in the public support guide. Physical controllers are not a separate gate by user decision. This is a qualified support boundary, not a conformance or physical-device claim.
+- A3/E6 remain open: durable SDK URL, candidate source/version/package/security/platform proof, then registry tags/provenance/default-install/docs readback. No version has been advanced and no publication dispatched.
+
+## Qualification acceptance
+
+Installed primary-host create/delete/stale-output verification passed Vite 8.3.0, Rollup 4.64.2 and webpack 5.111.1 using candidate Integrations/Plain and their declared Core dependency. Six protected transport-interruption cases passed all three browser engines without document replacement; ten encoded static/live browsing cases passed. `/sdk/` redirect preserves the deployment prefix, query and fragment. [VERIFICATION.md](VERIFICATION.md) is now the current SDK evidence entry point. These additional source/docs dispositions still await PR delivery; A3/E6 remain open until exact candidate and publication readback.
