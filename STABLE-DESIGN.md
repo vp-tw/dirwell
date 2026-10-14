@@ -74,8 +74,9 @@ For each scenario: specify API and defaults, add one runnable example, implement
 - Delivered in the publication controls PR: shared ignore-file selection for Core, live service, CLI and build adapters.
 - Delivered in the publication controls PR: output ownership, explicit force, rollback, exclusive output locks and dry-run reports.
 - Delivered in [the customization PR](https://github.com/vp-tw/dirwell/pull/79): the five theme scenarios, public annotations, static file URL mapping and retry/search controls. Verification includes 206 Node tests, nine packed consumers, the installed release-download recipe, translated desktop/mobile action journeys, paired Svelte/Vue source actions and exact-head platform/browser CI.
-- Implemented locally: shareable directory controls, History selection/scroll, failed-target recovery, malformed-snapshot rejection, skipped-parent native navigation and measured Crosswave windows. Local acceptance passed: 206 Node tests, 25 browser scenarios, nine clean packed consumers, types/lint/format, subpath site build and the packed benchmark in [BENCHMARKS.md](BENCHMARKS.md). PR delivery remains pending.
-- Remaining: discovery/support policy, direct API validation, strict CSP/access recipes, integration/device evidence and the release-candidate proof.
+- Delivered in [the browsing PR](https://github.com/vp-tw/dirwell/pull/80): shareable directory controls, History selection/scroll, complete failed-target recovery, malformed-snapshot rejection, skipped-parent native navigation and measured Crosswave windows. Acceptance passed: 206 Node tests, 25 browser scenarios, nine clean packed consumers, types/lint/format, subpath site build and the packed benchmark in [BENCHMARKS.md](BENCHMARKS.md); all 23 exact-head CI checks passed.
+- Implemented locally: direct Core/Server/build-adapter configuration validation, closest-key diagnostics and host-field projection. Local acceptance passed: 212 Node tests, 21 Chromium scenarios, nine clean packed consumers, types/lint/format and subpath site build. PR delivery remains pending.
+- Remaining: discovery/support policy, strict CSP/access recipes, integration/device evidence and the release-candidate proof.
 - No release has been dispatched and package versions have not been advanced.
 
 ## Large Crosswave directories
@@ -96,12 +97,13 @@ Acceptance: both rich themes, static and live, folder/Back/Forward, refresh/shar
 
 ## Direct API configuration validation
 
-CLI validation does not protect JavaScript callers of Core or Server. Validate recognized option keys and value shapes at each public boundary before publication locks, file writes or sockets. Keep custom theme objects extensible: verify required `name`/`render` and known contract fields, without rejecting their private extension fields. Trusted callback bodies remain executable host code; validate their documented results before publication.
+CLI validation does not protect JavaScript callers of Core, Server or build adapters. Validate recognized option keys and value shapes at each public boundary before publication locks, file writes or sockets. Keep custom theme objects extensible: verify required `name`/`render` and known contract fields, without rejecting their private extension fields. Trusted callback bodies remain executable host code; validate their documented results before publication.
 
 Scenarios and acceptance:
 
 - A misspelled `exclude`, nested sort key, listing strategy/size or live key fails with its complete option path and a likely correction. Invalid booleans and enum values cannot silently use defaults.
 - Core generation rejects invalid configuration before creating a new output or changing an existing marked output. DirectoryService rejects invalid configuration before reading its root.
+- Build adapters reject unknown config/sort/symlink/listing keys before publication; typed object config is checked immediately and callback factories remain lazy.
 - Server validates its own expanded option set, then passes only DirectoryService fields to Core. The Node startup helper validates `host`/`port` and strips them before creating the handler; an invalid port never opens a listener.
 - Valid async metadata/annotation providers, custom theme fields, source wrappers and listing-policy callbacks continue to work. Listing callback results reject unknown nested keys as well as invalid sizes.
 

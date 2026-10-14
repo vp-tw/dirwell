@@ -14,3 +14,7 @@ export default {
 The `/rollup`, `/rolldown`, `/webpack`, `/rspack`, `/rsbuild`, `/esbuild`, `/farm` and `/bun` exports use the existing host lifecycles and a dedicated `outputPath`. A `theme` is always required; `metadata` accepts a core MetadataProviderFactory. Array configurations must use non-overlapping output paths. Output ownership, symlink containment and stale-asset protections remain enabled.
 
 The adapters retain existing build/watch and Vite/Farm generated-preview behavior. They do not turn static build-watch into live server mode. For data that should update on requests without rebuilding, mount `@dirwell/server` in the host or proxy a standalone CLI server. Theme-source edits remain owned by the framework compiler. Farm standalone build-watch remains limited; package availability does not imply host feature parity.
+
+## Upcoming stable configuration validation
+
+Unknown top-level and nested sort/symlink/listing keys fail before the adapter publishes output. Errors name the config path and suggest the closest known key. `cwd` and `outputPath` belong to adapters; server startup belongs to the host. `defineConfig` validates object configuration immediately and retains lazy callback factories; their resolved result must pass validation when supplied to the adapter. These checks are in the upcoming stable source, not the published alpha.

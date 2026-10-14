@@ -7,6 +7,7 @@ import { promisify } from "node:util";
 import test from "node:test";
 import { createPlainTheme } from "../packages/theme-plain/src/index.ts";
 import unplugin from "../packages/integrations/src/unplugin.ts";
+import { defineConfig, validateConfig } from "../packages/integrations/src/config.ts";
 
 async function fixture(context) {
   const root = await mkdtemp(path.join(tmpdir(), "dirwell-host-"));
@@ -185,4 +186,41 @@ test("a configured ignore file outside the source triggers Rollup watch and remo
     /note.txt/,
   );
   await assert.rejects(readFile(path.join(root, "dist/dirwell/note.txt")), { code: "ENOENT" });
+});
+
+test("rollup rejects selection typos before publishing an explorer", async (context) => {
+  const root = await fixture(context);
+  await assert.rejects(
+    compile("rollup", root, {
+      cwd: root,
+      root: "files",
+      outputPath: "downloads",
+      theme: createPlainTheme(),
+      exlcude: ["private.txt"],
+    }),
+    /config\.exlcude.*config\.exclude/,
+  );
+  await assert.rejects(readFile(path.join(root, "dist/downloads/index.html")), { code: "ENOENT" });
+});
+
+test("adapter typed configuration rejects nested typos and keeps callback factories lazy", () => {
+  const theme = createPlainTheme();
+  assert.throws(() => defineConfig({ theme, exlcude: ["private"] }), /config\.exlcude.*exclude/);
+  assert.throws(
+    () => validateConfig({ theme, sort: { nmaeMode: "natural" } }),
+    /config\.sort\.nmaeMode.*nameMode/,
+  );
+  assert.throws(
+    () => validateConfig({ theme, symlinks: { folow: true } }),
+    /config\.symlinks\.folow.*follow/,
+  );
+  assert.throws(() => unplugin.rollup({ theme, cwd: 42 }), /config\.cwd/);
+  assert.throws(() => unplugin.rollup({ theme, outDir: "ignored" }), /config\.outDir.*outputPath/);
+  let calls = 0;
+  const factory = () => {
+    calls++;
+    return { theme };
+  };
+  assert.equal(defineConfig(factory), factory);
+  assert.equal(calls, 0);
 });

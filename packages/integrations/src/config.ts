@@ -37,6 +37,7 @@ export type DirwellConfigInput =
   | ((context: DirwellConfigContext) => DirwellConfig | Promise<DirwellConfig>);
 
 export function defineConfig<const T extends DirwellConfigInput>(config: T): T {
+  if (typeof config !== "function") validateConfig(config);
   return config;
 }
 
@@ -52,11 +53,78 @@ function assertOptionalString(value: unknown, key: string): asserts value is str
   }
 }
 
-export function validateConfig(value: unknown): asserts value is DirwellConfig {
+function configKeys(
+  value: Record<string, unknown>,
+  allowed: readonly string[],
+  name: string,
+): void {
+  for (const key of Object.keys(value)) {
+    if (allowed.includes(key)) continue;
+    const suggestion = allowed
+      .map((candidate) => {
+        let previous = Array.from({ length: candidate.length + 1 }, (_, index) => index);
+        for (let i = 1; i <= key.length; i++) {
+          const current = [i];
+          for (let j = 1; j <= candidate.length; j++)
+            current[j] = Math.min(
+              current[j - 1]! + 1,
+              previous[j]! + 1,
+              previous[j - 1]! + (key[i - 1] === candidate[j - 1] ? 0 : 1),
+            );
+          previous = current;
+        }
+        return { candidate, distance: previous[candidate.length]! };
+      })
+      .sort((left, right) => left.distance - right.distance)
+      .find((item) => item.distance <= 2)?.candidate;
+    throw new TypeError(
+      `Unsupported config key "${name}.${key}".${suggestion ? ` Did you mean "${name}.${suggestion}"?` : ` Supported keys: ${allowed.join(", ")}.`}`,
+    );
+  }
+}
+const configFields = {
+  fileHref: true,
+  entryData: true,
+  listing: true,
+  metadata: true,
+  base: true,
+  include: true,
+  exclude: true,
+  ignoreFiles: true,
+  extends: true,
+  mode: true,
+  mirror: true,
+  outDir: true,
+  outputName: true,
+  root: true,
+  server: true,
+  symlinks: true,
+  sort: true,
+  theme: true,
+  urls: true,
+} satisfies Record<keyof DirwellConfig, true>;
+
+export function validateConfig(
+  value: unknown,
+  adapter = false,
+): asserts value is DirwellConfig & { readonly cwd?: string; readonly outputPath?: string } {
   if (typeof value !== "object" || value === null || Array.isArray(value)) {
     throw new TypeError("Dirwell config must resolve to an object");
   }
   const config = value as Record<string, unknown>;
+  configKeys(
+    config,
+    [...Object.keys(configFields), ...(adapter ? ["cwd", "outputPath"] : [])],
+    "config",
+  );
+  if (adapter) {
+    assertOptionalString(config.cwd, "config.cwd");
+    assertOptionalString(config.outputPath, "config.outputPath");
+    if (config.server !== undefined)
+      throw new TypeError(
+        "config.server is not a build-adapter option; configure the host explicitly",
+      );
+  }
   if (config.listing !== undefined && typeof config.listing !== "function")
     validateListingPlan(config.listing);
   if (config.metadata !== undefined && typeof config.metadata !== "function")
@@ -100,10 +168,15 @@ export function validateConfig(value: unknown): asserts value is DirwellConfig {
     }
   }
   if (config.server !== undefined) {
-    if (typeof config.server !== "object" || config.server === null) {
+    if (
+      typeof config.server !== "object" ||
+      config.server === null ||
+      Array.isArray(config.server)
+    ) {
       throw new TypeError("server must be an object");
     }
     const server = config.server as Record<string, unknown>;
+    configKeys(server, ["host", "port"], "config.server");
     assertOptionalString(server.host, "server.host");
     if (
       server.port !== undefined &&
@@ -112,11 +185,27 @@ export function validateConfig(value: unknown): asserts value is DirwellConfig {
       throw new TypeError("server.port must be a non-negative integer");
     }
   }
+  if (config.symlinks !== undefined) {
+    if (
+      typeof config.symlinks !== "object" ||
+      config.symlinks === null ||
+      Array.isArray(config.symlinks)
+    )
+      throw new TypeError("config.symlinks must be an object");
+    const links = config.symlinks as Record<string, unknown>;
+    configKeys(links, ["follow", "boundary", "onCycle"], "config.symlinks");
+    assertOptionalBoolean(links.follow, "config.symlinks.follow");
+    if (links.boundary !== undefined && links.boundary !== "root" && links.boundary !== "anywhere")
+      throw new TypeError("config.symlinks.boundary must be root or anywhere");
+    if (links.onCycle !== undefined && links.onCycle !== "error" && links.onCycle !== "skip")
+      throw new TypeError("config.symlinks.onCycle must be error or skip");
+  }
   if (config.sort !== undefined) {
-    if (typeof config.sort !== "object" || config.sort === null) {
+    if (typeof config.sort !== "object" || config.sort === null || Array.isArray(config.sort)) {
       throw new TypeError("sort must be an object");
     }
     const sort = config.sort as Record<string, unknown>;
+    configKeys(sort, ["field", "direction", "directoriesFirst", "nameMode"], "config.sort");
     if (
       sort.field !== undefined &&
       (typeof sort.field !== "string" || !["name", "modified", "size"].includes(sort.field))

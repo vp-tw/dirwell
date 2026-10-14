@@ -107,10 +107,10 @@ function createDirwellPlugin(
       vite: {
         async configResolved(config) {
           viteConfig = config;
+          const merged = { urls: "base" as const, ...inlineOptions };
+          validateConfig(merged, true);
           const projectRoot = path.resolve(inlineOptions?.cwd ?? config.root);
           const viteOutput = path.resolve(config.root, config.build.outDir);
-          const merged = { urls: "base" as const, ...inlineOptions };
-          validateConfig(merged);
           const outputDir = path.resolve(
             projectRoot,
             merged.outDir ?? path.join(viteOutput, inlineOptions?.outputPath ?? "dirwell"),
