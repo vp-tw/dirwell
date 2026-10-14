@@ -47,6 +47,13 @@ for (const framework of ["svelte", "vue"]) {
       await search.fill("hello");
       await expect(page.locator("[data-custom-row]")).toHaveCount(1);
       await search.fill("");
+      const action = page.locator("[data-custom-action]").first();
+      await expect(page.locator("a [data-custom-action]")).toHaveCount(0);
+      const beforeAction = page.url();
+      await action.focus();
+      await page.keyboard.press("Enter");
+      await expect(page.locator("[data-inspected]")).not.toBeEmpty();
+      expect(page.url()).toBe(beforeAction);
       await page
         .locator("a")
         .filter({ has: page.locator("[data-custom-row]") })

@@ -1,7 +1,7 @@
 import type { ThemePage as BaseThemePage } from "../../shared-theme/src/page.ts";
 export type { ListingEntry } from "@dirwell/core";
 export interface ThemePage extends BaseThemePage {
-  readonly searchIndexHref?: string;
+  readonly searchIndexHref?: string | null;
 }
 /** The authoring compiler supplies both halves from the same source. */
 export interface FrameworkRenderer {

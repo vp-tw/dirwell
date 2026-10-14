@@ -8,7 +8,9 @@ import type {
   SortOptions,
   ExplorerTheme,
 } from "@dirwell/core";
+import type { ThemeCustomization } from "./customization.ts";
 export interface ThemePage {
+  readonly ui?: ThemeCustomization;
   readonly version: 1;
   readonly theme: string;
   readonly title: string;

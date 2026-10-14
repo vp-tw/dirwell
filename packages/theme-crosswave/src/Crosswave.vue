@@ -17,17 +17,26 @@ import {
   restoreThemePage,
 } from "../../shared-theme/src/navigation.ts";
 import { entryIcon } from "../../shared-theme/src/icons.ts";
-import { directoryLike, size, modified } from "../../shared-theme/src/records.ts";
+import { directoryLike, size } from "../../shared-theme/src/records.ts";
+import {
+  resolveCustomization,
+  label,
+  formattedDate,
+  copyEntryAction,
+  publicDataValue,
+} from "../../shared-theme/src/customization.ts";
 import { createWave } from "./wave.mjs";
 const props = defineProps({ model: { type: Object, required: true } }),
   model = shallowRef(restoreThemePage(props.model, Boolean(import.meta.hot))),
-  entries = shallowRef(model.value.entries);
+  entries = shallowRef(model.value.entries),
+  ui = computed(() => resolveCustomization(model.value.ui));
 const query = ref(""),
-  category = ref("all"),
+  category = ref(model.value.categories[0]?.id ?? null),
   selected = ref(null),
   ready = ref(false),
   busy = ref(false),
   error = ref(""),
+  failure = ref(null),
   color = ref(props.model.color),
   paused = ref(!props.model.backgroundMotion),
   clock = ref(""),
@@ -42,7 +51,7 @@ const complete = computed(() => entries.value.length === model.value.total),
 const rows = computed(() =>
     entries.value.filter(
       (entry) =>
-        (category.value === "all" || membership(entry).includes(category.value)) &&
+        membership(entry).includes(category.value) &&
         `${entry.name} ${entry.link?.target ?? ""}`
           .toLocaleLowerCase()
           .includes(query.value.trim().toLocaleLowerCase()),
@@ -50,7 +59,9 @@ const rows = computed(() =>
   ),
   active = computed(() => rows.value.find((entry) => entry.id === selected.value) ?? rows.value[0]),
   heading = computed(
-    () => model.value.categories.find((item) => item.id === category.value)?.label ?? "All files",
+    () =>
+      model.value.categories.find((item) => item.id === category.value)?.label ??
+      ui.value.labels.allFiles,
   );
 const nodes = new Map();
 let wave,
@@ -84,8 +95,10 @@ async function loadComplete() {
     });
     if (token === navigation && !local.signal.aborted && !disposed) entries.value = data.entries;
   } catch (cause) {
-    if (token === navigation && !local.signal.aborted)
-      error.value = "Could not load complete directory data. Native page links remain available.";
+    if (token === navigation && !local.signal.aborted) {
+      error.value = ui.value.labels.listingError;
+      failure.value = "listing";
+    }
   } finally {
     if (token === navigation) busy.value = false;
   }
@@ -96,6 +109,7 @@ async function openFolder(dataHref, url, push, refresh = false) {
   const local = (abort = new AbortController());
   busy.value = true;
   error.value = "";
+  failure.value = null;
   try {
     const next = await fetchThemePage(dataHref, url, "crosswave", local.signal, refresh);
     let nextEntries = next.entries;
@@ -109,14 +123,16 @@ async function openFolder(dataHref, url, push, refresh = false) {
     if (!refresh) {
       query.value = "";
       selected.value = null;
-      category.value = "all";
+      category.value = model.value.categories[0]?.id ?? null;
     }
     if (push) history.pushState({ dataHref: next.dataHref }, "", url);
     applyThemeMetadata(next, url);
     await loadComplete();
   } catch (cause) {
-    if (token === navigation && !local.signal.aborted)
-      error.value = "Could not open the folder. Its native link remains available.";
+    if (token === navigation && !local.signal.aborted) {
+      error.value = ui.value.labels.folderError;
+      failure.value = "folder";
+    }
   } finally {
     if (token === navigation) busy.value = false;
   }
@@ -183,6 +199,7 @@ function parent() {
 }
 function keyboard(event) {
   if (event.isComposing || event.altKey || event.ctrlKey || event.metaKey) return;
+  if (event.target?.closest?.("[data-dirwell-actions]")) return;
   const editing = /INPUT|TEXTAREA|SELECT/.test(event.target?.tagName ?? "");
   if (editing) {
     if (event.key === "Escape") query.value = "";
@@ -347,7 +364,11 @@ onMounted(() => {
     );
   }
   const updateClock = () =>
-    (clock.value = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }));
+    (clock.value = new Date().toLocaleTimeString(ui.value.dateOptions.locale, {
+      timeZone: ui.value.dateOptions.timeZone,
+      hour: "2-digit",
+      minute: "2-digit",
+    }));
   updateClock();
   timer = setInterval(updateClock, 1000);
   window.addEventListener("keydown", keyboard);
@@ -368,9 +389,15 @@ watch(
     if (!href || typeof EventSource === "undefined") return;
     const updates = new EventSource(href);
     updates.onmessage = () => (pendingUpdates.value = href);
-    updates.onerror = () => (error.value = "Live updates disconnected. Refresh to retry.");
+    updates.onerror = () => {
+      error.value = ui.value.labels.updatesError;
+      failure.value = "updates";
+    };
     updates.onopen = () => {
-      if (error.value.startsWith("Live updates")) error.value = "";
+      if (failure.value === "updates") {
+        error.value = "";
+        failure.value = null;
+      }
     };
     onCleanup(() => updates.close());
   },
@@ -418,16 +445,24 @@ onBeforeUnmount(() => {
   <header class="cw-top">
     <div class="cw-brand">
       <slot name="header" :model="model">
+        <img
+          v-if="ui.brand.logoUrl"
+          :src="ui.brand.logoUrl"
+          :alt="ui.brand.logoAlt ?? ''"
+          width="40"
+          height="40"
+        />
         <a
           :href="model.rootHref"
           @click="navigateLink($event, model.rootHref, model.rootDataHref)"
-          >{{ model.title }}</a
+          >{{ ui.brand.name ?? model.title }}</a
         ></slot
       >
     </div>
-    <nav class="cw-location" aria-label="Breadcrumb">
-      <a :href="model.rootHref" @click="navigateLink($event, model.rootHref, model.rootDataHref)"
-        >Home</a
+    <nav class="cw-location" :aria-label="ui.labels.breadcrumb">
+      <a :href="model.rootHref" @click="navigateLink($event, model.rootHref, model.rootDataHref)">{{
+        ui.labels.home
+      }}</a
       ><template v-for="crumb in model.breadcrumbs" :key="crumb.href">
         /
         <a :href="crumb.href" @click="navigateLink($event, crumb.href, crumb.dataHref)">{{
@@ -438,8 +473,8 @@ onBeforeUnmount(() => {
     <div class="cw-clock" v-if="ready">{{ clock }}</div>
   </header>
   <main class="cw-stage" data-framework="vue" :aria-busy="busy">
-    <h1 class="cw-sr">Files in {{ model.path || "/" }}</h1>
-    <nav class="cw-rail" aria-label="File categories" :hidden="!ready">
+    <h1 class="cw-sr">{{ label(ui, "filesIn", { path: model.path || "/" }) }}</h1>
+    <nav class="cw-rail" :aria-label="ui.labels.categories" :hidden="!ready">
       <div class="cw-categories" role="tablist">
         <button
           v-for="item in model.categories"
@@ -472,10 +507,13 @@ onBeforeUnmount(() => {
       <div class="cw-list-head">
         <div class="cw-directory">
           <h2>{{ heading }}</h2>
-          <span data-cw-count>{{ complete ? rows.length : entries.length }} items</span>
+          <span data-cw-count>{{
+            label(ui, "items", { count: complete ? rows.length : entries.length })
+          }}</span>
         </div>
         <label class="cw-search"
-          >Search<input ref="search" type="search" v-model="query" :disabled="!ready || !complete"
+          ><span>{{ ui.labels.search }}</span
+          ><input ref="search" type="search" v-model="query" :disabled="!ready || !complete"
         /></label>
       </div>
       <div class="cw-list-scroll">
@@ -494,6 +532,7 @@ onBeforeUnmount(() => {
             :ref="(node) => (node ? nodes.set(entry.id, node) : nodes.delete(entry.id))"
             :class="['cw-row', { 'cw-selected': active?.id === entry.id }]"
             data-cw-entry
+            :data-custom-columns="Boolean(model.ui?.columns)"
             :data-id="entry.id"
           >
             <a
@@ -519,13 +558,30 @@ onBeforeUnmount(() => {
                   "
                 ></span>
                 <span class="cw-entry-label">
-                  <span class="cw-name">{{ entry.name }}{{ directoryLike(entry) ? "/" : "" }}</span>
-                  <span v-if="entry.link" class="cw-target">{{ entry.link.target }}</span>
-                  <span class="cw-row-meta"
-                    >{{ entry.link?.unavailable ? "Target unavailable" : entry.kind }} ·
-                    {{ directoryLike(entry) ? "Folder" : size(entry.size) }}</span
+                  <template
+                    v-for="column in ui.columns"
+                    :key="typeof column === 'string' ? column : column.dataKey"
+                    ><span v-if="column === 'name'" class="cw-name"
+                      >{{ entry.name }}{{ directoryLike(entry) ? "/" : "" }}</span
+                    >
+                    <span v-if="entry.link && column === 'name'" class="cw-target">{{
+                      entry.link.target
+                    }}</span>
+                    <span v-if="column === 'size'" class="cw-row-meta"
+                      >{{
+                        entry.link?.unavailable
+                          ? ui.labels.unavailable
+                          : ui.labels[entry.kind === "symlink" ? "link" : entry.kind]
+                      }}
+                      · {{ directoryLike(entry) ? ui.labels.folder : size(entry.size) }}</span
+                    >
+                    <span v-if="column === 'modified'" class="cw-row-date"
+                      >{{ ui.labels.modified }}
+                      {{ formattedDate(entry.modifiedAt, ui, ready) }}</span
+                    ><span v-if="typeof column === 'object'" class="cw-data-value"
+                      >{{ column.label }}: {{ publicDataValue(entry.data?.[column.dataKey]) }}</span
+                    ></template
                   >
-                  <span class="cw-row-date">Modified {{ modified(entry.modifiedAt) }}</span>
                 </span></slot
               ></a
             ><span v-else class="cw-entry cw-unavailable"
@@ -533,37 +589,105 @@ onBeforeUnmount(() => {
                 entry.name
               }}</slot></span
             >
+            <span
+              v-if="ui.actions.length || $slots.actions"
+              data-dirwell-actions
+              class="cw-row-actions"
+            >
+              <slot
+                name="actions"
+                :model="model"
+                :entry="entry"
+                :selected="selected === entry.id"
+              />
+              <template v-for="action in ui.actions" :key="action">
+                <a
+                  v-if="
+                    action === 'download' &&
+                    entry.href &&
+                    !directoryLike(entry) &&
+                    !entry.link?.unavailable
+                  "
+                  :href="safeHref(entry)"
+                  download
+                  >{{ ui.labels.download }}</a
+                >
+                <button
+                  v-else-if="action !== 'download'"
+                  :disabled="!ready || (action === 'copy-link' && !entry.href)"
+                  :aria-label="
+                    (action === 'copy-link' ? ui.labels.copyLink : ui.labels.copyPath) +
+                    ': ' +
+                    entry.name
+                  "
+                  @click="
+                    async () => {
+                      try {
+                        await copyEntryAction(action, entry);
+                        error = ui.labels.copied;
+                        failure = null;
+                      } catch {
+                        error = ui.labels.copyError;
+                        failure = 'copy';
+                      }
+                    }
+                  "
+                >
+                  {{ action === "copy-link" ? ui.labels.copyLink : ui.labels.copyPath }}
+                </button>
+              </template>
+            </span>
           </li>
         </ul>
-        <p class="cw-empty" v-if="!rows.length">No matching files.</p>
+        <p class="cw-empty" v-if="!rows.length">{{ ui.labels.noMatches }}</p>
       </div>
     </section>
     <aside class="cw-detail" v-if="ready && active">
       <h2>{{ active.name }}</h2>
-      <p>{{ active.kind }} · {{ directoryLike(active) ? "Folder" : size(active.size) }}</p>
-      <p>{{ modified(active.modifiedAt) }}</p>
+      <p v-if="ui.columns.includes('size')">
+        {{ ui.labels[active.kind === "symlink" ? "link" : active.kind] }} ·
+        {{ directoryLike(active) ? ui.labels.folder : size(active.size) }}
+      </p>
+      <p v-if="ui.columns.includes('modified')">
+        {{ formattedDate(active.modifiedAt, ui, ready) }}
+      </p>
       <p v-if="active.link">{{ active.link.target }}</p>
     </aside>
-    <p role="status" aria-live="polite">{{ busy ? "Loading…" : error }}</p>
-    <nav v-if="model.page?.count > 1 && !complete" aria-label="Pagination">
-      <a v-if="model.page.previousHref" :href="model.page.previousHref" rel="prev">Previous</a> Page
-      {{ model.page.number }} of {{ model.page.count }}
-      <a v-if="model.page.nextHref" :href="model.page.nextHref" rel="next">Next</a>
+    <p role="status" aria-live="polite">{{ busy ? ui.labels.loading : error }}</p>
+    <button
+      v-if="failure && failure !== 'copy'"
+      :disabled="busy"
+      @click="openFolder(model.dataHref, location.href, false, true)"
+    >
+      {{ ui.labels.retry }}
+    </button>
+    <nav v-if="model.page?.count > 1 && !complete" :aria-label="ui.labels.pagination">
+      <a v-if="model.page.previousHref" :href="model.page.previousHref" rel="prev">{{
+        ui.labels.previous
+      }}</a>
+      {{ label(ui, "page", { page: model.page.number, pages: model.page.count }) }}
+      <a v-if="model.page.nextHref" :href="model.page.nextHref" rel="next">{{ ui.labels.next }}</a>
     </nav>
   </main>
   <footer class="cw-bottom">
-    <div class="cw-key-help">
+    <div :class="ui.brand.footerText || $slots.footer ? 'cw-custom-footer' : 'cw-key-help'">
       <slot name="footer" :model="model"
-        >Arrow keys navigate · Enter confirms · Backspace returns</slot
+        ><template v-if="ui.brand.footerText"
+          ><a v-if="ui.brand.footerUrl" :href="ui.brand.footerUrl">{{ ui.brand.footerText }}</a
+          ><span v-else>{{ ui.brand.footerText }}</span></template
+        ><template v-else>{{ ui.labels.crosswaveKeyboardHelp }}</template></slot
       >
     </div>
-    <div class="cw-controller" v-if="pad">Controller · Confirm / Back</div>
+    <div class="cw-controller" v-if="pad">{{ ui.labels.controller }}</div>
     <label class="cw-appearance"
-      >Color<select v-model="color" :disabled="!ready">
-        <option v-for="name in Object.keys(colors)" :key="name">{{ name }}</option>
+      >{{ ui.labels.color
+      }}<select v-model="color" :disabled="!ready">
+        <option v-for="name in Object.keys(colors)" :key="name" :value="name">
+          {{ ui.labels[name] }}
+        </option>
       </select></label
     ><button class="cw-motion" :disabled="!ready" @click="paused = !paused">
-      {{ paused ? "Resume motion" : "Pause motion" }}
+      {{ paused ? ui.labels.resumeMotion : ui.labels.pauseMotion }}
     </button>
   </footer>
 </template>

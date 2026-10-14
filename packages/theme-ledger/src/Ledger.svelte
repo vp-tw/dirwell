@@ -12,10 +12,17 @@
     directoryLike,
     entryType,
     size,
-    modified,
     fuzzy,
   } from "../../shared-theme/src/records.ts";
-  let { model: initialModel, header, row, footer } = $props();
+  import {
+    resolveCustomization,
+    label,
+    formattedDate,
+    copyEntryAction,
+    columnLabel,
+    publicDataValue,
+  } from "../../shared-theme/src/customization.ts";
+  let { model: initialModel, header, row, actions, footer } = $props();
   const snapshot = untrack(() =>
     restoreThemePage(initialModel, Boolean(import.meta.hot)),
   );
@@ -29,14 +36,25 @@
     ready = $state(false),
     busy = $state(false),
     error = $state(""),
+    failure = $state(null),
     timestamp = $state(null),
     composing = $state(false),
     scrollTop = $state(0),
     globalOpen = $state(false),
     globalQuery = $state(""),
     globalRows = $state.raw([]),
-    globalStatus = $state("Enter a search to begin."),
+    globalStatus = $state(
+      resolveCustomization(snapshot.ui).labels.beginArchive,
+    ),
     pendingUpdates = $state(null);
+  let ui = $derived(resolveCustomization(model.ui));
+  let archiveFailed = $state(false);
+  let countParts = $derived(
+    label(ui, complete ? "entries" : "pageEntries", {
+      count: "__COUNT__",
+      total: model.total,
+    }).split("__COUNT__"),
+  );
   let heights = $state.raw(new Map());
   let updatesHref = $derived(
     ready && model.updatesHref
@@ -87,7 +105,10 @@
   let navigation = 0,
     abort,
     archiveAbort,
-    archiveRequest = 0;
+    archiveRequest = 0,
+    archiveCache = null,
+    archiveCacheHref = "",
+    archiveCacheAt = 0;
   const isDirectory = directoryLike;
   function safeHref(record) {
     if (
@@ -117,9 +138,10 @@
       if (token === navigation && !local.signal.aborted)
         entries = loaded.entries;
     } catch (cause) {
-      if (token === navigation && !local.signal.aborted)
-        error =
-          "Could not load complete directory data. Native page links remain available.";
+      if (token === navigation && !local.signal.aborted) {
+        error = ui.labels.listingError;
+        failure = "listing";
+      }
     } finally {
       if (token === navigation) busy = false;
     }
@@ -150,6 +172,7 @@
     const local = (abort = new AbortController());
     busy = true;
     error = "";
+    failure = null;
     try {
       const next = await fetchThemePage(
         dataHref,
@@ -180,9 +203,10 @@
       await hydrateData();
       if (!refresh) window.scrollTo({ top: 0 });
     } catch (cause) {
-      if (token === navigation && !local.signal.aborted)
-        error =
-          "Could not open this folder. Open its native link or try again.";
+      if (token === navigation && !local.signal.aborted) {
+        error = ui.labels.folderError;
+        failure = "folder";
+      }
     } finally {
       if (token === navigation) busy = false;
     }
@@ -230,6 +254,7 @@
       if (event.key === "Escape") timestamp = null;
       return;
     }
+    if (event.target?.closest?.("[data-dirwell-actions]")) return;
     const editable = /INPUT|TEXTAREA|SELECT/.test(event.target?.tagName ?? "");
     if (event.key === "/" && !editable) {
       event.preventDefault();
@@ -277,54 +302,66 @@
     archiveAbort?.abort();
     const local = (archiveAbort = new AbortController());
     globalRows = [];
+    archiveFailed = false;
     const query = globalQuery.trim();
     if (!query) {
-      globalStatus = "Enter a search to begin.";
+      globalStatus = ui.labels.beginArchive;
       return;
     }
-    globalStatus = "Searching archive…";
+    globalStatus = ui.labels.searchingArchive;
     try {
       const url = new URL(model.searchIndexHref, document.baseURI);
-      const response = await fetch(url, { signal: local.signal });
-      if (!response.ok) throw new Error("Unavailable archive");
-      const index = await response.json();
-      if (
-        index.version !== 3 ||
-        !Array.isArray(index.shards) ||
-        !Number.isSafeInteger(index.count) ||
-        index.count > 100000
-      )
-        throw new Error("Unsupported archive");
-      const all = [];
-      for (const shard of index.shards) {
-        if (typeof shard !== "string") throw new Error("Invalid shard");
-        const shardUrl = new URL(shard, url);
-        if (shardUrl.origin !== url.origin) throw new Error("Unsafe shard");
-        const chunk = await fetch(shardUrl, { signal: local.signal });
-        if (!chunk.ok) throw new Error("Unavailable shard");
-        const data = await chunk.json();
+      let all =
+        archiveCacheHref === url.href && Date.now() - archiveCacheAt < 60000
+          ? archiveCache
+          : null;
+      if (all === null) {
+        const response = await fetch(url, { signal: local.signal });
+        if (!response.ok) throw new Error("Unavailable archive");
+        const index = await response.json();
         if (
-          !Array.isArray(data.entries) ||
-          all.length + data.entries.length > 100000
+          index.version !== 3 ||
+          !Array.isArray(index.shards) ||
+          !Number.isSafeInteger(index.count) ||
+          index.count > 100000
         )
-          throw new Error("Invalid archive");
-        for (const record of data.entries) {
+          throw new Error("Unsupported archive");
+        all = [];
+        for (const shard of index.shards) {
+          if (typeof shard !== "string") throw new Error("Invalid shard");
+          const shardUrl = new URL(shard, url);
+          if (shardUrl.origin !== url.origin) throw new Error("Unsafe shard");
+          const chunk = await fetch(shardUrl, { signal: local.signal });
+          if (!chunk.ok) throw new Error("Unavailable shard");
+          const data = await chunk.json();
           if (
-            typeof record.name !== "string" ||
-            typeof record.path !== "string" ||
-            typeof record.exitsExplorer !== "boolean"
+            !Array.isArray(data.entries) ||
+            all.length + data.entries.length > 100000
           )
-            throw new Error("Invalid archive record");
-          const href = record.href === null ? null : new URL(record.href, url);
-          if (href && !["http:", "https:"].includes(href.protocol))
-            throw new Error("Unsupported archive link");
-          all.push({
-            name: record.name,
-            path: record.path,
-            href: href?.href ?? null,
-            exitsExplorer: record.exitsExplorer,
-          });
+            throw new Error("Invalid archive");
+          for (const record of data.entries) {
+            if (
+              typeof record.name !== "string" ||
+              typeof record.path !== "string" ||
+              typeof record.exitsExplorer !== "boolean"
+            )
+              throw new Error("Invalid archive record");
+            const href =
+              record.href === null ? null : new URL(record.href, url);
+            if (href && !["http:", "https:"].includes(href.protocol))
+              throw new Error("Unsupported archive link");
+            all.push({
+              name: record.name,
+              path: record.path,
+              href: href?.href ?? null,
+              exitsExplorer: record.exitsExplorer,
+            });
+          }
         }
+        if (token !== archiveRequest || local.signal.aborted) return;
+        archiveCache = all;
+        archiveCacheHref = url.href;
+        archiveCacheAt = Date.now();
       }
       const matches = all
         .map((record) => ({
@@ -340,11 +377,13 @@
       globalRows = matches.slice(0, 100).map((item) => item.record);
       globalStatus =
         matches.length > 100
-          ? "Showing 100 of " + matches.length + " results"
-          : matches.length + " results";
+          ? label(ui, "truncatedResults", { shown: 100, count: matches.length })
+          : label(ui, "archiveResults", { count: matches.length });
     } catch {
-      if (token === archiveRequest && !local.signal.aborted)
-        globalStatus = "Could not load archive search. Try again.";
+      if (token === archiveRequest && !local.signal.aborted) {
+        globalStatus = ui.labels.archiveError;
+        archiveFailed = true;
+      }
     }
   }
   onMount(() => {
@@ -376,10 +415,15 @@
     if (!href || typeof EventSource === "undefined") return;
     const updates = new EventSource(href);
     updates.onmessage = () => (pendingUpdates = href);
-    updates.onerror = () =>
-      (error = "Live updates disconnected. Refresh to retry.");
+    updates.onerror = () => {
+      error = ui.labels.updatesError;
+      failure = "updates";
+    };
     updates.onopen = () => {
-      if (error.startsWith("Live updates")) error = "";
+      if (failure === "updates") {
+        error = "";
+        failure = null;
+      }
     };
     return () => updates.close();
   });
@@ -413,14 +457,21 @@
 />
 <header class="page-header">
   <div class="wordmark">
-    {#if header}{@render header({ model })}{:else}<h1>{model.title}</h1>
-      <span>File archive</span>{/if}
+    {#if header}{@render header({ model })}{:else}{#if ui.brand.logoUrl}<img
+          src={ui.brand.logoUrl}
+          alt={ui.brand.logoAlt ?? ""}
+          width="40"
+          height="40"
+        />{/if}
+      <h1>{ui.brand.name ?? model.title}</h1>
+      <span>{ui.labels.archive}</span>{/if}
   </div>
-  <nav aria-label="Breadcrumb">
+  <nav aria-label={ui.labels.breadcrumb}>
     <a
       href={model.rootHref}
       onclick={(event) =>
-        navigateLink(event, model.rootHref, model.rootDataHref)}>Home</a
+        navigateLink(event, model.rootHref, model.rootDataHref)}
+      >{ui.labels.home}</a
     >{#each model.breadcrumbs as crumb}
       / <a
         href={crumb.href}
@@ -432,10 +483,10 @@
 <main data-explorer data-framework="svelte" aria-busy={busy}>
   <div class="toolbar">
     <label class="search-field"
-      >Search this directory<input
+      >{ui.labels.searchDirectory}<input
         bind:this={searchInput}
         type="search"
-        placeholder="Search files"
+        placeholder={ui.labels.searchFiles}
         bind:value={query}
         disabled={!ready || !complete}
         oncompositionstart={() => (composing = true)}
@@ -443,7 +494,8 @@
       /></label
     >
     <fieldset disabled={!ready || !complete}>
-      <legend>Types</legend>{#each ["directory", "file", "link"] as type}<label
+      <legend>{ui.labels.types}</legend
+      >{#each ["directory", "file", "link"] as type}<label
           ><input
             type="checkbox"
             checked={types.includes(type)}
@@ -451,38 +503,39 @@
               (types = event.currentTarget.checked
                 ? [...types, type]
                 : types.filter((value) => value !== type))}
-          />{type}</label
+          />{ui.labels[type]}</label
         >{/each}
     </fieldset>
     <label
-      >Sort<select
+      >{ui.labels.sort}<select
         value={sort.field}
         disabled={!ready || !complete}
         onchange={(event) =>
           (sort = { ...sort, field: event.currentTarget.value })}
-        ><option value="name">Name</option><option value="size">Size</option
-        ><option value="modified">Modified</option></select
+        ><option value="name">{ui.labels.name}</option><option value="size"
+          >{ui.labels.size}</option
+        ><option value="modified">{ui.labels.modified}</option></select
       ></label
     >
     <label
-      >Names<select
+      >{ui.labels.names}<select
         value={sort.nameMode}
         disabled={!ready || !complete}
         onchange={(event) =>
           (sort = { ...sort, nameMode: event.currentTarget.value })}
-        ><option value="natural">Natural</option><option value="locale"
-          >Locale</option
-        ><option value="unicode">Unicode</option></select
+        ><option value="natural">{ui.labels.natural}</option><option
+          value="locale">{ui.labels.locale}</option
+        ><option value="unicode">{ui.labels.unicode}</option></select
       ></label
     >
     <label
-      >Order<select
+      >{ui.labels.order}<select
         value={sort.direction}
         disabled={!ready || !complete}
         onchange={(event) =>
           (sort = { ...sort, direction: event.currentTarget.value })}
-        ><option value="asc">Ascending</option><option value="desc"
-          >Descending</option
+        ><option value="asc">{ui.labels.ascending}</option><option value="desc"
+          >{ui.labels.descending}</option
         ></select
       ></label
     >
@@ -493,34 +546,55 @@
         disabled={!ready || !complete}
         onchange={(event) =>
           (sort = { ...sort, directoriesFirst: event.currentTarget.checked })}
-      />Folders first</label
+      />{ui.labels.directoriesFirst}</label
     >
     <label
-      >Appearance<select
+      >{ui.labels.appearance}<select
         value={scheme}
         disabled={!ready}
         onchange={(event) => updateScheme(event.currentTarget.value)}
-        ><option value="system">System</option><option value="light"
-          >Light</option
-        ><option value="dark">Dark</option></select
+        ><option value="system">{ui.labels.system}</option><option value="light"
+          >{ui.labels.light}</option
+        ><option value="dark">{ui.labels.dark}</option></select
       ></label
     >
-    <button
-      disabled={!ready || !model.searchIndexHref}
-      onclick={() => (globalOpen = true)}>Search archive</button
-    >
+    {#if model.searchIndexHref}
+      <button
+        disabled={!ready || !model.searchIndexHref}
+        onclick={() => (globalOpen = true)}>{ui.labels.searchArchive}</button
+      >
+    {/if}
   </div>
   <section class="listing-card">
     <div class="listing-summary">
-      <span data-visible-count>{complete ? rows.length : entries.length}</span>
-      entries{#if !complete}
-        on this page · {model.total} in directory{/if}<span
+      {countParts[0]}<span data-visible-count
+        >{complete ? rows.length : entries.length}</span
+      >{countParts.slice(1).join("__COUNT__")}<span
         role="status"
-        aria-live="polite">{busy ? "Loading…" : error}</span
+        aria-live="polite">{busy ? ui.labels.loading : error}</span
       >
     </div>
-    <div class="entry-head">
-      <span>Name</span><span>Size</span><span>Modified</span>
+    {#if failure && failure !== "copy"}<button
+        disabled={busy}
+        onclick={() => openFolder(model.dataHref, location.href, false, true)}
+        >{ui.labels.retry}</button
+      >{/if}
+    <div
+      class="entry-head"
+      data-custom-columns={Boolean(model.ui?.columns)}
+      style:grid-template-columns={model.ui?.columns
+        ? ui.columns
+            .map((column) =>
+              column === "name"
+                ? "minmax(0,1fr)"
+                : typeof column === "object"
+                  ? "minmax(0,12rem)"
+                  : "minmax(6rem,max-content)",
+            )
+            .join(" ")
+        : undefined}
+    >
+      {#each ui.columns as column}<span>{columnLabel(column, ui)}</span>{/each}
     </div>
     <ul class="entry-list" bind:this={list}>
       {#if model.parentHref}<li class="entry">
@@ -540,48 +614,102 @@
           class="entry"
           use:measure={entry.id}
           data-entry
+          data-custom-columns={Boolean(model.ui?.columns)}
           data-id={entry.id}
           data-order={start + index}
           data-active={selected === entry.id}
+          style:grid-template-columns={model.ui?.columns
+            ? ui.columns
+                .map((column) =>
+                  column === "name"
+                    ? "minmax(0,1fr)"
+                    : "minmax(6rem,max-content)",
+                )
+                .join(" ")
+            : undefined}
         >
-          <span class="identity"
-            >{#if entry.href}<a
-                class="name"
-                href={safeHref(entry)}
-                target={entry.exitsExplorer ? "_blank" : undefined}
-                rel={entry.exitsExplorer ? "noopener" : undefined}
-                onclick={(event) => navigate(event, entry)}
-                onfocus={() => (selected = entry.id)}
-                >{#if row}{@render row({
-                    model,
-                    entry,
-                    selected: selected === entry.id,
-                  })}{:else}<span class="file-icon" aria-hidden="true"
-                    >{@html entryIcon(entryType(entry))}</span
+          {#each ui.columns as column}
+            {#if column === "name"}<span class="identity"
+                >{#if entry.href}<a
+                    class="name"
+                    href={safeHref(entry)}
+                    target={entry.exitsExplorer ? "_blank" : undefined}
+                    rel={entry.exitsExplorer ? "noopener" : undefined}
+                    onclick={(event) => navigate(event, entry)}
+                    onfocus={() => (selected = entry.id)}
+                    >{#if row}{@render row({
+                        model,
+                        entry,
+                        selected: selected === entry.id,
+                      })}{:else}<span class="file-icon" aria-hidden="true"
+                        >{@html entryIcon(entryType(entry))}</span
+                      >
+                      {entry.name}{isDirectory(entry) ? "/" : ""}{/if}</a
+                  >{:else}<span
+                    >{#if row}{@render row({
+                        model,
+                        entry,
+                        selected: selected === entry.id,
+                      })}{:else}{entry.name}{/if}</span
+                  >{/if}{#if entry.link}<small class="target"
+                    >{entry.link.unavailable
+                      ? ui.labels.unavailable + " · "
+                      : "→ "}{entry.link.target}</small
+                  >{/if}</span
+              >
+            {:else if column === "size"}<span class="kind"
+                >{isDirectory(entry)
+                  ? ui.labels.folder
+                  : size(entry.size)}</span
+              >
+            {:else if column === "modified"}<button
+                class="timestamp-button"
+                disabled={!ready}
+                onclick={() => (timestamp = entry.modifiedAt)}
+                ><time datetime={entry.modifiedAt}
+                  >{formattedDate(entry.modifiedAt, ui, ready)}</time
+                ></button
+              >
+            {:else}<span class="entry-data"
+                >{publicDataValue(entry.data?.[column.dataKey])}</span
+              >{/if}{/each}
+          {#if actions || ui.actions.length}<span
+              data-dirwell-actions
+              style="grid-column:1/-1;display:flex;flex-wrap:wrap;gap:.5rem"
+            >
+              {#if actions}{@render actions({
+                  model,
+                  entry,
+                  selected: selected === entry.id,
+                })}{/if}
+              {#each ui.actions as action}
+                {#if action === "download" && entry.href && !isDirectory(entry) && !entry.link?.unavailable}<a
+                    href={safeHref(entry)}
+                    download>{ui.labels.download}</a
                   >
-                  {entry.name}{isDirectory(entry) ? "/" : ""}{/if}</a
-              >{:else}<span
-                >{#if row}{@render row({
-                    model,
-                    entry,
-                    selected: selected === entry.id,
-                  })}{:else}{entry.name}{/if}</span
-              >{/if}{#if entry.link}<small class="target"
-                >{entry.link.unavailable ? "Target unavailable · " : "→ "}{entry
-                  .link.target}</small
-              >{/if}</span
-          >
-          <span class="kind"
-            >{isDirectory(entry) ? "Folder" : size(entry.size)}</span
-          >
-          <button
-            class="timestamp-button"
-            disabled={!ready}
-            onclick={() => (timestamp = entry.modifiedAt)}
-            ><time datetime={entry.modifiedAt}
-              >{modified(entry.modifiedAt, ready)}</time
-            ></button
-          >
+                {:else if action !== "download"}<button
+                    disabled={!ready || (action === "copy-link" && !entry.href)}
+                    aria-label={(action === "copy-link"
+                      ? ui.labels.copyLink
+                      : ui.labels.copyPath) +
+                      ": " +
+                      entry.name}
+                    onclick={async () => {
+                      try {
+                        await copyEntryAction(action, entry);
+                        error = ui.labels.copied;
+                        failure = null;
+                      } catch {
+                        error = ui.labels.copyError;
+                        failure = "copy";
+                      }
+                    }}
+                    >{action === "copy-link"
+                      ? ui.labels.copyLink
+                      : ui.labels.copyPath}</button
+                  >{/if}
+              {/each}
+            </span>{/if}
         </li>
       {/each}
       {#if end < rows.length}<li
@@ -589,42 +717,58 @@
           style:height={offsets[rows.length] - offsets[end] + "px"}
         ></li>{/if}
     </ul>
-    {#if rows.length === 0}<p>No matching entries.</p>{/if}
+    {#if rows.length === 0}<p>{ui.labels.noMatches}</p>{/if}
   </section>
-  {#if model.page?.count > 1 && !complete}<nav aria-label="Pagination">
+  {#if model.page?.count > 1 && !complete}<nav
+      aria-label={ui.labels.pagination}
+    >
       {#if model.page.previousHref}<a rel="prev" href={model.page.previousHref}
-          >Previous</a
-        >{/if} Page {model.page.number} of {model.page.count}
-      {#if model.page.nextHref}<a rel="next" href={model.page.nextHref}>Next</a
+          >{ui.labels.previous}</a
+        >{/if}
+      {label(ui, "page", { page: model.page.number, pages: model.page.count })}
+      {#if model.page.nextHref}<a rel="next" href={model.page.nextHref}
+          >{ui.labels.next}</a
         >{/if}
     </nav>{/if}
-  {#if footer}{@render footer({ model })}{:else}<p class="keyboard-help">
-      Arrow keys select files · Home / End jump · / searches · Backspace opens
-      parent
+  {#if footer}{@render footer({ model })}{:else if ui.brand.footerText}<p
+      class="brand-footer"
+    >
+      {#if ui.brand.footerUrl}<a href={ui.brand.footerUrl}
+          >{ui.brand.footerText}</a
+        >{:else}{ui.brand.footerText}{/if}
+    </p>{:else}<p class="keyboard-help">
+      {ui.labels.keyboardHelp}
     </p>{/if}
 </main>
 {#if timestamp}<dialog
     bind:this={timeDialog}
     onclose={() => (timestamp = null)}
   >
-    <h2>Modified time</h2>
+    <h2>{ui.labels.modifiedTime}</h2>
     <p>{timestamp}</p>
-    <p>{new Date(timestamp).toLocaleString()}</p>
-    <button onclick={() => (timestamp = null)}>Close</button>
+    <p>
+      {ui.dateOptions.locale !== undefined ||
+      ui.dateOptions.timeZone !== undefined
+        ? formattedDate(timestamp, ui, true)
+        : new Date(timestamp).toLocaleString()}
+    </p>
+    <button onclick={() => (timestamp = null)}>{ui.labels.close}</button>
   </dialog>{/if}
 {#if globalOpen}<dialog
     bind:this={globalDialog}
     onclose={() => (globalOpen = false)}
   >
-    <h2>Search archive</h2>
+    <h2>{ui.labels.searchArchive}</h2>
     <input
-      aria-label="Search archive files"
+      aria-label={ui.labels.archiveSearchInput}
       bind:this={globalInput}
       type="search"
       bind:value={globalQuery}
       oninput={searchArchive}
     />
     <p role="status">{globalStatus}</p>
+    {#if archiveFailed}<button onclick={searchArchive}>{ui.labels.retry}</button
+      >{/if}
     <ul>
       {#each globalRows as record}<li>
           {#if record.href}<a
@@ -635,5 +779,5 @@
             >{:else}{record.path}{/if}
         </li>{/each}
     </ul>
-    <button onclick={() => (globalOpen = false)}>Close</button>
+    <button onclick={() => (globalOpen = false)}>{ui.labels.close}</button>
   </dialog>{/if}

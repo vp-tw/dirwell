@@ -4,6 +4,8 @@ import type { ExplorerTheme, GenerateOptions, SortOptions } from "@dirwell/core"
 import { normalizePathPatterns } from "../../core/src/filters.ts";
 
 export interface DirwellConfig {
+  readonly fileHref?: GenerateOptions["fileHref"];
+  readonly entryData?: GenerateOptions["entryData"];
   readonly listing?: GenerateOptions["listing"];
   readonly metadata?: GenerateOptions["metadata"];
   readonly base?: string;
@@ -65,6 +67,10 @@ export function validateConfig(value: unknown): asserts value is DirwellConfig {
   assertOptionalString(config.base, "base");
   normalizePathPatterns(config.include, "include");
   normalizePathPatterns(config.exclude, "exclude");
+  if (config.fileHref !== undefined && typeof config.fileHref !== "function")
+    throw new TypeError("fileHref must be a function");
+  if (config.entryData !== undefined && typeof config.entryData !== "function")
+    throw new TypeError("entryData must be a function");
   resolveIgnoreFiles(config.ignoreFiles);
   if (config.extends !== undefined)
     throw new TypeError("Legacy config extends is unsupported; configure the host explicitly");
@@ -142,6 +148,8 @@ export function resolveGenerateOptions(
     sourceDir,
     outputDir,
     theme: config.theme,
+    ...(config.fileHref === undefined ? {} : { fileHref: config.fileHref }),
+    ...(config.entryData === undefined ? {} : { entryData: config.entryData }),
     ...(config.listing === undefined ? {} : { listing: config.listing }),
     ...(config.metadata === undefined ? {} : { metadata: config.metadata }),
     ...(overrides.base === undefined && config.base === undefined

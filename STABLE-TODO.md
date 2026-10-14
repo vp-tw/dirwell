@@ -233,9 +233,9 @@ All checkboxes are deliberately open. They represent this backlog's acceptance c
 
 ## Implementation progress
 
-- Foundation implemented on the working branch: nested CLI validation, typed config, shared ordered ignore-file selection, explicit output ownership/force, canonical containment, rollback, concurrent-output locks and write-free dry-run reports.
-- Local qualification: 198 Node tests, checks/types, nine packed SDK consumers and Pages-prefix site generation passed. External ignore-file Rollup watch is exercised. PR/current-head CI and delivery readback remain to be completed.
-- Theme customization remains planned under [the accepted design](STABLE-DESIGN.md). No package version has changed and no release has been dispatched.
+- Foundation delivered in [the publication controls PR](https://github.com/vp-tw/dirwell/pull/78): nested CLI validation, typed config, shared ordered ignore-file selection, explicit output ownership/force, canonical containment, rollback, concurrent-output locks and write-free dry-run reports.
+- Local qualification: 198 Node tests, checks/types, nine packed SDK consumers and Pages-prefix site generation passed. External ignore-file Rollup watch is exercised. Exact-head CI passed, including 18 platform/Node consumer jobs; the PR was merged and Pages deployment succeeded. Live documentation readback remains pending.
+- Theme customization is implemented on the working branch under [the accepted design](STABLE-DESIGN.md): shared labels/branding/columns, independent actions, public annotations and static CDN mapping. Local acceptance passed: 206 Node tests, clean packed consumers and the release-download recipe, types/checks, docs generation, desktop/mobile customization, native fallback and paired source actions. This batch is not yet delivered. No package version has changed and no release has been dispatched.
 
 ## Suggested execution order
 

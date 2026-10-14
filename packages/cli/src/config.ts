@@ -82,6 +82,8 @@ function listing(value: unknown, name: string): void {
   }
 }
 const buildKeys = {
+  fileHref: true,
+  entryData: true,
   dryRun: true,
   outputPolicy: true,
   ignoreFiles: true,
@@ -97,6 +99,7 @@ const buildKeys = {
   sort: true,
 } satisfies Record<keyof NonNullable<CliConfig["build"]>, true>;
 const serverKeys = {
+  entryData: true,
   ignoreFiles: true,
   live: true,
   blockSize: true,
@@ -133,7 +136,9 @@ export function validateCliConfig(value: unknown): asserts value is CliConfig {
     patterns(options.exclude, `${mode}.exclude`);
     resolveIgnoreFiles(options.ignoreFiles as CliConfig["ignoreFiles"]);
     sort(options.sort, `${mode}.sort`);
+    scalar(options.entryData, "function", `${mode}.entryData`);
     if (mode === "build") {
+      scalar(options.fileHref, "function", "build.fileHref");
       for (const key of ["base", "mode", "urlStrategy"])
         scalar(options[key], "string", `${mode}.${key}`);
       scalar(options.mirror, "boolean", "build.mirror");

@@ -3,11 +3,25 @@ import { constants } from "node:fs";
 import { fileIdentityMatches } from "./file-identity.ts";
 import path from "node:path";
 import { describeEntry, isInsideRoot } from "./filesystem.ts";
-import { selectSourcePaths, resolveIgnoreFiles, createIgnoreMatcher } from "./filters.ts";
+import {
+  selectSourcePaths,
+  resolveIgnoreFiles,
+  createIgnoreMatcher,
+  normalizePathPatterns,
+} from "./filters.ts";
 import { compareEntries } from "./generator.ts";
-import type { DirectoryData, FileSystemEntry, SortOptions, IgnoreFile } from "./model.ts";
+import { entryDataFacts } from "./listing.ts";
+import { copyJsonObject } from "./json.ts";
+import type {
+  DirectoryData,
+  FileSystemEntry,
+  SortOptions,
+  IgnoreFile,
+  EntryDataProvider,
+} from "./model.ts";
 
 export interface DirectoryServiceOptions {
+  readonly entryData?: EntryDataProvider;
   readonly root: string;
   readonly include?: string | readonly string[];
   readonly exclude?: string | readonly string[];
@@ -49,19 +63,28 @@ export async function createDirectoryService(
   const ignoreFiles = resolveIgnoreFiles(options.ignoreFiles);
   // Validate explicit sources before an HTTP host starts accepting requests.
   await createIgnoreMatcher(ignoreFiles);
-  const selected = async () =>
-    options.include === undefined && options.exclude === undefined && ignoreFiles.length === 0
-      ? null
-      : (
-          await selectSourcePaths(
-            root,
-            path.join(root, "__dirwell"),
-            options.include,
-            options.exclude,
-            [],
-            ignoreFiles,
-          )
-        ).selected;
+  normalizePathPatterns(options.include, "include");
+  normalizePathPatterns(options.exclude, "exclude");
+  const selected = async () => {
+    const matcher = await createIgnoreMatcher(ignoreFiles);
+    if (
+      normalizePathPatterns(options.include, "include").length === 0 &&
+      normalizePathPatterns(options.exclude, "exclude").length === 0 &&
+      !matcher.hasRules
+    )
+      return null;
+    return (
+      await selectSourcePaths(
+        root,
+        path.join(root, "__dirwell"),
+        options.include,
+        options.exclude,
+        [],
+        ignoreFiles,
+        matcher,
+      )
+    ).selected;
+  };
   async function describe(
     logicalPath: string,
     selection: ReadonlySet<string> | null,
@@ -159,13 +182,25 @@ export async function createDirectoryService(
         names
           .filter((name) => selection === null || selection.has(path.posix.join(logicalPath, name)))
           .map(async (name) => {
+            let entry: FileSystemEntry;
             try {
-              return await describe(path.posix.join(logicalPath, name), selection);
+              entry = await describe(path.posix.join(logicalPath, name), selection);
             } catch (error) {
               // An enumerated child may disappear before stat; the directory is still available.
               if (error instanceof Error && "code" in error && error.code === "ENOENT") return null;
               throw error;
             }
+            return options.entryData === undefined
+              ? entry
+              : {
+                  ...entry,
+                  publicData: copyJsonObject(
+                    await options.entryData(entryDataFacts(entry), {
+                      operation: "server",
+                      directoryPath: logicalPath,
+                    }),
+                  ),
+                };
           }),
       );
       const entries = described.filter((entry): entry is FileSystemEntry => entry !== null);

@@ -54,7 +54,7 @@ if (framework === "svelte") {
 await writeFile(path.join(folder, "render-generated.mjs"), serverSource);
 await writeFile(
   path.join(folder, "render-generated.d.mts"),
-  "import type {ThemePage} from '../shared-theme/src/page.ts'; export declare const renderBody: (model: ThemePage & {readonly searchIndexHref?: string}) => string | Promise<string>;\n",
+  "import type {ThemePage} from '../shared-theme/src/page.ts'; export declare const renderBody: (model: ThemePage & {readonly searchIndexHref?: string | null}) => string | Promise<string>;\n",
 );
 {
   await build({
@@ -150,9 +150,10 @@ const componentSource = (await readFile(path.join(folder, "src", componentName),
   .replaceAll("../../shared-theme/src/", "./shared/")
   .replaceAll('icons.ts"', 'icons.mjs"')
   .replaceAll('navigation.ts"', 'navigation.mjs"')
-  .replaceAll('records.ts"', 'records.mjs"');
+  .replaceAll('records.ts"', 'records.mjs"')
+  .replaceAll('customization.ts"', 'customization.mjs"');
 await writeFile(path.join(sourceOutput, componentName), componentSource);
-for (const helper of ["icons", "navigation", "records"]) {
+for (const helper of ["icons", "navigation", "records", "customization"]) {
   await build({
     entryPoints: [path.join(repo, "packages/shared-theme/src", `${helper}.ts`)],
     bundle: true,
@@ -169,10 +170,10 @@ await writeFile(
   framework === "svelte"
     ? `import type {Component, Snippet} from 'svelte';
 import type {ThemePage, RowContext} from '../model.mjs';
-export interface LedgerProps {readonly model: ThemePage; readonly header?: Snippet<[{model: ThemePage}]>; readonly row?: Snippet<[RowContext]>; readonly footer?: Snippet<[{model: ThemePage}]>;}
+export interface LedgerProps {readonly model: ThemePage; readonly header?: Snippet<[{model: ThemePage}]>; readonly row?: Snippet<[RowContext]>; readonly actions?: Snippet<[RowContext]>; readonly footer?: Snippet<[{model: ThemePage}]>;}
 declare const Ledger: Component<LedgerProps>; export default Ledger;\n`
     : `import type {DefineComponent, SlotsType, VNode, ComponentOptionsMixin, PublicProps} from 'vue';
 import type {ThemePage, RowContext} from '../model.mjs';
-export interface CrosswaveSlots {header?: (props: {model: ThemePage}) => VNode[]; row?: (props: RowContext) => VNode[]; footer?: (props: {model: ThemePage}) => VNode[];}
+export interface CrosswaveSlots {header?: (props: {model: ThemePage}) => VNode[]; row?: (props: RowContext) => VNode[]; actions?: (props: RowContext) => VNode[]; footer?: (props: {model: ThemePage}) => VNode[];}
 declare const Crosswave: DefineComponent<{model: ThemePage}, {}, {}, {}, {}, ComponentOptionsMixin, ComponentOptionsMixin, {}, string, PublicProps, {model: ThemePage}, {}, SlotsType<CrosswaveSlots>>; export default Crosswave;\n`,
 );

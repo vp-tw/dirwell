@@ -56,6 +56,7 @@ function entry(value: unknown, base: URL): ListingEntry {
     };
   }
   return {
+    ...(value.data === undefined ? {} : { data: copyJsonObject(value.data) }),
     ...(value.presentation === undefined
       ? {}
       : { presentation: copyJsonObject(value.presentation) }),

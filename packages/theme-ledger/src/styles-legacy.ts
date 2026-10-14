@@ -1,4 +1,9 @@
 export const defaultStyles = `
+.entry-data{min-width:0;overflow-wrap:anywhere}
+
+[data-dirwell-actions] button,[data-dirwell-actions] a{min-height:44px;padding:8px 12px;border:1px solid var(--rule);border-radius:4px;background:var(--control);color:var(--ink)}
+@media(max-width:720px){.entry[data-custom-columns=true]{grid-template-columns:minmax(0,1fr)!important}.entry-head[data-custom-columns=true]{display:none}.entry[data-custom-columns=true]>.kind,.entry[data-custom-columns=true]>.timestamp-button{display:block!important}}
+
 :root {
   color-scheme: light dark;
   --dw-control-height: 2.75rem;
@@ -634,6 +639,7 @@ summary:focus-visible {
   background: var(--accent);
   color: var(--surface);
 }
+.brand-footer { padding: 0.7rem 1.4rem; overflow-wrap: anywhere; }
 footer {
   display: flex;
   align-items: center;

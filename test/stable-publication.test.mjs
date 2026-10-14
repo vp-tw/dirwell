@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { mkdtemp, mkdir, writeFile, readFile, readdir, rm, access } from "node:fs/promises";
+import { chmod, mkdtemp, mkdir, writeFile, readFile, readdir, rm, access } from "node:fs/promises";
 import path from "node:path";
 import { tmpdir } from "node:os";
 import { runCli, defineConfig } from "../packages/cli/dist/index.mjs";
@@ -214,4 +214,55 @@ test("explicit missing ignore files fail before live startup; excluding the sour
     ignoreFiles: [path.join(cwd, ".gitignore")],
   });
   assert.deepEqual((await service.listDirectory("")).entries, []);
+});
+
+test("multiple ignore files can reopen a directory using Git negation semantics", async (context) => {
+  const { cwd, source, output } = await fixture(context);
+  await mkdir(path.join(source, "drafts"));
+  await writeFile(path.join(source, "drafts/a.txt"), "public");
+  const first = path.join(cwd, "first.ignore"),
+    second = path.join(cwd, "second.ignore");
+  await writeFile(first, "drafts/\n");
+  await writeFile(second, "!drafts/\n");
+  const ignoreFiles = [first, second].map((filename) => ({ path: filename, baseDir: source }));
+  await generateExplorer({
+    sourceDir: source,
+    outputDir: output,
+    theme: createPlainTheme(),
+    ignoreFiles,
+  });
+  assert.equal(await readFile(path.join(output, "drafts/a.txt"), "utf8"), "public");
+  const service = await createDirectoryService({ root: source, ignoreFiles });
+  assert((await service.listDirectory("drafts")).entries.some((entry) => entry.name === "a.txt"));
+});
+
+test("optional absent or empty ignore files preserve root-only reads and detect newly added rules", async (context) => {
+  const { cwd, source } = await fixture(context);
+  const nested = path.join(source, "child");
+  await mkdir(nested);
+  const filename = path.join(cwd, "optional.ignore");
+  const service = await createDirectoryService({
+    root: source,
+    include: [],
+    exclude: [],
+    ignoreFiles: [{ path: filename, baseDir: source, optional: true }],
+  });
+  await chmod(nested, 0);
+  try {
+    let denied = false;
+    try {
+      await readdir(nested);
+    } catch (error) {
+      if (error.code === "EACCES") denied = true;
+      else throw error;
+    }
+    assert((await service.listDirectory("")).entries.some((entry) => entry.name === "public.txt"));
+    await writeFile(filename, "# no rules\n");
+    assert((await service.listDirectory("")).entries.some((entry) => entry.name === "private.txt"));
+    await writeFile(filename, "private.txt\n");
+    if (denied) await assert.rejects(service.listDirectory(""), { code: "EACCES" });
+  } finally {
+    await chmod(nested, 0o700);
+  }
+  assert(!(await service.listDirectory("")).entries.some((entry) => entry.name === "private.txt"));
 });

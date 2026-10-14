@@ -3,6 +3,7 @@ import { describeEntry, isInsideRoot } from "./filesystem.ts";
 import {
   listingRevision,
   projectListingEntry,
+  entryDataFacts,
   validateListingPlan,
   type ListingManifest,
 } from "./listing.ts";
@@ -273,16 +274,27 @@ async function generateExplorerUnlocked(
       return selection.selected.has(relativePath.split(path.sep).join("/"));
     });
     const entries = await Promise.all(
-      names.map((name) =>
-        describeEntry({
+      names.map(async (name) => {
+        const entry = await describeEntry({
           absolutePath: path.join(physicalDir, name),
           relativePath: path.posix.join(logicalDir, name),
           rootRealPath,
           ancestors: nextAncestors,
           followSymlinks,
           selectedPaths: filtersActive ? selection.selected : null,
-        }),
-      ),
+        });
+        return options.entryData === undefined
+          ? entry
+          : {
+              ...entry,
+              publicData: copyJsonObject(
+                await options.entryData(entryDataFacts(entry), {
+                  operation: "build",
+                  directoryPath: logicalDir,
+                }),
+              ),
+            };
+      }),
     );
     entries.sort(
       (left, right) =>
@@ -434,6 +446,26 @@ async function generateExplorerUnlocked(
       }
     >();
 
+    const fileHrefs = new Map<string, string | null>();
+    const mappedFileHref = (logicalPath: string): string | null => {
+      if (!fileHrefs.has(logicalPath)) {
+        const href = options.fileHref!(logicalPath);
+        if (
+          href !== null &&
+          (typeof href !== "string" ||
+            href.length === 0 ||
+            href.includes("\\") ||
+            Array.from(href).some((character) => character.charCodeAt(0) < 32) ||
+            !["http:", "https:"].includes(new URL(href, "https://dirwell.invalid/").protocol))
+        )
+          throw new TypeError(
+            "fileHref must return a synchronous HTTP(S), root-relative or relative URL, or null",
+          );
+        fileHrefs.set(logicalPath, href);
+      }
+      return fileHrefs.get(logicalPath)!;
+    };
+
     for (const { directory, logicalDir } of theme.searchIndex === false ? [] : plans) {
       for (const entry of directory.entries) {
         if (searchEntries.has(entry.relativePath)) continue;
@@ -457,6 +489,7 @@ async function generateExplorerUnlocked(
             linkedPath === ""
               ? "../"
               : `../${encodeLogicalPath(linkedPath)}${directoryLike && linkedPath === targetLogicalPath ? "/" : ""}`;
+          if (!directoryLike && options.fileHref !== undefined) href = mappedFileHref(linkedPath);
         }
         searchEntries.set(entry.relativePath, {
           exitsExplorer:
@@ -524,6 +557,8 @@ async function generateExplorerUnlocked(
         if (targetLogicalPath === null) return null;
         const directoryLike =
           entry.kind === "directory" || entry.symlink?.targetKind === "directory";
+        if (!directoryLike && options.fileHref !== undefined)
+          return mappedFileHref(targetLogicalPath);
         return hrefForLogicalPath(targetLogicalPath, directoryLike);
       };
       const baseContext: ThemeContext = {

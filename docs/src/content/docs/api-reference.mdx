@@ -104,3 +104,23 @@ See [SDK examples](../sdk-alpha/) for executed static/live/authorization example
 ## Theme rendering
 
 `ExplorerTheme.render(ThemeContext)` owns a complete document and optional string/byte assets. Context contains private Node-side directory facts, safe link functions, sort settings, optional listing and metadata. Escape untrusted text. Use projected public entries for client data, never absolute paths or raw stat metadata. A theme may add JSON entry data, opt into native pagination and choose whether to generate an archive search index.
+
+## Public annotations and file URL mapping (upcoming stable)
+
+`entryData(entry, context)` is an optional Core build/live-service callback. It receives public logical facts (`id`, `name`, `kind`, `size`, `modifiedAt`, `link`) and `{operation, directoryPath}`; it does not receive private source paths or raw stat records. Return a plain JSON object, synchronously or asynchronously. Values are copied and validated, then exposed as `ListingEntry.data`. This is a public field: publish only information intended for every reader allowed to list that directory.
+
+The callback runs for each selected row, concurrently within a directory, on each build or live listing read. Await all results before rendering, revision calculation or publication. Cache expensive sidecar/remote work in the caller, and keep results deterministic for a coherent live revision. An annotation change affects the listing revision and SSE refresh. This hook changes display data; it does not rename paths, grant access, or expand search scope. Theme-derived `presentation` remains separate.
+
+For static publication, `fileHref(logicalPath)` returns a synchronous HTTP(S), root-relative or relative URL, or `null` to omit the link. It runs once per canonical file path per build and is reused by listing and archive search. Encode each logical path segment before appending it to a CDN URL. Directory links, page/data/assets and unavailable symlink targets retain their existing rules. Combine with `mirror: false` when the files already exist on the host/CDN; otherwise mirroring still copies selected files. The host owns response headers and CDN access control.
+
+```js
+await generateExplorer({
+  sourceDir: "./files",
+  outputDir: "./generated",
+  theme: createPlainTheme(),
+  mirror: false,
+  fileHref: (logicalPath) =>
+    "https://cdn.example.com/releases/" + logicalPath.split("/").map(encodeURIComponent).join("/"),
+  entryData: (entry) => ({ description: annotations[entry.id]?.description ?? "" }),
+});
+```

@@ -11,21 +11,21 @@ The target release is `0.0.1`. Complete the accepted TODOs and their verificatio
 
 ## Selection: scenarios and contract
 
-| Scenario                                                 | Expected result                                                                        |
-| -------------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| CLI runs from a repository and sources a child directory | cwd `.gitignore` applies rules relative to its own directory                           |
-| CLI runs without `.gitignore`                            | Continue; no invented hidden-file exclusions                                           |
-| Core/API or build adapter has no ignoreFiles setting     | No ignore discovery                                                                    |
-| Config sets `ignoreFiles: []`                            | Disable CLI defaults                                                                   |
-| Config uses relative/absolute ignore file paths          | Resolve file paths from execution cwd, independent of config file location             |
-| Shared ignore file lives elsewhere                       | `{path, baseDir}` explicitly scopes its patterns to the source tree                    |
-| Explicit ignore file is absent/unreadable                | Fail before publishing or starting the server; only `optional: true` tolerates absence |
-| Multiple files use negation                              | Apply in configured order; later applicable matching rules decide                      |
-| Ignore rule excludes a parent directory                  | Do not traverse it; negating only a descendant cannot reopen the parent                |
-| Glob include matches an ignored entry                    | Entry remains excluded; include is a selector, not an access/ignore bypass             |
-| Glob exclude matches an unignored entry                  | Glob exclusion wins                                                                    |
-| Live ignore file changes                                 | Subsequent reads use current rules; native links and byte access obey selection        |
-| Source/base has a filesystem path alias                  | Static and live agree after canonicalizing filesystem bases                            |
+| Scenario                                                 | Expected result                                                                              |
+| -------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| CLI runs from a repository and sources a child directory | cwd `.gitignore` applies rules relative to its own directory                                 |
+| CLI runs without `.gitignore`                            | Continue; no invented hidden-file exclusions                                                 |
+| Core/API or build adapter has no ignoreFiles setting     | No ignore discovery                                                                          |
+| Config sets `ignoreFiles: []`                            | Disable CLI defaults                                                                         |
+| Config uses relative/absolute ignore file paths          | Resolve file paths from execution cwd, independent of config file location                   |
+| Shared ignore file lives elsewhere                       | `{path, baseDir}` explicitly scopes its patterns to the source tree                          |
+| Explicit ignore file is absent/unreadable                | Fail before publishing or starting the server; only `optional: true` tolerates absence       |
+| Multiple files use negation                              | Concatenate files in configured order within each base; deeper scopes override parent scopes |
+| Ignore rule excludes a parent directory                  | Do not traverse it; negating only a descendant cannot reopen the parent                      |
+| Glob include matches an ignored entry                    | Entry remains excluded; include is a selector, not an access/ignore bypass                   |
+| Glob exclude matches an unignored entry                  | Glob exclusion wins                                                                          |
+| Live ignore file changes                                 | Subsequent reads use current rules; native links and byte access obey selection              |
+| Source/base has a filesystem path alias                  | Static and live agree after canonicalizing filesystem bases                                  |
 
 Use Git-style syntax via the `ignore` package, not glob parsing. This is explicit ignore-file selection, not a Git index/worktree query: tracked files are not exempt, nested ignore files are not discovered automatically, and global Git settings are not loaded.
 
@@ -69,8 +69,9 @@ For each scenario: specify API and defaults, add one runnable example, implement
 
 ## Work record
 
-- Implemented, in delivery verification: nested CLI configuration validation and typed `defineConfig`.
-- Implemented, in delivery verification: shared ignore-file selection for Core, live service, CLI and build adapters.
-- Implemented, in delivery verification: output ownership, explicit force, rollback, exclusive output locks and dry-run reports.
-- Planned: the five theme scenarios, followed by discovery/docs, SDK/theme benchmarks, integration/device evidence and the release-candidate proof.
+- Delivered in the publication controls PR: nested CLI configuration validation and typed `defineConfig`.
+- Delivered in the publication controls PR: shared ignore-file selection for Core, live service, CLI and build adapters.
+- Delivered in the publication controls PR: output ownership, explicit force, rollback, exclusive output locks and dry-run reports.
+- Implemented locally: the five theme scenarios, public annotations, static file URL mapping and retry/search controls. Verification includes 206 Node tests, nine packed consumers, the installed release-download recipe, translated desktop/mobile action journeys and paired Svelte/Vue source actions. PR delivery remains pending.
+- Remaining: discovery/support policy, SDK/theme benchmarks, history/failure journeys, integration/device evidence and the release-candidate proof.
 - No release has been dispatched and package versions have not been advanced.
