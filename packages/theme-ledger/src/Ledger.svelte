@@ -941,6 +941,7 @@
   </dialog>{/if}
 {#if globalOpen}<dialog
     bind:this={globalDialog}
+    aria-label={ui.labels.searchArchive}
     onclose={closeArchive}
     onkeydown={(event) => {
       if (event.key === "Escape") {

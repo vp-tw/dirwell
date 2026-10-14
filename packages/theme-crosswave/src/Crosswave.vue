@@ -1018,6 +1018,7 @@ onBeforeUnmount(() => {
     v-if="archiveOpen"
     ref="archiveDialog"
     class="cw-archive"
+    :aria-label="ui.labels.searchArchive"
     @close="archiveOpen = false"
     @keydown.esc.prevent.stop="archiveOpen = false"
   >

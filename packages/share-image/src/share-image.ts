@@ -79,9 +79,11 @@ async function loadFace(source: string | URL, role: ImageFace["role"]) {
   });
   let bytes: Buffer;
   try {
-    const size = (await handle.stat()).size;
-    if (size < 12 || size > 32 * 1024 * 1024)
-      throw new TypeError(`fonts.${role} must be at most 32 MiB`);
+    const stats = await handle.stat();
+    if (!stats.isFile()) throw new TypeError(`fonts.${role} must refer to a regular font file`);
+    const size = stats.size;
+    if (size < 12) throw new TypeError(`fonts.${role} must contain a valid TTF or OTF header`);
+    if (size > 32 * 1024 * 1024) throw new TypeError(`fonts.${role} must be at most 32 MiB`);
     const bounded = Buffer.alloc(size + 1);
     let received = 0;
     while (received < bounded.length) {
@@ -99,15 +101,15 @@ async function loadFace(source: string | URL, role: ImageFace["role"]) {
   let font: Font;
   try {
     font = create(bytes) as Font;
+    if (
+      typeof font.layout !== "function" ||
+      !Number.isFinite(font.unitsPerEm) ||
+      font.unitsPerEm <= 0
+    )
+      throw new TypeError("Invalid font metrics");
   } catch (cause) {
     throw new TypeError(`Invalid fonts.${role}`, { cause });
   }
-  if (
-    typeof font.layout !== "function" ||
-    !Number.isFinite(font.unitsPerEm) ||
-    font.unitsPerEm <= 0
-  )
-    throw new TypeError(`Invalid fonts.${role}`);
   return { face: { font, custom: true, role } satisfies ImageFace, bytes };
 }
 function requireGlyphs(value: string, face: ImageFace) {

@@ -28,7 +28,7 @@ for (const [name, create] of [
       const trigger = page.getByRole("button", { name: "Search archive", exact: true });
       await expect(trigger).toBeEnabled();
       await trigger.click();
-      const dialog = page.getByRole("dialog");
+      const dialog = page.getByRole("dialog", { name: "Search archive", exact: true });
       await expect(dialog).toBeVisible();
       if (name === "crosswave") {
         await expect(dialog).toHaveCSS("background-color", "rgb(36, 21, 50)");
