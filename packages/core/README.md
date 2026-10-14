@@ -30,3 +30,5 @@ Stable also adds validated public `entryData` annotations and static `fileHref` 
 JavaScript callers receive the same recognized-option checks as typed consumers: unknown keys, invalid booleans/enums and malformed sort, symlink or listing plans fail before publication writes. Errors name the complete option path and suggest the closest known key. For example, `exlcude` is rejected with a suggestion for `exclude`; `mirror: "false"` is rejected rather than treated as truthy. A listing-policy callback runs after directory inspection, and its returned plan is validated before output replacement.
 
 Custom theme objects may carry extra private fields. Their required name/render and known hooks must match the theme contract. Metadata and annotation callbacks remain trusted executable host code and are awaited where the public contract is asynchronous. These controls are included in `0.0.1`.
+
+The 0.0.x API may evolve. Pin your qualified version and upgrade the official family together. See [support and verification](https://vp-tw.github.io/dirwell/support/) for host, browser and device boundaries.

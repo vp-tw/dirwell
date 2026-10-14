@@ -87,3 +87,5 @@ and archive search are not live-server features.
 pair. When only one is given, the other publication strategy is `all`.
 Mode-specific flags fail when used with the other mode. Legacy dev/daemon
 commands are unsupported; the CLI does not silently translate them.
+
+The 0.0.x API may evolve. Pin your qualified version and upgrade the official family together. See [support and verification](https://vp-tw.github.io/dirwell/support/) for host, browser and device boundaries.

@@ -33,3 +33,5 @@ A native HTML renderer with no runtime npm dependencies, browser JavaScript, ico
 Install with `npm install @dirwell/core@0.0.1 @dirwell/theme-plain@0.0.1` for API use. CLI `0.0.1` includes Plain as its minimal default.
 
 Standalone Plain uses explicit generated index filenames for portable no-JavaScript directory links, including breadcrumbs and parent navigation. Set `portableLinks: false` to prefer native directory URLs.
+
+The 0.0.x API may evolve. Pin your qualified version and upgrade the official family together. See [support and verification](https://vp-tw.github.io/dirwell/support/) for host, browser and device boundaries.

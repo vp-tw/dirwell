@@ -43,3 +43,5 @@ and footer are customizable; official navigation and interaction ownership is
 retained. See [the authoring guide](https://vp-tw.github.io/dirwell/themes/#source-component-customization).
 
 Stable windows more than 500 visible rows using measured heights and a bounded desktop/mobile scroll region. Full directory data still loads before filtering; this is not query loading. Directory query/category controls are shareable, and Back/Forward restores local selection/scroll. See [view behavior](https://vp-tw.github.io/dirwell/themes/#returning-to-a-view-upcoming-stable).
+
+The 0.0.x API may evolve. Pin your qualified version and upgrade the official family together. See [support and verification](https://vp-tw.github.io/dirwell/support/) for host, browser and device boundaries.

@@ -77,3 +77,5 @@ Express 5, Fastify 5 and Hono 4 have executed integration tests. Fetch compatibi
 ## Stable runtime validation
 
 Handler configuration rejects unknown keys, invalid callbacks and malformed listing/live options before filesystem initialization. Sort and selection use Core's validated directory-service contract. The standalone Node helper separately checks `host` and integer `port` (0–65535) before opening a socket; those transport fields are not passed to Core or the Fetch handler. Custom theme objects remain extensible while their known render/hooks/listing contract is checked. These controls are included in `0.0.1`.
+
+The 0.0.x API may evolve. Pin your qualified version and upgrade the official family together. See [support and verification](https://vp-tw.github.io/dirwell/support/) for host, browser and device boundaries.

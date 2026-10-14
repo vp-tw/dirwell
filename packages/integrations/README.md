@@ -30,3 +30,5 @@ The adapters retain existing build/watch and Vite/Farm generated-preview behavio
 ## Stable configuration validation
 
 Unknown top-level and nested sort/symlink/listing keys fail before the adapter publishes output. Errors name the config path and suggest the closest known key. `cwd` and `outputPath` belong to adapters; server startup belongs to the host. `defineConfig` validates object configuration immediately and retains lazy callback factories; their resolved result must pass validation when supplied to the adapter. These checks are included in `0.0.1`.
+
+The 0.0.x API may evolve. Pin your qualified version and upgrade the official family together. See [support and verification](https://vp-tw.github.io/dirwell/support/) for host, browser and device boundaries.

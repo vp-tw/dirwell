@@ -43,3 +43,5 @@ and footer are customizable; official navigation and interaction ownership is
 retained. See [the authoring guide](https://vp-tw.github.io/dirwell/themes/#source-component-customization).
 
 Stable shares directory query/sort/type controls through URL parameters and restores per-entry History selection/scroll. Failed navigation retains the previous view and offers retry/native navigation. See [view behavior](https://vp-tw.github.io/dirwell/themes/#returning-to-a-view-upcoming-stable).
+
+The 0.0.x API may evolve. Pin your qualified version and upgrade the official family together. See [support and verification](https://vp-tw.github.io/dirwell/support/) for host, browser and device boundaries.

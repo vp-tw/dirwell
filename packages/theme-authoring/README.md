@@ -98,3 +98,5 @@ before compilation, so partial editor writes can recover cleanly. Compiler error
 produce Vite's overlay and recover after a valid edit. Development CSS loads
 through Vite's client, so production output is the no-JavaScript/CSS acceptance
 path. No Farm watcher is involved.
+
+The 0.0.x API may evolve. Pin your qualified version and upgrade the official family together. See [support and verification](https://vp-tw.github.io/dirwell/support/) for host, browser and device boundaries.
