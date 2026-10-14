@@ -140,3 +140,33 @@ test("CLI configuration enables bounded queries and timeout releases capacity", 
     slow = false;
     assert.equal((await handler(request("?q=txt"))).status, 200);
   }));
+
+test("cancelling an async header hook immediately releases query capacity", () =>
+  fixture(async (root) => {
+    let entered, release;
+    const reached = new Promise((resolve) => (entered = resolve));
+    const gate = new Promise((resolve) => (release = resolve));
+    let first = true;
+    const handler = await createExplorerHandler({
+      root,
+      search: { maxConcurrent: 1 },
+      headers: async () => {
+        if (first) {
+          first = false;
+          entered();
+          await gate;
+        }
+        return {};
+      },
+    });
+    const controller = new AbortController();
+    const pending = handler(request("?q=txt", { signal: controller.signal }));
+    await reached;
+    controller.abort();
+    try {
+      assert.equal((await pending).status, 503);
+      assert.equal((await handler(request("?q=txt"))).status, 200);
+    } finally {
+      release();
+    }
+  }));

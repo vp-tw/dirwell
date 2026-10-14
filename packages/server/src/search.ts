@@ -8,6 +8,28 @@ export interface LiveSearchOptions {
   readonly timeoutMs?: number;
   readonly refreshIntervalMs?: number;
 }
+async function abortable<T>(signal: AbortSignal, operation: () => Promise<T>): Promise<T> {
+  signal.throwIfAborted();
+  return new Promise<T>((resolve, reject) => {
+    const abort = () => reject(signal.reason);
+    signal.addEventListener("abort", abort, { once: true });
+    Promise.resolve()
+      .then(() => {
+        signal.throwIfAborted();
+        return operation();
+      })
+      .then(
+        (value) => {
+          signal.removeEventListener("abort", abort);
+          resolve(value);
+        },
+        (error) => {
+          signal.removeEventListener("abort", abort);
+          reject(error);
+        },
+      );
+  });
+}
 const fold = (value: string) => value.normalize("NFKC").toLowerCase();
 const encode = (value: string) => value.split("/").map(encodeURIComponent).join("/");
 export function createSearchHandler(
@@ -55,23 +77,9 @@ export function createSearchHandler(
     const signal = AbortSignal.any([request.signal, AbortSignal.timeout(config.timeoutMs ?? 5000)]);
     const authorized = async (logical: string): Promise<boolean> => {
       signal.throwIfAborted();
-      if (!options.authorize) return true;
-      return new Promise<boolean>((resolve, reject) => {
-        const abort = () => reject(signal.reason);
-        signal.addEventListener("abort", abort, { once: true });
-        Promise.resolve()
-          .then(() => options.authorize!(request, logical))
-          .then(
-            (value) => {
-              signal.removeEventListener("abort", abort);
-              resolve(value === true);
-            },
-            (error) => {
-              signal.removeEventListener("abort", abort);
-              reject(error);
-            },
-          );
-      });
+      const authorize = options.authorize;
+      if (!authorize) return true;
+      return abortable(signal, async () => (await authorize(request, logical)) === true);
     };
     try {
       if (!(await authorized(subtree))) return response("Forbidden", 403);
@@ -104,12 +112,14 @@ export function createSearchHandler(
             : (options.fileHref?.(entry.relativePath) ??
               (options.files ? `${mount}/files/${encode(entry.relativePath)}` : null)),
       }));
-      const headers = await headersFor(
-        request,
-        new Headers({
-          "content-type": "application/json; charset=utf-8",
-          "x-content-type-options": "nosniff",
-        }),
+      const headers = await abortable(signal, () =>
+        headersFor(
+          request,
+          new Headers({
+            "content-type": "application/json; charset=utf-8",
+            "x-content-type-options": "nosniff",
+          }),
+        ),
       );
       // Search results are always request-local, including when the host customizes headers.
       headers.set("cache-control", options.authorize ? "private, no-store" : "no-store");

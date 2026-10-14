@@ -71,8 +71,15 @@ test("font validation reports unsupported sources, formats, oversized bytes and 
       /Cannot read fonts.body/,
     );
     const path = join(dir, "bad.ttf");
+    await writeFile(path, Buffer.alloc(0));
+    await assert.rejects(bytes({ ...options, fonts: { body: path } }), /valid TTF or OTF header/);
+    await assert.rejects(bytes({ ...options, fonts: { body: dir } }), /regular font file/);
     await writeFile(path, Buffer.alloc(16));
     await assert.rejects(bytes({ ...options, fonts: { body: path } }), /single TTF or OTF/);
+    const broken = Buffer.alloc(16);
+    broken.writeUInt32BE(0x00010000);
+    await writeFile(path, broken);
+    await assert.rejects(bytes({ ...options, fonts: { body: path } }), /Invalid fonts.body/);
     const file = await open(path, "w");
     await file.truncate(32 * 1024 * 1024 + 1);
     await file.close();
@@ -80,4 +87,17 @@ test("font validation reports unsupported sources, formats, oversized bytes and 
   } finally {
     await rm(dir, { recursive: true, force: true });
   }
+});
+
+test("long decomposed Unicode text stays deterministic within the image bounds", async () => {
+  const input = {
+    title: "e\u0301".repeat(20000),
+    description: "Sample files",
+    fonts: { body: sans },
+  };
+  const image = await bytes(input);
+  assert.deepEqual(image, await bytes(input));
+  assert.equal(image.readUInt32BE(16), 1200);
+  assert.equal(image.readUInt32BE(20), 630);
+  assert(image.length < 500000);
 });
