@@ -48,7 +48,12 @@ assert.deepEqual(
   Object.keys(lightLock.packages)
     .filter((name) => name)
     .sort(),
-  ["node_modules/@dirwell/core", "node_modules/@dirwell/theme-plain", "node_modules/picomatch"],
+  [
+    "node_modules/@dirwell/core",
+    "node_modules/@dirwell/theme-plain",
+    "node_modules/ignore",
+    "node_modules/picomatch",
+  ],
 );
 await writeFile(
   path.join(lightweight, "consumer.mjs"),
@@ -79,7 +84,7 @@ const report = {
   checkedAt: new Date().toISOString(),
   trial,
   tarballs,
-  lightweightDependencies: ["@dirwell/core", "@dirwell/theme-plain", "picomatch"],
+  lightweightDependencies: ["@dirwell/core", "@dirwell/theme-plain", "picomatch", "ignore"],
   reports,
   limits: [
     "Local packed artifacts; no registry publication.",

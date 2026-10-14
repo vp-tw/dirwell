@@ -29,12 +29,17 @@ explicitly when needed. `PORT` is accepted for proxies such as Portless. Port pr
 Plain remains script-free. Server mode does not generate a tree or need a
 filesystem watcher. Theme-source HMR belongs to the optional authoring package.
 
-## Select or customize a theme
+## Upcoming stable selection and output controls
 
-For repeated project use, install the CLI and the theme you want. Both this CLI
-and the compatibility package expose `dirwell`; replace the old CLI dependency
-instead of installing both in the same project. Keep compatibility API consumers
-on their existing line until they are migrated:
+These controls are under development and are not available in the published alpha.
+
+The CLI reads an optional `.gitignore` in cwd by default. Use repeatable `--ignore-file <path>` to replace that list, or `--no-ignore` to disable it. Config supports shared `ignoreFiles`, overridden by `build.ignoreFiles` or `server.ignoreFiles`; `[]` disables defaults. Paths resolve from cwd; rules use the file's directory as their base. Use `{ path, baseDir, optional }` for shared rules or optional files. Glob exclusions always win, and include globs do not bypass ignore rules.
+
+Builds replace missing, empty or Dirwell-marked output directories. A nonempty unmarked directory requires `--force` / `-f`; force never permits replacing source or a symlink/file destination. `--dry-run` reports selection and planned directory pages without writing output. `defineConfig` from `@dirwell/cli` provides editor types and runtime validation; nested option typos fail before build/server startup.
+
+## Theme selection and customization
+
+For repeated project use, install the CLI and the theme you want:
 
 ```sh
 npm install --save-dev @dirwell/cli@alpha @dirwell/theme-ledger@alpha
@@ -63,14 +68,14 @@ Then run either command without `--theme`. `--config ./other.mjs` selects anothe
 JavaScript module. Configuration is executable trusted project code, loaded by
 Node without a config loader or TypeScript compiler. Theme precedence is
 `--theme`, then `config.theme`, then Plain. A missing default file is optional;
-an explicit missing file or a broken config fails visibly. If only a legacy
+an explicit missing file or a broken config fails visibly. If only an unsupported
 `dirwell.config.ts`, `.mts`, `.js` or `.cjs` exists, the CLI stops and asks for
-migration or explicit `--config` selection rather than ignoring selection rules.
+renaming or explicit `--config` selection rather than ignoring selection rules.
 Automatic discovery uses only `.mjs`; explicit config must run as native JavaScript
 on your supported Node version.
 
 The config exports only `{ theme, listing, build, server }`; unknown top-level
-keys fail instead of silently dropping legacy options. Put `exclude`/`include`
+keys fail instead of silently dropping options. Put `exclude`/`include`
 in `build` and/or `server`. Export a resolved object, using top-level await
 for asynchronous setup. Shared `listing` accepts
 fixed plans or per-directory callbacks. `build` retains core filtering, sorting,

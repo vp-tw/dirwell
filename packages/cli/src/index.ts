@@ -3,12 +3,15 @@ import { access, stat } from "node:fs/promises";
 import { pathToFileURL } from "node:url";
 import { resolve as resolveModule } from "import-meta-resolve";
 import { parseArgs } from "node:util";
-import { generateExplorer } from "@dirwell/core";
+import { generateExplorer, resolveIgnoreFiles } from "@dirwell/core";
 import type { ExplorerTheme, ListingPolicy, GenerateOptions } from "@dirwell/core";
 import { createPlainTheme } from "@dirwell/theme-plain";
 import { startExplorerServer } from "@dirwell/server/node";
+import { validateCliConfig } from "./config.ts";
+export { defineConfig } from "./config.ts";
 
 export interface CliConfig {
+  readonly ignoreFiles?: GenerateOptions["ignoreFiles"];
   readonly build?: Omit<GenerateOptions, "sourceDir" | "outputDir" | "theme" | "listing">;
   readonly theme?: ExplorerTheme;
   readonly listing?: ListingPolicy;
@@ -24,6 +27,8 @@ Custom themes: --theme <module>#<factory>, or a module's default export.
 Reads dirwell.config.mjs in the working folder; --config <file.mjs> selects another file.
 Config exports theme, listing, build options, and server hooks.
 Build options: --mode ssg|mpa, --urls relative|base|html-base, --base <path>
+Build safety: --dry-run, --force (-f) replaces an unowned nonempty output.
+Selection: --ignore-file <path> (repeatable), --no-ignore disables ignore files.
 Server options: --host <host>, --port <port>, --mount <path>, --live
 Both modes: --page-size <n>, --block-size <n>
 Live server reads on request. It does not build an output tree or require watch mode.
@@ -99,6 +104,10 @@ export async function runCli(
     allowPositionals: true,
     options: {
       help: { type: "boolean", short: "h" },
+      force: { type: "boolean", short: "f" },
+      "dry-run": { type: "boolean" },
+      "ignore-file": { type: "string", multiple: true },
+      "no-ignore": { type: "boolean" },
       live: { type: "boolean" },
       theme: { type: "string" },
       config: { type: "string" },
@@ -126,7 +135,9 @@ export async function runCli(
   )
     throw new TypeError(help);
   const otherModeOptions =
-    command === "build" ? ["host", "port", "mount", "live"] : ["out", "mode", "urls", "base"];
+    command === "build"
+      ? ["host", "port", "mount", "live"]
+      : ["out", "mode", "urls", "base", "force", "dry-run"];
   for (const option of otherModeOptions)
     if (Object.hasOwn(parsed.values, option))
       throw new TypeError(`--${option} is not supported in ${command} mode`);
@@ -168,7 +179,7 @@ export async function runCli(
     )
       throw new TypeError("Config must export an object");
     for (const key of Object.keys(module.default))
-      if (!["theme", "listing", "build", "server"].includes(key))
+      if (!["theme", "listing", "build", "server", "ignoreFiles"].includes(key))
         throw new TypeError(
           `Unsupported config key "${key}". Use { theme, listing, build, server }; selection rules belong in build/server.`,
         );
@@ -176,6 +187,7 @@ export async function runCli(
       throw new TypeError(
         "Config must export a resolved object; use top-level await for async setup",
       );
+    validateCliConfig(module.default);
     config = module.default;
   }
   const theme =
@@ -197,6 +209,17 @@ export async function runCli(
   const root = path.resolve(cwd, source);
   if (!(await stat(root)).isDirectory())
     throw new TypeError("Source must be an existing directory");
+  if (parsed.values["no-ignore"] && parsed.values["ignore-file"])
+    throw new TypeError("--no-ignore cannot be combined with --ignore-file");
+  const modeOptions = command === "build" ? config.build : config.server;
+  const ignoreFiles = resolveIgnoreFiles(
+    parsed.values["no-ignore"]
+      ? []
+      : (parsed.values["ignore-file"] ??
+          modeOptions?.ignoreFiles ??
+          config.ignoreFiles ?? [{ path: ".gitignore", optional: true }]),
+    cwd,
+  );
   if (command === "build") {
     if (parsed.values.out === undefined)
       throw new TypeError("Build requires --out pointing to a dedicated generated output tree");
@@ -205,17 +228,33 @@ export async function runCli(
     if (mode !== "ssg" && mode !== "mpa") throw new TypeError("mode must be ssg or mpa");
     if (!["relative", "base", "html-base"].includes(urlStrategy))
       throw new TypeError("Unknown URL strategy");
-    await generateExplorer({
+    const report = await generateExplorer({
       ...config.build,
       sourceDir: root,
       outputDir: path.resolve(cwd, parsed.values.out),
       theme,
+      ignoreFiles,
+      ...(parsed.values.force ? { outputPolicy: "replace" } : {}),
+      ...(parsed.values["dry-run"] ? { dryRun: true } : {}),
       mode,
       urlStrategy: urlStrategy as "relative" | "base" | "html-base",
       ...(parsed.values.base === undefined ? {} : { base: parsed.values.base }),
       ...(listing === undefined ? {} : { listing }),
     });
-    log(`Built ${parsed.values.out}`);
+    if (report.dryRun) log(JSON.stringify(report, null, 2));
+    else {
+      log(`Built ${parsed.values.out}`);
+      log(
+        `${report.selectedPaths.length} selected paths; ${report.pages.filter((page) => page.outputName !== null).length} directory pages; ${report.pages.filter((page) => page.outputName === null).length} skipped pages.`,
+      );
+      for (const page of report.pages)
+        if (page.directory === "" || page.outputName === null)
+          log(
+            page.outputName === null
+              ? `Skipped explorer page: ${page.directory || "/"}`
+              : `Explorer entry: ${path.join(report.outputDir, page.outputName)}`,
+          );
+    }
     return null;
   }
   const port = Number(parsed.values.port ?? process.env.PORT ?? config.server?.port ?? 0);
@@ -226,6 +265,7 @@ export async function runCli(
     ...(parsed.values.live ? { live: config.server?.live || {} } : {}),
     root,
     theme,
+    ignoreFiles,
     port,
     ...(listing === undefined ? {} : { listing }),
     ...(pageSize === undefined ? {} : { pageSize }),

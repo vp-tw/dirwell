@@ -6,7 +6,7 @@ import path from "node:path";
 import { createVitePlugin } from "unplugin";
 import type { ResolvedConfig, ViteDevServer } from "vite";
 import { resolveGenerateOptions, validateConfig, type DirwellConfig } from "./config.ts";
-import { generateExplorer, generateExplorerSkippingPaths } from "@dirwell/core";
+import { generateExplorer, generateExplorerSkippingPaths, resolveIgnoreFiles } from "@dirwell/core";
 import { assertSafeMirroredSymlinks, canonicalPath, isWithin } from "./plugin-safety.ts";
 
 /** Dirwell configuration with an output path relative to the Vite project root or absolute. */
@@ -256,7 +256,14 @@ function createDirwellPlugin(
           });
           watchListener = (_event, changedPath) => {
             const changed = path.resolve(changedPath);
-            if (!isWithin(runtime.sourceDir, changed) && !isWithin(runtime.sourceReal, changed))
+            const ignorePaths = resolveIgnoreFiles(runtime.generate.ignoreFiles).map(
+              (file) => file.path,
+            );
+            if (
+              !isWithin(runtime.sourceDir, changed) &&
+              !isWithin(runtime.sourceReal, changed) &&
+              !ignorePaths.includes(changed)
+            )
               return;
             if (timer !== undefined) clearTimeout(timer);
             timer = setTimeout(() => {
@@ -264,6 +271,9 @@ function createDirwellPlugin(
             }, 75);
           };
           viteServer.watcher.add(runtime.sourceDir);
+          viteServer.watcher.add(
+            resolveIgnoreFiles(runtime.generate.ignoreFiles).map((file) => file.path),
+          );
           viteServer.watcher.on("all", watchListener);
         },
         async closeServer() {

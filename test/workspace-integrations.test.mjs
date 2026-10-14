@@ -144,3 +144,45 @@ test("new Vite adapter uses explicit theme and protects an unowned output", asyn
   await rm(path.join(root, "dist/dirwell/.dirwell-vite-output"));
   await assert.rejects(build(config), /unowned/);
 });
+
+test("a configured ignore file outside the source triggers Rollup watch and removes stale output", async (context) => {
+  const root = await fixture(context);
+  const filename = path.join(root, "publication.ignore");
+  await writeFile(filename, "");
+  const api = await import("rollup");
+  let resolveBuild, rejectBuild;
+  const nextBuild = () =>
+    new Promise((resolve, reject) => {
+      resolveBuild = resolve;
+      rejectBuild = reject;
+    });
+  let ready = nextBuild();
+  const watcher = api.watch({
+    input: path.join(root, "entry.js"),
+    output: { dir: path.join(root, "dist") },
+    plugins: unplugin.rollup({
+      cwd: root,
+      root: "files",
+      theme: createPlainTheme(),
+      ignoreFiles: [{ path: "publication.ignore", baseDir: "files" }],
+    }),
+  });
+  context.after(() => watcher.close());
+  watcher.on("event", async (event) => {
+    if (event.code === "ERROR") rejectBuild(event.error);
+    if (event.code === "BUNDLE_END") {
+      await event.result.close();
+      resolveBuild();
+    }
+  });
+  await ready;
+  assert.match(await readFile(path.join(root, "dist/dirwell/index.html"), "utf8"), /note.txt/);
+  ready = nextBuild();
+  await writeFile(filename, "note.txt\n");
+  await ready;
+  assert.doesNotMatch(
+    await readFile(path.join(root, "dist/dirwell/index.html"), "utf8"),
+    /note.txt/,
+  );
+  await assert.rejects(readFile(path.join(root, "dist/dirwell/note.txt")), { code: "ENOENT" });
+});

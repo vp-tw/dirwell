@@ -24,3 +24,29 @@ license. MIME estimates do not validate file contents or change serving headers.
 ## Adobe Source fonts
 
 Source Sans 3, Source Serif 4, and Source Code Pro are bundled under the SIL Open Font License 1.1. Their original licenses and pinned source manifests are in `dist/fonts/`. Source repositories: https://github.com/adobe-fonts/source-sans and https://github.com/adobe-fonts/source-serif, and https://github.com/adobe-fonts/source-code-pro.
+
+## ignore
+
+Git-style matching uses ignore 7.0.12, bundled where filesystem selection is compiled into a package.
+
+Copyright (c) 2013 Kael Zhang <i@kael.me>, contributors
+http://kael.me/
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.

@@ -18,6 +18,7 @@ test("paginated-capable themes cannot replace archive files with their own asset
     generateExplorer({
       sourceDir,
       outputDir,
+      outputPolicy: "replace",
       theme: {
         name: "fixture",
         listing: { pagination: true },

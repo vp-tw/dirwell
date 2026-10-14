@@ -86,14 +86,15 @@ for (const [slug, name, child, childCounts] of [
   });
 }
 
-test("the public Plain example opts out of metadata and emits only listing pages", async (context) => {
+test("the public Plain example emits listing pages and an inert ownership marker", async (context) => {
   const { default: config } = await import("../examples/plain/config.ts");
   assert.equal("metadata" in config, false);
   const outputDir = await mkdtemp(path.join(tmpdir(), "dirwell-plain-minimal-"));
   context.after(() => rm(outputDir, { recursive: true, force: true }));
   for (const mode of ["ssg", "mpa"] as const) {
     await generateExplorer({ ...config, mode, mirror: false, outputDir });
-    assert.deepEqual(await readdir(outputDir), ["index.html", "releases"]);
+    assert.deepEqual(await readdir(outputDir), ["__dirwell", "index.html", "releases"]);
+    assert.deepEqual(await readdir(path.join(outputDir, "__dirwell")), ["ownership.json"]);
     const html = await readFile(path.join(outputDir, "index.html"), "utf8");
     assert.match(html, /<title>Index of \/<\/title>/);
     assert.doesNotMatch(html, /og:|twitter:|@font-face|<footer|<script/);

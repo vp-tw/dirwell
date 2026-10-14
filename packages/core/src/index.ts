@@ -13,4 +13,5 @@ export type * from "./metadata.ts";
 export { createDirectoryService, DirectoryAccessError } from "./service.ts";
 export type { DirectoryService, DirectoryServiceOptions } from "./service.ts";
 export { copyJsonObject } from "./json.ts";
+export { resolveIgnoreFiles } from "./filters.ts";
 export type { JsonObject, JsonValue } from "./json.ts";

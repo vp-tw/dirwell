@@ -3,14 +3,15 @@ import { constants } from "node:fs";
 import { fileIdentityMatches } from "./file-identity.ts";
 import path from "node:path";
 import { describeEntry, isInsideRoot } from "./filesystem.ts";
-import { selectSourcePaths } from "./filters.ts";
+import { selectSourcePaths, resolveIgnoreFiles, createIgnoreMatcher } from "./filters.ts";
 import { compareEntries } from "./generator.ts";
-import type { DirectoryData, FileSystemEntry, SortOptions } from "./model.ts";
+import type { DirectoryData, FileSystemEntry, SortOptions, IgnoreFile } from "./model.ts";
 
 export interface DirectoryServiceOptions {
   readonly root: string;
   readonly include?: string | readonly string[];
   readonly exclude?: string | readonly string[];
+  readonly ignoreFiles?: readonly IgnoreFile[];
   readonly sort?: SortOptions;
 }
 export interface DirectoryService {
@@ -45,8 +46,11 @@ export async function createDirectoryService(
   options: DirectoryServiceOptions,
 ): Promise<DirectoryService> {
   const root = await realpath(options.root);
+  const ignoreFiles = resolveIgnoreFiles(options.ignoreFiles);
+  // Validate explicit sources before an HTTP host starts accepting requests.
+  await createIgnoreMatcher(ignoreFiles);
   const selected = async () =>
-    options.include === undefined && options.exclude === undefined
+    options.include === undefined && options.exclude === undefined && ignoreFiles.length === 0
       ? null
       : (
           await selectSourcePaths(
@@ -54,6 +58,8 @@ export async function createDirectoryService(
             path.join(root, "__dirwell"),
             options.include,
             options.exclude,
+            [],
+            ignoreFiles,
           )
         ).selected;
   async function describe(
