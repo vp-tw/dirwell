@@ -256,3 +256,7 @@ Checkboxes represent this backlog's complete acceptance criteria. B1/B2/B3/B4/C1
 - Reproduced nested config-key acceptance and no-mirror native-link behavior against the current built SDK in an isolated temporary folder with dummy files. Neither test touched a real secret or production output.
 - Retrieved the live homepage, theme guide and API reference successfully. npm HTML browsing was unavailable through the web fetcher; tarballs and registry metadata supplied primary package evidence. Public npm link rendering remains an A1 acceptance check.
 - Did not rerun the full test suite, browser journeys, performance suite, consumer security audit or physical-device checks for this audit. Items requiring those checks remain open instead of being described as regressions.
+
+## Private integration acceptance in progress
+
+The private-downloads example composes an existing application session, approved root, response nonce CSP and typed document/style asset extension. Six Chromium/Firefox/WebKit cases passed for Ledger/Crosswave: denial across route surfaces and ranges/conditionals, selected-byte access, outside/excluded aliases, encoded folder navigation/Back, live updates, current-session revocation and SSE closure, fresh document nonces, preserved application head/styles and no unexpected CSP violations. These are synthetic sessions/local files, not a production identity or hostile-filesystem proof. PR delivery remains pending.

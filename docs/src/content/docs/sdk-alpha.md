@@ -155,3 +155,9 @@ loopback with native Vite HMR. It is separate from production server mode and
 from file-revision SSE. CSS-only changes preserve state; wrapper/template edits
 can remount children and reset search/selection. Core and Plain do not depend on
 these tools. The published alpha includes both framework compilers and their matching SSR/client output.
+
+## Private downloads behind an existing application session
+
+Use a fixed approved root and resolve the current application session on every request. The [private-downloads recipe](https://github.com/vp-tw/dirwell/tree/main/examples/private-downloads) gates HTML, JSON, blocks, theme assets, ranges, conditional requests and SSE; its authorization callback rechecks revocation while SSE is active. It composes a fresh CSP nonce for trusted rendered documents.
+
+An allowed parent listing reveals selected child names. Separate tenant/role roots or explicit publication selection establish the names boundary; the hook is not row redaction. Keep private-target aliases out of an approved tree. Already delivered content and downloads cannot be retracted after revocation. The recipe provides no identity provider, cookie issuer or session store; the host supplies a current same-origin session and owns shutdown.
