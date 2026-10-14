@@ -14,7 +14,6 @@ import {
   readFile,
   readdir,
   realpath,
-  rename,
   rm,
   writeFile,
 } from "node:fs/promises";
@@ -32,6 +31,15 @@ import type {
   ThemeContext,
 } from "./model.ts";
 import { selectSourcePaths } from "./filters.ts";
+import {
+  checkOutput,
+  publishOutput,
+  outputMarker,
+  outputMarkerContents,
+  lockOutput,
+  canonicalPath,
+} from "./publication.ts";
+import type { BuildReport } from "./model.ts";
 
 const indexPattern = /^index\.html?$/i;
 
@@ -140,7 +148,7 @@ function rawLinkFilename(entry: FileSystemEntry): string {
     .slice(0, 16)}.txt`;
 }
 
-export async function generateExplorer(options: GenerateOptions): Promise<void> {
+export async function generateExplorer(options: GenerateOptions): Promise<BuildReport> {
   return generateExplorerSkippingPaths(options, []);
 }
 
@@ -148,11 +156,29 @@ export async function generateExplorer(options: GenerateOptions): Promise<void> 
 export async function generateExplorerSkippingPaths(
   options: GenerateOptions,
   ignoredPaths: readonly string[],
-): Promise<void> {
-  const sourceDir = path.resolve(options.sourceDir);
-  const outputDir = path.resolve(options.outputDir);
+): Promise<BuildReport> {
+  const source = path.resolve(options.sourceDir),
+    output = path.resolve(options.outputDir);
+  await checkOutput(source, output, options.outputPolicy);
+  if (options.dryRun) return generateExplorerUnlocked(options, ignoredPaths);
+  const lock = await lockOutput(output);
+  const lexicalLock = path.join(path.dirname(output), path.basename(lock.lockPath));
+  try {
+    return await generateExplorerUnlocked(options, [...ignoredPaths, lock.lockPath, lexicalLock]);
+  } finally {
+    await lock.release();
+  }
+}
+
+async function generateExplorerUnlocked(
+  options: GenerateOptions,
+  ignoredPaths: readonly string[],
+): Promise<BuildReport> {
+  const sourceDir = await realpath(path.resolve(options.sourceDir));
+  const outputDir = await canonicalPath(path.resolve(options.outputDir));
   const ignoredSourcePaths = ignoredPaths.map((value) => path.resolve(value));
   const rootRealPath = await realpath(sourceDir);
+  const replacesOutput = await checkOutput(sourceDir, outputDir, options.outputPolicy);
   const outputName = options.outputName ?? defaultOutputName;
   const resolveOutputName: OutputNameResolver =
     typeof outputName === "string" ? () => outputName : outputName;
@@ -165,7 +191,10 @@ export async function generateExplorerSkippingPaths(
   const boundary = options.symlinks?.boundary ?? "root";
   const onCycle = options.symlinks?.onCycle ?? "skip";
   const filtersActive =
-    options.include !== undefined || options.exclude !== undefined || ignoredSourcePaths.length > 0;
+    options.include !== undefined ||
+    options.exclude !== undefined ||
+    (options.ignoreFiles?.length ?? 0) > 0 ||
+    ignoredSourcePaths.length > 0;
   const plans: Array<{
     readonly directory: DirectoryData;
     readonly logicalDir: string;
@@ -191,16 +220,17 @@ export async function generateExplorerSkippingPaths(
     options.include,
     options.exclude,
     ignoredSourcePaths,
+    options.ignoreFiles,
   );
   const stageParent = outputIsWithinSource ? path.dirname(sourceDir) : path.dirname(outputDir);
-  await mkdir(stageParent, { recursive: true });
-  const stagedOutputDir = await mkdtemp(
-    path.join(stageParent, `.${path.basename(outputDir)}-dirwell-`),
-  );
-  const buildOutputDir = stagedOutputDir;
+  if (!options.dryRun) await mkdir(stageParent, { recursive: true });
+  const stagedOutputDir = options.dryRun
+    ? null
+    : await mkdtemp(path.join(stageParent, `.${path.basename(outputDir)}-dirwell-`));
+  const buildOutputDir = stagedOutputDir!;
 
   try {
-    if (options.mirror ?? true) {
+    if (!options.dryRun && (options.mirror ?? true)) {
       await rm(buildOutputDir, { recursive: true, force: true });
       await mkdir(buildOutputDir, { recursive: true });
       await cp(sourceDir, buildOutputDir, {
@@ -217,7 +247,7 @@ export async function generateExplorerSkippingPaths(
       });
     }
   } catch (error) {
-    await rm(stagedOutputDir, { recursive: true, force: true });
+    if (stagedOutputDir !== null) await rm(stagedOutputDir, { recursive: true, force: true });
     throw error;
   }
 
@@ -349,6 +379,18 @@ export async function generateExplorerSkippingPaths(
 
   try {
     await visit("", sourceDir, new Set());
+
+    const report: BuildReport = {
+      sourceDir,
+      outputDir,
+      theme: theme.name,
+      dryRun: options.dryRun ?? false,
+      mirror: options.mirror ?? true,
+      replacesOutput,
+      selectedPaths: [...selection.selected].filter(Boolean).sort(),
+      pages: plans.map((plan) => ({ directory: plan.logicalDir, outputName: plan.outputName })),
+    };
+    if (options.dryRun) return report;
 
     const generatedPages = new Map(
       plans
@@ -736,11 +778,12 @@ export async function generateExplorerSkippingPaths(
       );
     }
 
-    await rm(outputDir, { recursive: true, force: true });
-    await mkdir(path.dirname(outputDir), { recursive: true });
-    await rename(stagedOutputDir, outputDir);
+    await mkdir(path.join(buildOutputDir, "__dirwell"), { recursive: true });
+    await writeFile(path.join(buildOutputDir, outputMarker), outputMarkerContents);
+    await publishOutput(buildOutputDir, outputDir, sourceDir, options.outputPolicy);
+    return report;
   } finally {
-    await rm(stagedOutputDir, { recursive: true, force: true });
+    if (stagedOutputDir !== null) await rm(stagedOutputDir, { recursive: true, force: true });
   }
 }
 

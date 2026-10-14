@@ -30,7 +30,14 @@ export async function canonicalPath(candidate: string): Promise<string> {
 export async function assertSafeMirroredSymlinks(options: GenerateOptions): Promise<void> {
   const sourceDir = path.resolve(options.sourceDir);
   const outputDir = path.resolve(options.outputDir);
-  const selection = await selectSourcePaths(sourceDir, outputDir, options.include, options.exclude);
+  const selection = await selectSourcePaths(
+    sourceDir,
+    outputDir,
+    options.include,
+    options.exclude,
+    [],
+    options.ignoreFiles,
+  );
   async function visit(directory: string): Promise<void> {
     for (const entry of await readdir(directory, { withFileTypes: true })) {
       const entryPath = path.join(directory, entry.name);

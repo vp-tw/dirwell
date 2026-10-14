@@ -66,6 +66,16 @@ export type SortField = "modified" | "name" | "size";
 export type NameSortMode = "locale" | "natural" | "unicode";
 export type SortDirection = "asc" | "desc";
 
+export type IgnoreFile =
+  | string
+  | {
+      readonly path: string;
+      /** Pattern base; defaults to the ignore file's directory. Paths resolve from cwd. */
+      readonly baseDir?: string;
+      /** Missing optional files are skipped; unreadable files always fail. */
+      readonly optional?: boolean;
+    };
+
 export interface SortOptions {
   readonly direction?: SortDirection;
   readonly directoriesFirst?: boolean;
@@ -114,6 +124,10 @@ export interface ExplorerTheme {
 }
 
 export interface GenerateOptions {
+  /** Inspect filesystem selection and planned directory pages without writing output. */
+  readonly dryRun?: boolean;
+  /** Nonempty outputs require an ownership marker unless replacement is explicit. */
+  readonly outputPolicy?: "owned" | "replace";
   /** Opt-in data publication and independently planned HTML pagination. */
   readonly listing?: ListingPolicy;
   /** Optional Node-side metadata provider; core supplies no image implementation. */
@@ -121,6 +135,8 @@ export interface GenerateOptions {
   readonly base?: string;
   readonly include?: string | readonly string[];
   readonly exclude?: string | readonly string[];
+  /** Ordered Git-style ignore files; none are discovered by Core. */
+  readonly ignoreFiles?: readonly IgnoreFile[];
   readonly sourceDir: string;
   /** Dedicated output tree, replaced after a successful build. Keep unrelated files elsewhere. */
   readonly outputDir: string;
@@ -136,6 +152,17 @@ export interface GenerateOptions {
     readonly onCycle?: "error" | "skip";
   };
   readonly sort?: SortOptions;
+}
+
+export interface BuildReport {
+  readonly sourceDir: string;
+  readonly outputDir: string;
+  readonly theme: string;
+  readonly dryRun: boolean;
+  readonly mirror: boolean;
+  readonly replacesOutput: boolean;
+  readonly selectedPaths: readonly string[];
+  readonly pages: readonly { readonly directory: string; readonly outputName: string | null }[];
 }
 
 export interface MetadataProvider {

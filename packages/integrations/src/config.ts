@@ -1,4 +1,4 @@
-import { validateListingPlan } from "@dirwell/core";
+import { validateListingPlan, resolveIgnoreFiles } from "@dirwell/core";
 import path from "node:path";
 import type { ExplorerTheme, GenerateOptions, SortOptions } from "@dirwell/core";
 import { normalizePathPatterns } from "../../core/src/filters.ts";
@@ -9,6 +9,7 @@ export interface DirwellConfig {
   readonly base?: string;
   readonly include?: GenerateOptions["include"];
   readonly exclude?: GenerateOptions["exclude"];
+  readonly ignoreFiles?: GenerateOptions["ignoreFiles"];
   readonly extends?: string | readonly string[];
   readonly mode?: "mpa" | "ssg";
   readonly mirror?: boolean;
@@ -64,6 +65,7 @@ export function validateConfig(value: unknown): asserts value is DirwellConfig {
   assertOptionalString(config.base, "base");
   normalizePathPatterns(config.include, "include");
   normalizePathPatterns(config.exclude, "exclude");
+  resolveIgnoreFiles(config.ignoreFiles);
   if (config.extends !== undefined)
     throw new TypeError("Legacy config extends is unsupported; configure the host explicitly");
   assertOptionalBoolean(config.mirror, "mirror");
@@ -151,6 +153,9 @@ export function resolveGenerateOptions(
     ...(config.mirror === undefined ? {} : { mirror: config.mirror }),
     ...(config.include === undefined ? {} : { include: config.include }),
     ...(config.exclude === undefined ? {} : { exclude: config.exclude }),
+    ...(config.ignoreFiles === undefined
+      ? {}
+      : { ignoreFiles: resolveIgnoreFiles(config.ignoreFiles, cwd) }),
     ...(config.outputName === undefined ? {} : { outputName: config.outputName }),
     ...(config.symlinks === undefined ? {} : { symlinks: config.symlinks }),
     ...(config.sort === undefined ? {} : { sort: config.sort }),

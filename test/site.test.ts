@@ -40,7 +40,7 @@ test("site build combines docs and examples in one publish directory", async () 
 
   const buildScript = await readFile(path.join(root, "scripts/build-examples.ts"), "utf8");
   assert.match(buildScript, /const examples = publishedExampleSlugs/);
-  assert.match(buildScript, /await generateExplorer\(options\)/);
+  assert.match(buildScript, /await generateExplorer\(/);
   assert.match(buildScript, /examples\/\$\{example\}\/config\.ts/);
   for (const { slug } of exampleCatalog) {
     const config = await readFile(path.join(root, `examples/${slug}/config.ts`), "utf8");

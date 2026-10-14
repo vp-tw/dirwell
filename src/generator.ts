@@ -22,7 +22,7 @@ export async function generateExplorerSkippingPaths(
   const metadataEnabled =
     metadata !== undefined ||
     (theme.metadataDefaults !== undefined && theme.metadataDefaults.enabledByDefault !== false);
-  return generateCore(
+  await generateCore(
     {
       ...coreOptions,
       theme,

@@ -14,7 +14,7 @@ import type { IncomingMessage, ServerResponse } from "node:http";
 import { watch, type FSWatcher } from "chokidar";
 import { createUnplugin, type UnpluginOptions, type UnpluginInstance } from "unplugin";
 import { resolveGenerateOptions, validateConfig, type DirwellConfig } from "./config.ts";
-import { generateExplorerSkippingPaths } from "@dirwell/core";
+import { generateExplorerSkippingPaths, resolveIgnoreFiles } from "@dirwell/core";
 import dirwellVite from "./vite.ts";
 import { assertSafeMirroredSymlinks, canonicalPath, isWithin } from "./plugin-safety.ts";
 
@@ -116,7 +116,9 @@ const core = createUnplugin<DirwellPluginInput, true>((options, meta) => {
     }
 
     async function paths() {
-      return watchPaths(source, hostOutput === undefined ? [] : [hostOutput]);
+      const watched = await watchPaths(source, hostOutput === undefined ? [] : [hostOutput]);
+      watched.files.push(...resolveIgnoreFiles(config.ignoreFiles, cwd).map((file) => file.path));
+      return watched;
     }
 
     async function emit(target: {
@@ -216,11 +218,14 @@ const core = createUnplugin<DirwellPluginInput, true>((options, meta) => {
             watchDirectory = await mkdtemp(path.join(tmpdir(), "dirwell-watch-"));
             sentinel = path.join(watchDirectory, "revision.js");
             await writeFile(sentinel, "export {};\n");
-            sourceWatcher = watch(source, {
-              ignoreInitial: true,
-              followSymlinks: false,
-              ignored: (name) => hostOutput !== undefined && isWithin(hostOutput, name),
-            });
+            sourceWatcher = watch(
+              [source, ...resolveIgnoreFiles(config.ignoreFiles, cwd).map((file) => file.path)],
+              {
+                ignoreInitial: true,
+                followSymlinks: false,
+                ignored: (name) => hostOutput !== undefined && isWithin(hostOutput, name),
+              },
+            );
             await new Promise<void>((resolve, reject) => {
               sourceWatcher!.once("ready", resolve);
               sourceWatcher!.once("error", reject);
