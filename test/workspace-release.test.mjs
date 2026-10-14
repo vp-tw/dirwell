@@ -277,3 +277,27 @@ test("registry readback waits for packument/tag propagation and keeps integrity 
   await assert.rejects(readback(manifest, output), /readback incomplete/);
   assert.equal(tagCalls, 23, "packument absence must exhaust the existing 20-attempt bound");
 });
+
+test("stable SDK artifacts require latest, exact sibling versions and OIDC", () => {
+  const manifest = fixture();
+  manifest.version = "0.0.1";
+  for (const item of manifest.packages) {
+    item.filename = item.filename.replace(version, manifest.version);
+    item.metadata.version = manifest.version;
+    item.metadata.publishConfig.tag = "latest";
+    for (const name of Object.keys(item.metadata.dependencies))
+      item.metadata.dependencies[name] = manifest.version;
+  }
+  validateManifest(manifest, { ...environment, RELEASE_VERSION: manifest.version });
+  manifest.packages[0].metadata.publishConfig.tag = "alpha";
+  assert.throws(() =>
+    validateManifest(manifest, { ...environment, RELEASE_VERSION: manifest.version }),
+  );
+  const bootstrap = {
+    GITHUB_ACTIONS: "true",
+    ACTIONS_ID_TOKEN_REQUEST_URL: "test-only",
+    DIRWELL_PUBLISH_AUTH: "bootstrap-token",
+    NODE_AUTH_TOKEN: "test-only",
+  };
+  assert.throws(() => validatePublicationAuthentication(bootstrap, "0.0.1"), /first alpha/);
+});

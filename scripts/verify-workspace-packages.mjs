@@ -26,7 +26,7 @@ for (const name of names) {
   const manifest = JSON.parse(await readFile(path.join(folder, "package.json"), "utf8"));
   version ??= manifest.version;
   assert.equal(manifest.version, version, "Official SDK versions must remain synchronized");
-  assert.match(version, /^0\.0\.\d+-alpha(?:\.(?:0|[1-9]\d*))?$/);
+  assert.match(version, /^0\.0\.(?:0|[1-9]\d*)(?:-alpha(?:\.(?:0|[1-9]\d*))?)?$/);
   assert.ok(manifest.private === undefined || typeof manifest.private === "boolean");
   const tarball = path.join(trial, `dirwell-${name}-${manifest.version}.tgz`);
   run(process.platform === "win32" ? "pnpm.cmd" : "pnpm", ["pack", "--out", tarball], folder);
