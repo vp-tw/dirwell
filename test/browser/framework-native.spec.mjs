@@ -88,7 +88,11 @@ for (const [name, creator] of [
         await expect
           .poll(() => page.evaluate(() => document.activeElement.textContent))
           .toMatch(/file1199/);
-        if (name === "ledger") expect(await rows.count()).toBeLessThan(50);
+        expect(await rows.count()).toBeLessThan(50);
+        await page.keyboard.press("ArrowDown");
+        await expect
+          .poll(() => page.evaluate(() => document.activeElement.textContent))
+          .toMatch(/file1199/);
         if (name === "ledger") {
           await page.locator(".toolbar select").nth(0).selectOption("size");
           await page.locator(".toolbar select").nth(2).selectOption("desc");
@@ -132,6 +136,25 @@ for (const [name, creator] of [
         await expect(page).toHaveURL(server.url);
         await expect(search).toBeEnabled();
         expect(await page.evaluate(() => window.__nativeLifetime)).toBe("same component");
+        await page.setViewportSize({ width: 1280, height: 4000 });
+        await expect.poll(() => rows.count()).toBeGreaterThan(35);
+        const gap = await page.evaluate((name) => {
+          const pane =
+            name === "ledger"
+              ? document.querySelector(".entry-list")
+              : document.querySelector(".cw-list-scroll");
+          const visible = [
+            ...document.querySelectorAll(name === "ledger" ? "[data-entry]" : "[data-cw-entry]"),
+          ].map((node) => node.getBoundingClientRect());
+          const bottom =
+            name === "ledger"
+              ? innerHeight
+              : pane.getBoundingClientRect().bottom -
+                parseFloat(getComputedStyle(pane).paddingBottom);
+          return visible.at(-1).bottom < bottom - 1;
+        }, name);
+        expect(gap).toBe(false);
+        await page.setViewportSize({ width: 1280, height: 800 });
         await page.evaluate(() => globalThis.__dirwellUnmount());
         expect(errors).toEqual([]);
         nojs = await browser.newContext({ javaScriptEnabled: false });
@@ -270,8 +293,10 @@ for (const [name, creator] of [
         const data = await response.json();
         if (!stalePage && data.total === 252) {
           stalePage = true;
-          if (name === "ledger") data.total = 251;
-          else data.listingRevision = "previous-revision";
+          if (name === "ledger") {
+            data.total = 251;
+            data.page.total = 251;
+          } else data.listingRevision = "previous-revision";
         }
         await route.fulfill({ response, json: data });
       });

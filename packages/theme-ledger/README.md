@@ -41,3 +41,5 @@ types from `/model`. Use `@dirwell/theme-authoring` to compile the same wrapper
 for SSR and client, or its `/dev` entry for trusted local HMR. Header, row content
 and footer are customizable; official navigation and interaction ownership is
 retained. See [the authoring guide](https://vp-tw.github.io/dirwell/themes/#source-component-customization).
+
+Upcoming stable shares directory query/sort/type controls through URL parameters and restores per-entry History selection/scroll. Failed navigation retains the previous view and offers retry/native navigation. See [view behavior](https://vp-tw.github.io/dirwell/themes/#returning-to-a-view-upcoming-stable).

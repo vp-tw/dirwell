@@ -1,6 +1,6 @@
 # @dirwell/theme-crosswave
 
-Vue categories, directory search and keyboard navigation with optional experimental gamepad controls.
+Vue categories, directory search and keyboard navigation with optional VueUse gamepad controls.
 
 Requires Node.js 22.12 or newer. Install the currently published prerelease:
 
@@ -30,7 +30,7 @@ Vue owns the server markup, reactive category/search/selection state, keyed medi
 
 Use `createCrosswaveTheme({ title: "Sample media files" })` with `@dirwell/core` and an explicit listing policy. Paged HTML preserves native links without JavaScript. Complete compact listing data is validated before category filtering and search become available. MIME classification runs in Node and publishes small category IDs; no MIME database is sent to the browser.
 
-Options include custom categories, color, gamepad controls and background motion. Physical gamepads remain unverified. File URLs use native links and pagination.
+Options include custom categories, color, gamepad controls and background motion. Controller polling uses VueUse `useGamepad`; automated regression uses simulated standard input. File URLs use native links and pagination.
 
 Vue, VueUse and the browser graphics code belong to this theme only. No Open Graph image implementation is bundled.
 
@@ -41,3 +41,5 @@ types from `/model`. Use `@dirwell/theme-authoring` to compile the same wrapper
 for SSR and client, or its `/dev` entry for trusted local HMR. Header, row content
 and footer are customizable; official navigation and interaction ownership is
 retained. See [the authoring guide](https://vp-tw.github.io/dirwell/themes/#source-component-customization).
+
+Upcoming stable windows more than 500 visible rows using measured heights and a bounded desktop/mobile scroll region. Full directory data still loads before filtering; this is not query loading. Directory query/category controls are shareable, and Back/Forward restores local selection/scroll. See [view behavior](https://vp-tw.github.io/dirwell/themes/#returning-to-a-view-upcoming-stable).

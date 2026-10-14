@@ -136,6 +136,8 @@ for (const [name, creator] of [
         .filter({ hasText: "note.txt" });
       await expect(row).toHaveCount(1);
       await expect(row).toContainText("Release notes");
+      await expect.poll(() => new URL(page.url()).searchParams.get("dw.q")).toBe("note");
+      const viewUrl = page.url();
       const expected = new Intl.DateTimeFormat("zh-TW", {
         timeZone: "Asia/Taipei",
         dateStyle: "short",
@@ -144,11 +146,11 @@ for (const [name, creator] of [
       await expect(row).toContainText(expected);
       await row.getByRole("button", { name: "複製連結: note.txt", exact: true }).click();
       await expect.poll(() => page.evaluate(() => window.__copied)).toBe(server.url + "note.txt");
-      expect(page.url()).toBe(server.url);
+      expect(page.url()).toBe(viewUrl);
       await row.getByRole("button", { name: "複製路徑: note.txt", exact: true }).focus();
       await page.keyboard.press("Enter");
       await expect.poll(() => page.evaluate(() => window.__copied)).toBe("note.txt");
-      expect(page.url()).toBe(server.url);
+      expect(page.url()).toBe(viewUrl);
       await page.evaluate(() => {
         navigator.clipboard.writeText = async () => {
           throw new Error("denied");

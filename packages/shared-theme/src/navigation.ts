@@ -31,6 +31,39 @@ export async function fetchThemePage(
     throw new ListingDataError("Unsupported folder snapshot");
   if (data.metadataHead !== undefined && typeof data.metadataHead !== "string")
     throw new ListingDataError("Invalid folder metadata");
+  const sort = data.sort as Record<string, unknown> | null;
+  if (
+    !sort ||
+    typeof sort !== "object" ||
+    !["name", "size", "modified"].includes(String(sort.field)) ||
+    !["asc", "desc"].includes(String(sort.direction)) ||
+    !["natural", "locale", "unicode"].includes(String(sort.nameMode)) ||
+    typeof sort.directoriesFirst !== "boolean"
+  )
+    throw new ListingDataError("Invalid folder order");
+  if (theme === "crosswave") {
+    const categories = data.categories;
+    const ids = new Set<string>();
+    if (
+      !Array.isArray(categories) ||
+      categories.length === 0 ||
+      categories.some((category) => {
+        if (
+          typeof category !== "object" ||
+          category === null ||
+          typeof category.id !== "string" ||
+          !category.id ||
+          ids.has(category.id) ||
+          typeof category.label !== "string" ||
+          typeof category.svg !== "string"
+        )
+          return true;
+        ids.add(category.id);
+        return false;
+      })
+    )
+      throw new ListingDataError("Invalid folder categories");
+  }
   const base = document.querySelector("base")?.href ?? pageHref;
   const link = (raw: unknown): string | null => {
     if (raw === null) return null;
@@ -52,6 +85,28 @@ export async function fetchThemePage(
       : {}),
   }));
   if (entries.length > Number(data.total)) throw new ListingDataError("Invalid folder count");
+  if (data.page !== null) {
+    const page = data.page as Record<string, unknown> | null;
+    if (
+      !page ||
+      typeof page !== "object" ||
+      !Number.isSafeInteger(page.number) ||
+      Number(page.number) < 1 ||
+      !Number.isSafeInteger(page.count) ||
+      Number(page.count) < Number(page.number) ||
+      !Number.isSafeInteger(page.offset) ||
+      Number(page.offset) < 0 ||
+      Number(page.offset) > Number(data.total) ||
+      page.total !== data.total
+    )
+      throw new ListingDataError("Invalid folder pagination");
+    data.page = {
+      ...page,
+      href: link(page.href),
+      previousHref: link(page.previousHref),
+      nextHref: link(page.nextHref),
+    };
+  }
   if (data.ui !== undefined)
     resolveCustomization(data.ui as Parameters<typeof resolveCustomization>[0]);
   const result = {
@@ -77,9 +132,12 @@ export async function fetchThemePage(
       return { name: raw.name, href: link(raw.href), dataHref: link(raw.dataHref) };
     }),
   };
-  // Keep the current UI until independently fetched page and listing revisions agree.
-  if (fresh && result.manifestHref) {
-    const loaded = await loadListing(result.manifestHref, { signal, cache: "no-store" });
+  // Keep the current UI until the complete target listing and page revision agree.
+  if (result.manifestHref) {
+    const loaded = await loadListing(result.manifestHref, {
+      signal,
+      cache: fresh ? "no-store" : "default",
+    });
     if (
       loaded.manifest.total !== data.total ||
       (data.listingRevision !== undefined && loaded.manifest.revision !== data.listingRevision)

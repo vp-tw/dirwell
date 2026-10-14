@@ -71,6 +71,7 @@ export const defaultLabels = {
   folderError: "Could not open the folder. Its native link remains available.",
   updatesError: "Live updates disconnected. Refresh to retry.",
   retry: "Retry",
+  openNative: "Open folder directly",
   categories: "File categories",
   items: "{count} items",
   filesIn: "Files in {path}",

@@ -49,6 +49,7 @@ for (const framework of ["svelte", "vue"]) {
       await search.fill("");
       const action = page.locator("[data-custom-action]").first();
       await expect(page.locator("a [data-custom-action]")).toHaveCount(0);
+      await expect.poll(() => new URL(page.url()).searchParams.get("dw.q")).toBe(null);
       const beforeAction = page.url();
       await action.focus();
       await page.keyboard.press("Enter");

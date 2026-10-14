@@ -15,7 +15,7 @@ Implementation is authorized through auto development. Treat the SDK family as t
 
 The accepted implementation plan is [STABLE-DESIGN.md](STABLE-DESIGN.md). Publish `0.0.1` only after the accepted TODOs and validation are complete.
 
-All checkboxes are deliberately open. They represent this backlog's acceptance criteria, not a statement that existing capabilities are missing.
+Checkboxes represent this backlog's complete acceptance criteria. B2/B3/B4/C1/C3/C4 are accepted and delivered in source and deployed guides; registry publication belongs to A3/E6. Implemented slices and remaining evidence are recorded below; an open item does not mean all of its capabilities are missing.
 
 ## User intents and entry points
 
@@ -75,7 +75,7 @@ All checkboxes are deliberately open. They represent this backlog's acceptance c
 
 ### B2 · D · Define an explicit hidden-file and ignore policy
 
-- [ ] **Intent:** publish a folder without accidentally including `.env`, `.git` or local tooling; alternatively, deliberately publish hidden files.
+- [x] **Intent:** publish a folder without accidentally including `.env`, `.git` or local tooling; alternatively, deliberately publish hidden files.
 - **Confirmed behavior:** selection supports dot paths and does not apply a hidden-file or `.gitignore` preset. With no selection rules, the dummy `.env` in the probe is copied. This is current selection semantics, not a promise that a project folder is safe to publish unchanged.
 - **Recommendation:** use explicit ordered `ignoreFiles`: API defaults to `[]`, CLI defaults to an optional cwd `.gitignore`, and config can replace or disable it. Keep glob selection and Git-style rules distinct. See the accepted design for bases, precedence and missing-file handling.
 - **Acceptance:** specify and test hidden paths, descendants, include/exclude precedence, ignored symlink targets and intentional overrides. The user can preview which files will be published. Choose the default before stable rather than changing it later without notice.
@@ -83,7 +83,7 @@ All checkboxes are deliberately open. They represent this backlog's acceptance c
 
 ### B3 · G · Make output replacement and selection reviewable
 
-- [ ] **Intent:** publish into the correct folder and understand what will be copied, skipped or removed.
+- [x] **Intent:** publish into the correct folder and understand what will be copied, skipped or removed.
 - **Confirmed friction:** build prints only `Built <output>`. Core stages generation and then removes the previous output before renaming the new tree. Output ownership is documented, but the basic command does not preview selection or identify an existing unrelated target tree.
 - **Change:** add a useful build summary and a dry-run/plan path with source/output, theme, counts, exclusions, skipped pages and replacement scope. Decide an explicit CLI policy for non-owned nonempty output; preserve a deliberate replacement option. Qualify final-swap recovery rather than calling the whole operation atomic.
 - **Acceptance:** a plan does not mutate files; a failed render retains the prior build; an unrelated output directory is handled according to the stated policy. Exercise final rename failure and concurrent-build handling before claiming recovery guarantees.
@@ -91,7 +91,7 @@ All checkboxes are deliberately open. They represent this backlog's acceptance c
 
 ### B4 · D · Separate explorer URLs from file URLs
 
-- [ ] **Intent:** publish listing pages while leaving large files on an existing CDN.
+- [x] **Intent:** publish listing pages while leaving large files on an existing CDN.
 - **Confirmed limitation:** `mirror: false` avoids copying files but keeps generated native file links. The probe produces only `index.html` with a `public.txt` link and no corresponding file. That is valid when files are supplied separately, but `mirror: false` alone is not a working remote-file deployment recipe. Static `GenerateOptions` has no independent file URL callback; Server has `fileHref`.
 - **Recommendation:** establish an encoded logical-path file URL hook or file-base option for static generation, independent of directory/page URLs. Include the CDN/no-copy recipe. Preserve filters and unavailable-link handling.
 - **Acceptance:** root and nested pages link to external files while navigation, data, metadata and assets remain on the explorer host. Cover spaces, Unicode, `#`, `%`, aliases and unavailable targets; selected-file copying stays optional.
@@ -109,7 +109,7 @@ All checkboxes are deliberately open. They represent this backlog's acceptance c
 
 ### C1 · D · Expose labels and locale as theme inputs
 
-- [ ] **Intent:** publish for a non-English audience or adjust labels without replacing controls.
+- [x] **Intent:** publish for a non-English audience or adjust labels without replacing controls.
 - **Confirmed limitation:** official documents use `lang="en"`, controls/errors are hardcoded English and date/name formatting uses the environment's locale. The i18n example owns a custom renderer; it is not official-theme label configuration.
 - **Recommendation:** add document language, partial labels with defaults, locale and date/time-zone policy to official themes. A language picker is optional; configurable language is the contract worth deciding first.
 - **Acceptance:** translate visible text, accessible names, loading/errors, pagination and dialogs in all three themes. SSR and hydrated formatting follow a stated policy. Changing locale preserves keyboard/IME behavior and does not require the authoring compiler.
@@ -125,7 +125,7 @@ All checkboxes are deliberately open. They represent this backlog's acceptance c
 
 ### C3 · D · Add accessible row actions and column controls
 
-- [ ] **Intent:** add copy-link, copy-path, download or a custom action, and hide/reorder columns.
+- [x] **Intent:** add copy-link, copy-path, download or a custom action, and hide/reorder columns.
 - **Confirmed limitation:** row customization is inside the official file link and explicitly forbids nested interactive controls. It cannot safely provide an independent button there. Columns and timestamp dialogs are owned by the theme rather than configuration.
 - **Recommendation:** define a separate typed action region outside the primary link, column visibility/order/format hooks, and opt-in built-in copy/download actions. Avoid making arbitrary client callback serialization part of CLI config; source hooks may remain necessary for custom behavior.
 - **Acceptance:** primary navigation, row selection and actions work separately with mouse, keyboard and touch. No nested links/buttons. Copy uses the intended public URL/path, reports failure, and unavailable entries remain unavailable. A download action states static-host versus Node-header limitations.
@@ -133,7 +133,7 @@ All checkboxes are deliberately open. They represent this backlog's acceptance c
 
 ### C4 · D · Define public entry annotations before themes depend on them
 
-- [ ] **Intent:** show release versions, checksums, descriptions, badges or external documentation next to files.
+- [x] **Intent:** show release versions, checksums, descriptions, badges or external documentation next to files.
 - **Confirmed limitation:** public records provide filesystem/navigation facts plus theme-derived `presentation`. The theme hook receives projected facts, but there is no documented consumer-level async enrichment pipeline or standard sidecar manifest. Custom renderers can implement more; that does not make it easy for official-theme consumers.
 - **Recommendation:** evaluate a public-entry enrichment hook/sidecar format reused by build and server, with typed JSON values and documented precedence. Keep private stat/source paths out of client records. Treat display names, search fields and metadata as separate policies.
 - **Acceptance:** a release-download example adds a checksum and description without a theme fork; projection validation rejects unsupported data; filters, revisions, search and live updates reflect the chosen annotation contract. Specify synchronous versus asynchronous timing and cost.
@@ -220,7 +220,7 @@ All checkboxes are deliberately open. They represent this backlog's acceptance c
 - [ ] **Intent:** use native keyboard focus, a screen reader, touch, reduced motion or a controller.
 - **Unqualified scope:** the current support guide explicitly leaves real screen-reader output, physical iOS and physical gamepad mappings unqualified. Existing automated keyboard, IME, browser and simulated-controller coverage is valuable but does not replace those paths.
 - **Change:** execute the core browsing/search/sort/pagination/dialog/recovery journey with a real screen reader and iOS device. Check rich row virtualization announcements and focus, mobile long names, zoom, reduced motion and source action extensions. Keep controller qualification theme-specific.
-- **Acceptance:** record device/browser/assistive-tool evidence and remaining limits. If physical gamepad support cannot be qualified, mark it experimental rather than blocking unrelated Plain/Ledger stable support.
+- **Acceptance:** record device/browser/assistive-tool evidence and remaining limits. Controller input delegates to VueUse `useGamepad`; the user does not require a separate physical-controller gate for `0.0.1`. Retain the existing simulated input regression and distinguish its evidence from a hardware test.
 - **Evidence:** [verification](VERIFICATION.md), [support](docs/src/content/docs/support.md), official components.
 
 ### E6 · G · Run a stable candidate proof, not only repository tests
@@ -235,7 +235,9 @@ All checkboxes are deliberately open. They represent this backlog's acceptance c
 
 - Foundation delivered in [the publication controls PR](https://github.com/vp-tw/dirwell/pull/78): nested CLI validation, typed config, shared ordered ignore-file selection, explicit output ownership/force, canonical containment, rollback, concurrent-output locks and write-free dry-run reports.
 - Local qualification: 198 Node tests, checks/types, nine packed SDK consumers and Pages-prefix site generation passed. External ignore-file Rollup watch is exercised. Exact-head CI passed, including 18 platform/Node consumer jobs; the PR was merged and Pages deployment succeeded. Live documentation readback remains pending.
-- Theme customization is implemented on the working branch under [the accepted design](STABLE-DESIGN.md): shared labels/branding/columns, independent actions, public annotations and static CDN mapping. Local acceptance passed: 206 Node tests, clean packed consumers and the release-download recipe, types/checks, docs generation, desktop/mobile customization, native fallback and paired source actions. This batch is not yet delivered. No package version has changed and no release has been dispatched.
+- Theme customization was delivered in [the customization PR](https://github.com/vp-tw/dirwell/pull/79): shared labels/branding/columns, independent actions, public annotations and static CDN mapping. Acceptance passed: 206 Node tests, clean packed consumers and the release-download recipe, types/checks, docs generation, desktop/mobile customization, native fallback, paired source actions and exact-head platform/browser CI. Deployed guide readback passed. No package version has changed and no release has been dispatched.
+- Browsing continuity and Crosswave windowing are implemented locally: shared controls, Back/Forward selection/scroll, failed-target retry, malformed snapshot rejection, skipped-parent native links and 10,000-row desktop/mobile scroll coverage. Local acceptance passed: 206 Node tests, 25 browser scenarios, nine clean packed consumers, types/lint/format, subpath site build and the current packed benchmark in [BENCHMARKS.md](BENCHMARKS.md). PR delivery remains pending.
+- Physical-controller testing is not a release gate by user decision: Crosswave uses VueUse `useGamepad`; simulated integration regressions remain required. Physical iOS and real screen-reader behavior remain unqualified.
 
 ## Suggested execution order
 

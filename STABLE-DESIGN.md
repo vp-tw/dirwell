@@ -5,6 +5,7 @@ The target release is `0.0.1`. Complete the accepted TODOs and their verificatio
 ## Accepted boundaries
 
 - No in-explorer preview feature in official themes. A disposable media-preview theme example may demonstrate extension points, without a maintenance or support promise.
+- Controller input uses VueUse `useGamepad`. Physical-controller verification is not a `0.0.1` release gate by user decision; retain automated simulated-input regression evidence.
 - Qualify Core filesystem/publication cost separately from each theme's data-loading, rendering and interaction cost. No single directory-size promise applies to every theme.
 - Core/API/build integration ignore-file defaults are empty. CLI defaults to an optional cwd `.gitignore`; explicit configuration, including `[]`, overrides it.
 - Official themes gain supported common customization; arbitrary layouts and behavior remain source-theme responsibilities.
@@ -72,6 +73,23 @@ For each scenario: specify API and defaults, add one runnable example, implement
 - Delivered in the publication controls PR: nested CLI configuration validation and typed `defineConfig`.
 - Delivered in the publication controls PR: shared ignore-file selection for Core, live service, CLI and build adapters.
 - Delivered in the publication controls PR: output ownership, explicit force, rollback, exclusive output locks and dry-run reports.
-- Implemented locally: the five theme scenarios, public annotations, static file URL mapping and retry/search controls. Verification includes 206 Node tests, nine packed consumers, the installed release-download recipe, translated desktop/mobile action journeys and paired Svelte/Vue source actions. PR delivery remains pending.
-- Remaining: discovery/support policy, SDK/theme benchmarks, history/failure journeys, integration/device evidence and the release-candidate proof.
+- Delivered in [the customization PR](https://github.com/vp-tw/dirwell/pull/79): the five theme scenarios, public annotations, static file URL mapping and retry/search controls. Verification includes 206 Node tests, nine packed consumers, the installed release-download recipe, translated desktop/mobile action journeys, paired Svelte/Vue source actions and exact-head platform/browser CI.
+- Implemented locally: shareable directory controls, History selection/scroll, failed-target recovery, malformed-snapshot rejection, skipped-parent native navigation and measured Crosswave windows. Local acceptance passed: 206 Node tests, 25 browser scenarios, nine clean packed consumers, types/lint/format, subpath site build and the packed benchmark in [BENCHMARKS.md](BENCHMARKS.md). PR delivery remains pending.
+- Remaining: discovery/support policy, direct API validation, strict CSP/access recipes, integration/device evidence and the release-candidate proof.
 - No release has been dispatched and package versions have not been advanced.
+
+## Large Crosswave directories
+
+The packed-theme baseline at 10,000 entries renders all 10,000 Crosswave rows. Local Chromium at 4× CPU took about 2.2–2.5 seconds to filter and 4.7–4.8 seconds to clear, versus roughly 0.1 seconds for Ledger's measured window. These are diagnostic samples, not production budgets.
+
+Keep the complete coherent data contract, but window Crosswave's DOM above 500 visible rows. Measure row heights, render an overscanned window in a bounded scroll region on desktop/mobile, reserve the actual footer height, preserve total/position semantics, and scroll/focus logical keyboard or controller selections into that window. Native SSR and no-JavaScript pagination remain unchanged. Acceptance covers 10,000 long names, custom columns/actions, desktop/mobile resize, scroll coverage, End/Home/filter/category, native pagination, and lifecycle cleanup. Data blocks still do not reduce total client memory.
+
+## View state and recovery
+
+Scenarios: share a filtered directory with a new visitor; open a folder then return with Back/Forward; preserve useful controls during live updates; recover a failed folder request without changing the successful view.
+
+Contract: share directory query with `dw.q`; Ledger adds `dw.sort`, `dw.types`; Crosswave adds `dw.category`. Keep host/native `page` and other query parameters. Update the current history entry without adding an entry for every keystroke. New folder navigation starts an empty query with the theme's defaults. Back/Forward restores that history entry's query, sort/types/category, selected logical ID and scroll. Refresh/fresh tabs apply URL controls; selection and scroll remain local history state. Appearance preferences remain separate. Plain ignores these enhancement parameters and preserves native pagination.
+
+Validation: reject unsupported sort/category/type values by falling back to current theme defaults; cap shared queries at 4,096 characters; restore only validated inert values. A removed/filtered selection yields the first usable row. Save view state before leaving; commit navigation history before replacing the model. If history mutation is unavailable, keep native links usable and preserve the existing view. Failed enhanced navigation retains the previous model/address; retry targets the failed request. Back-load failures return the address to the usable committed view and provide the failed native target.
+
+Acceptance: both rich themes, static and live, folder/Back/Forward, refresh/shared fresh context, encoded names, selected-row focus, narrow-screen scroll, missing files, failed/slow/superseded snapshots, disabled history mutation, stale manifests and SSE reconnect. Native/no-JavaScript links remain valid.
