@@ -52,11 +52,12 @@ for (const [name, creator] of [
       const sourceDir = path.join(root, "files"),
         outputDir = path.join(root, "out");
       let server, fresh;
+      const folder = "docs #50% Á";
       try {
-        await mkdir(path.join(sourceDir, "docs"), { recursive: true });
+        await mkdir(path.join(sourceDir, folder), { recursive: true });
         await mkdir(path.join(sourceDir, "beta"));
         await writeFile(path.join(sourceDir, "beta/b.txt"), "beta");
-        await writeFile(path.join(sourceDir, "docs/nested.txt"), "nested");
+        await writeFile(path.join(sourceDir, folder, "nested.txt"), "nested");
         await writeFile(path.join(sourceDir, "hello.txt"), "hello");
         const theme = creator(
           name === "ledger"
@@ -154,7 +155,8 @@ for (const [name, creator] of [
         const dataHref = await page.evaluate(() => {
           const model = JSON.parse(document.querySelector("#dirwell-page-data").textContent);
           return new URL(
-            model.entries.find((entry) => entry.name === "docs").presentation.folderDataHref,
+            model.entries.find((entry) => entry.name.startsWith("docs")).presentation
+              .folderDataHref,
             document.baseURI,
           ).href;
         });

@@ -128,3 +128,9 @@ Entering a new folder starts its default controls. Back/Forward restores that hi
 A failed enhanced folder request keeps the successful view and offers Retry plus the target's native link. Retry uses the failed target. Superseded requests cannot replace a newer view. If the host denies a History mutation, the view stays usable through native links. Skipped source pages retain native parent/Home navigation.
 
 Large Crosswave directories now use measured DOM windows above 500 visible rows, with a bounded scroll region that reserves the actual footer height on desktop and mobile. Ledger also windows large lists. Both still load complete directory data; blocks and DOM windows do not turn this into query loading or bound total data memory. See [the SDK benchmark](https://github.com/vp-tw/dirwell/blob/main/BENCHMARKS.md) for workload-specific evidence.
+
+## Document assets and CSP
+
+Common identity, logo, footer and font/color variables use the shared configuration above. For application styles/head elements without source compilation, wrap the typed `render(context)` result, retain its assets/client/data protocol and add assets through `RenderedPage.assets` plus `context.assetHref`. See the [document branding helper](https://github.com/vp-tw/dirwell/tree/main/examples/private-downloads). Asset names must not collide with selected source files; use source snippets/slots for body layout changes.
+
+The private live recipe composes fresh response nonces with a nonce/`strict-dynamic` script policy and nonced stylesheet elements. Inline style attributes remain explicitly allowed for measured row positioning; inline scripts, event handlers and eval remain blocked. Host sessions, CSP delivery and external brand-resource permissions belong to the application. This is an executed production-renderer recipe, not a development-Vite policy or an HTML sanitizer. [W3C CSP3](https://www.w3.org/TR/CSP3/#strict-dynamic-usage) defines the policy model.
