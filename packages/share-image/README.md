@@ -49,7 +49,7 @@ await generateExplorer({
 });
 ```
 
-Omit `imageTheme` for text-only metadata. `image: false` disables any preset; a local File/path/file URL or async callback supplies a custom image. `createShareImage({ theme, title, description })` returns a PNG File. Rendering is lazy, uses bundled Adobe fonts without network/system-font lookup, and retains at most 32 rendered PNGs per process. The existing renderer requires bundled glyph coverage; unsupported text fails instead of silently emitting missing glyphs. Use a custom renderer for other scripts. Per-build image loading is deduplicated; image output paths are validated and conflicting bytes are rejected.
+Omit `imageTheme` for text-only metadata. `image: false` disables any preset; a local File/path/file URL or async callback supplies a custom image. `createShareImage({ theme, title, description })` returns a PNG File. Rendering is lazy, uses bundled Adobe fonts by default or the supplied local fonts described below, and retains at most 32 rendered PNGs per process. No network/system-font lookup occurs. The selected fonts must cover every displayed character; unsupported text fails instead of silently emitting missing glyphs. Supply a licensed local font for other scripts, or use a separate renderer when the required shaping is outside your qualified workload. Per-build image loading is deduplicated; image output paths are validated and conflicting bytes are rejected.
 
 This is a static-build provider. No server image route or runtime image service is implied.
 
