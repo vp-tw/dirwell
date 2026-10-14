@@ -1,3 +1,4 @@
+import { validateGenerateOptions } from "./validation.ts";
 import { copyJsonObject } from "./json.ts";
 import { describeEntry, isInsideRoot } from "./filesystem.ts";
 import {
@@ -158,6 +159,7 @@ export async function generateExplorerSkippingPaths(
   options: GenerateOptions,
   ignoredPaths: readonly string[],
 ): Promise<BuildReport> {
+  validateGenerateOptions(options);
   const source = path.resolve(options.sourceDir),
     output = path.resolve(options.outputDir);
   await checkOutput(source, output, options.outputPolicy);

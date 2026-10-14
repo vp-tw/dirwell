@@ -49,3 +49,7 @@ There is no shared HTTP response/snapshot cache, filesystem watcher, distributed
 - `@dirwell/server/node`: `createNodeRequestListener` integrates an existing Node HTTP server; the host owns shutdown.
 
 Express 5, Fastify 5 and Hono 4 have executed integration tests. Fetch compatibility alone does not qualify other framework adapters or Edge runtimes; this package requires Node filesystem access.
+
+## Upcoming stable runtime validation
+
+Handler configuration rejects unknown keys, invalid callbacks and malformed listing/live options before filesystem initialization. Sort and selection use Core's validated directory-service contract. The standalone Node helper separately checks `host` and integer `port` (0–65535) before opening a socket; those transport fields are not passed to Core or the Fetch handler. Custom theme objects remain extensible while their known render/hooks/listing contract is checked. These controls are in the upcoming stable source, not the published alpha.

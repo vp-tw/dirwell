@@ -124,3 +124,21 @@ await generateExplorer({
   entryData: (entry) => ({ description: annotations[entry.id]?.description ?? "" }),
 });
 ```
+
+## Direct JavaScript validation (upcoming stable)
+
+Core generation, DirectoryService and Server reject unknown option keys and incorrect value shapes. Diagnostics include the complete option path and a likely correction. Invalid direct options fail before publication writes, directory-service initialization or socket creation. A listing callback is evaluated after directory inspection; its returned plan is checked before output replacement. Custom theme fields remain allowed, while required render/name and known hooks must match their declared contract. Trusted async metadata and annotation callbacks are still awaited.
+
+```js
+// Rejected: options.exlcude. Did you mean options.exclude?
+await generateExplorer({
+  sourceDir: "files",
+  outputDir: "generated",
+  theme,
+  exlcude: ["drafts/**"],
+});
+// Rejected: mirror must be a boolean.
+await generateExplorer({ sourceDir: "files", outputDir: "generated", theme, mirror: "false" });
+```
+
+Pass Node-specific `host`/`port` only to `startExplorerServer`; the Fetch handler and Core directory service have separate option contracts. Runtime validation checks configuration and callback results, not side effects performed by trusted callbacks. These checks are not available in the published alpha.

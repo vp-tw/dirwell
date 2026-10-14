@@ -24,3 +24,9 @@ Upcoming stable controls: `ignoreFiles` defaults to `[]`; explicit files must ex
 The service rejects dot segments, absolute paths, backslashes, reserved root paths and paths outside the physical root. Symlink metadata retains existing declared-target behavior. Node-side entries are private inputs; use `projectListingEntry` before public serialization. Reads are not a transactional filesystem snapshot and are not qualified against adversarial concurrent directory replacement.
 
 Upcoming stable also adds validated public `entryData` annotations and static `fileHref` mapping for existing CDN files. See the [API guide](https://vp-tw.github.io/dirwell/api-reference/#public-annotations-and-file-url-mapping-upcoming-stable) for callback timing and public-data boundaries.
+
+## Upcoming stable runtime validation
+
+JavaScript callers receive the same recognized-option checks as typed consumers: unknown keys, invalid booleans/enums and malformed sort, symlink or listing plans fail before publication writes. Errors name the complete option path and suggest the closest known key. For example, `exlcude` is rejected with a suggestion for `exclude`; `mirror: "false"` is rejected rather than treated as truthy. A listing-policy callback runs after directory inspection, and its returned plan is validated before output replacement.
+
+Custom theme objects may carry extra private fields. Their required name/render and known hooks must match the theme contract. Metadata and annotation callbacks remain trusted executable host code and are awaited where the public contract is asynchronous. These controls are part of the upcoming stable source and are not available in the published alpha.
