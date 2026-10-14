@@ -3,7 +3,7 @@ title: Support and verification
 description: Choose packages and integrations using their tested boundaries.
 ---
 
-Use the published `@dirwell/*` alpha family. All nine packages share `0.0.1-alpha.1`; use the `alpha` tag and pin the version you tested for reproducible builds. Node.js 22.12 or later is required.
+Use the published `@dirwell/*` family. All nine packages share `0.0.1`, selected by `latest`. The 0.0.x API may evolve: pin the version you qualified and upgrade the official family together. Node.js 22.12 or later is required.
 
 ## Package boundaries
 
@@ -25,6 +25,6 @@ Browser regressions cover keyboard operation, desktop/mobile viewport sizes and 
 
 ## Limits
 
-Hostile filesystem mutation, distributed caching and production-scale performance are not fully qualified. Rich clients load the complete directory. The upcoming stable clients both window large rendered lists; the published alpha Crosswave renders filtered rows in full. Live mode has directory search but no archive-wide search index. Source HMR and file-data refresh are separate mechanisms.
+Hostile filesystem mutation, distributed caching and production-scale performance are not fully qualified. Rich clients load the complete directory. Ledger and Crosswave window large rendered lists while retaining full directory data. Live mode has directory search but no archive-wide search index. Source HMR and file-data refresh are separate mechanisms.
 
 Controller polling uses VueUse `useGamepad`; regression covers simulated standard input, held buttons, deadzones, disconnects and unavailable APIs. Physical-controller testing is not a separate `0.0.1` release gate.

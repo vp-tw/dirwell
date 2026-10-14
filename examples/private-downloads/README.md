@@ -2,7 +2,7 @@
 
 This Node recipe composes `@dirwell/server` with a current session resolver and a fresh nonce CSP. It demonstrates a fixed approved root; it does not implement login, issue cookies or provide a session store.
 
-Install `@dirwell/server@alpha` and the desired theme. Copy `handler.mjs` and `bridge.mjs` into your Node project. Integrate your existing application session:
+Install `@dirwell/server` and the desired theme. Copy `handler.mjs` and `bridge.mjs` into your Node project. Integrate your existing application session:
 
 ```js
 import { createLedgerTheme } from "@dirwell/theme-ledger";
@@ -26,7 +26,7 @@ console.log(`${server.url}/downloads/browse/`);
 // Await server.close() during host shutdown.
 ```
 
-Install `@dirwell/theme-ledger@alpha` for this sample. `yourApp` represents your existing trusted session service; the resolver must bind the capability to this root and return current expiry/revocation state, with `expiresAt` in epoch milliseconds. Browser clients require the host's normal same-origin session cookie. This recipe never places credentials in URLs or public records.
+Install `@dirwell/theme-ledger` for this sample. `yourApp` represents your existing trusted session service; the resolver must bind the capability to this root and return current expiry/revocation state, with `expiresAt` in epoch milliseconds. Browser clients require the host's normal same-origin session cookie. This recipe never places credentials in URLs or public records.
 
 The outer gate covers documents, JSON, blocks, theme assets, byte ranges, conditional requests and SSE. The same resolver is called by Dirwell while an SSE connection is active. Allowing a parent listing reveals its selected child names: isolate tenants/roles in separate approved roots or select only approved files. This is not row-level redaction. Do not put private-target aliases in an approved tree. Existing downloads and content already delivered to a client cannot be retracted by later revocation.
 
@@ -36,7 +36,7 @@ Run `pnpm exec playwright test test/browser/private-downloads.spec.mjs --browser
 
 ## Add document styles without source compilation
 
-`branding.mjs` wraps the official typed `render(context)` contract, adds a stylesheet asset through `RenderedPage.assets`, and links it with `context.assetHref`. It preserves the theme name, public data projection, client and navigation. Add `@dirwell/core@alpha` when importing this helper.
+`branding.mjs` wraps the official typed `render(context)` contract, adds a stylesheet asset through `RenderedPage.assets`, and links it with `context.assetHref`. It preserves the theme name, public data projection, client and navigation. Add `@dirwell/core` when importing this helper.
 
 ```js
 import { withApplicationBranding } from "./branding.mjs";
@@ -48,4 +48,4 @@ const theme = withApplicationBranding(
 );
 ```
 
-The shared brand/CSS inputs are upcoming stable options. Use source snippets/slots for advanced body structure. The added document head and stylesheet belong to the application; they are constant for the theme and stay present during enhanced folder navigation. Choose an asset name that cannot collide with selected source files. For static generation prefer `urlStrategy: 'base'` with the deployed root so application resources keep stable rooted URLs; serve the complete generated tree. Nonces are a response-composition concern for private live HTML, not a serializable theme setting or a credential.
+Shared brand/CSS inputs are available in `0.0.1`. Use source snippets/slots for advanced body structure. The added document head and stylesheet belong to the application; they are constant for the theme and stay present during enhanced folder navigation. Choose an asset name that cannot collide with selected source files. For static generation prefer `urlStrategy: 'base'` with the deployed root so application resources keep stable rooted URLs; serve the complete generated tree. Nonces are a response-composition concern for private live HTML, not a serializable theme setting or a credential.

@@ -1,6 +1,6 @@
 # Dirwell
 
-Turn a folder into a browsable website, or serve current files directly. The published `@dirwell/*` packages are alpha; use Node.js 22.12 or later.
+Turn a folder into a browsable website, or serve current files directly. Use the published `@dirwell/*` packages; use Node.js 22.12 or later.
 
 ![Dirwell — Turn a folder into a searchable website.](https://raw.githubusercontent.com/vp-tw/dirwell/main/assets/brand/dirwell-og.png)
 
@@ -9,8 +9,8 @@ Turn a folder into a browsable website, or serve current files directly. The pub
 ## Open or publish a folder
 
 ```sh
-npx @dirwell/cli@alpha server ./downloads
-npx @dirwell/cli@alpha build ./downloads --out ./site-downloads
+npx @dirwell/cli server ./downloads
+npx @dirwell/cli build ./downloads --out ./site-downloads
 ```
 
 No project or config is required. Plain is included: native links and pagination, no browser JavaScript, fonts or share images. Server prints its URL and reads fresh data on requests; Ctrl+C stops it. Build replaces a dedicated output tree and copies selected source files. Publish the complete tree on a static host; keep unrelated files out of that directory.
@@ -18,7 +18,7 @@ No project or config is required. Plain is included: native links and pagination
 For a searchable interface, install a rich theme:
 
 ```sh
-npm install --save-dev @dirwell/cli@alpha @dirwell/theme-ledger@alpha
+npm install --save-dev @dirwell/cli @dirwell/theme-ledger
 npx dirwell server ./downloads --theme ledger --live
 ```
 
@@ -38,7 +38,7 @@ Use `dirwell.config.mjs` to configure themes, selection and server/build options
 | Static generation inside build tools        | `@dirwell/integrations`    |
 | Svelte/Vue source compilation and local HMR | `@dirwell/theme-authoring` |
 
-All nine share version `0.0.1-alpha.1` and the `alpha` tag. Pin the tested version for reproducible builds. Core and Plain stay free of framework/image/font/watch dependencies. See the [SDK guide](https://vp-tw.github.io/dirwell/sdk/) for API, live server and listing policy examples.
+All nine share version `0.0.1` and the `latest` tag. Pin the tested version for reproducible builds. Core and Plain stay free of framework/image/font/watch dependencies. See the [SDK guide](https://vp-tw.github.io/dirwell/sdk/) for API, live server and listing policy examples.
 
 ## Learn more
 

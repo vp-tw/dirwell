@@ -6,7 +6,7 @@ description: Generate static explorers inside an existing build with explicit th
 Install the adapter package and the theme you want:
 
 ```sh
-npm install --save-dev @dirwell/integrations@alpha @dirwell/theme-plain@alpha
+npm install --save-dev @dirwell/integrations @dirwell/theme-plain
 ```
 
 ```js

@@ -6,7 +6,7 @@ description: Publish complete static output with a URL strategy that matches its
 Build a dedicated output tree and publish every file inside it:
 
 ```sh
-npx @dirwell/cli@alpha build ./downloads --out ./site-downloads
+npx @dirwell/cli build ./downloads --out ./site-downloads
 ```
 
 A static host serves the generated HTML, listing data, theme assets and mirrored source files. No Dirwell server is needed. Rebuild when the source changes. Do not overlay only selected HTML files; their asset/data references belong to the same build.
@@ -22,7 +22,7 @@ A static host serves the generated HTML, listing data, theme assets and mirrored
 For a fixed GitHub Pages or CDN prefix:
 
 ```sh
-npx @dirwell/cli@alpha build ./downloads --out ./dist --base /project/downloads/ --urls base
+npx @dirwell/cli build ./downloads --out ./dist --base /project/downloads/ --urls base
 ```
 
 The prefix must match the deployed explorer root. `ssg` and `mpa` describe output layout, independently of link strategy. Both generate HTML; rich clients fetch data and assets over HTTP. Serve directory indexes and check a child page directly, not just the root.

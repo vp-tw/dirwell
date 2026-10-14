@@ -13,17 +13,17 @@ CLI includes Plain. Core and integrations require a theme explicitly. Install on
 
 ## Choose a theme by task
 
-| Need                                           | Plain                              | Ledger                                              | Crosswave                                           |
-| ---------------------------------------------- | ---------------------------------- | --------------------------------------------------- | --------------------------------------------------- |
-| Native links and pagination without JavaScript | Yes                                | Yes                                                 | Yes                                                 |
-| Current-directory search                       | No                                 | Yes                                                 | Yes                                                 |
-| Archive-wide search                            | No                                 | Static only; opt out available in upcoming stable   | No                                                  |
-| Sorting                                        | Configured in Core/server          | Interactive and configured                          | Configured in Core/server                           |
-| Categories and controller input                | No                                 | No                                                  | Configurable categories; VueUse gamepad input       |
-| Common labels, branding and columns            | Upcoming stable                    | Upcoming stable                                     | Upcoming stable                                     |
-| Independent actions                            | Native download in upcoming stable | Copy/download and source actions in upcoming stable | Copy/download and source actions in upcoming stable |
-| Embedded image/audio/video preview             | No                                 | No                                                  | No                                                  |
-| Large-list rendering                           | Native page size                   | Measured DOM windows                                | Measured DOM windows in upcoming stable             |
+| Need                                           | Plain                     | Ledger                           | Crosswave                                     |
+| ---------------------------------------------- | ------------------------- | -------------------------------- | --------------------------------------------- |
+| Native links and pagination without JavaScript | Yes                       | Yes                              | Yes                                           |
+| Current-directory search                       | No                        | Yes                              | Yes                                           |
+| Archive-wide search                            | No                        | Static only; opt out available   | No                                            |
+| Sorting                                        | Configured in Core/server | Interactive and configured       | Configured in Core/server                     |
+| Categories and controller input                | No                        | No                               | Configurable categories; VueUse gamepad input |
+| Common labels, branding and columns            | Yes                       | Yes                              | Yes                                           |
+| Independent actions                            | Native download           | Copy/download and source actions | Copy/download and source actions              |
+| Embedded image/audio/video preview             | No                        | No                               | No                                            |
+| Large-list rendering                           | Native page size          | Measured DOM windows             | Measured DOM windows                          |
 
 Rich themes load complete directory data. Native pagination, data blocks and rendered windows solve different costs; consult the [packed SDK benchmark](https://github.com/vp-tw/dirwell/blob/main/BENCHMARKS.md). File opening/download URLs are supplied by static publication or the Node server; this is separate from embedding a media preview in a theme. A custom source theme can implement its own interface. [Support and verification](../support/) records tested host/device boundaries.
 
@@ -34,9 +34,11 @@ export default { theme: createLedgerTheme({ title: "Downloads" }) };
 
 Save as `dirwell.config.mjs` after installing CLI and Ledger. Rich themes load complete coherent listing data before enabling directory-wide filters. Native HTML pagination remains usable without JavaScript; it is independent of interactive row virtualization.
 
-## Shared configuration (upcoming stable)
+<span id="shared-configuration-upcoming-stable"></span>
 
-These options are implemented for the next release; the published alpha does not yet include them. All three official factories accept the same small, serializable customization surface:
+## Shared configuration
+
+All three official factories accept the same small, serializable customization surface:
 
 ```js
 createLedgerTheme({
@@ -94,7 +96,7 @@ Plain accepts `project` attribution options and `portableLinks`; its normal mini
 
 ## Source component customization
 
-Install `@dirwell/theme-authoring@alpha` for trusted source customization. Wrap Ledger from `@dirwell/theme-ledger/source` in Svelte, or Crosswave from `@dirwell/theme-crosswave/source` in Vue. Both expose header, row, actions and footer extension contexts. Row content lives inside the official link; do not nest interactive controls. Put independent buttons or links in the `actions` snippet/slot instead; it receives the same public row context.
+Install `@dirwell/theme-authoring` for trusted source customization. Wrap Ledger from `@dirwell/theme-ledger/source` in Svelte, or Crosswave from `@dirwell/theme-crosswave/source` in Vue. Both expose header, row, actions and footer extension contexts. Row content lives inside the official link; do not nest interactive controls. Put independent buttons or links in the `actions` snippet/slot instead; it receives the same public row context.
 
 ```js
 import { buildFrameworkTheme } from "@dirwell/theme-authoring";
@@ -113,7 +115,9 @@ Compile matching SSR/client output before using it in a build or server. Rebuild
 
 Implement `ExplorerTheme` from `@dirwell/core`: `name` and `render(context)` returning a complete HTML document plus optional assets. Escape filenames and other untrusted text. Do not serialize absolute source paths, inode/ownership data or raw stat objects. Use public listing records for client data. Opt into pagination only if the renderer emits native page links. See [API reference](../api-reference/).
 
-## Returning to a view (upcoming stable)
+<span id="returning-to-a-view-upcoming-stable"></span>
+
+## Returning to a view
 
 Enhanced Ledger and Crosswave keep directory controls in the current URL without adding a history entry for each keystroke:
 

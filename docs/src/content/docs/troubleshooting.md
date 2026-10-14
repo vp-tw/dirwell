@@ -5,10 +5,10 @@ description: Resolve CLI setup, config, data and deployment problems.
 
 ## First command fails
 
-Use Node.js 22.12 or later, an existing source directory and the alpha tag:
+Use Node.js 22.12 or later and an existing source directory:
 
 ```sh
-npx @dirwell/cli@alpha server ./downloads
+npx @dirwell/cli server ./downloads
 ```
 
 A file path is not a directory. Build requires `--out`. Server-only flags fail in build mode and build-only flags fail in server mode. Start with `--help`.
