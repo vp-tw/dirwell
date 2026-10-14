@@ -5,7 +5,7 @@ import { readFile, writeFile, mkdir } from "node:fs/promises";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { workspacePackages } from "./workspace-packages.mjs";
-import { readProvenance } from "./alpha-release.mjs";
+import { readProvenance, releaseTag } from "./alpha-release.mjs";
 
 export const repository = "vp-tw/dirwell";
 export const workflow = "publish-workspace.yml";
@@ -35,8 +35,8 @@ export function validatePublicationAuthentication(environment, version) {
 export function validatePackage(metadata, version, { publish = false } = {}) {
   assert.match(
     version,
-    /^0\.0\.\d+-alpha(?:\.(?:0|[1-9]\d*))?$/,
-    "Only the new alpha line is supported",
+    /^0\.0\.(?:0|[1-9]\d*)(?:-alpha(?:\.(?:0|[1-9]\d*))?)?$/,
+    "Only synchronized SDK 0.0.x stable or alpha versions are supported",
   );
   assert.ok(
     workspacePackages.includes(metadata.name?.replace("@dirwell/", "")),
@@ -49,7 +49,7 @@ export function validatePackage(metadata, version, { publish = false } = {}) {
   assert.equal(metadata.version, version, "Mixed package versions");
   assert.equal(metadata.repository?.url, `git+https://github.com/${repository}.git`);
   assert.equal(metadata.publishConfig?.access, "public");
-  assert.equal(metadata.publishConfig?.tag, "alpha");
+  assert.equal(metadata.publishConfig?.tag, releaseTag(version));
   assert.equal(metadata.publishConfig?.provenance, true);
   assert.equal(metadata.engines?.node, ">=22.12.0");
   if (publish) assert.notEqual(metadata.private, true, "Private publication guard remains enabled");
@@ -168,8 +168,11 @@ export async function readback(manifest, directory = artifactDirectory) {
           const tags = await fetch(
             `https://registry.npmjs.org/${encodeURIComponent(item.metadata.name)}`,
           );
-          // Exact-version metadata can propagate before the packument and its alpha tag.
-          if (tags.ok && (await tags.json())["dist-tags"]?.alpha === manifest.version) {
+          // Exact-version metadata can propagate before the packument and its release-channel tag.
+          if (
+            tags.ok &&
+            (await tags.json())["dist-tags"]?.[releaseTag(manifest.version)] === manifest.version
+          ) {
             result = {
               name: item.metadata.name,
               version: manifest.version,
@@ -299,7 +302,7 @@ async function main(mode) {
         "--access",
         "public",
         "--tag",
-        "alpha",
+        releaseTag(manifest.version),
         "--provenance",
         "--ignore-scripts",
         "--registry",

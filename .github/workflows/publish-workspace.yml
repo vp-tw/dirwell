@@ -1,4 +1,4 @@
-name: Prepare and publish verified workspace alpha
+name: Prepare and publish verified workspace release
 
 on:
   pull_request:
@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: Exact synchronized alpha version already merged into main
+        description: Exact synchronized SDK version already merged into main
         required: true
         type: string
       publish:
@@ -76,6 +76,7 @@ jobs:
       - run: pnpm verify:package
       - run: node scripts/workspace-release.mjs prepare
       - run: node scripts/verify-workspace-consumer.mjs .workspace-release
+      - run: node scripts/verify-readme-quickstarts.mjs .workspace-release
       - run: node scripts/workspace-release.mjs verify
       - uses: actions/upload-artifact@v4
         if: failure()
@@ -151,7 +152,7 @@ jobs:
       - uses: actions/checkout@v5
         with:
           ref: ${{ github.sha }}
-      - name: Bind the family prerelease to the verified source
+      - name: Bind the family release to the verified source
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -161,9 +162,15 @@ jobs:
           await writeFile('workspace-release-notes.md', releaseNotes(await readFile('WORKSPACE_CHANGELOG.md', 'utf8'), process.env.RELEASE_VERSION));
           JS
           tag="@dirwell/workspace@$RELEASE_VERSION"
+          prerelease=false
+          case "$RELEASE_VERSION" in *-alpha*) prerelease=true ;; esac
           if ! gh release view "$tag"; then
-            gh release create "$tag" --target "$GITHUB_SHA" --title "Dirwell SDK $RELEASE_VERSION" --prerelease --notes-file workspace-release-notes.md
+            if test "$prerelease" = true; then
+              gh release create "$tag" --target "$GITHUB_SHA" --title "Dirwell SDK $RELEASE_VERSION" --prerelease --notes-file workspace-release-notes.md
+            else
+              gh release create "$tag" --target "$GITHUB_SHA" --title "Dirwell SDK $RELEASE_VERSION" --notes-file workspace-release-notes.md
+            fi
           fi
-          test "$(gh release view "$tag" --json isPrerelease --jq .isPrerelease)" = true
+          test "$(gh release view "$tag" --json isPrerelease --jq .isPrerelease)" = "$prerelease"
           git fetch origin "refs/tags/$tag:refs/tags/$tag"
           test "$(git rev-parse "$tag^{commit}")" = "$GITHUB_SHA"
