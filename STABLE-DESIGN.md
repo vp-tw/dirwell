@@ -75,7 +75,7 @@ For each scenario: specify API and defaults, add one runnable example, implement
 - Delivered in the publication controls PR: output ownership, explicit force, rollback, exclusive output locks and dry-run reports.
 - Delivered in [the customization PR](https://github.com/vp-tw/dirwell/pull/79): the five theme scenarios, public annotations, static file URL mapping and retry/search controls. Verification includes 206 Node tests, nine packed consumers, the installed release-download recipe, translated desktop/mobile action journeys, paired Svelte/Vue source actions and exact-head platform/browser CI.
 - Delivered in [the browsing PR](https://github.com/vp-tw/dirwell/pull/80): shareable directory controls, History selection/scroll, complete failed-target recovery, malformed-snapshot rejection, skipped-parent native navigation and measured Crosswave windows. Acceptance passed: 206 Node tests, 25 browser scenarios, nine clean packed consumers, types/lint/format, subpath site build and the packed benchmark in [BENCHMARKS.md](BENCHMARKS.md); all 23 exact-head CI checks passed.
-- Implemented locally: direct Core/Server/build-adapter configuration validation, closest-key diagnostics and host-field projection. Local acceptance passed: 212 Node tests, 21 Chromium scenarios, nine clean packed consumers, types/lint/format and subpath site build. PR delivery remains pending.
+- Delivered in [the configuration validation PR](https://github.com/vp-tw/dirwell/pull/81): direct Core/Server/build-adapter validation, closest-key diagnostics and host-field projection. Acceptance passed: 212 Node tests, 21 Chromium scenarios, nine clean packed consumers, types/lint/format, subpath site build and all 23 exact-head CI checks. Deployed API/support readback passed.
 - Remaining: discovery/support policy, strict CSP/access recipes, integration/device evidence and the release-candidate proof.
 - No release has been dispatched and package versions have not been advanced.
 
@@ -108,3 +108,11 @@ Scenarios and acceptance:
 - Valid async metadata/annotation providers, custom theme fields, source wrappers and listing-policy callbacks continue to work. Listing callback results reject unknown nested keys as well as invalid sizes.
 
 Prefer explicit runtime checks against key maps checked with TypeScript `satisfies Record<keyof Options, true>`. Avoid a new schema dependency for the small Node-side configuration surface. Keep transport-data validation separate from configuration validation and preserve existing theme-factory validation.
+
+## Package discovery and first-task proof
+
+Scenarios: arrive on one npm package; copy its complete smallest example; see Ledger on the website and reproduce that interface; choose local browsing, static publication or app integration without guessing a package.
+
+Each README supplies the required install list, script/file names, an expected result, Node requirement and absolute guide. Package homepage metadata points to the matching guide. Isolated npm consumers execute code extracted from each README. Unpublished sibling artifacts are resolved through same-version tarball overrides; unused family packages are not installed. This proves the local candidate's instructions and dependency graph, not public registry installation. Registry tags, README rendering and immutable integrity remain release follow-up.
+
+The website pairs the Ledger preview with its CLI/theme install and live command, retains the minimal Plain commands, provides three task links and one theme capability matrix. Reuse the existing design, preserve native navigation and verify desktop/mobile wrapping and guide destinations.
