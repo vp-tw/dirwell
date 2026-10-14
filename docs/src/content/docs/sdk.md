@@ -3,7 +3,7 @@ title: SDK and live server
 description: Explicit themes, static builds, live server mode and the optional package boundaries.
 ---
 
-The nine `@dirwell/*` packages are published at `0.0.1`, tagged `latest`. The [SDK release](https://github.com/vp-tw/dirwell/releases/tag/%40dirwell/workspace%400.0.1) passed registry integrity, signatures, provenance and installed-consumer checks. The CLI, guides and public examples use this package family.
+The nine `@dirwell/*` packages are published at `0.0.2`, tagged `latest`. The [SDK release](https://github.com/vp-tw/dirwell/releases/tag/%40dirwell/workspace%400.0.2) passed registry integrity, signatures, provenance and installed-consumer checks. The CLI, guides and public examples use this package family.
 
 ## Choose a mode
 
@@ -19,13 +19,13 @@ Server mode handles file data without a Farm/compiler watcher. Theme source stil
 
 ## Install only the capabilities you need
 
-Core requires an explicit theme. CLI `0.0.1` includes Plain by default; its behavior is described below. Plain emits native HTML with no JavaScript, image, font or icon assets by default. Ledger uses Svelte; Crosswave uses Vue and VueUse gamepad support. `@dirwell/share-image` supplies optional build-time metadata/PNG images. `@dirwell/integrations` supplies explicit-theme build adapters. Core and Plain do not depend on either optional package.
+Core requires an explicit theme. CLI `0.0.2` includes Plain by default; its behavior is described below. Plain emits native HTML with no JavaScript, image, font or icon assets by default. Ledger uses Svelte; Crosswave uses Vue and VueUse gamepad support. `@dirwell/share-image` supplies optional build-time metadata/PNG images. `@dirwell/integrations` supplies explicit-theme build adapters. Core and Plain do not depend on either optional package.
 
 The nine packages have separate dependency graphs, but share one official version. The minimum **verified** Node version is 22.12; publishing tools use Node 26. See [support and verification](../support/) for device and scale qualification.
 
 ## CLI: minimal default and project configuration
 
-CLI `0.0.1` includes Plain by default. The commands below select `latest`. Core and integrated HTML require an explicit theme.
+CLI `0.0.2` includes Plain by default. The commands below select `latest`. Core and integrated HTML require an explicit theme.
 
 ```sh
 npx @dirwell/cli server ./files
@@ -80,7 +80,7 @@ await generateExplorer({
 });
 ```
 
-HTML publication and compact listing data are independent decisions. The callback is synchronous and runs per directory; it also receives path, UTF-8 data bytes, operation and pagination capability. The example threshold is a configurable policy, not a universal optimum. Plain's native pagination works without JavaScript. Rich themes load complete data before directory-wide filtering/sorting; Ledger uses row virtualization for large lists, while Crosswave currently renders its filtered rows.
+HTML publication and compact listing data are independent decisions. The callback is synchronous and runs per directory; it also receives path, UTF-8 data bytes, operation and pagination capability. The example threshold is a configurable policy, not a universal optimum. Plain's native pagination works without JavaScript. Rich themes load complete data before directory-wide filtering/sorting; Both rich themes window large rendered lists while retaining complete directory data.
 
 The CLI equivalent selects the factory explicitly:
 
@@ -99,15 +99,17 @@ const server = await startExplorerServer({
   root: "files",
   theme: createLedgerTheme(),
   live: { intervalMs: 1000 },
+  search: {},
 });
-console.log(server.url);
-// Stop accepting requests, cancel connections and await resource cleanup.
-await server.close();
+console.log(server.url + "/browse/");
+// During host shutdown, await server.close() to cancel connections and release resources.
 ```
 
 Standalone defaults bind loopback and preview raster images/audio/video; HTML, SVG and other files download with `nosniff`. Integrated file transport is opt-in. Native Node, Express, Fastify and Hono paths have executed tests. Filesystem access requires Node; this does not qualify edge runtimes or every framework host.
 
 Use `createExplorerHandler` for Request/Response integration, or `createNodeRequestListener` for an existing Node server. Express and Fastify have dedicated package subpaths; Hono uses the shared Request/Response handler. Await creation before mounting. Use a dedicated `mountPath`, such as `/downloads`, without a trailing slash. Listing, theme assets, files and update events share that mount.
+
+Enable `search: {}` to use the rich archive dialog or `GET /__dirwell/search?q=report`. Use `path` for subtree results and `limit` for result count. Search is off by default, uses request-local authorization/selection and returns explicit overload/scan-budget errors. See [query settings and limits](../configuration/#live-archive-search).
 
 ## Headers, authorization and freshness
 
@@ -132,7 +134,7 @@ Default responses use `no-store` and ETags. Async authorization and header hooks
 
 Optional SSE shares a poll per canonical directory, rechecks subscribers, coalesces slow consumers and releases polling after the last cancellation. A changed revision tells rich clients to fetch complete data; query state survives the committed refresh. Plain stays script-free. No shared response cache, distributed invalidation, replay log or retained historical snapshot is supplied.
 
-## Metadata and migration
+## Metadata
 
 Metadata is opt-in through a core provider. `@dirwell/share-image` can supply titles, descriptions, canonical URLs and either a fixed/custom image or an explicit PNG preset. It is a build-time provider, not a live server image endpoint. Plain stays minimal when omitted.
 

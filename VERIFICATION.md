@@ -1,6 +1,6 @@
 # SDK verification record
 
-The synchronized `@dirwell/*` family is published at `0.0.1`, selected by `latest`. This record distinguishes source/registry qualification from public-page and physical-device evidence. It is not a WCAG, hostile-filesystem or production-capacity claim.
+The synchronized `@dirwell/*` family is published at `0.0.2`, selected by `latest`. This record distinguishes source/registry qualification from public-page and physical-device evidence. It is not a WCAG, hostile-filesystem or production-capacity claim.
 
 ## Delivered source and current-head checks
 
@@ -27,7 +27,7 @@ Source authoring's isolated README compiles and generates Vue SSR/client output.
 
 Keyboard, browser engine, mobile viewport, native no-JavaScript, reduced-motion and simulated standard gamepad paths have bounded automated/browser evidence. Physical iOS and real screen-reader output remain pending qualification; physical controller testing is not a separate gate by user decision. Simulators/viewports and injected input do not become physical-device claims.
 
-Core/Plain stay free of framework, image, font and watcher runtime dependencies. Rich themes load complete directory data despite blocks/windows. Images retain bounded bundled glyph coverage; custom image providers are available, while font injection and live archive/distributed-cache expansion are deferred. Private examples rely on an application-owned current session and approved root, not row-level redaction or an identity provider.
+Core/Plain stay free of framework, image, font and watcher runtime dependencies. Rich themes load complete directory data despite blocks/windows. Share images support supplied local font coverage alongside the bounded default fonts. Opt-in live archive queries are qualified under explicit scan/concurrency/time budgets; distributed caching remains deferred. Private examples rely on an application-owned current session and approved root, not row-level redaction or an identity provider.
 
 ## Published 0.0.1 family
 
@@ -38,3 +38,13 @@ All nine exact registry versions, `latest` tags, downloaded bytes and provenance
 [The SDK release](https://github.com/vp-tw/dirwell/releases/tag/%40dirwell/workspace%400.0.1) is not a prerelease; its tag points to the qualified source. The 0.0.x API may evolve: applications should pin a qualified version and upgrade the official family together. Two documented Farm development advisories remain; no clean-all-dependencies claim is made.
 
 Public guide deployment and default npm-page rendering are distinct from registry integrity. [The public-guide delivery PR](https://github.com/vp-tw/dirwell/pull/87) records final live readback after its deployed switch; exact-version package pages and default pages are checked separately so page-cache lag cannot become a false delivery claim. Physical iOS/reader paths remain pending as documented above.
+
+## Published 0.0.2 family
+
+[The font/live-query implementation](https://github.com/vp-tw/dirwell/pull/88) and [the final cancellation/font/dialog qualification](https://github.com/vp-tw/dirwell/pull/89) passed 24 exact-head checks each. Final qualification includes 225 Node tests, 143 Chromium regressions, 21 three-engine compatibility paths, nine isolated README programs and 18 OS/Node installed-consumer combinations. The licensed font fixture, image/scan conditions and limits are recorded in [the follow-up design](FOLLOWUP-DESIGN.md).
+
+[Preparation without publication](https://github.com/vp-tw/dirwell/actions/runs/38584993536) and [OIDC publication/readback](https://github.com/vp-tw/dirwell/actions/runs/38586472293) produced identical nine-package source manifests, payloads and SHA-512 integrity. The release is bound to [the qualified source](https://github.com/vp-tw/dirwell/commit/edd6d7b39a3c277e0f029bc9b0ed254ea02ac7a9). Publication's first attempt stopped before npm writes because a test expected a second query to finish within a 5ms budget; a legitimate CI timeout violated that assertion. The unchanged source passed the complete rerun. The subsequent guide/test update increases that test's timeout/reply delay to 1,000/1,500ms without changing SDK payloads or the published runtime deadline.
+
+All nine `latest` tags select 0.0.2 and the registry README content matches its APIs. Registry bytes, exact sibling dependencies, source/workflow provenance, signatures and installed behavior passed. A separate local consumer installed the nine names without tags/versions/file sources/overrides, matched every version/integrity, verified 94 signatures and 51 attestations, and executed three-theme SSG/MPA, CLI, listing/file/live-query transport, custom fonts, integration imports and Svelte/Vue source compilation/dev SSR. These are registry-content/installation checks, not a fresh nine-page npm UI audit.
+
+[The 0.0.2 SDK release](https://github.com/vp-tw/dirwell/releases/tag/%40dirwell/workspace%400.0.2) is not a prerelease. Public-guide deployment/readback is recorded separately in the delivery PR. Physical iOS/screen-reader and production-scale qualifications remain bounded as above; distributed caches and file-content search remain outside this release.

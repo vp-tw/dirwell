@@ -128,9 +128,9 @@ test("CLI configuration enables bounded queries and timeout releases capacity", 
     let slow = true;
     const handler = await createExplorerHandler({
       root,
-      search: { timeoutMs: 5, maxConcurrent: 1 },
+      search: { timeoutMs: 1000, maxConcurrent: 1 },
       authorize: async () => {
-        if (slow) await new Promise((resolve) => setTimeout(resolve, 30));
+        if (slow) await new Promise((resolve) => setTimeout(resolve, 1500));
         return true;
       },
     });

@@ -151,8 +151,8 @@ await generateExplorer({ sourceDir: "files", outputDir: "generated", theme, mirr
 
 Pass Node-specific `host`/`port` only to `startExplorerServer`; the Fetch handler and Core directory service have separate option contracts. Runtime validation checks configuration and callback results, not side effects performed by trusted callbacks. These checks are included in `0.0.1`.
 
-## Local fonts and live queries (next release)
+## Local fonts and live queries
 
-`ShareImageFonts` adds local `body`/`headline` TTF/OTF sources to `createShareImage`. See [metadata](../metadata/#local-font-injection-next-release). `LiveSearchOptions` enables bounded fresh archive queries on `ExplorerHandlerOptions.search`; see [configuration](../configuration/#live-archive-search-next-release).
+`ShareImageFonts` adds local `body`/`headline` TTF/OTF sources to `createShareImage`. See [metadata](../metadata/#local-font-injection). `LiveSearchOptions` enables bounded fresh archive queries on `ExplorerHandlerOptions.search`; see [configuration](../configuration/#live-archive-search).
 
 `DirectoryService.scan(SelectionBudget)` streams selected canonical physical entries under entry/directory budgets, checking `signal` and `allowPath` before traversal. It throws `SelectionBudgetError` rather than returning an incomplete scan. It returns private filesystem facts, without annotation callbacks; project only explicit safe fields for public transport. Aliases are omitted; scans are not transactional. Host callbacks should honor the enclosing request signal.
