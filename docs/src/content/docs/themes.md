@@ -96,3 +96,19 @@ Compile matching SSR/client output before using it in a build or server. Rebuild
 ## Independent themes
 
 Implement `ExplorerTheme` from `@dirwell/core`: `name` and `render(context)` returning a complete HTML document plus optional assets. Escape filenames and other untrusted text. Do not serialize absolute source paths, inode/ownership data or raw stat objects. Use public listing records for client data. Opt into pagination only if the renderer emits native page links. See [API reference](../api-reference/).
+
+## Returning to a view (upcoming stable)
+
+Enhanced Ledger and Crosswave keep directory controls in the current URL without adding a history entry for each keystroke:
+
+- `dw.q`: directory query, up to 4,096 characters.
+- Ledger `dw.sort`: `field:direction:nameMode:folders` (or `mixed`), for example `size:desc:unicode:mixed`; `dw.types`: comma-separated `directory,file,link`, or an empty value to hide all types.
+- Crosswave `dw.category`: a configured category ID, such as `document` in the default set.
+
+A fresh tab or refresh applies those controls after hydration. Unsupported values fall back to theme defaults. Host query parameters and native `page` parameters remain intact. Plain and no-JavaScript pages retain their native listing order/pagination and ignore enhancement controls. Archive-dialog queries and appearance preferences are separate.
+
+Entering a new folder starts its default controls. Back/Forward restores that history entry's controls, selected logical ID and scroll; deleted or filtered selections are cleared. Crosswave retains measured heights for up to eight directories at the same layout width and discards that cache on resize. This is local history state, not a shareable selection or a filesystem snapshot.
+
+A failed enhanced folder request keeps the successful view and offers Retry plus the target's native link. Retry uses the failed target. Superseded requests cannot replace a newer view. If the host denies a History mutation, the view stays usable through native links. Skipped source pages retain native parent/Home navigation.
+
+Large Crosswave directories now use measured DOM windows above 500 visible rows, with a bounded scroll region that reserves the actual footer height on desktop and mobile. Ledger also windows large lists. Both still load complete directory data; blocks and DOM windows do not turn this into query loading or bound total data memory. See [the SDK benchmark](https://github.com/vp-tw/dirwell/blob/main/BENCHMARKS.md) for workload-specific evidence.

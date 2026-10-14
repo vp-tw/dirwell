@@ -21,4 +21,6 @@ Vite, Rollup and webpack are primary paths. Rolldown, Rspack, Rsbuild, esbuild, 
 
 ## Limits
 
-Physical gamepad mappings, physical iOS, real screen-reader output, hostile filesystem mutation, distributed caching and production-scale performance are not fully qualified. Rich clients load the complete directory; Crosswave renders filtered rows while Ledger virtualizes large lists. Live mode has directory search but no archive-wide search index. Source HMR and file-data refresh are separate mechanisms.
+Physical iOS, real screen-reader output, hostile filesystem mutation, distributed caching and production-scale performance are not fully qualified. Rich clients load the complete directory. The upcoming stable clients both window large rendered lists; the published alpha Crosswave renders filtered rows in full. Live mode has directory search but no archive-wide search index. Source HMR and file-data refresh are separate mechanisms.
+
+Controller polling uses VueUse `useGamepad`; regression covers simulated standard input, held buttons, deadzones, disconnects and unavailable APIs. Physical-controller testing is not a separate `0.0.1` release gate.

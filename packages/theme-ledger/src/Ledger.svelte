@@ -1,5 +1,9 @@
 <script>
   import { onMount, tick, untrack } from "svelte";
+  import {
+    readView,
+    createViewHistory,
+  } from "../../shared-theme/src/view-state.ts";
   import { entryIcon } from "../../shared-theme/src/icons.ts";
   import { loadListing } from "@dirwell/core/client";
   import {
@@ -40,6 +44,7 @@
     timestamp = $state(null),
     composing = $state(false),
     scrollTop = $state(0),
+    viewportHeight = $state(800),
     globalOpen = $state(false),
     globalQuery = $state(""),
     globalRows = $state.raw([]),
@@ -83,7 +88,17 @@
       }
       return Math.max(0, low - 5);
     }),
-    end = $derived(virtual ? Math.min(rows.length, start + 35) : rows.length);
+    end = $derived.by(() => {
+      if (!virtual) return rows.length;
+      let low = 0,
+        high = rows.length;
+      while (low < high) {
+        const middle = (low + high) >> 1;
+        if (offsets[middle + 1] <= scrollTop + viewportHeight) low = middle + 1;
+        else high = middle;
+      }
+      return Math.min(rows.length, Math.max(start + 35, low + 5));
+    });
   function measure(node, id) {
     if (typeof ResizeObserver === "undefined") return;
     const observer = new ResizeObserver(() => {
@@ -108,7 +123,50 @@
     archiveRequest = 0,
     archiveCache = null,
     archiveCacheHref = "",
-    archiveCacheAt = 0;
+    archiveCacheAt = 0,
+    viewHistory,
+    retryRequest = null;
+  const viewDefaults = (page) => ({
+    query: "",
+    sort: page.sort,
+    types: ["directory", "file", "link"],
+  });
+  function saveView() {
+    if (!viewHistory) return;
+    viewHistory.save(
+      new URL(model.dataHref, document.baseURI).href,
+      model.path,
+      {
+        query,
+        types,
+        sort,
+        selected,
+        windowY: window.scrollY,
+        listTop: scrollTop,
+      },
+      viewDefaults(model),
+    );
+  }
+  function retry() {
+    if (failure === "folder" && retryRequest) openFolder(...retryRequest, true);
+    else openFolder(model.dataHref, location.href, false, true);
+  }
+  $effect(() => {
+    if (!ready || busy) return;
+    const view = { query, types, sort, selected, listTop: scrollTop };
+    const dataHref = model.dataHref,
+      path = model.path,
+      defaults = viewDefaults(model);
+    const frame = requestAnimationFrame(() =>
+      viewHistory?.save(
+        new URL(dataHref, document.baseURI).href,
+        path,
+        { ...view, windowY: window.scrollY },
+        defaults,
+      ),
+    );
+    return () => cancelAnimationFrame(frame);
+  });
   const isDirectory = directoryLike;
   function safeHref(record) {
     if (
@@ -147,6 +205,7 @@
     }
   }
   async function navigate(event, record) {
+    saveView();
     const dataHref = record.presentation?.folderDataHref;
     if (
       record.exitsExplorer ||
@@ -166,7 +225,15 @@
       true,
     );
   }
-  async function openFolder(dataHref, url, push, refresh = false) {
+  async function openFolder(
+    dataHref,
+    url,
+    push,
+    refresh = false,
+    restoreState = null,
+    fresh = false,
+  ) {
+    if (push) saveView();
     const token = ++navigation;
     abort?.abort();
     const local = (abort = new AbortController());
@@ -179,7 +246,7 @@
         url,
         "ledger",
         local.signal,
-        refresh,
+        refresh || fresh,
       );
       let nextEntries = next.entries;
       if (refresh && next.manifestHref && nextEntries.length !== next.total) {
@@ -191,21 +258,51 @@
         ).entries;
       }
       if (token !== navigation || local.signal.aborted) return;
+      if (!refresh) viewHistory.commit(next.dataHref, next.path, url, push);
       model = next;
       entries = nextEntries;
+      retryRequest = null;
       if (!refresh) {
-        query = "";
-        selected = null;
-        scrollTop = 0;
+        const view = readView(
+          url,
+          "ledger",
+          next.path,
+          viewDefaults(next),
+          [],
+          restoreState,
+        );
+        query = view.query;
+        types = view.types;
+        sort = view.sort;
+        selected = view.selected;
+        scrollTop = view.listTop;
       }
-      if (push) history.pushState({ dataHref: next.dataHref }, "", url);
       applyThemeMetadata(next, url);
       await hydrateData();
-      if (!refresh) window.scrollTo({ top: 0 });
+      if (!refresh) {
+        const view = readView(
+          url,
+          "ledger",
+          next.path,
+          viewDefaults(next),
+          [],
+          restoreState,
+        );
+        await tick();
+        if (selected && !rows.some((entry) => entry.id === selected))
+          selected = null;
+        window.scrollTo({ top: view.windowY });
+        if (restoreState && selected)
+          list
+            ?.querySelector(`[data-id="${CSS.escape(selected)}"] a`)
+            ?.focus({ preventScroll: true });
+      }
     } catch (cause) {
       if (token === navigation && !local.signal.aborted) {
         error = ui.labels.folderError;
         failure = "folder";
+        retryRequest = [dataHref, url, push, refresh, restoreState];
+        viewHistory?.rollback();
       }
     } finally {
       if (token === navigation) busy = false;
@@ -213,6 +310,8 @@
   }
   function navigateLink(event, href, dataHref) {
     if (
+      typeof href !== "string" ||
+      typeof dataHref !== "string" ||
       event?.altKey ||
       event?.ctrlKey ||
       event?.metaKey ||
@@ -225,11 +324,12 @@
     openFolder(dataHref, new URL(href, document.baseURI).href, true);
   }
   async function move(index) {
-    const row = rows[Math.max(0, Math.min(rows.length - 1, index))];
+    const target = Math.max(0, Math.min(rows.length - 1, index));
+    const row = rows[target];
     if (!row) return;
     selected = row.id;
     if (virtual) {
-      scrollTop = Math.max(0, offsets[index] - 100);
+      scrollTop = Math.max(0, offsets[target] - 100);
       if (list)
         window.scrollTo({
           top: list.getBoundingClientRect().top + window.scrollY + scrollTop,
@@ -270,7 +370,11 @@
     }
     if (event.key === "Backspace" && model.parentHref) {
       event.preventDefault();
-      if (location.protocol === "file:") location.href = model.parentHref;
+      if (
+        location.protocol === "file:" ||
+        typeof model.parentDataHref !== "string"
+      )
+        location.href = model.parentHref;
       else
         openFolder(
           model.parentDataHref,
@@ -387,19 +491,37 @@
     }
   }
   onMount(() => {
+    viewportHeight = innerHeight;
     ready = true;
     abort = new AbortController();
     try {
       const stored = localStorage.getItem("dirwell-color-scheme");
       if (["system", "light", "dark"].includes(stored)) scheme = stored;
     } catch {}
-    history.replaceState(
-      { dataHref: new URL(model.dataHref, document.baseURI).href },
-      "",
+    viewHistory = createViewHistory("ledger");
+    const view = readView(
+      location.href,
+      "ledger",
+      model.path,
+      viewDefaults(model),
+      [],
+      history.state,
     );
+    query = view.query;
+    types = view.types;
+    sort = view.sort;
+    selected = view.selected;
+    scrollTop = view.listTop;
+    saveView();
     const onPop = (event) => {
       if (event.state?.dataHref)
-        openFolder(event.state.dataHref, location.href, false);
+        openFolder(
+          event.state.dataHref,
+          location.href,
+          false,
+          false,
+          event.state,
+        );
       else location.reload();
     };
     window.addEventListener("popstate", onPop);
@@ -450,6 +572,7 @@
 </script>
 
 <svelte:window
+  onresize={() => (viewportHeight = innerHeight)}
   onkeydown={keyboard}
   onscroll={() => {
     if (list) scrollTop = Math.max(0, window.scrollY - list.offsetTop);
@@ -574,10 +697,11 @@
         aria-live="polite">{busy ? ui.labels.loading : error}</span
       >
     </div>
-    {#if failure && failure !== "copy"}<button
-        disabled={busy}
-        onclick={() => openFolder(model.dataHref, location.href, false, true)}
+    {#if failure && failure !== "copy"}<button disabled={busy} onclick={retry}
         >{ui.labels.retry}</button
+      >{/if}
+    {#if failure === "folder" && retryRequest}<a href={retryRequest[1]}
+        >{ui.labels.openNative}</a
       >{/if}
     <div
       class="entry-head"
@@ -717,7 +841,9 @@
           style:height={offsets[rows.length] - offsets[end] + "px"}
         ></li>{/if}
     </ul>
-    {#if rows.length === 0}<p>{ui.labels.noMatches}</p>{/if}
+    {#if rows.length === 0 && !busy}<p>
+        {model.total === 0 ? ui.labels.empty : ui.labels.noMatches}
+      </p>{/if}
   </section>
   {#if model.page?.count > 1 && !complete}<nav
       aria-label={ui.labels.pagination}

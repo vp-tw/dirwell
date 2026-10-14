@@ -28,15 +28,15 @@ Users run Dirwell through a CLI or its TypeScript API. They may serve directory 
 - SSG and MPA output modes.
 - Relative, deployment-base, and native HTML `<base>` URL strategies.
 - Directory-aware output naming that may skip generation by returning `null`; the default preserves existing `index.html` and `index.htm` files.
-- Live server reads on request; optional shared SSE updates Svelte/Vue clients. The compatibility server and build adapters retain watch/rebuild lifecycles.
+- Live server reads on request; optional shared SSE updates Svelte/Vue clients. Build adapters retain their host-specific watch/rebuild lifecycles.
 - Ledger: local and global fuzzy search, type filters, configurable sorting, IME-safe keyboard input, Backspace parent navigation, linked breadcrumbs, and system/light/dark appearance controls.
-- SDK listing policy independently controls HTML pagination and compact data. Plain stays usable without scripts; rich themes load complete data for full-directory search. Ledger virtualizes large lists. The legacy default-theme MPA threshold remains a compatibility behavior.
+- SDK listing policy independently controls HTML pagination and compact data. Plain stays usable without scripts; rich themes load complete data for full-directory search. Ledger and Crosswave measure and window large interactive lists; native HTML pagination remains independent.
 - Symlinks remain visible. Cycles are navigable without recursive generation. Broken, out-of-root, and excluded targets expose only their declared text through a safe raw-file route.
 - Build integrations are selective: Vite, Rollup, and webpack are primary; other existing adapters are experimental. Full Unplugin target coverage and dedicated framework adapters are not product goals. See [support policy](docs/src/content/docs/support.md).
 - Plain defaults to minimal listing HTML and system fonts, with no social metadata, image, branding footer, JavaScript, or search assets. Project attribution and metadata remain explicit opt-ins.
-- Three independently packaged themes: Ledger, Plain, and Crosswave. Built-in interfaces stay English; localization belongs to custom themes.
+- Three independently packaged themes: Ledger, Plain, and Crosswave. Official themes default to English and accept document language, partial labels, locale and time-zone configuration.
 - Configurable page metadata, static share images, and build-time per-folder image callbacks with public counts. Bundled font sources keep normal builds independent of remote font services.
-- Official framework themes expose source snippets/slots through the optional paired compiler; third-party renderers own their complete document and assets. Legacy typed HTML component overrides remain a separate compatibility API.
+- Official framework themes expose source snippets/slots through the optional paired compiler; third-party renderers own their complete document and assets.
 - Generated sites must work as static files without a required application server.
 - The public repository is [vp-tw/dirwell](https://github.com/vp-tw/dirwell), and the documentation site is deployed at [vp-tw.github.io/dirwell](https://vp-tw.github.io/dirwell/). Generated sites remain configurable for other hosts and base paths.
 

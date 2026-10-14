@@ -19,7 +19,7 @@ export interface ThemePage {
   readonly rootHref: string;
   readonly parentHref: string | null;
   readonly parentDataHref: string | null;
-  readonly rootDataHref: string;
+  readonly rootDataHref: string | null;
   readonly dataHref: string;
   readonly manifestHref: string | null;
   readonly listingRevision?: string;
@@ -31,7 +31,7 @@ export interface ThemePage {
   readonly breadcrumbs: readonly {
     readonly name: string;
     readonly href: string;
-    readonly dataHref: string;
+    readonly dataHref: string | null;
   }[];
 }
 export const pageAsset = (theme: string, directory: string, page = 1) =>
@@ -98,20 +98,22 @@ export function createThemePage(
     directoryPath,
   };
   const dataForDirectory = (logicalPath: string) =>
-    folderDataHref(
-      {
-        id: logicalPath,
-        name: logicalPath,
-        kind: "directory",
-        href: context.hrefForDirectory(logicalPath),
-        exitsExplorer: false,
-        size: 0,
-        modifiedAt: "",
-        link: null,
-      },
-      safeContext,
-      theme.name,
-    )!;
+    context.hasPageForDirectory?.(logicalPath) === false
+      ? null
+      : folderDataHref(
+          {
+            id: logicalPath,
+            name: logicalPath,
+            kind: "directory",
+            href: context.hrefForDirectory(logicalPath),
+            exitsExplorer: false,
+            size: 0,
+            modifiedAt: "",
+            link: null,
+          },
+          safeContext,
+          theme.name,
+        )!;
   const entries = context.directory.entries.map((entry) => {
     const record = projectListingEntry(entry, context);
     return theme.entryData === undefined

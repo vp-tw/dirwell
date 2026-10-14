@@ -16,6 +16,7 @@ import {
   applyThemeMetadata,
   restoreThemePage,
 } from "../../shared-theme/src/navigation.ts";
+import { readView, createViewHistory } from "../../shared-theme/src/view-state.ts";
 import { entryIcon } from "../../shared-theme/src/icons.ts";
 import { directoryLike, size } from "../../shared-theme/src/records.ts";
 import {
@@ -44,7 +45,13 @@ const query = ref(""),
   waveReady = ref(false),
   pendingUpdates = ref(null),
   canvas = ref(),
-  search = ref();
+  search = ref(),
+  listScroll = ref(),
+  footerElement = ref(),
+  scrollTop = ref(0),
+  viewportHeight = ref(400),
+  retryRequest = shallowRef(null),
+  heights = shallowRef(new Map());
 const complete = computed(() => entries.value.length === model.value.total),
   membership = (entry) =>
     Array.isArray(entry.presentation?.categories) ? entry.presentation.categories : [];
@@ -64,6 +71,111 @@ const rows = computed(() =>
       ui.value.labels.allFiles,
   );
 const nodes = new Map();
+const virtual = computed(() => ready.value && rows.value.length > 500);
+const offsets = computed(() => {
+  const result = [0];
+  for (const entry of rows.value) result.push(result.at(-1) + (heights.value.get(entry.id) ?? 76));
+  return result;
+});
+const start = computed(() => {
+  if (!virtual.value) return 0;
+  const position = Math.max(0, scrollTop.value - (model.value.parentHref ? 76 : 0));
+  let low = 0,
+    high = rows.value.length;
+  while (low < high) {
+    const middle = (low + high) >> 1;
+    if (offsets.value[middle + 1] <= position) low = middle + 1;
+    else high = middle;
+  }
+  return Math.max(0, low - 5);
+});
+const end = computed(() => {
+  if (!virtual.value) return rows.value.length;
+  let low = 0,
+    high = rows.value.length;
+  while (low < high) {
+    const middle = (low + high) >> 1;
+    if (offsets.value[middle + 1] <= scrollTop.value + viewportHeight.value) low = middle + 1;
+    else high = middle;
+  }
+  return Math.min(rows.value.length, Math.max(start.value + 35, low + 5));
+});
+const visibleRows = computed(() => rows.value.slice(start.value, end.value));
+const heightCache = new Map();
+let rowObserver, layoutObserver, viewHistory, measuredWidth;
+function measureLayout() {
+  if (!listScroll.value) return;
+  const width = listScroll.value.clientWidth;
+  if (measuredWidth !== undefined && width !== measuredWidth) {
+    heightCache.clear();
+    heights.value = new Map(
+      [...nodes].map(([id, node]) => [id, node.getBoundingClientRect().height]),
+    );
+  }
+  measuredWidth = width;
+  const footerHeight = footerElement.value?.getBoundingClientRect().height ?? 82;
+  document.documentElement.style.setProperty("--cw-footer-height", footerHeight + "px");
+  const available = Math.max(
+    160,
+    innerHeight - listScroll.value.getBoundingClientRect().top - footerHeight - 24,
+  );
+  viewportHeight.value = available;
+  listScroll.value.style.setProperty("--cw-list-height", available + "px");
+}
+watch([virtual, () => model.value.path], () => nextTick(measureLayout));
+const viewDefaults = (page) => ({ query: "", category: page.categories[0]?.id ?? null });
+function saveView() {
+  if (!viewHistory) return;
+  viewHistory.save(
+    new URL(model.value.dataHref, document.baseURI).href,
+    model.value.path,
+    {
+      query: query.value,
+      category: category.value,
+      selected: selected.value,
+      windowY: window.scrollY,
+      listTop: listScroll.value?.scrollTop ?? 0,
+    },
+    viewDefaults(model.value),
+  );
+}
+function retry() {
+  if (failure.value === "folder" && retryRequest.value) openFolder(...retryRequest.value, true);
+  else openFolder(model.value.dataHref, location.href, false, true);
+}
+watchEffect((onCleanup) => {
+  if (!ready.value || busy.value) return;
+  const view = {
+    query: query.value,
+    category: category.value,
+    selected: selected.value,
+    listTop: scrollTop.value,
+  };
+  const dataHref = model.value.dataHref,
+    path = model.value.path,
+    defaults = viewDefaults(model.value);
+  const frame = requestAnimationFrame(() =>
+    viewHistory?.save(
+      new URL(dataHref, document.baseURI).href,
+      path,
+      { ...view, windowY: window.scrollY },
+      defaults,
+    ),
+  );
+  onCleanup(() => cancelAnimationFrame(frame));
+});
+function setNode(id, node) {
+  const old = nodes.get(id);
+  if (old && old !== node) rowObserver?.unobserve(old);
+  if (node) {
+    nodes.set(id, node);
+    rowObserver?.observe(node);
+  } else nodes.delete(id);
+}
+watch([query, category], () => {
+  scrollTop.value = 0;
+  if (listScroll.value) listScroll.value.scrollTop = 0;
+});
 let wave,
   gamepad,
   abort,
@@ -103,7 +215,15 @@ async function loadComplete() {
     if (token === navigation) busy.value = false;
   }
 }
-async function openFolder(dataHref, url, push, refresh = false) {
+async function openFolder(
+  dataHref,
+  url,
+  push,
+  refresh = false,
+  restoreState = null,
+  fresh = false,
+) {
+  if (push) saveView();
   const token = ++navigation;
   abort?.abort();
   const local = (abort = new AbortController());
@@ -111,27 +231,62 @@ async function openFolder(dataHref, url, push, refresh = false) {
   error.value = "";
   failure.value = null;
   try {
-    const next = await fetchThemePage(dataHref, url, "crosswave", local.signal, refresh);
+    const next = await fetchThemePage(dataHref, url, "crosswave", local.signal, refresh || fresh);
     let nextEntries = next.entries;
     if (refresh && next.manifestHref && nextEntries.length !== next.total)
       nextEntries = (
         await loadListing(next.manifestHref, { signal: local.signal, cache: "no-store" })
       ).entries;
     if (token !== navigation || local.signal.aborted || disposed) return;
+    if (!refresh) viewHistory.commit(next.dataHref, next.path, url, push);
+    if (next.path !== model.value.path) {
+      heightCache.set(model.value.path, heights.value);
+      if (heightCache.size > 8) heightCache.delete(heightCache.keys().next().value);
+      heights.value = heightCache.get(next.path) ?? new Map();
+    }
     model.value = next;
+    retryRequest.value = null;
     entries.value = nextEntries;
     if (!refresh) {
-      query.value = "";
-      selected.value = null;
-      category.value = model.value.categories[0]?.id ?? null;
+      const view = readView(
+        url,
+        "crosswave",
+        next.path,
+        viewDefaults(next),
+        next.categories.map((item) => item.id),
+        restoreState,
+      );
+      query.value = view.query;
+      selected.value = view.selected;
+      category.value = view.category;
     }
-    if (push) history.pushState({ dataHref: next.dataHref }, "", url);
     applyThemeMetadata(next, url);
     await loadComplete();
+    if (!refresh) {
+      const view = readView(
+        url,
+        "crosswave",
+        next.path,
+        viewDefaults(next),
+        next.categories.map((item) => item.id),
+        restoreState,
+      );
+      await nextTick();
+      if (selected.value && !rows.value.some((entry) => entry.id === selected.value))
+        selected.value = null;
+      scrollTop.value = view.listTop;
+      if (listScroll.value) listScroll.value.scrollTop = view.listTop;
+      await nextTick();
+      window.scrollTo({ top: view.windowY });
+      if (restoreState && selected.value)
+        nodes.get(selected.value)?.querySelector("a")?.focus({ preventScroll: true });
+    }
   } catch (cause) {
     if (token === navigation && !local.signal.aborted) {
       error.value = ui.value.labels.folderError;
       failure.value = "folder";
+      retryRequest.value = [dataHref, url, push, refresh, restoreState];
+      viewHistory?.rollback();
     }
   } finally {
     if (token === navigation) busy.value = false;
@@ -139,6 +294,8 @@ async function openFolder(dataHref, url, push, refresh = false) {
 }
 function navigateLink(event, href, dataHref) {
   if (
+    typeof href !== "string" ||
+    typeof dataHref !== "string" ||
     event?.altKey ||
     event?.ctrlKey ||
     event?.metaKey ||
@@ -151,6 +308,7 @@ function navigateLink(event, href, dataHref) {
   openFolder(dataHref, new URL(href, document.baseURI).href, true);
 }
 async function openEntry(event, entry) {
+  saveView();
   const href = entry.presentation?.folderDataHref;
   if (
     entry.exitsExplorer ||
@@ -167,28 +325,41 @@ async function openEntry(event, entry) {
   await openFolder(href, new URL(entry.href, document.baseURI).href, true);
 }
 async function move(index) {
-  const entry = rows.value[Math.max(0, Math.min(rows.value.length - 1, index))];
+  const target = Math.max(0, Math.min(rows.value.length - 1, index));
+  const entry = rows.value[target];
   if (!entry) return;
   selected.value = entry.id;
+  if (virtual.value) {
+    scrollTop.value = Math.max(0, offsets.value[target] - 100 + (model.value.parentHref ? 76 : 0));
+    if (listScroll.value) listScroll.value.scrollTop = scrollTop.value;
+  }
   await nextTick();
   const node = nodes.get(entry.id);
   node?.querySelector("a")?.focus({ preventScroll: true });
   node?.scrollIntoView({ block: "nearest" });
 }
-function stepCategory(delta) {
+async function stepCategory(delta) {
+  if (ui.value.direction === "rtl") delta = -delta;
+  const moveFocus = document.activeElement?.getAttribute("role") === "tab";
   const items = model.value.categories,
     index = items.findIndex((item) => item.id === category.value);
   category.value = items[(index + delta + items.length) % items.length].id;
   selected.value = null;
+  if (moveFocus) {
+    await nextTick();
+    document.getElementById("cw-tab-" + category.value)?.focus({ preventScroll: true });
+  }
 }
-function confirm() {
+async function confirm() {
   if (!active.value || busy.value) return;
+  await move(rows.value.findIndex((entry) => entry.id === active.value.id));
   const anchor = nodes.get(active.value.id)?.querySelector("a");
   anchor?.click();
 }
 function parent() {
   if (model.value.parentHref) {
-    if (location.protocol === "file:") location.href = model.value.parentHref;
+    if (location.protocol === "file:" || typeof model.value.parentDataHref !== "string")
+      location.href = model.value.parentHref;
     else
       openFolder(
         model.value.parentDataHref,
@@ -293,7 +464,7 @@ const colors = {
 };
 const onPop = (event) =>
   event.state?.dataHref
-    ? openFolder(event.state.dataHref, location.href, false)
+    ? openFolder(event.state.dataHref, location.href, false, false, event.state)
     : location.reload();
 const suspend = () => {
   gamepad?.pause();
@@ -315,7 +486,43 @@ onMounted(() => {
   ready.value = true;
   document.body.setAttribute("data-cw-enhanced", "");
   abort = new AbortController();
-  history.replaceState({ dataHref: new URL(model.value.dataHref, document.baseURI).href }, "");
+  if (typeof ResizeObserver !== "undefined") {
+    rowObserver = new ResizeObserver((observations) => {
+      const next = new Map(heights.value);
+      let changed = false;
+      for (const observation of observations) {
+        const id = observation.target.dataset.id;
+        const height = observation.target.getBoundingClientRect().height;
+        if (height > 0 && next.get(id) !== height) {
+          next.set(id, height);
+          changed = true;
+        }
+      }
+      if (changed) heights.value = next;
+    });
+    for (const node of nodes.values()) rowObserver.observe(node);
+    layoutObserver = new ResizeObserver(measureLayout);
+    if (footerElement.value) layoutObserver.observe(footerElement.value);
+    const header = document.querySelector("[data-dirwell-theme='crosswave'] .cw-top");
+    if (header) layoutObserver.observe(header);
+  }
+  measureLayout();
+  window.addEventListener("resize", measureLayout);
+  viewHistory = createViewHistory("crosswave");
+  const view = readView(
+    location.href,
+    "crosswave",
+    model.value.path,
+    viewDefaults(model.value),
+    model.value.categories.map((item) => item.id),
+    history.state,
+  );
+  query.value = view.query;
+  category.value = view.category;
+  selected.value = view.selected;
+  scrollTop.value = view.listTop;
+  if (listScroll.value) listScroll.value.scrollTop = view.listTop;
+  saveView();
   try {
     const stored = localStorage.getItem("dirwell-crosswave-color");
     if (Object.hasOwn(colors, stored)) color.value = stored;
@@ -424,6 +631,9 @@ onBeforeUnmount(() => {
   disposed = true;
   document.body.removeAttribute("data-cw-enhanced");
   abort?.abort();
+  rowObserver?.disconnect();
+  layoutObserver?.disconnect();
+  window.removeEventListener("resize", measureLayout);
   gamepad?.pause();
   wave?.dispose();
   clearInterval(timer);
@@ -516,7 +726,12 @@ onBeforeUnmount(() => {
           ><input ref="search" type="search" v-model="query" :disabled="!ready || !complete"
         /></label>
       </div>
-      <div class="cw-list-scroll">
+      <div
+        class="cw-list-scroll"
+        :data-virtual="virtual"
+        ref="listScroll"
+        @scroll="scrollTop = $event.currentTarget.scrollTop"
+      >
         <ul class="cw-files">
           <li v-if="model.parentHref" class="cw-row">
             <a
@@ -526,10 +741,13 @@ onBeforeUnmount(() => {
               >../</a
             >
           </li>
+          <li v-if="start" aria-hidden="true" :style="{ height: offsets[start] + 'px' }"></li>
           <li
-            v-for="entry in rows"
+            v-for="(entry, visibleIndex) in visibleRows"
             :key="entry.id"
-            :ref="(node) => (node ? nodes.set(entry.id, node) : nodes.delete(entry.id))"
+            :ref="(node) => setNode(entry.id, node)"
+            :aria-posinset="start + visibleIndex + 1"
+            :aria-setsize="rows.length"
             :class="['cw-row', { 'cw-selected': active?.id === entry.id }]"
             data-cw-entry
             :data-custom-columns="Boolean(model.ui?.columns)"
@@ -638,8 +856,15 @@ onBeforeUnmount(() => {
               </template>
             </span>
           </li>
+          <li
+            v-if="end < rows.length"
+            aria-hidden="true"
+            :style="{ height: offsets[rows.length] - offsets[end] + 'px' }"
+          ></li>
         </ul>
-        <p class="cw-empty" v-if="!rows.length">{{ ui.labels.noMatches }}</p>
+        <p class="cw-empty" v-if="!rows.length && !busy">
+          {{ model.total === 0 ? ui.labels.empty : ui.labels.noMatches }}
+        </p>
       </div>
     </section>
     <aside class="cw-detail" v-if="ready && active">
@@ -654,13 +879,12 @@ onBeforeUnmount(() => {
       <p v-if="active.link">{{ active.link.target }}</p>
     </aside>
     <p role="status" aria-live="polite">{{ busy ? ui.labels.loading : error }}</p>
-    <button
-      v-if="failure && failure !== 'copy'"
-      :disabled="busy"
-      @click="openFolder(model.dataHref, location.href, false, true)"
-    >
+    <button v-if="failure && failure !== 'copy'" :disabled="busy" @click="retry">
       {{ ui.labels.retry }}
     </button>
+    <a v-if="failure === 'folder' && retryRequest" :href="retryRequest[1]">{{
+      ui.labels.openNative
+    }}</a>
     <nav v-if="model.page?.count > 1 && !complete" :aria-label="ui.labels.pagination">
       <a v-if="model.page.previousHref" :href="model.page.previousHref" rel="prev">{{
         ui.labels.previous
@@ -669,7 +893,7 @@ onBeforeUnmount(() => {
       <a v-if="model.page.nextHref" :href="model.page.nextHref" rel="next">{{ ui.labels.next }}</a>
     </nav>
   </main>
-  <footer class="cw-bottom">
+  <footer class="cw-bottom" ref="footerElement">
     <div :class="ui.brand.footerText || $slots.footer ? 'cw-custom-footer' : 'cw-key-help'">
       <slot name="footer" :model="model"
         ><template v-if="ui.brand.footerText"
