@@ -29,6 +29,16 @@ test("SDK guide code exercises threshold pagination, server shutdown and handler
         JSON.stringify(name),
         JSON.stringify(new URL(source, import.meta.url).href),
       );
+    if (snippet.includes("const server = await startExplorerServer"))
+      snippet += `\ntry {
+        const page = await fetch(server.url + '/browse/');
+        if (page.status !== 200 || !(await page.text()).includes('data-dirwell-theme'))
+          throw new Error('The running guide server did not return its HTML');
+        const response = await fetch(server.url + '/__dirwell/search?q=0.txt');
+        const data = await response.json();
+        if (response.status !== 200 || data.version !== 1 || !data.results.some(result => result.path === '0.txt'))
+          throw new Error('The running guide server did not return its live query');
+      } finally { await server.close(); }`;
     execFileSync(process.execPath, ["--input-type=module", "--eval", snippet], {
       cwd: root,
       timeout: 20000,
