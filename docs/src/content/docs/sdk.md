@@ -3,7 +3,7 @@ title: SDK and live server
 description: Explicit themes, static builds, live server mode and the optional package boundaries.
 ---
 
-The nine `@dirwell/*` packages are published at `0.0.1-alpha.1`, tagged `alpha`. The [SDK release](https://github.com/vp-tw/dirwell/releases/tag/%40dirwell/workspace%400.0.1-alpha.1) passed registry integrity, signatures, provenance and installed-consumer checks. The CLI, guides and public examples use this package family.
+The nine `@dirwell/*` packages are published at `0.0.1`, tagged `latest`. The [SDK release](https://github.com/vp-tw/dirwell/releases/tag/%40dirwell/workspace%400.0.1) passed registry integrity, signatures, provenance and installed-consumer checks. The CLI, guides and public examples use this package family.
 
 ## Choose a mode
 
@@ -19,30 +19,26 @@ Server mode handles file data without a Farm/compiler watcher. Theme source stil
 
 ## Install only the capabilities you need
 
-Core requires an explicit theme. CLI `0.0.1-alpha.1` includes Plain by default; its behavior is described below. Plain emits native HTML with no JavaScript, image, font or icon assets by default. Ledger uses Svelte; Crosswave uses Vue and VueUse gamepad support. `@dirwell/share-image` supplies optional build-time metadata/PNG images. `@dirwell/integrations` supplies explicit-theme build adapters. Core and Plain do not depend on either optional package.
+Core requires an explicit theme. CLI `0.0.1` includes Plain by default; its behavior is described below. Plain emits native HTML with no JavaScript, image, font or icon assets by default. Ledger uses Svelte; Crosswave uses Vue and VueUse gamepad support. `@dirwell/share-image` supplies optional build-time metadata/PNG images. `@dirwell/integrations` supplies explicit-theme build adapters. Core and Plain do not depend on either optional package.
 
-The nine packages have separate dependency graphs, but share one official alpha version. The minimum **verified** Node version is 22.12; publishing tools use Node 26. Physical gamepads and production-scale performance remain unverified.
+The nine packages have separate dependency graphs, but share one official version. The minimum **verified** Node version is 22.12; publishing tools use Node 26. See [support and verification](../support/) for device and scale qualification.
 
 ## CLI: minimal default and project configuration
 
-CLI `0.0.1-alpha.1` includes Plain by default. The commands below use the
-published `alpha` tag. Core and integrated HTML continue to require an explicit
-theme. The earlier `0.0.1-alpha` CLI required a project-installed theme.
+CLI `0.0.1` includes Plain by default. The commands below select `latest`. Core and integrated HTML require an explicit theme.
 
 ```sh
-npx @dirwell/cli@alpha server ./files
-npx @dirwell/cli@alpha build ./files --out ./generated
+npx @dirwell/cli server ./files
+npx @dirwell/cli build ./files --out ./generated
 ```
 
-Install only one package providing `dirwell`; replace any previous CLI dependency
-in a project rather than installing both. The CLI rejects legacy config discovery
-instead of silently dropping its rules. Use native `.mjs` or explicit `--config`.
+Use native `.mjs` configuration or an explicit `--config` path.
 
 The CLI reads `dirwell.config.mjs` from the working directory without a config
 loader or TypeScript compiler. Install a rich theme locally before importing it:
 
 ```sh
-npm install --save-dev @dirwell/cli@alpha @dirwell/theme-ledger@alpha
+npm install --save-dev @dirwell/cli @dirwell/theme-ledger
 ```
 
 ```mjs
@@ -154,7 +150,7 @@ component from its theme's `/source` entry and model types from `/model`.
 loopback with native Vite HMR. It is separate from production server mode and
 from file-revision SSE. CSS-only changes preserve state; wrapper/template edits
 can remount children and reset search/selection. Core and Plain do not depend on
-these tools. The published alpha includes both framework compilers and their matching SSR/client output.
+these tools. The package includes both framework compilers and their matching SSR/client output.
 
 ## Private downloads behind an existing application session
 

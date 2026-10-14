@@ -1,6 +1,6 @@
 # Release downloads with public annotations
 
-This upcoming stable example keeps filesystem names, public annotations and theme presentation separate. It uses new APIs not present in the published alpha. Test it against the candidate tarballs until the stable release is published.
+This example keeps filesystem names, public annotations and theme presentation separate. Use the synchronized `0.0.1` package family.
 
 Requires Node.js 22.12 or newer. In a clean project, install `@dirwell/core` and `@dirwell/theme-ledger`, then copy `build.mjs` and `annotations.json` here. Create `files/release.txt` with sample release notes, run `node build.mjs`, and serve `generated` over HTTP. Every artifact row receives the description/checksum keyed by its logical path; no private absolute paths are supplied to the callback. The sample checksum is a placeholder, not an integrity claim. Keep the sidecar outside the public source folder.
 

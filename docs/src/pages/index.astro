@@ -108,7 +108,7 @@ const shareImageUrl = new URL(path(shareImagePath), Astro.site);
         </div>
         <div class="preview-command">
           <p>Run the Ledger interface shown above with your own files:</p>
-          <pre><code>npm install --save-dev @dirwell/cli@alpha @dirwell/theme-ledger@alpha
+          <pre><code>npm install --save-dev @dirwell/cli @dirwell/theme-ledger
 npx dirwell server ./downloads --theme ledger --live</code></pre>
         </div>
       </section>
@@ -116,11 +116,11 @@ npx dirwell server ./downloads --theme ledger --live</code></pre>
       <section class="quick-start" aria-labelledby="quick-title">
         <div class="section-heading">
           <h2 id="quick-title">Browse your folder. Then publish it.</h2>
-          <p>Requires Node.js 22.12 or later. Use the published alpha CLI; Plain is included and no config file is needed.</p>
+          <p>Requires Node.js 22.12 or later. Use the published CLI; Plain is included and no config file is needed.</p>
         </div>
         <div class="command-pair">
-          <div><span>Serve current files</span><code>npx @dirwell/cli@alpha server ./downloads</code></div>
-          <div><span>Build static output</span><code>npx @dirwell/cli@alpha build ./downloads --out ./site-downloads</code></div>
+          <div><span>Serve current files</span><code>npx @dirwell/cli server ./downloads</code></div>
+          <div><span>Build static output</span><code>npx @dirwell/cli build ./downloads --out ./site-downloads</code></div>
         </div>
         <div class="task-paths">
           <p><strong>Browse locally.</strong> Open a current folder with the included Plain theme. <a href={path("getting-started/")}>Start a local server</a></p>

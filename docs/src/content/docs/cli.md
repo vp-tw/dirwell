@@ -3,12 +3,12 @@ title: CLI
 description: Build static output or serve current files with Plain included.
 ---
 
-Install nothing globally: use `npx @dirwell/cli@alpha`. For repeated project use, install `@dirwell/cli@alpha` as a dev dependency and run `npx dirwell`.
+Install nothing globally: use `npx @dirwell/cli`. For repeated project use, install `@dirwell/cli` as a dev dependency and run `npx dirwell`.
 
 ```sh
-npx @dirwell/cli@alpha --help
-npx @dirwell/cli@alpha server ./files
-npx @dirwell/cli@alpha build ./files --out ./generated
+npx @dirwell/cli --help
+npx @dirwell/cli server ./files
+npx @dirwell/cli build ./files --out ./generated
 ```
 
 Both commands require an existing source directory. Build also requires a dedicated `--out`; it replaces the generated tree. Server owns its HTTP lifecycle, prints a URL and stops with Ctrl+C. It reads current data without generating static output or starting a filesystem watcher.
@@ -25,10 +25,10 @@ Pass only options for the selected mode. Page/block sizes are positive integers.
 
 ## Themes and configuration
 
-Plain is included. Install `@dirwell/theme-ledger@alpha` or `@dirwell/theme-crosswave@alpha` before selecting `--theme ledger` or `--theme crosswave`.
+Plain is included. Install `@dirwell/theme-ledger` or `@dirwell/theme-crosswave` before selecting `--theme ledger` or `--theme crosswave`.
 
 ```sh
-npm exec --package=@dirwell/cli@alpha --package=@dirwell/theme-ledger@alpha -- dirwell server ./files --theme ledger --live
+npm exec --package=@dirwell/cli --package=@dirwell/theme-ledger -- dirwell server ./files --theme ledger --live
 ```
 
 Custom themes use `--theme './theme.mjs#createTheme'` or a module default export. Resolution prefers the working project, then packages supplied beside the CLI by npm exec. An explicit theme failure is an error.

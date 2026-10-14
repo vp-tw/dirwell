@@ -8,7 +8,7 @@ export const landingCode: Record<
 > = {
   terminal: [
     { text: "$ npx " },
-    { text: "@dirwell/cli@alpha", tone: "shell-package" },
+    { text: "@dirwell/cli", tone: "shell-package" },
     { text: " server ./downloads\n" },
     { text: "Dirwell server: http://127.0.0.1:4173/browse/", tone: "output" },
   ],

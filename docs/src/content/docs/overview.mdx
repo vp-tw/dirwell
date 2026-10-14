@@ -5,20 +5,20 @@ description: Browse a folder live or publish it as a static website.
 
 Dirwell turns folders into browsable websites. Use live server mode for a local folder or build portable HTML for release downloads, reports and artifacts.
 
-The published `@dirwell/*` packages are currently alpha. Use Node.js 22.12 or later and the `alpha` tag. The CLI includes Plain: native links and pagination without browser JavaScript. Install Ledger or Crosswave separately for search, sorting and keyboard navigation.
+Use the published `@dirwell/*` packages with Node.js 22.12 or later. The CLI includes Plain: native links and pagination without browser JavaScript. Install Ledger or Crosswave separately for search, sorting and keyboard navigation.
 
 [Start with the CLI](../getting-started/) or [compare working examples](../examples/).
 
 ## Choose a path
 
-| Need                                 | Use                                                                    |
-| ------------------------------------ | ---------------------------------------------------------------------- |
-| Browse changing files                | [CLI server](../cli/)                                                  |
-| Publish a folder on a static host    | [Static build and deployment](../deployment/)                          |
-| Configure selection and URLs         | [Configuration](../configuration/)                                     |
-| Choose an interface                  | [Themes](../themes/)                                                   |
-| Add routes to a Node app             | [SDK server integration](../sdk-alpha/#standalone-and-integrated-http) |
-| Generate alongside an existing build | [Build adapters](../build-tools/)                                      |
-| Write a renderer                     | [API reference](../api-reference/)                                     |
+| Need                                 | Use                                                              |
+| ------------------------------------ | ---------------------------------------------------------------- |
+| Browse changing files                | [CLI server](../cli/)                                            |
+| Publish a folder on a static host    | [Static build and deployment](../deployment/)                    |
+| Configure selection and URLs         | [Configuration](../configuration/)                               |
+| Choose an interface                  | [Themes](../themes/)                                             |
+| Add routes to a Node app             | [SDK server integration](../sdk/#standalone-and-integrated-http) |
+| Generate alongside an existing build | [Build adapters](../build-tools/)                                |
+| Write a renderer                     | [API reference](../api-reference/)                               |
 
 Static output needs no Dirwell server. Live mode reads filesystem data on requests and does not generate an output tree. Optional rich-client updates use SSE; static builds must be rebuilt after source changes.

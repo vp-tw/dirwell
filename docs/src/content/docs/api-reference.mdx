@@ -71,9 +71,11 @@ All names below come from `@dirwell/core`. Source definitions live in [the Core 
 | `readGeneratedPage`             | Read an available generated directory page.                                         |
 | `validateListingPlan`           | Validate independent HTML/data policy and pagination support.                       |
 
-## Upcoming stable publication controls
+<span id="upcoming-stable-publication-controls"></span>
 
-These additions are on the development branch for the upcoming stable release; they are not part of the currently published alpha.
+## Publication controls
+
+These controls are included in `0.0.1`.
 
 `IgnoreFile` is a path or `{ path, baseDir?, optional? }`. `resolveIgnoreFiles` accepts `(files, cwd)` to validate and resolve ordered ignore file paths. `GenerateOptions.ignoreFiles` and live service options default to no ignore discovery. The CLI selects an optional cwd `.gitignore` unless overridden, including with `[]`.
 
@@ -99,13 +101,15 @@ These additions are on the development branch for the upcoming stable release; t
 | Default build adapter factories                                               | [Build tools](../build-tools/) and `@dirwell/integrations/*`                                             |
 | `buildFrameworkTheme`, `startAuthoringServer`                                 | [Source customization](../themes/#source-component-customization) and `@dirwell/theme-authoring` / `dev` |
 
-See [SDK examples](../sdk-alpha/) for executed static/live/authorization examples. Package exports include TypeScript declarations. Theme `/source` and `/model` subpaths supply framework component and row contracts; they are compiled with paired SSR/client output rather than serialized function overrides.
+See [SDK examples](../sdk/) for executed static/live/authorization examples. Package exports include TypeScript declarations. Theme `/source` and `/model` subpaths supply framework component and row contracts; they are compiled with paired SSR/client output rather than serialized function overrides.
 
 ## Theme rendering
 
 `ExplorerTheme.render(ThemeContext)` owns a complete document and optional string/byte assets. Context contains private Node-side directory facts, safe link functions, sort settings, optional listing and metadata. Escape untrusted text. Use projected public entries for client data, never absolute paths or raw stat metadata. A theme may add JSON entry data, opt into native pagination and choose whether to generate an archive search index.
 
-## Public annotations and file URL mapping (upcoming stable)
+<span id="public-annotations-and-file-url-mapping-upcoming-stable"></span>
+
+## Public annotations and file URL mapping
 
 `entryData(entry, context)` is an optional Core build/live-service callback. It receives public logical facts (`id`, `name`, `kind`, `size`, `modifiedAt`, `link`) and `{operation, directoryPath}`; it does not receive private source paths or raw stat records. Return a plain JSON object, synchronously or asynchronously. Values are copied and validated, then exposed as `ListingEntry.data`. This is a public field: publish only information intended for every reader allowed to list that directory.
 
@@ -125,7 +129,9 @@ await generateExplorer({
 });
 ```
 
-## Direct JavaScript validation (upcoming stable)
+<span id="direct-javascript-validation-upcoming-stable"></span>
+
+## Direct JavaScript validation
 
 Core generation, DirectoryService and Server reject unknown option keys and incorrect value shapes. Diagnostics include the complete option path and a likely correction. Invalid direct options fail before publication writes, directory-service initialization or socket creation. A listing callback is evaluated after directory inspection; its returned plan is checked before output replacement. Custom theme fields remain allowed, while required render/name and known hooks must match their declared contract. Trusted async metadata and annotation callbacks are still awaited.
 
@@ -141,4 +147,4 @@ await generateExplorer({
 await generateExplorer({ sourceDir: "files", outputDir: "generated", theme, mirror: "false" });
 ```
 
-Pass Node-specific `host`/`port` only to `startExplorerServer`; the Fetch handler and Core directory service have separate option contracts. Runtime validation checks configuration and callback results, not side effects performed by trusted callbacks. These checks are not available in the published alpha.
+Pass Node-specific `host`/`port` only to `startExplorerServer`; the Fetch handler and Core directory service have separate option contracts. Runtime validation checks configuration and callback results, not side effects performed by trusted callbacks. These checks are included in `0.0.1`.

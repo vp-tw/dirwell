@@ -29,9 +29,9 @@ test("README default CLI and independent public theme build and serve real files
   await mkdir(path.join(root, "downloads/child"), { recursive: true });
   await writeFile(path.join(root, "downloads/child", "a & b.txt"), "proof");
   const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
-  for (const command of [...readme.matchAll(/^npx @dirwell\/cli@alpha (.+)$/gm)].map(
-    (match) => match[1],
-  )) {
+  const commands = [...readme.matchAll(/^npx @dirwell\/cli (.+)$/gm)].map((match) => match[1]);
+  assert.equal(commands.length, 2, "README must exercise both default CLI commands");
+  for (const command of commands) {
     const server = await runCli(command.split(" "), root, () => {});
     if (server) {
       try {

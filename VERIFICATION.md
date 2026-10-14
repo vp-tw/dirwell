@@ -1,6 +1,6 @@
 # SDK verification record
 
-The current `@dirwell/*` source is preparing `0.0.1`; it has not been published. This record distinguishes delivered source, local candidate/CI execution, public deployment and remaining registry/device proof. It is not a WCAG, hostile-filesystem or production-capacity claim.
+The synchronized `@dirwell/*` family is published at `0.0.1`, selected by `latest`. This record distinguishes source/registry qualification from public-page and physical-device evidence. It is not a WCAG, hostile-filesystem or production-capacity claim.
 
 ## Delivered source and current-head checks
 
@@ -21,7 +21,7 @@ Source authoring's isolated README compiles and generates Vue SSR/client output.
 
 ## Additional readiness proof
 
-The qualification branch repeats encoded spaces/hash/percent/Unicode folder navigation for both rich themes in static/live modes and interrupts the protected live transport. Both themes reconnect, receive changed files and retain the same document in all three browser engines. A durable `/sdk/` redirect preserves deployment base, query and fragment. Delivery of this additional branch remains pending.
+[The support qualification PR](https://github.com/vp-tw/dirwell/pull/85) repeats encoded spaces/hash/percent/Unicode folder navigation for both rich themes in static/live modes and interrupts the protected live transport. Both themes reconnect, receive changed files and retain the same document in all three browser engines. A durable `/sdk/` redirect preserves deployment base, query and fragment. All 24 exact-head checks passed, the PR merged, and the deployed SDK/redirect/support content was independently read back.
 
 ## Support and release boundaries
 
@@ -29,4 +29,12 @@ Keyboard, browser engine, mobile viewport, native no-JavaScript, reduced-motion 
 
 Core/Plain stay free of framework, image, font and watcher runtime dependencies. Rich themes load complete directory data despite blocks/windows. Images retain bounded bundled glyph coverage; custom image providers are available, while font injection and live archive/distributed-cache expansion are deferred. Private examples rely on an application-owned current session and approved root, not row-level redaction or an identity provider.
 
-The exact 0.0.1 candidate still needs synchronized versions, fresh artifacts/security/licenses/platform checks and preparation-only release proof. Registry publication, tags/provenance/integrity, untagged installs, npm rendering and deployed stable commands require subsequent readback. Two documented Farm development advisories are retained; no clean-all-dependencies claim is made.
+## Published 0.0.1 family
+
+[The synchronized candidate](https://github.com/vp-tw/dirwell/pull/86) passed 213 Node tests, nine isolated README programs, packed consumers, all 24 current-head CI checks and the documented security/license gates. [Preparation without publication](https://github.com/vp-tw/dirwell/actions/runs/38552394410) and [the OIDC publication](https://github.com/vp-tw/dirwell/actions/runs/38553763885) produced identical nine tarballs. Independent artifact verification binds their metadata and SHA-512 integrity to [the qualified source](https://github.com/vp-tw/dirwell/commit/c21b91a560807cbb9e38bf19c5233a7b4e944cd6).
+
+All nine exact registry versions, `latest` tags, downloaded bytes and provenance passed readback. CI installed registry versions and checked signatures/behavior. A separate clean npm consumer installed the nine names without tags, versions, file sources or overrides: every installed version was `0.0.1`, each lockfile integrity matched the immutable artifact, and 94 registry signatures plus 51 attestations passed. Three-theme SSG/MPA, CLI, live listing/files, optional images, integration imports and Svelte/Vue source compilation/dev SSR passed from that installation.
+
+[The SDK release](https://github.com/vp-tw/dirwell/releases/tag/%40dirwell/workspace%400.0.1) is not a prerelease; its tag points to the qualified source. The 0.0.x API may evolve: applications should pin a qualified version and upgrade the official family together. Two documented Farm development advisories remain; no clean-all-dependencies claim is made.
+
+Public guide deployment and default npm-page rendering are distinct from registry integrity. [The public-guide delivery PR](https://github.com/vp-tw/dirwell/pull/87) records final live readback after its deployed switch; exact-version package pages and default pages are checked separately so page-cache lag cannot become a false delivery claim. Physical iOS/reader paths remain pending as documented above.
