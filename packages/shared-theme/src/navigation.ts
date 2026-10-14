@@ -1,4 +1,5 @@
 import { loadListing, parseListingEntries, ListingDataError } from "@dirwell/core/client";
+import { resolveCustomization } from "./customization.ts";
 
 /** Folder snapshots resolve relative URLs before History changes the document URL. */
 export async function fetchThemePage(
@@ -51,6 +52,8 @@ export async function fetchThemePage(
       : {}),
   }));
   if (entries.length > Number(data.total)) throw new ListingDataError("Invalid folder count");
+  if (data.ui !== undefined)
+    resolveCustomization(data.ui as Parameters<typeof resolveCustomization>[0]);
   const result = {
     ...data,
     updatesHref: link(data.updatesHref ?? null),

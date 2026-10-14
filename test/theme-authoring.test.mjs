@@ -49,6 +49,7 @@ for (const framework of ["svelte", "vue"])
       assert.match(html, /data-nested/);
       assert.match(html, /letter-spacing:1px/);
       assert.match(html, /data-custom-footer/);
+      assert.match(html, /data-custom-action/);
       assert.match(html, /font-weight:600/);
       assert.match(html, /<script type="module"/);
       const notice = await readFile(path.join(fixture.output, "THIRD_PARTY_NOTICES.txt"), "utf8");

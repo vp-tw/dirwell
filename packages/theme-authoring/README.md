@@ -18,11 +18,11 @@ const { createTheme } = await import(result.themeUrl);
 Import Ledger from `@dirwell/theme-ledger/source`, or Crosswave from
 `@dirwell/theme-crosswave/source`. Your wrapper accepts the `model` prop; public
 model and row context types are available from each theme's `/model` entry.
-Ledger accepts `header`, `row` and `footer` snippets. Crosswave exposes named slots
-with those names. Header/footer receive `{model}`; row receives
+Ledger accepts `header`, `row`, `actions` and `footer` snippets. Crosswave exposes named slots
+with those names. Header/footer receive `{model}`; row/actions receive
 `{model, entry, selected}`. These contexts track the current directory after
 navigation or live updates. Row content lives inside the official link: do not
-nest links, buttons, or other interactive controls inside it. Official list
+nest links, buttons, or other interactive controls inside it. The separate `actions` region is outside that link and accepts independent interactive controls. Official list
 identity, keyboard selection, link actions, virtualization, pagination, dialogs,
 appearance controls and gamepad lifecycle remain owned by the theme.
 

@@ -36,6 +36,8 @@ export function resolveIgnoreFiles(
 
 export async function createIgnoreMatcher(files: readonly IgnoreFile[]) {
   const rules: { base: string; matcher: ReturnType<typeof ignore> }[] = [];
+  const scopes = new Map<string, ReturnType<typeof ignore>>();
+  let hasRules = false;
   for (const file of resolveIgnoreFiles(files)) {
     let contents: string;
     try {
@@ -45,9 +47,21 @@ export async function createIgnoreMatcher(files: readonly IgnoreFile[]) {
         continue;
       throw error;
     }
-    rules.push({ base: await realpath(file.baseDir!), matcher: ignore().add(contents) });
+    const base = await realpath(file.baseDir!);
+    if (contents.split(/\r?\n/).some((line) => line.trim() !== "" && !line.startsWith("#")))
+      hasRules = true;
+    let matcher = scopes.get(base);
+    if (matcher === undefined) {
+      matcher = ignore();
+      scopes.set(base, matcher);
+      rules.push({ base, matcher });
+    }
+    matcher.add(contents);
   }
-  return (filename: string, directory: boolean): boolean => {
+  // Preserve Git's parent-directory negation behavior across files in one scope.
+  // Explicit deeper scopes override applicable parent-scope rules.
+  rules.sort((left, right) => left.base.split(path.sep).length - right.base.split(path.sep).length);
+  const matches = (filename: string, directory: boolean): boolean => {
     let ignored = false;
     for (const rule of rules) {
       if (!isWithin(rule.base, filename)) continue;
@@ -59,6 +73,7 @@ export async function createIgnoreMatcher(files: readonly IgnoreFile[]) {
     }
     return ignored;
   };
+  return Object.assign(matches, { hasRules });
 }
 
 export function normalizePathPatterns(value: unknown, name: string): readonly string[] {
@@ -104,8 +119,9 @@ export async function selectSourcePaths(
   exclude: unknown,
   ignoredPaths: readonly string[] = [],
   ignoreFiles: readonly IgnoreFile[] = [],
+  preparedIgnore?: Awaited<ReturnType<typeof createIgnoreMatcher>>,
 ): Promise<SourceSelection> {
-  const isIgnored = await createIgnoreMatcher(ignoreFiles);
+  const isIgnored = preparedIgnore ?? (await createIgnoreMatcher(ignoreFiles));
   const canonicalRoot = await realpath(sourceDir);
   const ignored = ignoredPaths.map((value) => path.resolve(value));
   const included = normalizePathPatterns(include, "include").map((pattern) =>

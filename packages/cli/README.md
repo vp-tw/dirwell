@@ -33,7 +33,7 @@ filesystem watcher. Theme-source HMR belongs to the optional authoring package.
 
 These controls are under development and are not available in the published alpha.
 
-The CLI reads an optional `.gitignore` in cwd by default. Use repeatable `--ignore-file <path>` to replace that list, or `--no-ignore` to disable it. Config supports shared `ignoreFiles`, overridden by `build.ignoreFiles` or `server.ignoreFiles`; `[]` disables defaults. Paths resolve from cwd; rules use the file's directory as their base. Use `{ path, baseDir, optional }` for shared rules or optional files. Glob exclusions always win, and include globs do not bypass ignore rules.
+The CLI reads an optional `.gitignore` in cwd by default. Use repeatable `--ignore-file <path>` to replace that list, or `--no-ignore` to disable it. Config supports shared `ignoreFiles`, overridden by `build.ignoreFiles` or `server.ignoreFiles`; `[]` disables defaults. Paths resolve from cwd; rules use the file's directory as their base. Use `{ path, baseDir, optional }` for shared rules or optional files. Files sharing a pattern base are concatenated in order; deeper scopes override parent scopes. Glob exclusions always win, and include globs do not bypass ignore rules.
 
 Builds replace missing, empty or Dirwell-marked output directories. A nonempty unmarked directory requires `--force` / `-f`; force never permits replacing source or a symlink/file destination. `--dry-run` reports selection and planned directory pages without writing output. `defineConfig` from `@dirwell/cli` provides editor types and runtime validation; nested option typos fail before build/server startup.
 

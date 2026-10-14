@@ -35,6 +35,8 @@ export interface SymlinkMetadata {
 }
 
 export interface FileSystemEntry {
+  /** Explicitly supplied public annotations, distinct from private filesystem facts. */
+  readonly publicData?: JsonObject;
   readonly name: string;
   /** Node-side source path; custom themes must not serialize it into public output. */
   readonly absolutePath: string;
@@ -65,6 +67,10 @@ export interface RenderedPage {
 export type SortField = "modified" | "name" | "size";
 export type NameSortMode = "locale" | "natural" | "unicode";
 export type SortDirection = "asc" | "desc";
+export type EntryDataProvider = (
+  entry: Omit<ListingEntry, "href" | "exitsExplorer" | "presentation" | "data">,
+  context: { readonly operation: "build" | "server"; readonly directoryPath: string },
+) => JsonObject | Promise<JsonObject>;
 
 export type IgnoreFile =
   | string
@@ -124,6 +130,9 @@ export interface ExplorerTheme {
 }
 
 export interface GenerateOptions {
+  /** Synchronous public file URL mapping, independent of explorer/data/asset URLs. */
+  readonly fileHref?: (logicalPath: string) => string | null;
+  readonly entryData?: EntryDataProvider;
   /** Inspect filesystem selection and planned directory pages without writing output. */
   readonly dryRun?: boolean;
   /** Nonempty outputs require an ownership marker unless replacement is explicit. */

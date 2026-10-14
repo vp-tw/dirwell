@@ -1,9 +1,11 @@
 import type { JsonObject } from "./json.ts";
 import { createHash } from "node:crypto";
 import type { EntryKind, FileSystemEntry, ThemeContext, SortOptions } from "./model.ts";
+import { copyJsonObject } from "./json.ts";
 
 /** Public transport fields only. Internal filesystem metadata must never be spread here. */
 export interface ListingEntry {
+  readonly data?: JsonObject;
   readonly presentation?: JsonObject;
   readonly id: string;
   readonly name: string;
@@ -80,6 +82,7 @@ export function projectListingEntry(
 ): ListingEntry {
   const link = entry.symlink;
   return {
+    ...(entry.publicData === undefined ? {} : { data: copyJsonObject(entry.publicData) }),
     id: entry.relativePath,
     name: entry.name,
     kind: entry.kind,
@@ -98,6 +101,19 @@ export function projectListingEntry(
             cycle: link.isCycle,
           },
   };
+}
+
+/** Annotation providers receive public facts, not transport URLs or raw stat objects. */
+export function entryDataFacts(
+  entry: FileSystemEntry,
+): Omit<ListingEntry, "href" | "exitsExplorer" | "presentation" | "data"> {
+  const {
+    href: _href,
+    exitsExplorer: _exits,
+    data: _data,
+    ...facts
+  } = projectListingEntry(entry, { hrefFor: () => null, exitsExplorerFor: () => false });
+  return facts;
 }
 function record(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
