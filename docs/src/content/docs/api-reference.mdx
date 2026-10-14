@@ -71,7 +71,17 @@ All names below come from `@dirwell/core`. Source definitions live in [the Core 
 | `readGeneratedPage`             | Read an available generated directory page.                                         |
 | `validateListingPlan`           | Validate independent HTML/data policy and pagination support.                       |
 
-## Browser listing loader
+## Upcoming stable publication controls
+
+These additions are on the development branch for the upcoming stable release; they are not part of the currently published alpha.
+
+`IgnoreFile` is a path or `{ path, baseDir?, optional? }`. `resolveIgnoreFiles` accepts `(files, cwd)` to validate and resolve ordered ignore file paths. `GenerateOptions.ignoreFiles` and live service options default to no ignore discovery. The CLI selects an optional cwd `.gitignore` unless overridden, including with `[]`.
+
+`GenerateOptions.outputPolicy` defaults to `owned`: missing, empty or marked outputs can be published. `replace` permits replacing an unowned nonempty directory. Neither permits a source-containing output or a file/symlink destination. `dryRun` selects and plans without writing output. `generateExplorer` returns a `BuildReport` containing selected paths, directory-page names, theme and replacement scope. Publication keeps a rollback backup until the staged output is installed.
+
+`defineConfig` from `@dirwell/cli` preserves configuration types and rejects unknown nested options before starting either mode. CLI builds accept `--force`/`-f` and `--dry-run`; both modes accept repeatable `--ignore-file` and `--no-ignore`.
+
+## Browser listing loader behavior
 
 `@dirwell/core/client` exports `loadListing` and `parseListingEntries`. The loader fetches coherent public records and retries once when a live revision expires. Private filesystem objects never belong in browser payloads. Data splitting is independent of HTML pagination and row rendering.
 
