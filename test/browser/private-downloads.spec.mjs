@@ -30,6 +30,7 @@ for (const [name, creator] of [
       const sessions = new Map([
         ["synthetic-session", { canDownload: true, expiresAt: Date.now() + 60000 }],
       ]);
+      sessions.set("expired-session", { canDownload: true, expiresAt: Date.now() - 1 });
       const handler = await createPrivateDownloads({
         root,
         theme: withApplicationBranding(
@@ -62,6 +63,13 @@ for (const [name, creator] of [
         expect(response.status).toBe(401);
         expect(response.headers.get("cache-control")).toContain("no-store");
         expect(await response.text()).not.toMatch(/release\.txt|hidden-secret|private bytes/);
+      }
+      for (const route of paths) {
+        const response = await fetch(server.url + "/downloads" + route, {
+          headers: { cookie: "host_session=expired-session" },
+        });
+        expect(response.status).toBe(401);
+        expect(await response.text()).not.toMatch(/release\.txt|hidden-secret/);
       }
       const cookie = "host_session=synthetic-session";
       const file = await fetch(server.url + "/downloads/files/release.txt", {
@@ -160,6 +168,21 @@ for (const [name, creator] of [
         headers: { cookie },
       });
       expect(deniedHead.status).toBe(401);
+      await page.evaluate(() => {
+        const button = document.createElement("button");
+        button.setAttribute("onclick", "window.__untrustedHandlerRan = true");
+        document.body.append(button);
+        button.click();
+        button.remove();
+      });
+      expect(await page.evaluate(() => window.__untrustedHandlerRan)).toBeUndefined();
+      await expect
+        .poll(() =>
+          page.evaluate(() =>
+            window.__violations.some((directive) => directive.startsWith("script-src")),
+          ),
+        )
+        .toBe(true);
       await page.goto("about:blank");
     } finally {
       await reader?.cancel();
