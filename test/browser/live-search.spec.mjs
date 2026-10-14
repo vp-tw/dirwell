@@ -18,7 +18,7 @@ for (const [name, create] of [
       server = await startExplorerServer({
         root,
         port: 0,
-        theme: create(),
+        theme: create(name === "crosswave" ? { color: "violet" } : {}),
         files: "media",
         search: { refreshIntervalMs: 1000 },
       });
@@ -30,6 +30,10 @@ for (const [name, create] of [
       await trigger.click();
       const dialog = page.getByRole("dialog");
       await expect(dialog).toBeVisible();
+      if (name === "crosswave") {
+        await expect(dialog).toHaveCSS("background-color", "rgb(36, 21, 50)");
+        expect((await trigger.boundingBox()).height).toBeGreaterThanOrEqual(44);
+      }
       const input = dialog.getByRole("searchbox");
       await expect(input).toBeFocused();
       await input.fill("日本語");

@@ -817,6 +817,7 @@ onBeforeUnmount(() => {
           ><input ref="search" type="search" v-model="query" :disabled="!ready || !complete"
         /></label>
         <button
+          class="cw-archive-trigger"
           ref="archiveTrigger"
           v-if="model.searchQueryHref"
           :disabled="!ready"
