@@ -41,6 +41,7 @@ for (const [name, creator] of [
           ),
         ),
         intervalMs: 50,
+        search: {},
         exclude: ["external-link"],
         getSession: async (request) =>
           sessions.get(request.headers.get("cookie")?.match(/host_session=([^;]+)/)?.[1]) ?? null,
@@ -55,6 +56,7 @@ for (const [name, creator] of [
         "/__dirwell/asset?name=client.js",
         "/files/release.txt",
         "/__dirwell/updates",
+        "/__dirwell/search?q=release",
       ];
       for (const route of paths) {
         const response = await fetch(server.url + "/downloads" + route, {
@@ -72,6 +74,14 @@ for (const [name, creator] of [
         expect(await response.text()).not.toMatch(/release\.txt|hidden-secret/);
       }
       const cookie = "host_session=synthetic-session";
+      const searchResult = await fetch(server.url + "/downloads/__dirwell/search?q=release", {
+        headers: { cookie },
+      });
+      expect(searchResult.status).toBe(200);
+      expect((await searchResult.json()).results.map((record) => record.path)).toEqual([
+        "release.txt",
+      ]);
+
       const file = await fetch(server.url + "/downloads/files/release.txt", {
         headers: { cookie, range: "bytes=0-2" },
       });

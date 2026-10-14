@@ -23,6 +23,8 @@ All names below come from `@dirwell/core`. Source definitions live in [the Core 
 | `DirectoryAccessError`          | Unavailable or rejected logical filesystem path.                                    |
 | `DirectoryData`                 | Private root/current/parent facts and current-directory entries.                    |
 | `DirectoryService`              | Async path resolution, entry reads, directory reads and safe file handles.          |
+| `SelectionBudget`               | Fresh scan entry/directory limits, abort signal and per-path authorization.         |
+| `SelectionBudgetError`          | An incomplete bounded scan; callers must not expose partial results as complete.    |
 | `DirectoryServiceOptions`       | Physical root, include/exclude rules and sort policy for live reads.                |
 | `EntryKind`                     | Directory, file, symlink or other entry.                                            |
 | `ExplorerTheme`                 | Renderer, optional public entry data, pagination and search capabilities.           |
@@ -148,3 +150,9 @@ await generateExplorer({ sourceDir: "files", outputDir: "generated", theme, mirr
 ```
 
 Pass Node-specific `host`/`port` only to `startExplorerServer`; the Fetch handler and Core directory service have separate option contracts. Runtime validation checks configuration and callback results, not side effects performed by trusted callbacks. These checks are included in `0.0.1`.
+
+## Local fonts and live queries (next release)
+
+`ShareImageFonts` adds local `body`/`headline` TTF/OTF sources to `createShareImage`. See [metadata](../metadata/#local-font-injection-next-release). `LiveSearchOptions` enables bounded fresh archive queries on `ExplorerHandlerOptions.search`; see [configuration](../configuration/#live-archive-search-next-release).
+
+`DirectoryService.scan(SelectionBudget)` streams selected canonical physical entries under entry/directory budgets, checking `signal` and `allowPath` before traversal. It throws `SelectionBudgetError` rather than returning an incomplete scan. It returns private filesystem facts, without annotation callbacks; project only explicit safe fields for public transport. Aliases are omitted; scans are not transactional. Host callbacks should honor the enclosing request signal.

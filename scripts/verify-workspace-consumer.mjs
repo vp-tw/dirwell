@@ -47,6 +47,10 @@ await writeFile(
   await readFile(new URL("./workspace-consumer.mjs", import.meta.url), "utf8"),
 );
 await writeFile(
+  path.join(trial, "font-fixture.ttf"),
+  await readFile(new URL("../test/fixtures/fonts/DirwellFontFixture.ttf", import.meta.url)),
+);
+await writeFile(
   path.join(trial, "diagnose-file-identity.mjs"),
   await readFile(new URL("./diagnose-file-identity.mjs", import.meta.url), "utf8"),
 );

@@ -43,3 +43,11 @@ export default {
 HTML pagination and public data publication are independent. The synchronous callback runs per directory and receives path, entry count, UTF-8 data size, operation and pagination capability. Use `data: { strategy: "blocks", blockSize: 200 }` when splitting responses helps. Rich themes need complete coherent data for directory-wide filtering; splitting does not bound their total data needs.
 
 CLI flags override the corresponding configuration settings. Build adapters take explicit host options and do not discover this file. No config loader, inheritance or implicit TypeScript compilation is included in the CLI.
+
+## Live archive search (next release)
+
+Enable `server: { search: {} }` to add fresh cross-directory filename/path queries. It is off by default. Ledger and Crosswave distinguish the archive dialog from their current-directory filter; either factory accepts `archiveSearch: false` to hide the dialog. Plain keeps native browsing.
+
+The endpoint is `GET /__dirwell/search?q=report&path=docs&limit=25`, under your configured mount. Defaults bound scans to 10,000 entries/1,000 directories, two active queries, 100 results and five seconds. Set `maxEntries`, `maxDirectories`, `maxConcurrent`, `maxResults`, `timeoutMs` and `refreshIntervalMs` inside `search`. The open rich dialog debounces typing by 300 ms and refreshes every two seconds while visible. No background archive scan runs with the dialog closed.
+
+Queries apply selection rules and per-path authorization before child traversal, omit symbolic-link aliases and private annotations, and return encoded native links. Root/ancestor access is required for subtree queries. Scan exhaustion returns 503, overload returns 429 and result truncation is explicit. Every request scans fresh; there is no file-content index, transactional snapshot or distributed cache. Qualify your own tree and host callbacks before raising the limits.

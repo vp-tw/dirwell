@@ -56,6 +56,7 @@ export function createLedgerTheme(
         ...createThemePage(context, theme, options.title ?? ui.brand.name ?? "Dirwell"),
         ...(publishedUi === undefined ? {} : { ui: publishedUi }),
         searchIndexHref: theme.searchIndex === false ? null : context.searchIndexHref,
+        searchQueryHref: theme.searchIndex === false ? null : (context.searchQueryHref ?? null),
       };
       const { script, scriptName, styles } = await loadResources();
       const json = JSON.stringify(model).replaceAll("<", "\\u003c");

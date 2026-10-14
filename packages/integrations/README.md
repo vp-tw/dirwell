@@ -7,7 +7,7 @@ Explicit-theme static build adapters for Vite and unplugin hosts. No default the
 ## Build with Vite
 
 ```sh
-npm install --save-dev vite @dirwell/integrations@0.0.1 @dirwell/theme-plain@0.0.1
+npm install --save-dev vite @dirwell/integrations@0.0.2 @dirwell/theme-plain@0.0.2
 ```
 
 Create `files/note.txt` and an `index.html` for your host page. Save the following as `vite.config.mjs`, then run `npx vite build`:

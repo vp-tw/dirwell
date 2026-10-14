@@ -105,6 +105,7 @@ const serverKeys = {
   entryData: true,
   ignoreFiles: true,
   live: true,
+  search: true,
   blockSize: true,
   mountPath: true,
   files: true,
@@ -187,6 +188,31 @@ export function validateCliConfig(value: unknown): asserts value is CliConfig {
         keys(live, ["intervalMs", "maxClients"], "server.live");
         for (const key of ["intervalMs", "maxClients"])
           scalar(live[key], "number", `server.live.${key}`);
+      }
+      if (options.search !== undefined && options.search !== false) {
+        const search = object(options.search, "server.search");
+        keys(
+          search,
+          [
+            "maxEntries",
+            "maxDirectories",
+            "maxConcurrent",
+            "maxResults",
+            "timeoutMs",
+            "refreshIntervalMs",
+          ],
+          "server.search",
+        );
+        if (typeof search.maxResults === "number" && search.maxResults > 10000)
+          throw new TypeError("server.search.maxResults must not exceed 10000");
+        for (const key of Object.keys(search)) {
+          scalar(search[key], "number", `server.search.${key}`);
+          if (
+            !Number.isSafeInteger(search[key]) ||
+            Number(search[key]) < (key === "refreshIntervalMs" ? 1000 : 1)
+          )
+            throw new TypeError(`server.search.${key} must be a positive safe integer`);
+        }
       }
     }
   }

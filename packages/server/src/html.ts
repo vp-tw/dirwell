@@ -102,6 +102,12 @@ export async function themeResponse(
     outputName: "index.html",
     documentBaseHref: null,
     searchIndexHref: "",
+    ...(options.search
+      ? {
+          searchQueryHref: `${mount}/__dirwell/search`,
+          searchRefreshIntervalMs: options.search.refreshIntervalMs ?? 2000,
+        }
+      : {}),
     hrefForDirectory,
     hrefFor,
     hasPageForDirectory: () => true,

@@ -5,7 +5,7 @@ import type {
 } from "@dirwell/core";
 import { countKinds, createMetadataResolver } from "./metadata.ts";
 export { createShareImage } from "./share-image-api.ts";
-export type { ShareImageOptions } from "./share-image-api.ts";
+export type { ShareImageOptions, ShareImageFonts } from "./share-image-api.ts";
 export {
   countEntries,
   countKinds,

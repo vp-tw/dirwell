@@ -24,6 +24,8 @@ export interface ThemePage {
   readonly manifestHref: string | null;
   readonly listingRevision?: string;
   readonly updatesHref: string | null;
+  readonly searchQueryHref?: string | null;
+  readonly searchRefreshIntervalMs?: number;
   readonly total: number;
   readonly entries: readonly ListingEntry[];
   readonly sort: Required<SortOptions>;
@@ -142,6 +144,12 @@ export function createThemePage(
     manifestHref: context.listing?.manifestHref ?? null,
     ...(context.listing ? { listingRevision: context.listing.revision } : {}),
     updatesHref: context.updatesHref ?? null,
+    ...(context.searchQueryHref
+      ? {
+          searchQueryHref: context.searchQueryHref,
+          searchRefreshIntervalMs: context.searchRefreshIntervalMs,
+        }
+      : {}),
     total: context.listing?.page.total ?? entries.length,
     entries,
     sort: context.sort,

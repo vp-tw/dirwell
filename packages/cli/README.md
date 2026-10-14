@@ -11,8 +11,8 @@ The CLI supports short theme names and automatic `dirwell.config.mjs` discovery.
 ## Open or publish a folder
 
 ```sh
-npx @dirwell/cli@0.0.1 server ./files
-npx @dirwell/cli@0.0.1 build ./files --out ./generated
+npx @dirwell/cli@0.0.2 server ./files
+npx @dirwell/cli@0.0.2 build ./files --out ./generated
 ```
 
 No project, configuration file or global installation is required. Open the URL
@@ -42,7 +42,7 @@ Builds replace missing, empty or Dirwell-marked output directories. A nonempty u
 For repeated project use, install the CLI and the theme you want:
 
 ```sh
-npm install --save-dev @dirwell/cli@0.0.1 @dirwell/theme-ledger@0.0.1
+npm install --save-dev @dirwell/cli@0.0.2 @dirwell/theme-ledger@0.0.2
 npx dirwell server ./files --theme ledger
 ```
 
