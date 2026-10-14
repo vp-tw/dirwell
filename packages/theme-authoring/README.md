@@ -9,7 +9,7 @@ this package or its compilers.
 ## Compile and publish a Vue wrapper
 
 ```sh
-npm install @dirwell/theme-authoring@alpha @dirwell/theme-crosswave@alpha @dirwell/core@alpha
+npm install @dirwell/theme-authoring@0.0.1 @dirwell/theme-crosswave@0.0.1 @dirwell/core@0.0.1
 ```
 
 Create `files/note.txt`. Save this as `Downloads.vue`:
@@ -98,3 +98,5 @@ before compilation, so partial editor writes can recover cleanly. Compiler error
 produce Vite's overlay and recover after a valid edit. Development CSS loads
 through Vite's client, so production output is the no-JavaScript/CSS acceptance
 path. No Farm watcher is involved.
+
+The 0.0.x API may evolve. Pin your qualified version and upgrade the official family together. See [support and verification](https://vp-tw.github.io/dirwell/support/) for host, browser and device boundaries.

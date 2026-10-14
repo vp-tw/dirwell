@@ -7,7 +7,7 @@ Optional build-time metadata and 1200 × 630 PNG images. Install this package on
 ## Save a share image
 
 ```sh
-npm install @dirwell/share-image@alpha
+npm install @dirwell/share-image@0.0.1
 ```
 
 Save this as `image.mjs`, then run `node image.mjs`:
@@ -28,7 +28,7 @@ The result is a local 1200 × 630 PNG. No explorer build or browser runtime is r
 ## Add metadata to an explorer
 
 ```sh
-npm install @dirwell/core@alpha @dirwell/theme-plain@alpha @dirwell/share-image@alpha
+npm install @dirwell/core@0.0.1 @dirwell/theme-plain@0.0.1 @dirwell/share-image@0.0.1
 ```
 
 Create `files/note.txt`, save the following as `build.mjs` and run `node build.mjs`. Serve the complete `public/downloads` folder over HTTP; its pages reference the generated metadata/image assets.
@@ -52,3 +52,5 @@ await generateExplorer({
 Omit `imageTheme` for text-only metadata. `image: false` disables any preset; a local File/path/file URL or async callback supplies a custom image. `createShareImage({ theme, title, description })` returns a PNG File. Rendering is lazy, uses bundled Adobe fonts without network/system-font lookup, and retains at most 32 rendered PNGs per process. The existing renderer requires bundled glyph coverage; unsupported text fails instead of silently emitting missing glyphs. Use a custom renderer for other scripts. Per-build image loading is deduplicated; image output paths are validated and conflicting bytes are rejected.
 
 This is a static-build provider. No server image route or runtime image service is implied.
+
+The 0.0.x API may evolve. Pin your qualified version and upgrade the official family together. See [support and verification](https://vp-tw.github.io/dirwell/support/) for host, browser and device boundaries.

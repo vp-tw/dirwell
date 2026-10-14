@@ -6,15 +6,13 @@ Build a static file explorer or serve a live folder. Plain is included as the
 minimal default: no browser JavaScript, framework, fonts or share images.
 Other themes remain separate installs.
 
-Starting with `0.0.1-alpha.1`, the CLI defaults to Plain and supports short theme
-names and automatic `dirwell.config.mjs` discovery. Version `0.0.1-alpha` requires an explicit
-`--theme '@dirwell/theme-plain#createPlainTheme'` and a project-installed theme.
+The CLI supports short theme names and automatic `dirwell.config.mjs` discovery.
 
 ## Open or publish a folder
 
 ```sh
-npx @dirwell/cli@alpha server ./files
-npx @dirwell/cli@alpha build ./files --out ./generated
+npx @dirwell/cli@0.0.1 server ./files
+npx @dirwell/cli@0.0.1 build ./files --out ./generated
 ```
 
 No project, configuration file or global installation is required. Open the URL
@@ -31,9 +29,9 @@ explicitly when needed. `PORT` is accepted for proxies such as Portless. Port pr
 Plain remains script-free. Server mode does not generate a tree or need a
 filesystem watcher. Theme-source HMR belongs to the optional authoring package.
 
-## Upcoming stable selection and output controls
+## Stable selection and output controls
 
-These controls are under development and are not available in the published alpha.
+These controls are included in `0.0.1`.
 
 The CLI reads an optional `.gitignore` in cwd by default. Use repeatable `--ignore-file <path>` to replace that list, or `--no-ignore` to disable it. Config supports shared `ignoreFiles`, overridden by `build.ignoreFiles` or `server.ignoreFiles`; `[]` disables defaults. Paths resolve from cwd; rules use the file's directory as their base. Use `{ path, baseDir, optional }` for shared rules or optional files. Files sharing a pattern base are concatenated in order; deeper scopes override parent scopes. Glob exclusions always win, and include globs do not bypass ignore rules.
 
@@ -44,7 +42,7 @@ Builds replace missing, empty or Dirwell-marked output directories. A nonempty u
 For repeated project use, install the CLI and the theme you want:
 
 ```sh
-npm install --save-dev @dirwell/cli@alpha @dirwell/theme-ledger@alpha
+npm install --save-dev @dirwell/cli@0.0.1 @dirwell/theme-ledger@0.0.1
 npx dirwell server ./files --theme ledger
 ```
 
@@ -89,3 +87,5 @@ and archive search are not live-server features.
 pair. When only one is given, the other publication strategy is `all`.
 Mode-specific flags fail when used with the other mode. Legacy dev/daemon
 commands are unsupported; the CLI does not silently translate them.
+
+The 0.0.x API may evolve. Pin your qualified version and upgrade the official family together. See [support and verification](https://vp-tw.github.io/dirwell/support/) for host, browser and device boundaries.

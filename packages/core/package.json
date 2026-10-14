@@ -1,6 +1,6 @@
 {
   "name": "@dirwell/core",
-  "version": "0.0.1-alpha.1",
+  "version": "0.0.1",
   "description": "Framework-neutral directory listing and static publication kernel.",
   "homepage": "https://vp-tw.github.io/dirwell/api-reference/",
   "bugs": {
@@ -31,7 +31,7 @@
   "publishConfig": {
     "access": "public",
     "provenance": true,
-    "tag": "alpha"
+    "tag": "latest"
   },
   "scripts": {
     "build": "vp pack"

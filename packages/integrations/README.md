@@ -7,7 +7,7 @@ Explicit-theme static build adapters for Vite and unplugin hosts. No default the
 ## Build with Vite
 
 ```sh
-npm install --save-dev vite @dirwell/integrations@alpha @dirwell/theme-plain@alpha
+npm install --save-dev vite @dirwell/integrations@0.0.1 @dirwell/theme-plain@0.0.1
 ```
 
 Create `files/note.txt` and an `index.html` for your host page. Save the following as `vite.config.mjs`, then run `npx vite build`:
@@ -27,6 +27,8 @@ The `/rollup`, `/rolldown`, `/webpack`, `/rspack`, `/rsbuild`, `/esbuild`, `/far
 
 The adapters retain existing build/watch and Vite/Farm generated-preview behavior. They do not turn static build-watch into live server mode. For data that should update on requests without rebuilding, mount `@dirwell/server` in the host or proxy a standalone CLI server. Theme-source edits remain owned by the framework compiler. Farm standalone build-watch remains limited; package availability does not imply host feature parity.
 
-## Upcoming stable configuration validation
+## Stable configuration validation
 
-Unknown top-level and nested sort/symlink/listing keys fail before the adapter publishes output. Errors name the config path and suggest the closest known key. `cwd` and `outputPath` belong to adapters; server startup belongs to the host. `defineConfig` validates object configuration immediately and retains lazy callback factories; their resolved result must pass validation when supplied to the adapter. These checks are in the upcoming stable source, not the published alpha.
+Unknown top-level and nested sort/symlink/listing keys fail before the adapter publishes output. Errors name the config path and suggest the closest known key. `cwd` and `outputPath` belong to adapters; server startup belongs to the host. `defineConfig` validates object configuration immediately and retains lazy callback factories; their resolved result must pass validation when supplied to the adapter. These checks are included in `0.0.1`.
+
+The 0.0.x API may evolve. Pin your qualified version and upgrade the official family together. See [support and verification](https://vp-tw.github.io/dirwell/support/) for host, browser and device boundaries.
