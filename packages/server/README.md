@@ -7,7 +7,7 @@ Requires Node.js 22.12 or later. [Read the guide](https://vp-tw.github.io/dirwel
 ## Run a live folder
 
 ```sh
-npm install @dirwell/server@alpha @dirwell/theme-plain@alpha
+npm install @dirwell/server@0.0.1 @dirwell/theme-plain@0.0.1
 ```
 
 Create `files/note.txt`, save this as `server.mjs`, then run `node server.mjs`:
@@ -74,6 +74,6 @@ There is no shared HTTP response/snapshot cache, filesystem watcher, distributed
 
 Express 5, Fastify 5 and Hono 4 have executed integration tests. Fetch compatibility alone does not qualify other framework adapters or Edge runtimes; this package requires Node filesystem access.
 
-## Upcoming stable runtime validation
+## Stable runtime validation
 
-Handler configuration rejects unknown keys, invalid callbacks and malformed listing/live options before filesystem initialization. Sort and selection use Core's validated directory-service contract. The standalone Node helper separately checks `host` and integer `port` (0–65535) before opening a socket; those transport fields are not passed to Core or the Fetch handler. Custom theme objects remain extensible while their known render/hooks/listing contract is checked. These controls are in the upcoming stable source, not the published alpha.
+Handler configuration rejects unknown keys, invalid callbacks and malformed listing/live options before filesystem initialization. Sort and selection use Core's validated directory-service contract. The standalone Node helper separately checks `host` and integer `port` (0–65535) before opening a socket; those transport fields are not passed to Core or the Fetch handler. Custom theme objects remain extensible while their known render/hooks/listing contract is checked. These controls are included in `0.0.1`.

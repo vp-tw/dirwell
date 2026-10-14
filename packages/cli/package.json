@@ -1,6 +1,6 @@
 {
   "name": "@dirwell/cli",
-  "version": "0.0.1-alpha.1",
+  "version": "0.0.1",
   "description": "Minimal file explorer build and live-server commands with Plain included.",
   "homepage": "https://vp-tw.github.io/dirwell/getting-started/",
   "bugs": {
@@ -30,7 +30,7 @@
   "publishConfig": {
     "access": "public",
     "provenance": true,
-    "tag": "alpha"
+    "tag": "latest"
   },
   "scripts": {
     "build": "vp pack"

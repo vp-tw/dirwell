@@ -8,5 +8,18 @@
   "privatePackages": {
     "version": false,
     "tag": false
-  }
+  },
+  "fixed": [
+    [
+      "@dirwell/core",
+      "@dirwell/theme-plain",
+      "@dirwell/server",
+      "@dirwell/share-image",
+      "@dirwell/integrations",
+      "@dirwell/theme-ledger",
+      "@dirwell/theme-crosswave",
+      "@dirwell/cli",
+      "@dirwell/theme-authoring"
+    ]
+  ]
 }

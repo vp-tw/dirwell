@@ -2,10 +2,10 @@
 
 Vue categories, directory search and keyboard navigation with optional VueUse gamepad controls.
 
-Requires Node.js 22.12 or newer. Install the currently published prerelease:
+Requires Node.js 22.12 or newer. Install the first stable family:
 
 ```sh
-npm install @dirwell/core@alpha @dirwell/theme-crosswave@alpha
+npm install @dirwell/core@0.0.1 @dirwell/theme-crosswave@0.0.1
 ```
 
 Create `files/note.txt`, save this as `build.mjs`, then run `node build.mjs`:
@@ -22,7 +22,7 @@ await generateExplorer({
 
 Serve the complete `generated` folder over HTTP and open its root. Native links/pagination remain usable without JavaScript.
 
-Upcoming stable adds shared `language`, `direction`, `locale`, `timeZone`, partial `labels`, `brand`, `columns` and `cssVariables`. Opt-in `copy-link`, `copy-path` and `download` actions live outside the primary row link; source wrappers have a separate `actions` region. These additions are not in the published alpha. See [theme configuration](https://vp-tw.github.io/dirwell/themes/) and [the public annotation example](https://github.com/vp-tw/dirwell/tree/main/examples/release-downloads). Official themes do not embed media previews.
+Version `0.0.1` adds shared `language`, `direction`, `locale`, `timeZone`, partial `labels`, `brand`, `columns` and `cssVariables`. Opt-in `copy-link`, `copy-path` and `download` actions live outside the primary row link; source wrappers have a separate `actions` region. See [theme configuration](https://vp-tw.github.io/dirwell/themes/) and [the public annotation example](https://github.com/vp-tw/dirwell/tree/main/examples/release-downloads). Official themes do not embed media previews.
 
 ## Implementation and advanced use
 
@@ -42,4 +42,4 @@ for SSR and client, or its `/dev` entry for trusted local HMR. Header, row conte
 and footer are customizable; official navigation and interaction ownership is
 retained. See [the authoring guide](https://vp-tw.github.io/dirwell/themes/#source-component-customization).
 
-Upcoming stable windows more than 500 visible rows using measured heights and a bounded desktop/mobile scroll region. Full directory data still loads before filtering; this is not query loading. Directory query/category controls are shareable, and Back/Forward restores local selection/scroll. See [view behavior](https://vp-tw.github.io/dirwell/themes/#returning-to-a-view-upcoming-stable).
+Stable windows more than 500 visible rows using measured heights and a bounded desktop/mobile scroll region. Full directory data still loads before filtering; this is not query loading. Directory query/category controls are shareable, and Back/Forward restores local selection/scroll. See [view behavior](https://vp-tw.github.io/dirwell/themes/#returning-to-a-view-upcoming-stable).
