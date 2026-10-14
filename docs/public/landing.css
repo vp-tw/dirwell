@@ -610,3 +610,28 @@ h2 {
     scroll-behavior: auto;
   }
 }
+
+.preview-command {
+  margin-top: 20px;
+}
+.preview-command p {
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+.preview-command pre {
+  padding: 20px;
+  background: var(--code);
+  color: white;
+}
+.preview-command code {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.task-paths p {
+  padding: 16px 0;
+  margin: 0;
+  border-top: 1px solid var(--line);
+}
+.task-paths a {
+  color: var(--blue);
+}

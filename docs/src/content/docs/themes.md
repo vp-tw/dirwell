@@ -11,6 +11,22 @@ CLI includes Plain. Core and integrations require a theme explicitly. Install on
 | Ledger    | `@dirwell/theme-ledger`    | Svelte search, sorting, keyboard selection and large-list virtualization |
 | Crosswave | `@dirwell/theme-crosswave` | Vue crossbar, categories, keyboard and gamepad navigation                |
 
+## Choose a theme by task
+
+| Need                                           | Plain                              | Ledger                                              | Crosswave                                           |
+| ---------------------------------------------- | ---------------------------------- | --------------------------------------------------- | --------------------------------------------------- |
+| Native links and pagination without JavaScript | Yes                                | Yes                                                 | Yes                                                 |
+| Current-directory search                       | No                                 | Yes                                                 | Yes                                                 |
+| Archive-wide search                            | No                                 | Static only; opt out available in upcoming stable   | No                                                  |
+| Sorting                                        | Configured in Core/server          | Interactive and configured                          | Configured in Core/server                           |
+| Categories and controller input                | No                                 | No                                                  | Configurable categories; VueUse gamepad input       |
+| Common labels, branding and columns            | Upcoming stable                    | Upcoming stable                                     | Upcoming stable                                     |
+| Independent actions                            | Native download in upcoming stable | Copy/download and source actions in upcoming stable | Copy/download and source actions in upcoming stable |
+| Embedded image/audio/video preview             | No                                 | No                                                  | No                                                  |
+| Large-list rendering                           | Native page size                   | Measured DOM windows                                | Measured DOM windows in upcoming stable             |
+
+Rich themes load complete directory data. Native pagination, data blocks and rendered windows solve different costs; consult the [packed SDK benchmark](https://github.com/vp-tw/dirwell/blob/main/BENCHMARKS.md). File opening/download URLs are supplied by static publication or the Node server; this is separate from embedding a media preview in a theme. A custom source theme can implement its own interface. [Support and verification](../support/) records tested host/device boundaries.
+
 ```js
 import { createLedgerTheme } from "@dirwell/theme-ledger";
 export default { theme: createLedgerTheme({ title: "Downloads" }) };

@@ -2,6 +2,10 @@
   "name": "@dirwell/theme-ledger",
   "version": "0.0.1-alpha.1",
   "description": "Svelte-owned searchable directory explorer.",
+  "homepage": "https://vp-tw.github.io/dirwell/themes/",
+  "bugs": {
+    "url": "https://github.com/vp-tw/dirwell/issues"
+  },
   "license": "MIT",
   "repository": {
     "type": "git",

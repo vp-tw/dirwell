@@ -1,6 +1,37 @@
 # @dirwell/share-image
 
+Requires Node.js 22.12 or later. [Read the guide](https://vp-tw.github.io/dirwell/metadata/).
+
 Optional build-time metadata and 1200 × 630 PNG images. Install this package only when share metadata or image rendering is needed. Core, Plain and the rich themes do not depend on it.
+
+## Save a share image
+
+```sh
+npm install @dirwell/share-image@alpha
+```
+
+Save this as `image.mjs`, then run `node image.mjs`:
+
+```js
+import { writeFile } from "node:fs/promises";
+import { createShareImage } from "@dirwell/share-image";
+const image = await createShareImage({
+  theme: "plain",
+  title: "Sample downloads",
+  description: "Release files and reports",
+});
+await writeFile("share.png", new Uint8Array(await image.arrayBuffer()));
+```
+
+The result is a local 1200 × 630 PNG. No explorer build or browser runtime is required.
+
+## Add metadata to an explorer
+
+```sh
+npm install @dirwell/core@alpha @dirwell/theme-plain@alpha @dirwell/share-image@alpha
+```
+
+Create `files/note.txt`, save the following as `build.mjs` and run `node build.mjs`. Serve the complete `public/downloads` folder over HTTP; its pages reference the generated metadata/image assets.
 
 ```js
 import { generateExplorer } from "@dirwell/core";

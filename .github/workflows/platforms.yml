@@ -8,6 +8,7 @@ on:
       - scripts/platform-consumer.mjs
       - scripts/workspace-packages.mjs
       - scripts/pack-workspace.mjs
+      - scripts/verify-readme-quickstarts.mjs
       - scripts/verify-workspace-consumer.mjs
       - scripts/workspace-consumer.mjs
       - scripts/build-framework-theme.mjs
@@ -42,7 +43,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: workspace-package
-          path: workspace-artifact/*.tgz
+          path: workspace-artifact/*
   consumer:
     needs: package
     strategy:
@@ -93,6 +94,26 @@ jobs:
           name: workspace-platform-proof-${{ matrix.os }}-node-${{ matrix.node }}
           path: .workspace-platform-proof/*.json
           include-hidden-files: true
+  readme-quickstarts:
+    needs: package
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22.12.0"
+          package-manager-cache: false
+      - uses: actions/download-artifact@v4
+        with:
+          name: workspace-package
+          path: workspace-artifact
+      - name: Run each package README in an isolated consumer
+        run: node scripts/verify-readme-quickstarts.mjs workspace-artifact > readme-proof.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: readme-quickstart-proof
+          path: readme-proof.json
   compare-images:
     needs: consumer
     runs-on: ubuntu-latest

@@ -1,5 +1,7 @@
 # @dirwell/cli
 
+Requires Node.js 22.12 or later. [Read the guide](https://vp-tw.github.io/dirwell/getting-started/).
+
 Build a static file explorer or serve a live folder. Plain is included as the
 minimal default: no browser JavaScript, framework, fonts or share images.
 Other themes remain separate installs.
