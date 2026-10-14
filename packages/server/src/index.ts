@@ -1,3 +1,4 @@
+import { validateHandlerOptions } from "./validation.ts";
 import { fileResponse, type FileServingMode } from "./files.ts";
 import { themeResponse } from "./html.ts";
 import { createUpdatesHandler } from "./updates.ts";
@@ -33,6 +34,7 @@ export interface ExplorerHandlerOptions extends DirectoryServiceOptions {
 export async function createExplorerHandler(
   options: ExplorerHandlerOptions,
 ): Promise<(request: Request) => Promise<Response>> {
+  validateHandlerOptions(options);
   const pageSize = options.pageSize ?? 100;
   const mount = options.mountPath ?? "";
   if (
@@ -69,7 +71,14 @@ export async function createExplorerHandler(
     !["media", "attachment", "inline"].includes(options.files)
   )
     throw new TypeError("Invalid file serving mode");
-  const service = await createDirectoryService(options);
+  const service = await createDirectoryService({
+    root: options.root,
+    ...(options.include === undefined ? {} : { include: options.include }),
+    ...(options.exclude === undefined ? {} : { exclude: options.exclude }),
+    ...(options.ignoreFiles === undefined ? {} : { ignoreFiles: options.ignoreFiles }),
+    ...(options.sort === undefined ? {} : { sort: options.sort }),
+    ...(options.entryData === undefined ? {} : { entryData: options.entryData }),
+  });
   const headersFor = async (request: Request, headers: Headers) => {
     headers.set("cache-control", "no-store");
     if (options.headers !== undefined)

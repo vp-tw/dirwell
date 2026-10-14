@@ -91,6 +91,9 @@ const core = createUnplugin<DirwellPluginInput, true>((options, meta) => {
     const prefix = prefixes[index]!;
     if (meta.framework === "vite")
       return { name: `dirwell:${prefix}`, vite: dirwellVite({ ...inline, outputPath: prefix }) };
+    validateConfig(inline, true);
+    if ("outDir" in inline && inline.outDir !== undefined)
+      throw new TypeError("config.outDir is not an unplugin option; use config.outputPath");
     let cwd = path.resolve(inline.cwd ?? process.cwd());
     let hostOutput: string | undefined;
     let config: DirwellConfig;
@@ -111,7 +114,7 @@ const core = createUnplugin<DirwellPluginInput, true>((options, meta) => {
 
     async function prepare(): Promise<void> {
       config = { ...inline };
-      validateConfig(config);
+      validateConfig(config, true);
       source = path.resolve(cwd, config.root ?? ".");
     }
 

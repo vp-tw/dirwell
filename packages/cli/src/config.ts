@@ -24,7 +24,10 @@ function distance(left: string, right: string): number {
 function keys(value: RecordValue, allowed: readonly string[], name: string): void {
   for (const key of Object.keys(value)) {
     if (allowed.includes(key)) continue;
-    const suggestion = allowed.find((candidate) => distance(key, candidate) <= 2);
+    const suggestion = allowed
+      .map((candidate) => ({ candidate, distance: distance(key, candidate) }))
+      .sort((left, right) => left.distance - right.distance)
+      .find((item) => item.distance <= 2)?.candidate;
     throw new TypeError(
       `Unsupported config key "${name}.${key}".${suggestion ? ` Did you mean "${name}.${suggestion}"?` : ` Supported keys: ${allowed.join(", ")}.`}`,
     );

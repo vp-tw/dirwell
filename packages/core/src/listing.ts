@@ -115,25 +115,7 @@ export function entryDataFacts(
   } = projectListingEntry(entry, { hrefFor: () => null, exitsExplorerFor: () => false });
   return facts;
 }
-function record(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-function positiveInteger(value: unknown, key: string): void {
-  if (typeof value !== "number" || !Number.isSafeInteger(value) || value < 1)
-    throw new TypeError(`${key} must be a positive safe integer`);
-}
-export function validateListingPlan(value: unknown): asserts value is ListingPlan {
-  if (!record(value) || !record(value.html) || !record(value.data))
-    throw new TypeError("listing must contain html and data plans");
-  if (value.html.strategy === "paged")
-    positiveInteger(value.html.pageSize, "listing.html.pageSize");
-  else if (value.html.strategy !== "all")
-    throw new TypeError('listing.html.strategy must be "all" or "paged"');
-  if (value.data.strategy === "blocks")
-    positiveInteger(value.data.blockSize, "listing.data.blockSize");
-  else if (value.data.strategy !== "all")
-    throw new TypeError('listing.data.strategy must be "all" or "blocks"');
-}
+export { validateListingPlan } from "./validation.ts";
 export function listingRevision(
   entries: readonly ListingEntry[],
   sort: Required<SortOptions>,

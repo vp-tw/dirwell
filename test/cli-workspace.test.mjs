@@ -98,7 +98,7 @@ test("config theme overrides Plain and an explicit theme overrides config", asyn
   );
   await assert.rejects(
     runCli(["server", "source", "--config", "invalid-live.mjs", "--live"], cwd, () => {}),
-    /Invalid live update limits/,
+    /options\.live\.intervalMs.*25/,
   );
   await writeFile(path.join(cwd, "invalid-theme.mjs"), "export default {theme:null};");
   await assert.rejects(

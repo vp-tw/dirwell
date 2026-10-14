@@ -19,8 +19,12 @@ Native Node, Express 5, Fastify 5 and Hono 4 server integrations have executed t
 
 Vite, Rollup and webpack are primary paths. Rolldown, Rspack, Rsbuild, esbuild, Farm and Bun use existing host-specific adapters with varying qualification. Consult [build tools](../build-tools/) before relying on watch behavior. Farm standalone build-watch is limited for non-module file changes; an adapter being available does not prove host feature parity.
 
+## Browser and device verification
+
+Browser regressions cover keyboard operation, desktop/mobile viewport sizes and native browsing without JavaScript. Physical iOS and real screen-reader output have not completed device qualification. These are pending verification paths for `0.0.1`, rather than supported-device guarantees.
+
 ## Limits
 
-Physical iOS, real screen-reader output, hostile filesystem mutation, distributed caching and production-scale performance are not fully qualified. Rich clients load the complete directory. The upcoming stable clients both window large rendered lists; the published alpha Crosswave renders filtered rows in full. Live mode has directory search but no archive-wide search index. Source HMR and file-data refresh are separate mechanisms.
+Hostile filesystem mutation, distributed caching and production-scale performance are not fully qualified. Rich clients load the complete directory. The upcoming stable clients both window large rendered lists; the published alpha Crosswave renders filtered rows in full. Live mode has directory search but no archive-wide search index. Source HMR and file-data refresh are separate mechanisms.
 
 Controller polling uses VueUse `useGamepad`; regression covers simulated standard input, held buttons, deadzones, disconnects and unavailable APIs. Physical-controller testing is not a separate `0.0.1` release gate.

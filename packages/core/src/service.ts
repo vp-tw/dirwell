@@ -1,3 +1,4 @@
+import { validateDirectoryOptions } from "./validation.ts";
 import { readdir, realpath, open, type FileHandle } from "node:fs/promises";
 import { constants } from "node:fs";
 import { fileIdentityMatches } from "./file-identity.ts";
@@ -59,6 +60,7 @@ function assertLogicalPath(value: string): void {
 export async function createDirectoryService(
   options: DirectoryServiceOptions,
 ): Promise<DirectoryService> {
+  validateDirectoryOptions(options);
   const root = await realpath(options.root);
   const ignoreFiles = resolveIgnoreFiles(options.ignoreFiles);
   // Validate explicit sources before an HTTP host starts accepting requests.

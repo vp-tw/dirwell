@@ -1,3 +1,4 @@
+import { validateHandlerOptions, validateBridge } from "./validation.ts";
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { createExplorerHandler, type ExplorerHandlerOptions } from "./index.ts";
 
@@ -9,6 +10,7 @@ export async function createNodeRequestListener(
   options: ExplorerHandlerOptions,
   bridge: NodeBridgeOptions = {},
 ) {
+  validateBridge(bridge);
   const handler = await createExplorerHandler(options);
   return async (incoming: IncomingMessage, outgoing: ServerResponse): Promise<void> => {
     const abort = new AbortController();
@@ -87,11 +89,13 @@ export async function createNodeRequestListener(
 export async function startExplorerServer(
   options: ExplorerHandlerOptions & { readonly host?: string; readonly port?: number },
 ) {
-  const listener = await createNodeRequestListener({ files: "media", ...options });
+  validateHandlerOptions(options, true);
+  const { host, port, ...handlerOptions } = options;
+  const listener = await createNodeRequestListener({ files: "media", ...handlerOptions });
   const server = createServer(listener);
   await new Promise<void>((resolve, reject) => {
     server.once("error", reject);
-    server.listen(options.port ?? 0, options.host ?? "127.0.0.1", () => {
+    server.listen(port ?? 0, host ?? "127.0.0.1", () => {
       server.off("error", reject);
       resolve();
     });
