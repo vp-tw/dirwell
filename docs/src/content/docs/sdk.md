@@ -109,6 +109,8 @@ Standalone defaults bind loopback and preview raster images/audio/video; HTML, S
 
 Use `createExplorerHandler` for Request/Response integration, or `createNodeRequestListener` for an existing Node server. Express and Fastify have dedicated package subpaths; Hono uses the shared Request/Response handler. Await creation before mounting. Use a dedicated `mountPath`, such as `/downloads`, without a trailing slash. Listing, theme assets, files and update events share that mount.
 
+For a runnable Hono application with shared public listing data, see [Server integrations](../server-integrations/).
+
 Enable `search: {}` to use the rich archive dialog or `GET /__dirwell/search?q=report`. Use `path` for subtree results and `limit` for result count. Search is off by default, uses request-local authorization/selection and returns explicit overload/scan-budget errors. See [query settings and limits](../configuration/#live-archive-search).
 
 ## Headers, authorization and freshness

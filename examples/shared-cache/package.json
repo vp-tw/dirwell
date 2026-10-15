@@ -1,0 +1,20 @@
+{
+  "name": "dirwell-shared-cache-example",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node server.mjs",
+    "invalidate": "node invalidate.mjs",
+    "test": "node --test test/*.test.mjs"
+  },
+  "dependencies": {
+    "@dirwell/server": "0.0.2",
+    "@dirwell/theme-plain": "0.0.2",
+    "@hono/node-server": "2.1.5",
+    "hono": "4.13.13",
+    "redis": "6.3.0"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  }
+}

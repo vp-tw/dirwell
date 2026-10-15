@@ -6,7 +6,7 @@ import { exampleCatalog, exampleGroups, publishedExampleSlugs } from "../example
 
 const root = path.resolve(import.meta.dirname, "..");
 
-test("landing page exposes every live example and source directory", async () => {
+test("landing page distinguishes static demos from local server examples", async () => {
   const source = await readFile(path.join(root, "docs/src/pages/index.astro"), "utf8");
   assert.match(source, /exampleGroups\.map/);
   assert.match(source, /examplePath\(example\.slug\)/);
@@ -20,7 +20,15 @@ test("landing page exposes every live example and source directory", async () =>
     false,
   );
   assert.equal(publishedExampleSlugs.filter((slug) => slug === "basic").length, 1);
-  assert.equal(exampleCatalog.at(-1)?.slug, "dynamic-og");
+  assert.equal(exampleCatalog.at(-1)?.slug, "shared-cache");
+  assert.equal(
+    publishedExampleSlugs.some((slug) => String(slug) === "shared-cache"),
+    false,
+  );
+  const serverExample = exampleCatalog.find(({ slug }) => slug === "shared-cache");
+  assert.equal(serverExample?.preview, false);
+  assert.match(source, /example\.preview/);
+  assert.match(source, /path\(example\.guide\)/);
   const examplesDoc = await readFile(path.join(root, "docs/src/content/docs/examples.mdx"), "utf8");
   assert.match(examplesDoc, /exampleGroups\.map/);
   for (const { slug } of exampleCatalog) {
@@ -42,7 +50,7 @@ test("site build combines docs and examples in one publish directory", async () 
   assert.match(buildScript, /const examples = publishedExampleSlugs/);
   assert.match(buildScript, /await generateExplorer\(/);
   assert.match(buildScript, /examples\/\$\{example\}\/config\.ts/);
-  for (const { slug } of exampleCatalog) {
+  for (const { slug } of exampleCatalog.filter(({ preview }) => preview)) {
     const config = await readFile(path.join(root, `examples/${slug}/config.ts`), "utf8");
     assert.match(config, new RegExp(`docs/public/examples/${slug}`));
   }

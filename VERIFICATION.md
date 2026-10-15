@@ -13,6 +13,16 @@ The synchronized `@dirwell/*` family is published at `0.0.2`, selected by `lates
 
 Optional automated reviewers were unobserved where they did not start. Complete paginated feedback and current-head checks were reconciled after Ready; no silence was treated as a submitted review.
 
+## Shared public listing example
+
+The standalone `examples/shared-cache` application uses published Server/Plain 0.0.2, Hono 4.13.13, its official Node adapter 2.1.5 and node-redis 6.3.0. SDK package payloads and APIs are unchanged. Six example checks cover invalid/corrupt cache data, failed writes, a delayed old fill, concurrent cold misses, two real Node processes sharing Redis, namespace isolation, source updates, normal HTML/file transport, TTL expiry and disconnected-client fallback. The cache is limited to the public root listing API; it does not qualify private listings or cache the explorer, file streams, search or SSE.
+
+A separate agent with no conversation history started from the example catalog, copied the example into a clean temporary directory and installed its locked published dependencies. Following the README, it started two Node processes and an isolated Redis 8 service, observed A miss/B hit with read counts 1/0, added files and invalidated, waited for expiry, stopped/restarted Redis and observed bypass/recovery. It read back the revised text after reporting initial ambiguity about the cached API and dataset identifier. This was an independent agent task trial, not a human usability study; it fetched explorer HTML but did not visually operate the explorer. It removed its own processes, container/network and temporary files.
+
+A second conversation-free agent performed reading/decision tasks and correctly chose static output for a static host, the shared example for public listing reuse, and the private recipe rather than this cache for per-user visibility. Its findings led to explicit theme installation labels and moving documentation-site build instructions out of the user example guide. Desktop (1280 px) and mobile (390 px) Chromium checks verified nine demo links, one local-run link, guide navigation and no horizontal overflow.
+
+The site catalog distinguishes browser previews from local server examples. Only previewable entries enter the static build; the server example links to its guide and source. The site remains statically deployed. Redis installation and commands belong to the standalone example and are absent from SDK dependencies. Two simultaneous misses may still perform two source reads; no distributed lock or production capacity claim is made.
+
 ## Installed primary-host update proof
 
 A separate npm consumer installed only Integrations/Plain (plus their declared Core dependency), with Vite 8.3.0, Rollup 4.64.2 and webpack 5.111.1 as explicit development hosts. Same-version local sibling artifacts resolved candidate dependencies. All three detected an ordinary file creation and deletion; Rollup/webpack also removed the mirrored stale file. The Vite generated preview reflected the new listing without switching to live-server semantics. Watchers/servers closed after verification. These are specific host/mode checks, not universal adapter parity; Farm's non-module standalone-watch limitation remains documented.

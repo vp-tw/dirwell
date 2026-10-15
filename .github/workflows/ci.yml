@@ -26,3 +26,34 @@ jobs:
       - run: pnpm build
       - run: pnpm verify:package
       - run: pnpm docs:build
+
+  shared-cache-example:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [22.12.0, 26]
+    services:
+      redis:
+        image: redis:8-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+    defaults:
+      run:
+        working-directory: examples/shared-cache
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+          cache-dependency-path: examples/shared-cache/package-lock.json
+      - run: npm ci --ignore-scripts
+      - run: npm audit --omit=dev
+      - run: npm test
+        env:
+          REDIS_URL: redis://127.0.0.1:6379

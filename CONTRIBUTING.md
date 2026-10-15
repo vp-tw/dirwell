@@ -54,7 +54,7 @@ pnpm docs:dev
 
 For one example, run `node scripts/build-example.ts file-icons ./generated-example` and serve its output over HTTP. Keep scratch output separate from `docs/public/examples/`.
 
-`examples/catalog.ts` defines the shared theme and customization groups for the homepage and docs. The builder also retains the unlisted `basic` archive for existing links.
+`examples/catalog.ts` defines theme, customization and server integration groups for the homepage and docs. Only entries with `preview: true` enter the static build. Server examples have their own run instructions and dependencies; they are not built into GitHub Pages. The builder also retains the unlisted `basic` archive for existing links.
 
 `pnpm site:build` writes `site/`. `pnpm docs:dev` builds the examples, serves
 the docs, and watches source changes. `SITE_BASE=/dirwell/ pnpm site:build` checks the GitHub
