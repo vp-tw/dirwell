@@ -7,7 +7,7 @@ Requires Node.js 22.12 or later. [Read the guide](https://vp-tw.github.io/dirwel
 ## Run a live folder
 
 ```sh
-npm install @dirwell/server@0.0.2 @dirwell/theme-plain@0.0.2
+npm install @dirwell/server@0.0.3 @dirwell/theme-plain@0.0.3
 ```
 
 Create `files/note.txt`, save this as `server.mjs`, then run `node server.mjs`:
@@ -87,3 +87,13 @@ Set `search: {}` on the handler or Node server to enable `GET /__dirwell/search?
 Defaults are 10,000 enumerated entries, 1,000 opened directories, two active requests, 100 results, a 5-second scan timeout and a 2-second open-dialog refresh interval. Customize `maxEntries`, `maxDirectories`, `maxConcurrent`, `maxResults`, `timeoutMs`, or `refreshIntervalMs` (at least 1,000 ms); `maxResults` is capped at 10,000. Fresh scans obey include/exclude/ignore rules and request authorization before entering children. Canonical physical entries appear once; symbolic-link aliases are omitted. Roots/ancestors must be authorized even for subtree queries. Use trusted local roots and bounded, cancellation-aware host callbacks.
 
 Responses contain `{ version: 1, query, path, results: [{ name, path, kind, href }], truncated }`, with native encoded links and `null` for host-owned file links when no transport is configured. Results are ordered by logical path. Result truncation is explicit; exhausted scan/time budgets return 503 without partial results, concurrent overload returns 429, invalid queries return 400 and denied query roots return 403. Each request rereads the filesystem and uses `no-store`; it is not a transactional snapshot or a distributed index/cache. The rich UI debounces typing by 300 ms and refreshes while its dialog is visible. Measure your host's filters, authorization latency and tree size before raising limits.
+
+## Directory URLs
+
+Version 0.0.3 uses Core `routing: { directoryUrls: "explicit" }` by default
+for every theme. Choose `slash` for directory-index hosts or `clean` for a
+qualified extensionless host. Themes do not rewrite links. Existing source
+homepages and download names are preserved; output conflicts fail. CLI config
+puts routing at the top level, and `--directory-urls` overrides it.
+See [directory URL guidance](https://vp-tw.github.io/dirwell/urls/) for output
+placement, host requirements, native Plain file navigation and migration.

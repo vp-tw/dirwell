@@ -52,7 +52,7 @@ test("plain theme emits complete HTML without icons, scripts, or search assets",
     });
     const html = await readFile(path.join(output, "index.html"), "utf8");
     assert.match(html, /<h1>Index of \/<\/h1>/);
-    assert.match(html, /href="releases\/">releases\/<\/a>/);
+    assert.match(html, /href="releases\/index\.html">releases\/<\/a>/);
     assert.match(html, /href="README\.txt" target="_blank" rel="noopener">README\.txt<\/a>/);
     assert.match(html, /broken link.*Target: missing/);
     assert.match(html, /unavailable link.*Target: \.\.\/external/);
@@ -65,9 +65,9 @@ test("plain theme emits complete HTML without icons, scripts, or search assets",
     const nested = await readFile(path.join(output, "releases", "index.html"), "utf8");
     assert.match(
       nested,
-      /aria-label="Breadcrumb"><a href="\.\.\/">Home<\/a> \/ <span aria-current="page">releases<\/span>/,
+      /aria-label="Breadcrumb"><a href="\.\.\/index\.html">Home<\/a> \/ <span aria-current="page">releases<\/span>/,
     );
-    assert.match(nested, /href="\.\.\/">\.\.\/<\/a>/);
+    assert.match(nested, /href="\.\.\/index\.html">\.\.\/<\/a>/);
     assert.doesNotMatch(nested, /<footer|og:|twitter:|@font-face/);
   }
 
@@ -261,15 +261,15 @@ test("mirrors source files and preserves an existing index", async (context) => 
   assert.match(await readFile(path.join(output, "releases", "index.html"), "utf8"), /Cycle/);
   assert.match(
     await readFile(path.join(output, "releases", "index.html"), "utf8"),
-    /data-parent-href="\.\.\/"/,
+    /data-parent-href="\.\.\/index\.html"/,
   );
   assert.match(
     await readFile(path.join(output, "releases", "index.html"), "utf8"),
-    /aria-label="Breadcrumb"><a href="\.\.\/">Home<\/a><span[^>]*>\/<\/span><span aria-current="page">releases<\/span>/,
+    /aria-label="Breadcrumb"><a href="\.\.\/index\.html">Home<\/a><span[^>]*>\/<\/span><span aria-current="page">releases<\/span>/,
   );
   assert.match(
     await readFile(path.join(output, "releases", "index.html"), "utf8"),
-    /href="\.\.\/">[\s\S]*back-to-root\//,
+    /href="\.\.\/index\.html">[\s\S]*back-to-root\//,
   );
   const rootIndex = await readFile(path.join(output, "index.html"), "utf8");
   assert.doesNotMatch(rootIndex, /directory-label|Static directory index/);
@@ -300,9 +300,9 @@ test("mirrors source files and preserves an existing index", async (context) => 
   assert.doesNotMatch(rootIndex, /data-parent-href/);
   assert.match(rootIndex, /href="README\.txt" target="_blank" rel="noopener">[\s\S]*README\.txt/);
   assert.match(rootIndex, /href="docs\/_dirwell\.html">[\s\S]*docs\//);
-  assert.match(rootIndex, /href="releases\/">[\s\S]*releases\//);
+  assert.match(rootIndex, /href="releases\/index\.html">[\s\S]*releases\//);
   assert.match(rootIndex, /href="space%20name\.txt"/);
-  assert.doesNotMatch(rootIndex, /href="releases\/" target="_blank"/);
+  assert.doesNotMatch(rootIndex, /href="releases\/index\.html" target="_blank"/);
   assert.match(rootIndex, /external-link/);
   assert.match(
     rootIndex,
@@ -644,7 +644,7 @@ test("MPA shares runtime assets from the output root", async (context) => {
   );
   assert.equal(
     searchEntries.find((entry: { path: string }) => entry.path === "releases/back-to-root")?.href,
-    "../",
+    "../index.html",
   );
   assert.deepEqual(
     searchEntries
@@ -723,11 +723,11 @@ test("base URLs prefix pages, assets, breadcrumbs, and raw-link views", async (c
   const nestedHtml = await readFile(path.join(output, "releases", "index.html"), "utf8");
   assert.match(rootHtml, /src="\/repo\/dirwell\.runtime\.js"/);
   assert.match(rootHtml, /src="\/repo\/vscode-file_type_text\.svg"/);
-  assert.match(rootHtml, /href="\/repo\/releases\/"/);
+  assert.match(rootHtml, /href="\/repo\/releases\/index\.html"/);
   assert.match(rootHtml, /href="\/repo\/space%20name\.txt"/);
   assert.match(rootHtml, /href="\/repo\/__dirwell\/raw-links\/[a-f0-9]{16}\.txt"/);
-  assert.match(nestedHtml, /href="\/repo\/">Home<\/a>/);
-  assert.match(nestedHtml, /href="\/repo\/releases\/v2\.4\.0\/"/);
+  assert.match(nestedHtml, /href="\/repo\/index\.html">Home<\/a>/);
+  assert.match(nestedHtml, /href="\/repo\/releases\/v2\.4\.0\/index\.html"/);
   assert.match(nestedHtml, /src="\/repo\/releases\/dirwell\.runtime\.js"/);
   assert.match(nestedHtml, /src="\/repo\/releases\/vscode-default_folder\.svg"/);
   assert.doesNotMatch(nestedHtml, /<base href=/);
@@ -746,13 +746,13 @@ test("html-base emits a native base element and base-relative URLs", async (cont
   const rootHtml = await readFile(path.join(output, "index.html"), "utf8");
   const nestedHtml = await readFile(path.join(output, "releases", "index.html"), "utf8");
   assert.match(rootHtml, /<base href="\/repo\/">/);
-  assert.match(rootHtml, /href="releases\/"/);
+  assert.match(rootHtml, /href="releases\/index\.html"/);
   assert.match(rootHtml, /href="space%20name\.txt"/);
   assert.match(rootHtml, /src="vscode-file_type_text\.svg"/);
   assert.match(rootHtml, /href="__dirwell\/raw-links\/[a-f0-9]{16}\.txt"/);
   assert.match(nestedHtml, /<base href="\/repo\/">/);
-  assert.match(nestedHtml, /href="\.\/">Home<\/a>/);
-  assert.match(nestedHtml, /href="releases\/v2\.4\.0\/"/);
+  assert.match(nestedHtml, /href="index\.html">Home<\/a>/);
+  assert.match(nestedHtml, /href="releases\/v2\.4\.0\/index\.html"/);
   assert.match(nestedHtml, /src="releases\/dirwell\.runtime\.js"/);
   assert.match(nestedHtml, /src="releases\/vscode-default_folder\.svg"/);
   assert.match(nestedHtml, /&quot;searchIndexHref&quot;:&quot;__dirwell\/search-index\.json&quot;/);

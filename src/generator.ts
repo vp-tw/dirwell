@@ -36,6 +36,7 @@ export async function generateExplorerSkippingPaths(
     ...(options.mode === undefined ? {} : { mode: options.mode }),
     ...(options.mirror === undefined ? {} : { mirror: options.mirror }),
     ...(options.outputName === undefined ? {} : { outputName: options.outputName }),
+    ...(options.routing === undefined ? {} : { routing: options.routing }),
     ...(options.urlStrategy === undefined ? {} : { urlStrategy: options.urlStrategy }),
     ...(options.symlinks === undefined ? {} : { symlinks: options.symlinks }),
   };

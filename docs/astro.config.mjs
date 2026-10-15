@@ -41,6 +41,7 @@ export default defineConfig({
             { label: "Overview", slug: "overview" },
             { label: "Getting started", slug: "getting-started" },
             { label: "Deployment", slug: "deployment" },
+            { label: "Directory URLs", slug: "urls" },
             { label: "Examples", slug: "examples" },
             { label: "SDK and live server", slug: "sdk" },
           ],

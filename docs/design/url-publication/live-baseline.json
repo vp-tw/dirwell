@@ -1,0 +1,114 @@
+[
+  {
+    "portableLinks": true,
+    "route": "/",
+    "status": 307,
+    "location": "/downloads/browse/",
+    "links": []
+  },
+  {
+    "portableLinks": true,
+    "route": "/browse",
+    "status": 404,
+    "location": null,
+    "links": []
+  },
+  {
+    "portableLinks": true,
+    "route": "/browse/",
+    "status": 200,
+    "location": null,
+    "links": ["/downloads/browse/child/index.html"]
+  },
+  {
+    "portableLinks": true,
+    "route": "/browse/index.html",
+    "status": 200,
+    "location": null,
+    "links": ["/downloads/browse/child/index.html"]
+  },
+  {
+    "portableLinks": true,
+    "route": "/browse/child",
+    "status": 200,
+    "location": null,
+    "links": ["/downloads/browse/index.html", "/downloads/browse/index.html"]
+  },
+  {
+    "portableLinks": true,
+    "route": "/browse/child/",
+    "status": 200,
+    "location": null,
+    "links": ["/downloads/browse/index.html", "/downloads/browse/index.html"]
+  },
+  {
+    "portableLinks": true,
+    "route": "/browse/child/index.html",
+    "status": 200,
+    "location": null,
+    "links": ["/downloads/browse/index.html", "/downloads/browse/index.html"]
+  },
+  {
+    "portableLinks": true,
+    "route": "/browse/child/?page=1",
+    "status": 200,
+    "location": null,
+    "links": ["/downloads/browse/index.html", "/downloads/browse/index.html"]
+  },
+  {
+    "portableLinks": false,
+    "route": "/",
+    "status": 307,
+    "location": "/downloads/browse/",
+    "links": []
+  },
+  {
+    "portableLinks": false,
+    "route": "/browse",
+    "status": 404,
+    "location": null,
+    "links": []
+  },
+  {
+    "portableLinks": false,
+    "route": "/browse/",
+    "status": 200,
+    "location": null,
+    "links": ["/downloads/browse/child/"]
+  },
+  {
+    "portableLinks": false,
+    "route": "/browse/index.html",
+    "status": 200,
+    "location": null,
+    "links": ["/downloads/browse/child/"]
+  },
+  {
+    "portableLinks": false,
+    "route": "/browse/child",
+    "status": 200,
+    "location": null,
+    "links": ["/downloads/browse/", "/downloads/browse/"]
+  },
+  {
+    "portableLinks": false,
+    "route": "/browse/child/",
+    "status": 200,
+    "location": null,
+    "links": ["/downloads/browse/", "/downloads/browse/"]
+  },
+  {
+    "portableLinks": false,
+    "route": "/browse/child/index.html",
+    "status": 200,
+    "location": null,
+    "links": ["/downloads/browse/", "/downloads/browse/"]
+  },
+  {
+    "portableLinks": false,
+    "route": "/browse/child/?page=1",
+    "status": 200,
+    "location": null,
+    "links": ["/downloads/browse/", "/downloads/browse/"]
+  }
+]

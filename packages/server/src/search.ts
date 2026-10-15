@@ -1,4 +1,5 @@
 import { SelectionBudgetError, type DirectoryService } from "@dirwell/core";
+import { browseHref } from "./routing.ts";
 import type { ExplorerHandlerOptions } from "./index.ts";
 export interface LiveSearchOptions {
   readonly maxEntries?: number;
@@ -107,10 +108,13 @@ export function createSearchHandler(
         href:
           entry.kind === "directory"
             ? options.theme
-              ? `${mount}/browse/${encode(entry.relativePath)}/`
+              ? browseHref(entry.relativePath, options)
               : `${mount}/listing?path=${encodeURIComponent(entry.relativePath)}`
-            : (options.fileHref?.(entry.relativePath) ??
-              (options.files ? `${mount}/files/${encode(entry.relativePath)}` : null)),
+            : options.fileHref !== undefined
+              ? options.fileHref(entry.relativePath)
+              : options.files
+                ? `${mount}/files/${encode(entry.relativePath)}`
+                : null,
       }));
       const headers = await abortable(signal, () =>
         headersFor(

@@ -19,7 +19,7 @@ async function source(context) {
   return root;
 }
 async function verify(request) {
-  const html = await request("/downloads/browse/");
+  const html = await request("/downloads/browse/index.html");
   assert.equal(html.status, 200);
   assert.match(await html.text(), /active.html/);
   assert.equal(html.headers.get("x-dirwell"), "host");

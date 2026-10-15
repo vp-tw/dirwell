@@ -55,7 +55,7 @@ export interface DefaultThemeOptions {
 
 function createBreadcrumbs(
   relativePath: string,
-  hrefForDirectory: (relativePath: string) => string,
+  hrefForDirectory: (relativePath: string) => string | null,
 ): readonly BreadcrumbItem[] {
   const segments = relativePath === "" ? [] : relativePath.split("/");
   return [

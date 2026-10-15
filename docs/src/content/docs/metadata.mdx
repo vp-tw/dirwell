@@ -67,3 +67,7 @@ Presets generate 1200 × 630 PNGs using bundled fonts without network/system-fon
 Supply `fonts: { body: new URL("./fonts/MyLicensedFont.ttf", import.meta.url) }` to `createShareImage` for branded or CJK text. An optional `headline` font overrides the body fallback. Local paths resolve from cwd; single-face TTF/OTF files must be at most 32 MiB and cover all displayed characters, including preset labels. No font download or system-font fallback occurs. Byte changes invalidate the bounded image cache; custom text measurement and glyph outlines consume the same parsed bytes.
 
 Pass the returned File to the metadata provider, or use the existing async image callback for per-directory text. Missing glyph errors identify the role/code point. Collections and WOFF formats are unsupported. The test-only OFL subset demonstrates Latin/Traditional Chinese/Japanese rendering, and is deliberately not a complete CJK font. Complex-script/emoji rendering needs separate qualification.
+
+## Canonical page URLs
+
+Core supplies the planned public page path to the metadata provider, independently of the physical output filename. Canonical and social URLs must agree with the final host URL, including page number and deployment prefix. Metadata remains opt-in; a canonical tag does not implement a redirect. See [directory URLs](../urls/).

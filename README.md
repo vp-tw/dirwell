@@ -58,6 +58,8 @@ SDK installed-consumer checks cover Linux, Windows and macOS, ARM64/x64 and Node
 
 ## Contribute
 
+For proposed directory URL policies, ownership, scenario matrices and future documentation placement, see the [URL publication design](docs/design/url-publication/README.md). It records the implementation and verification of the next contract; the routing API is not available in published 0.0.2.
+
 For repository setup, tests, examples, architecture, and release instructions,
 see [Contributing](https://github.com/vp-tw/dirwell/blob/main/CONTRIBUTING.md).
 

@@ -74,14 +74,14 @@ test("categories, keyboard navigation, search composition, and page transitions"
   await page.keyboard.press("ArrowUp");
   await expect(page.locator(".cw-stage .cw-selected")).toHaveAttribute("data-name", "Albums");
   await page.keyboard.press("Enter");
-  await expect(page).toHaveURL(/Albums\/$/);
+  await expect(page).toHaveURL(/Albums\/index\.html$/);
   expect(await page.evaluate(() => document.querySelector("#cw-wave") === window.__canvas)).toBe(
     true,
   );
   expect(await page.evaluate(() => window.__cwAnimations)).toBeGreaterThan(0);
   await expect(page.getByRole("link", { name: /inside\.txt/ })).toBeVisible();
   await page.keyboard.press("Backspace");
-  await expect(page).toHaveURL(server.url);
+  await expect(page).toHaveURL(new URL("index.html", server.url).href);
   await page.keyboard.press("/");
   const search = page.getByRole("searchbox", { name: "Search this folder" });
   await expect(search).toBeFocused();
@@ -276,14 +276,14 @@ test("virtual standard gamepad: deadzone, held repeat, release, navigation, disc
     window.__pads[0].buttons[12].pressed = false;
     window.__pads[0].buttons[0].pressed = true;
   });
-  await expect(page).toHaveURL(/Albums\/$/);
+  await expect(page).toHaveURL(/Albums\/index\.html$/);
   // Every document receives a fresh virtual navigator; connect and release before Back.
   await page.evaluate(() => window.__connect());
   await expect(page.locator(".cw-controller")).toBeVisible();
   await page.evaluate(() => {
     window.__pads[0].buttons[1].pressed = true;
   });
-  await expect(page).toHaveURL(server.url);
+  await expect(page).toHaveURL(new URL("index.html", server.url).href);
   await page.evaluate(() => window.__connect());
   await expect(page.locator(".cw-controller")).toBeVisible();
   await page.evaluate(() => {
@@ -324,7 +324,7 @@ test("held confirm at connection never opens a file until released", async ({ pa
     window.__pad.buttons[0].pressed = true;
     window.__pad.buttons[0].value = 1;
   });
-  await expect(page).toHaveURL(/Albums\/$/);
+  await expect(page).toHaveURL(/Albums\/index\.html$/);
   await expect(page.locator(".cw-controller")).toBeVisible();
   await page.waitForTimeout(500);
   expect(context.pages()).toHaveLength(1);
@@ -349,7 +349,7 @@ test("storage denial and WebGL context loss preserve navigation", async ({ page 
   );
   await expect(page.getByRole("button", { name: "Static background" })).toBeDisabled();
   await page.getByRole("link", { name: /Albums\/ Folder/ }).click();
-  await expect(page).toHaveURL(/Albums\/$/);
+  await expect(page).toHaveURL(/Albums\/index\.html$/);
 });
 
 test("controller file activation retains opener isolation and a blocked-tab recovery", async ({
@@ -450,13 +450,13 @@ test("aborted page transitions preserve navigation without unhandled rejections"
       .removeAttribute("data-cw-page"),
   );
   await page.getByRole("link", { name: /Albums\/ Folder/ }).click();
-  await expect(page).toHaveURL(/Albums\/$/);
+  await expect(page).toHaveURL(/Albums\/index\.html$/);
   await expect(page.getByRole("link", { name: /inside\.txt/ })).toBeVisible();
   if (crossDocumentTransitions)
     expect(await page.evaluate(() => window.__skippedTransitions)).toBeGreaterThan(0);
   else expect(await page.evaluate(() => window.__skippedTransitions)).toBeUndefined();
   await page.keyboard.press("Backspace");
-  await expect(page).toHaveURL(server.url);
+  await expect(page).toHaveURL(new URL("index.html", server.url).href);
   await expect(page.getByRole("link", { name: /note\.txt/ })).toBeVisible();
   expect(errors).toEqual([]);
 });

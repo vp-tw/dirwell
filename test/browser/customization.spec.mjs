@@ -177,7 +177,7 @@ for (const [name, creator] of [
       }
       await search.fill("docs");
       await page.getByRole("link", { name: /^docs\// }).click();
-      await expect(page).toHaveURL(/\/docs\/$/);
+      await expect(page).toHaveURL(/\/docs\/index\.html$/);
       await expect(page.getByText("Sample owner", { exact: true })).toBeVisible();
       await expect(
         page.locator(name === "ledger" ? "[data-entry]" : "[data-cw-entry]"),

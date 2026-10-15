@@ -169,17 +169,6 @@
     return () => cancelAnimationFrame(frame);
   });
   const isDirectory = directoryLike;
-  function safeHref(record) {
-    if (
-      typeof location !== "undefined" &&
-      location.protocol === "file:" &&
-      isDirectory(record) &&
-      !record.exitsExplorer &&
-      record.href?.endsWith("/")
-    )
-      return record.href + "index.html";
-    return record.href;
-  }
   async function hydrateData() {
     if (complete || !model.manifestHref || location.protocol === "file:")
       return;
@@ -206,6 +195,7 @@
     }
   }
   async function navigate(event, record) {
+    selected = record.id;
     saveView();
     const dataHref = record.presentation?.folderDataHref;
     if (
@@ -815,7 +805,7 @@
             {#if column === "name"}<span class="identity"
                 >{#if entry.href}<a
                     class="name"
-                    href={safeHref(entry)}
+                    href={entry.href}
                     target={entry.exitsExplorer ? "_blank" : undefined}
                     rel={entry.exitsExplorer ? "noopener" : undefined}
                     onclick={(event) => navigate(event, entry)}
@@ -867,7 +857,7 @@
                 })}{/if}
               {#each ui.actions as action}
                 {#if action === "download" && entry.href && !isDirectory(entry) && !entry.link?.unavailable}<a
-                    href={safeHref(entry)}
+                    href={entry.href}
                     download>{ui.labels.download}</a
                   >
                 {:else if action !== "download"}<button

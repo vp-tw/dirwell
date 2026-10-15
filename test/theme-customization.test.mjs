@@ -161,7 +161,7 @@ test("static fileHref maps canonical file paths without copying or changing dire
   });
   assert.deepEqual(calls.sort(), ["nested/" + filename, "note.txt"].sort());
   const rootHtml = await readFile(path.join(outputDir, "index.html"), "utf8");
-  assert.match(rootHtml, /href="nested\/"/);
+  assert.match(rootHtml, /href="nested\/index\.html"/);
   assert.doesNotMatch(rootHtml, /href="note.txt"/);
   const nestedHtml = await readFile(path.join(outputDir, "nested/index.html"), "utf8");
   assert(

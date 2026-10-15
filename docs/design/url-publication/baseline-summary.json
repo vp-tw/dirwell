@@ -1,0 +1,922 @@
+{
+  "date": "2026-10-15",
+  "runtime": "v26.12.0",
+  "source": "Core and Plain: working tree TypeScript source. Ledger and Crosswave: existing dist bundles; freshness not qualified",
+  "scope": "HTML generation and context observation; no browser, HTTP host or production deployment",
+  "method": "Temporary fixture, generateExplorer with captured render context, and source-homepage byte equality. No host/browser execution.",
+  "dimensions": {
+    "mode": ["ssg", "mpa"],
+    "urlStrategy": ["relative", "base", "html-base"],
+    "theme": ["plain-portable", "plain-directory", "ledger", "crosswave"],
+    "output": ["default", "custom", "skip-owned"],
+    "paged": [false, true],
+    "mirror": [false, true]
+  },
+  "cases": 288,
+  "results": {
+    "generated": 288
+  },
+  "mirroredSourceHomepagesPreserved": 144,
+  "files": [
+    {
+      "path": "packages/core/src/generator.ts",
+      "sha256": "07ed0f7e073daf458de524c9703e5d589df486f137103dd7f95d4f10383a79ad"
+    },
+    {
+      "path": "packages/core/src/model.ts",
+      "sha256": "64b9489851103c6f94a1d5a5fee655e871132b1b8edd1e9e38742affa5371353"
+    },
+    {
+      "path": "packages/theme-plain/src/index.ts",
+      "sha256": "b421d70a927d010d7315787547e35a71152770161c5a9679baffe9d89e627139"
+    },
+    {
+      "path": "packages/shared-theme/src/page.ts",
+      "sha256": "b706fe9e85a62b8e8bc0d13b7c5e3eb6fb0f9a7d491296de8e90fea1943bd0cb"
+    },
+    {
+      "path": "packages/server/src/html.ts",
+      "sha256": "f5daaff5421c145a76309a18d5b0009fdfbadcd40d164201fbe64c3673686908"
+    },
+    {
+      "path": "packages/theme-ledger/dist/index.mjs",
+      "sha256": "43e4531cbbc475326c3e0929422c912d31133c85b854822ff00e0ac99b1d207e"
+    },
+    {
+      "path": "packages/theme-crosswave/dist/index.mjs",
+      "sha256": "f6ea0c9d202497d1aa3cd3ead8d120aad0738d949c857df5ab24305d7f5c7094"
+    }
+  ],
+  "representativeCases": [
+    {
+      "mode": "ssg",
+      "urlStrategy": "relative",
+      "theme": "plain-portable",
+      "output": "default",
+      "paged": false,
+      "mirror": true,
+      "status": "generated",
+      "pages": [
+        {
+          "directory": "",
+          "outputName": "index.html"
+        },
+        {
+          "directory": "child",
+          "outputName": "index.html"
+        },
+        {
+          "directory": "child/deep",
+          "outputName": "index.html"
+        },
+        {
+          "directory": "owned",
+          "outputName": "_dirwell.html"
+        }
+      ],
+      "captures": [
+        {
+          "directory": "",
+          "page": 1,
+          "outputName": "index.html",
+          "rootHref": "./",
+          "childHref": "child/",
+          "noteHref": null,
+          "documentBaseHref": null,
+          "links": ["child/index.html", "owned/_dirwell.html", "one.txt", "two.txt"],
+          "manifest": null
+        },
+        {
+          "directory": "child",
+          "page": 1,
+          "outputName": "index.html",
+          "rootHref": "../",
+          "childHref": "./",
+          "noteHref": "note%20%23%25.txt",
+          "documentBaseHref": null,
+          "links": ["../index.html", "../index.html", "deep/index.html", "note%20%23%25.txt"],
+          "manifest": null
+        },
+        {
+          "directory": "child/deep",
+          "page": 1,
+          "outputName": "index.html",
+          "rootHref": "../../",
+          "childHref": "../",
+          "noteHref": null,
+          "documentBaseHref": null,
+          "links": ["../../index.html", "../index.html", "../index.html"],
+          "manifest": null
+        },
+        {
+          "directory": "owned",
+          "page": 1,
+          "outputName": "_dirwell.html",
+          "rootHref": "../",
+          "childHref": "../child/",
+          "noteHref": null,
+          "documentBaseHref": null,
+          "links": ["../index.html", "../index.html", "index.html"],
+          "manifest": null
+        }
+      ],
+      "ownedPreserved": true
+    },
+    {
+      "mode": "ssg",
+      "urlStrategy": "relative",
+      "theme": "plain-portable",
+      "output": "custom",
+      "paged": false,
+      "mirror": true,
+      "status": "generated",
+      "pages": [
+        {
+          "directory": "",
+          "outputName": "files.html"
+        },
+        {
+          "directory": "child",
+          "outputName": "files.html"
+        },
+        {
+          "directory": "child/deep",
+          "outputName": "files.html"
+        },
+        {
+          "directory": "owned",
+          "outputName": "files.html"
+        }
+      ],
+      "captures": [
+        {
+          "directory": "",
+          "page": 1,
+          "outputName": "files.html",
+          "rootHref": "files.html",
+          "childHref": "child/files.html",
+          "noteHref": null,
+          "documentBaseHref": null,
+          "links": ["child/files.html", "owned/files.html", "one.txt", "two.txt"],
+          "manifest": null
+        },
+        {
+          "directory": "child",
+          "page": 1,
+          "outputName": "files.html",
+          "rootHref": "../files.html",
+          "childHref": "files.html",
+          "noteHref": "note%20%23%25.txt",
+          "documentBaseHref": null,
+          "links": ["../files.html", "../files.html", "deep/files.html", "note%20%23%25.txt"],
+          "manifest": null
+        },
+        {
+          "directory": "child/deep",
+          "page": 1,
+          "outputName": "files.html",
+          "rootHref": "../../files.html",
+          "childHref": "../files.html",
+          "noteHref": null,
+          "documentBaseHref": null,
+          "links": ["../../files.html", "../files.html", "../files.html"],
+          "manifest": null
+        },
+        {
+          "directory": "owned",
+          "page": 1,
+          "outputName": "files.html",
+          "rootHref": "../files.html",
+          "childHref": "../child/files.html",
+          "noteHref": null,
+          "documentBaseHref": null,
+          "links": ["../files.html", "../files.html", "index.html"],
+          "manifest": null
+        }
+      ],
+      "ownedPreserved": true
+    },
+    {
+      "mode": "ssg",
+      "urlStrategy": "relative",
+      "theme": "plain-portable",
+      "output": "skip-owned",
+      "paged": false,
+      "mirror": true,
+      "status": "generated",
+      "pages": [
+        {
+          "directory": "",
+          "outputName": "index.html"
+        },
+        {
+          "directory": "child",
+          "outputName": "index.html"
+        },
+        {
+          "directory": "child/deep",
+          "outputName": "index.html"
+        },
+        {
+          "directory": "owned",
+          "outputName": null
+        }
+      ],
+      "captures": [
+        {
+          "directory": "",
+          "page": 1,
+          "outputName": "index.html",
+          "rootHref": "./",
+          "childHref": "child/",
+          "noteHref": null,
+          "documentBaseHref": null,
+          "links": ["child/index.html", "owned/", "one.txt", "two.txt"],
+          "manifest": null
+        },
+        {
+          "directory": "child",
+          "page": 1,
+          "outputName": "index.html",
+          "rootHref": "../",
+          "childHref": "./",
+          "noteHref": "note%20%23%25.txt",
+          "documentBaseHref": null,
+          "links": ["../index.html", "../index.html", "deep/index.html", "note%20%23%25.txt"],
+          "manifest": null
+        },
+        {
+          "directory": "child/deep",
+          "page": 1,
+          "outputName": "index.html",
+          "rootHref": "../../",
+          "childHref": "../",
+          "noteHref": null,
+          "documentBaseHref": null,
+          "links": ["../../index.html", "../index.html", "../index.html"],
+          "manifest": null
+        }
+      ],
+      "ownedPreserved": true
+    },
+    {
+      "mode": "ssg",
+      "urlStrategy": "relative",
+      "theme": "plain-directory",
+      "output": "default",
+      "paged": false,
+      "mirror": true,
+      "status": "generated",
+      "pages": [
+        {
+          "directory": "",
+          "outputName": "index.html"
+        },
+        {
+          "directory": "child",
+          "outputName": "index.html"
+        },
+        {
+          "directory": "child/deep",
+          "outputName": "index.html"
+        },
+        {
+          "directory": "owned",
+          "outputName": "_dirwell.html"
+        }
+      ],
+      "captures": [
+        {
+          "directory": "",
+          "page": 1,
+          "outputName": "index.html",
+          "rootHref": "./",
+          "childHref": "child/",
+          "noteHref": null,
+          "documentBaseHref": null,
+          "links": ["child/", "owned/_dirwell.html", "one.txt", "two.txt"],
+          "manifest": null
+        },
+        {
+          "directory": "child",
+          "page": 1,
+          "outputName": "index.html",
+          "rootHref": "../",
+          "childHref": "./",
+          "noteHref": "note%20%23%25.txt",
+          "documentBaseHref": null,
+          "links": ["../", "../", "deep/", "note%20%23%25.txt"],
+          "manifest": null
+        },
+        {
+          "directory": "child/deep",
+          "page": 1,
+          "outputName": "index.html",
+          "rootHref": "../../",
+          "childHref": "../",
+          "noteHref": null,
+          "documentBaseHref": null,
+          "links": ["../../", "../", "../"],
+          "manifest": null
+        },
+        {
+          "directory": "owned",
+          "page": 1,
+          "outputName": "_dirwell.html",
+          "rootHref": "../",
+          "childHref": "../child/",
+          "noteHref": null,
+          "documentBaseHref": null,
+          "links": ["../", "../", "index.html"],
+          "manifest": null
+        }
+      ],
+      "ownedPreserved": true
+    },
+    {
+      "mode": "ssg",
+      "urlStrategy": "relative",
+      "theme": "plain-directory",
+      "output": "custom",
+      "paged": false,
+      "mirror": true,
+      "status": "generated",
+      "pages": [
+        {
+          "directory": "",
+          "outputName": "files.html"
+        },
+        {
+          "directory": "child",
+          "outputName": "files.html"
+        },
+        {
+          "directory": "child/deep",
+          "outputName": "files.html"
+        },
+        {
+          "directory": "owned",
+          "outputName": "files.html"
+        }
+      ],
+      "captures": [
+        {
+          "directory": "",
+          "page": 1,
+          "outputName": "files.html",
+          "rootHref": "files.html",
+          "childHref": "child/files.html",
+          "noteHref": null,
+          "documentBaseHref": null,
+          "links": ["child/files.html", "owned/files.html", "one.txt", "two.txt"],
+          "manifest": null
+        },
+        {
+          "directory": "child",
+          "page": 1,
+          "outputName": "files.html",
+          "rootHref": "../files.html",
+          "childHref": "files.html",
+          "noteHref": "note%20%23%25.txt",
+          "documentBaseHref": null,
+          "links": ["../files.html", "../files.html", "deep/files.html", "note%20%23%25.txt"],
+          "manifest": null
+        },
+        {
+          "directory": "child/deep",
+          "page": 1,
+          "outputName": "files.html",
+          "rootHref": "../../files.html",
+          "childHref": "../files.html",
+          "noteHref": null,
+          "documentBaseHref": null,
+          "links": ["../../files.html", "../files.html", "../files.html"],
+          "manifest": null
+        },
+        {
+          "directory": "owned",
+          "page": 1,
+          "outputName": "files.html",
+          "rootHref": "../files.html",
+          "childHref": "../child/files.html",
+          "noteHref": null,
+          "documentBaseHref": null,
+          "links": ["../files.html", "../files.html", "index.html"],
+          "manifest": null
+        }
+      ],
+      "ownedPreserved": true
+    },
+    {
+      "mode": "ssg",
+      "urlStrategy": "relative",
+      "theme": "plain-directory",
+      "output": "skip-owned",
+      "paged": false,
+      "mirror": true,
+      "status": "generated",
+      "pages": [
+        {
+          "directory": "",
+          "outputName": "index.html"
+        },
+        {
+          "directory": "child",
+          "outputName": "index.html"
+        },
+        {
+          "directory": "child/deep",
+          "outputName": "index.html"
+        },
+        {
+          "directory": "owned",
+          "outputName": null
+        }
+      ],
+      "captures": [
+        {
+          "directory": "",
+          "page": 1,
+          "outputName": "index.html",
+          "rootHref": "./",
+          "childHref": "child/",
+          "noteHref": null,
+          "documentBaseHref": null,
+          "links": ["child/", "owned/", "one.txt", "two.txt"],
+          "manifest": null
+        },
+        {
+          "directory": "child",
+          "page": 1,
+          "outputName": "index.html",
+          "rootHref": "../",
+          "childHref": "./",
+          "noteHref": "note%20%23%25.txt",
+          "documentBaseHref": null,
+          "links": ["../", "../", "deep/", "note%20%23%25.txt"],
+          "manifest": null
+        },
+        {
+          "directory": "child/deep",
+          "page": 1,
+          "outputName": "index.html",
+          "rootHref": "../../",
+          "childHref": "../",
+          "noteHref": null,
+          "documentBaseHref": null,
+          "links": ["../../", "../", "../"],
+          "manifest": null
+        }
+      ],
+      "ownedPreserved": true
+    },
+    {
+      "mode": "ssg",
+      "urlStrategy": "relative",
+      "theme": "ledger",
+      "output": "default",
+      "paged": false,
+      "mirror": true,
+      "status": "generated",
+      "pages": [
+        {
+          "directory": "",
+          "outputName": "index.html"
+        },
+        {
+          "directory": "child",
+          "outputName": "index.html"
+        },
+        {
+          "directory": "child/deep",
+          "outputName": "index.html"
+        },
+        {
+          "directory": "owned",
+          "outputName": "_dirwell.html"
+        }
+      ],
+      "captures": [
+        {
+          "directory": "",
+          "page": 1,
+          "outputName": "index.html",
+          "rootHref": "./",
+          "childHref": "child/",
+          "noteHref": null,
+          "documentBaseHref": null,
+          "links": ["./", "child/", "owned/_dirwell.html", "one.txt", "two.txt"],
+          "manifest": null
+        },
+        {
+          "directory": "child",
+          "page": 1,
+          "outputName": "index.html",
+          "rootHref": "../",
+          "childHref": "./",
+          "noteHref": "note%20%23%25.txt",
+          "documentBaseHref": null,
+          "links": ["../", "./", "../", "deep/", "note%20%23%25.txt"],
+          "manifest": null
+        },
+        {
+          "directory": "child/deep",
+          "page": 1,
+          "outputName": "index.html",
+          "rootHref": "../../",
+          "childHref": "../",
+          "noteHref": null,
+          "documentBaseHref": null,
+          "links": ["../../", "../", "./", "../"],
+          "manifest": null
+        },
+        {
+          "directory": "owned",
+          "page": 1,
+          "outputName": "_dirwell.html",
+          "rootHref": "../",
+          "childHref": "../child/",
+          "noteHref": null,
+          "documentBaseHref": null,
+          "links": ["../", "_dirwell.html", "../", "index.html"],
+          "manifest": null
+        }
+      ],
+      "ownedPreserved": true
+    },
+    {
+      "mode": "ssg",
+      "urlStrategy": "relative",
+      "theme": "ledger",
+      "output": "custom",
+      "paged": false,
+      "mirror": true,
+      "status": "generated",
+      "pages": [
+        {
+          "directory": "",
+          "outputName": "files.html"
+        },
+        {
+          "directory": "child",
+          "outputName": "files.html"
+        },
+        {
+          "directory": "child/deep",
+          "outputName": "files.html"
+        },
+        {
+          "directory": "owned",
+          "outputName": "files.html"
+        }
+      ],
+      "captures": [
+        {
+          "directory": "",
+          "page": 1,
+          "outputName": "files.html",
+          "rootHref": "files.html",
+          "childHref": "child/files.html",
+          "noteHref": null,
+          "documentBaseHref": null,
+          "links": ["files.html", "child/files.html", "owned/files.html", "one.txt", "two.txt"],
+          "manifest": null
+        },
+        {
+          "directory": "child",
+          "page": 1,
+          "outputName": "files.html",
+          "rootHref": "../files.html",
+          "childHref": "files.html",
+          "noteHref": "note%20%23%25.txt",
+          "documentBaseHref": null,
+          "links": [
+            "../files.html",
+            "files.html",
+            "../files.html",
+            "deep/files.html",
+            "note%20%23%25.txt"
+          ],
+          "manifest": null
+        },
+        {
+          "directory": "child/deep",
+          "page": 1,
+          "outputName": "files.html",
+          "rootHref": "../../files.html",
+          "childHref": "../files.html",
+          "noteHref": null,
+          "documentBaseHref": null,
+          "links": ["../../files.html", "../files.html", "files.html", "../files.html"],
+          "manifest": null
+        },
+        {
+          "directory": "owned",
+          "page": 1,
+          "outputName": "files.html",
+          "rootHref": "../files.html",
+          "childHref": "../child/files.html",
+          "noteHref": null,
+          "documentBaseHref": null,
+          "links": ["../files.html", "files.html", "../files.html", "index.html"],
+          "manifest": null
+        }
+      ],
+      "ownedPreserved": true
+    },
+    {
+      "mode": "ssg",
+      "urlStrategy": "relative",
+      "theme": "ledger",
+      "output": "skip-owned",
+      "paged": false,
+      "mirror": true,
+      "status": "generated",
+      "pages": [
+        {
+          "directory": "",
+          "outputName": "index.html"
+        },
+        {
+          "directory": "child",
+          "outputName": "index.html"
+        },
+        {
+          "directory": "child/deep",
+          "outputName": "index.html"
+        },
+        {
+          "directory": "owned",
+          "outputName": null
+        }
+      ],
+      "captures": [
+        {
+          "directory": "",
+          "page": 1,
+          "outputName": "index.html",
+          "rootHref": "./",
+          "childHref": "child/",
+          "noteHref": null,
+          "documentBaseHref": null,
+          "links": ["./", "child/", "owned/", "one.txt", "two.txt"],
+          "manifest": null
+        },
+        {
+          "directory": "child",
+          "page": 1,
+          "outputName": "index.html",
+          "rootHref": "../",
+          "childHref": "./",
+          "noteHref": "note%20%23%25.txt",
+          "documentBaseHref": null,
+          "links": ["../", "./", "../", "deep/", "note%20%23%25.txt"],
+          "manifest": null
+        },
+        {
+          "directory": "child/deep",
+          "page": 1,
+          "outputName": "index.html",
+          "rootHref": "../../",
+          "childHref": "../",
+          "noteHref": null,
+          "documentBaseHref": null,
+          "links": ["../../", "../", "./", "../"],
+          "manifest": null
+        }
+      ],
+      "ownedPreserved": true
+    },
+    {
+      "mode": "ssg",
+      "urlStrategy": "relative",
+      "theme": "crosswave",
+      "output": "default",
+      "paged": false,
+      "mirror": true,
+      "status": "generated",
+      "pages": [
+        {
+          "directory": "",
+          "outputName": "index.html"
+        },
+        {
+          "directory": "child",
+          "outputName": "index.html"
+        },
+        {
+          "directory": "child/deep",
+          "outputName": "index.html"
+        },
+        {
+          "directory": "owned",
+          "outputName": "_dirwell.html"
+        }
+      ],
+      "captures": [
+        {
+          "directory": "",
+          "page": 1,
+          "outputName": "index.html",
+          "rootHref": "./",
+          "childHref": "child/",
+          "noteHref": null,
+          "documentBaseHref": null,
+          "links": ["./", "./", "child/", "owned/_dirwell.html", "one.txt", "two.txt"],
+          "manifest": null
+        },
+        {
+          "directory": "child",
+          "page": 1,
+          "outputName": "index.html",
+          "rootHref": "../",
+          "childHref": "./",
+          "noteHref": "note%20%23%25.txt",
+          "documentBaseHref": null,
+          "links": ["../", "../", "./", "../", "deep/", "note%20%23%25.txt"],
+          "manifest": null
+        },
+        {
+          "directory": "child/deep",
+          "page": 1,
+          "outputName": "index.html",
+          "rootHref": "../../",
+          "childHref": "../",
+          "noteHref": null,
+          "documentBaseHref": null,
+          "links": ["../../", "../../", "../", "./", "../"],
+          "manifest": null
+        },
+        {
+          "directory": "owned",
+          "page": 1,
+          "outputName": "_dirwell.html",
+          "rootHref": "../",
+          "childHref": "../child/",
+          "noteHref": null,
+          "documentBaseHref": null,
+          "links": ["../", "../", "_dirwell.html", "../", "index.html"],
+          "manifest": null
+        }
+      ],
+      "ownedPreserved": true
+    },
+    {
+      "mode": "ssg",
+      "urlStrategy": "relative",
+      "theme": "crosswave",
+      "output": "custom",
+      "paged": false,
+      "mirror": true,
+      "status": "generated",
+      "pages": [
+        {
+          "directory": "",
+          "outputName": "files.html"
+        },
+        {
+          "directory": "child",
+          "outputName": "files.html"
+        },
+        {
+          "directory": "child/deep",
+          "outputName": "files.html"
+        },
+        {
+          "directory": "owned",
+          "outputName": "files.html"
+        }
+      ],
+      "captures": [
+        {
+          "directory": "",
+          "page": 1,
+          "outputName": "files.html",
+          "rootHref": "files.html",
+          "childHref": "child/files.html",
+          "noteHref": null,
+          "documentBaseHref": null,
+          "links": [
+            "files.html",
+            "files.html",
+            "child/files.html",
+            "owned/files.html",
+            "one.txt",
+            "two.txt"
+          ],
+          "manifest": null
+        },
+        {
+          "directory": "child",
+          "page": 1,
+          "outputName": "files.html",
+          "rootHref": "../files.html",
+          "childHref": "files.html",
+          "noteHref": "note%20%23%25.txt",
+          "documentBaseHref": null,
+          "links": [
+            "../files.html",
+            "../files.html",
+            "files.html",
+            "../files.html",
+            "deep/files.html",
+            "note%20%23%25.txt"
+          ],
+          "manifest": null
+        },
+        {
+          "directory": "child/deep",
+          "page": 1,
+          "outputName": "files.html",
+          "rootHref": "../../files.html",
+          "childHref": "../files.html",
+          "noteHref": null,
+          "documentBaseHref": null,
+          "links": [
+            "../../files.html",
+            "../../files.html",
+            "../files.html",
+            "files.html",
+            "../files.html"
+          ],
+          "manifest": null
+        },
+        {
+          "directory": "owned",
+          "page": 1,
+          "outputName": "files.html",
+          "rootHref": "../files.html",
+          "childHref": "../child/files.html",
+          "noteHref": null,
+          "documentBaseHref": null,
+          "links": ["../files.html", "../files.html", "files.html", "../files.html", "index.html"],
+          "manifest": null
+        }
+      ],
+      "ownedPreserved": true
+    },
+    {
+      "mode": "ssg",
+      "urlStrategy": "relative",
+      "theme": "crosswave",
+      "output": "skip-owned",
+      "paged": false,
+      "mirror": true,
+      "status": "generated",
+      "pages": [
+        {
+          "directory": "",
+          "outputName": "index.html"
+        },
+        {
+          "directory": "child",
+          "outputName": "index.html"
+        },
+        {
+          "directory": "child/deep",
+          "outputName": "index.html"
+        },
+        {
+          "directory": "owned",
+          "outputName": null
+        }
+      ],
+      "captures": [
+        {
+          "directory": "",
+          "page": 1,
+          "outputName": "index.html",
+          "rootHref": "./",
+          "childHref": "child/",
+          "noteHref": null,
+          "documentBaseHref": null,
+          "links": ["./", "./", "child/", "owned/", "one.txt", "two.txt"],
+          "manifest": null
+        },
+        {
+          "directory": "child",
+          "page": 1,
+          "outputName": "index.html",
+          "rootHref": "../",
+          "childHref": "./",
+          "noteHref": "note%20%23%25.txt",
+          "documentBaseHref": null,
+          "links": ["../", "../", "./", "../", "deep/", "note%20%23%25.txt"],
+          "manifest": null
+        },
+        {
+          "directory": "child/deep",
+          "page": 1,
+          "outputName": "index.html",
+          "rootHref": "../../",
+          "childHref": "../",
+          "noteHref": null,
+          "documentBaseHref": null,
+          "links": ["../../", "../../", "../", "./", "../"],
+          "manifest": null
+        }
+      ],
+      "ownedPreserved": true
+    }
+  ]
+}

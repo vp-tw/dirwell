@@ -1,0 +1,233 @@
+{
+  "date": "2026-10-15",
+  "status": "locally-qualified-unreleased",
+  "trackedBaseCommit": "4158ec34a6dc49f3eb55562f4cbf61454ebf5103",
+  "uncommittedWorkingTree": true,
+  "platform": {
+    "os": "Darwin",
+    "architecture": "arm64",
+    "node": "v26.12.0",
+    "playwright": "1.63.0"
+  },
+  "policy": {
+    "owner": "Core",
+    "option": "routing.directoryUrls",
+    "default": "explicit",
+    "supported": ["explicit", "slash", "clean"],
+    "cliConfigLocation": "top-level"
+  },
+  "counts": {
+    "unitTests": 233,
+    "publicationCombinations": 864,
+    "fullBrowserTests": 594,
+    "engines": ["chromium", "firefox", "webkit"],
+    "routingScenariosPerEngine": 55,
+    "strengthenedFileScenarioRetests": 3,
+    "compatibilityTests": 21,
+    "modelOnlyHostCombinations": 144
+  },
+  "browserRevisionNote": "Full regression tested final product code. The existing local-file test was then strengthened and rerun in all engines; product code was unchanged.",
+  "checks": {
+    "audit": {
+      "command": "pnpm audit:dependencies",
+      "status": "passed",
+      "logSha256": "f10816520c8dcdcd10608ee2d776b34a6cc9b55ccc3c20f535b6e42e3154840f"
+    },
+    "check": {
+      "command": "pnpm check",
+      "status": "passed",
+      "logSha256": "ed750424b96c0946e51bec607ec91f250acfcec4dc7c8a9a1fc5bbf20d6f66d7"
+    },
+    "test": {
+      "command": "pnpm test",
+      "status": "passed",
+      "logSha256": "87316fe7182cc29bd8f04a2febfa619c0c5a030de80d4652b0c76b9e793d19e1"
+    },
+    "build": {
+      "command": "pnpm build",
+      "status": "passed",
+      "logSha256": "f983a4ebfb58b2f232cb3c093959368e09b20f6bf4e055846894eb039150da85"
+    },
+    "package": {
+      "command": "pnpm verify:package",
+      "status": "passed",
+      "logSha256": "3d7c254298364f3902093baaebece7237943958c2e47fb867a9fe43e92e2baed"
+    },
+    "browsers": {
+      "command": "pnpm exec playwright test --browser all --reporter=line",
+      "status": "passed",
+      "logSha256": "16cfb27c30c722c18221aca3dddce0917f4e2eceb006ea3a115045db0322758f"
+    },
+    "fileBoundaries": {
+      "command": "pnpm exec playwright test test/browser/routing.spec.mjs --browser all --grep 'Plain explicit relative output'",
+      "status": "passed",
+      "logSha256": "86a97f5afd5b86caad19aa2eae822e0607488864b1deaa31e64d9f0b2a2a7aea"
+    },
+    "compatibility": {
+      "command": "pnpm test:compat",
+      "status": "passed",
+      "logSha256": "4e03c90bffd43eae72b8189141cd4a36cbeaf534114bc10deac88f0ad89115b7"
+    },
+    "siteRoot": {
+      "command": "pnpm site:build",
+      "status": "passed",
+      "logSha256": "119eb2dab90f7b16b3fa852b40135024ece8178362644af6932bc871bb95fdd3"
+    },
+    "sitePrefix": {
+      "command": "SITE_BASE=/dirwell/ pnpm site:build",
+      "status": "passed",
+      "logSha256": "dad089fa7133c6d9dcca0ccb05f833c1ab63d29fcb10cfb4eefdb92cbd046f58"
+    },
+    "transitionReproduction": {
+      "command": "node docs/design/url-publication/native-transition-repro.mjs",
+      "status": "passed",
+      "logSha256": "d5f2aaae4d54a43654699715d658c55eb7c3cfe8d2457b083d88b4a2a46b0cb7"
+    }
+  },
+  "installedConsumers": [
+    {
+      "family": {
+        "node": "v22.19.0",
+        "status": "passed",
+        "themes": ["plain", "ledger", "crosswave"],
+        "modes": ["ssg", "mpa"],
+        "liveListing": true,
+        "fileTransport": true,
+        "optionalImage": true,
+        "customFontImage": true,
+        "liveArchiveSearch": true,
+        "integrationImports": true,
+        "sourceAuthoring": ["svelte", "vue"],
+        "authoringDevSsr": true
+      },
+      "routing": {
+        "node": "v22.19.0",
+        "builds": 54,
+        "livePolicies": 3,
+        "cliOverride": true
+      }
+    },
+    {
+      "family": {
+        "node": "v26.12.0",
+        "status": "passed",
+        "themes": ["plain", "ledger", "crosswave"],
+        "modes": ["ssg", "mpa"],
+        "liveListing": true,
+        "fileTransport": true,
+        "optionalImage": true,
+        "customFontImage": true,
+        "liveArchiveSearch": true,
+        "integrationImports": true,
+        "sourceAuthoring": ["svelte", "vue"],
+        "authoringDevSsr": true
+      },
+      "routing": {
+        "node": "v26.12.0",
+        "builds": 54,
+        "livePolicies": 3,
+        "cliOverride": true
+      }
+    }
+  ],
+  "packedLocalArtifacts": {
+    "dirwell-cli-0.0.2.tgz": "14125c6f257f3135f04b7eeceed3f94d7161c5dbda90c06a810d6b566968d2c8",
+    "dirwell-core-0.0.2.tgz": "2aa653f3629426130d86cb8fcd0e6d2f3befe4d6d0ab5d970867c30080abfc38",
+    "dirwell-integrations-0.0.2.tgz": "dc3e7a73a322dd60d70fdd631fee335383e55af34b4a3e60eab4ecee024c5ded",
+    "dirwell-server-0.0.2.tgz": "71b11be0ca7aae065547d50ee8d41f8a0fb71f379d15c6910cfa546db506c265",
+    "dirwell-share-image-0.0.2.tgz": "a66dab2a4ec59d7cb7d198bd047e35212b502edab685323c5840ccfe64afaca4",
+    "dirwell-theme-authoring-0.0.2.tgz": "5139763a019645f0d0007c8009948e4144ca4199f4fe651ec2523f316dd4593e",
+    "dirwell-theme-crosswave-0.0.2.tgz": "cdb320f1677cec0da3f22e8ad86a61a49a0d5f15c9e8568160d4695a56578ac0",
+    "dirwell-theme-ledger-0.0.2.tgz": "bb8830a9857cc369a2b38514ed3efb2247ac7e7429aa90ec4ca705f9a5f01e42",
+    "dirwell-theme-plain-0.0.2.tgz": "8b57f3efe12674e3232acad92bbfedc5dd99574c9864ddf6dc464704e7afeed1"
+  },
+  "examples": {
+    "explicit": {
+      "files": 13,
+      "bytes": 5388
+    },
+    "slash": {
+      "files": 13,
+      "bytes": 5312
+    },
+    "clean": {
+      "files": 13,
+      "bytes": 5305
+    }
+  },
+  "documentation": {
+    "buildBases": ["/", "/dirwell/"],
+    "scans": [
+      {
+        "prefix": "/",
+        "pages": 18,
+        "localLinks": 670,
+        "errors": []
+      },
+      {
+        "prefix": "/dirwell/",
+        "pages": 18,
+        "localLinks": 670,
+        "errors": []
+      }
+    ],
+    "scanMethod": "HTMLParser resolved links and fragments from the generated documentation/home pages; generated explorer examples are outside this link scan."
+  },
+  "causalProofs": {
+    "crosswaveNativeTransition": ["fail", "pass", "fail"],
+    "webkitActivationFocus": "Ledger focus failure reproduced by removing only the activated-entry selection assignment, then passed after restoration; both rich themes passed full final regression."
+  },
+  "sourceSha256": {
+    "examples/catalog.ts": "2b2710fdc4324a29cfb0df6d5290b17690216b50e75e1ad9fc5499246f3af197",
+    "examples/custom-theme/theme.ts": "09be93d21155cf0fea10634035b662a9f1c485b69054e15a25bef1f5fb282c8d",
+    "examples/i18n/theme.ts": "e1a9c7c34cabce754c804cfeafde12a4d5eaf145232aaabe411b141707afe567",
+    "examples/url-routing/build.mjs": "55f27d74fe3ba21769daf2f1a1996b01775bad15403e5930e218e2e977a323bf",
+    "packages/cli/src/config.ts": "5c90c76a3ffdb33c78e1066d47c5228795da215d38a3bcf31f19b89ab2f6b032",
+    "packages/cli/src/index.ts": "549c8f3920c8a98e29d9f099b1322f48663f73c6daa662a7fbbea46c98b1d509",
+    "packages/core/src/generator.ts": "325a650506ef4d54a9dabe8d3a8e120c0cbb06423b9f228dda6b688ac4615221",
+    "packages/core/src/index.ts": "c369db7bd1a40134850eb5f82e02e64c1c7977d94a2d2c099b3b0237aa46d489",
+    "packages/core/src/model.ts": "14b2b138c70d485050d60bc0215e9bde868d888aa26301dfb727562b3736075e",
+    "packages/core/src/routing.ts": "9e3071c4d82760a41be407a0bb458dbc9d30528525c86e57d22e6f4eb613acaa",
+    "packages/core/src/validation.ts": "277fc193f1695da852ccb63248b109ca09a7daefa2dc06425f8b6996b40b7e7a",
+    "packages/integrations/src/config.ts": "a3fcc8624353ec11b86c595f425c4d72059d0bbfb8092da2b5f3bbc00b5dad83",
+    "packages/server/src/html.ts": "299cc53e9c8c494d0b8c9f59024e6d6f5ae79695c63fc2d53415cd87a49927de",
+    "packages/server/src/index.ts": "c55711b7fae0dd685315b87722f596a932a581d06edc29f8b87d7e114d0b0094",
+    "packages/server/src/routing.ts": "606d915127461b904d3f7e383595c328f675d2f1e84ba6c451aee1d7be25cb1b",
+    "packages/server/src/search.ts": "f88f2d6a703f918e11b055d7f3065ad024798a2225f4d7bac3cc8502a3f5f2e0",
+    "packages/server/src/validation.ts": "02e0f2208c2409c802ee69fc2b4ccb8862f7fa1954f5b8fa35d5b659f86ed7f2",
+    "packages/shared-theme/src/page.ts": "647eb03462d7287fbb80f275f93385ec8c80ad2124ef32513f2edd55636265db",
+    "packages/theme-crosswave/src/Crosswave.vue": "e6ff0d22fed9f881af33b076e10b154fa85860b34f7c1625b65f7352c007b314",
+    "packages/theme-crosswave/src/styles-legacy.ts": "d7876caadee43472cc9564741cff25050c16e83d7452e870eb51b1b3d8b2831e",
+    "packages/theme-ledger/src/Ledger.svelte": "0d89d7c350ffb89d3427630c9d6f69a74e4e07a52b0992a907e5b88535eede7a",
+    "packages/theme-plain/src/index.ts": "794de1b17d7a05b9987bcb28e41b460ba14f4853c1b3e550a9a85d7e8058708a",
+    "src/generator.ts": "56b626147441c143de401c44b495e05fd768f5a98bf385d2552702e7b9caed6c",
+    "src/theme-crosswave.ts": "f6b7f3e776a93aec4cd43f5fadaf7fe2375cdb2f3cd91b98aad9675a1f2af3aa",
+    "src/theme-crosswave/styles.ts": "8a17d92bd970a4512fe8ab1b63b10350c86b8fd47139e33d89c380424a43de49",
+    "src/theme-default.ts": "300ab73684957297162a8aee739ab52e03a7603bee09bfc3a14b825ad221a8fd",
+    "src/theme-plain.ts": "df7d8ff4195b83ce6a68832702496acca6fc294c027bdf95c08341715657aff1",
+    "test/browser/browsing-state.spec.mjs": "a00060b1bc3555deba2ecfebad392c13dd5ab1b5857ba9854b1490b1bc29356f",
+    "test/browser/crosswave-categories.spec.mjs": "8788e8f3245841404155c050826e4dd4f7c8fdce0d187b66fb5b7b59d74833cb",
+    "test/browser/crosswave-hosts.spec.mjs": "643b1d3ed441c9332eb9fbfa567a82501a309467bc4f57c99fa6f265172190d5",
+    "test/browser/crosswave-navigation.spec.mjs": "9dd540fe321150e2920dc534c4d1e0e5fe133205e05db302ffcf4a7b954e9aab",
+    "test/browser/crosswave.spec.mjs": "fc58f22d570f7b8de7e36c985231ea47840b66691036e57b8b6f12dab927f79b",
+    "test/browser/customization.spec.mjs": "86a095d692d6f55cb338f3c47703e4d2075e15ea4abe64ca670893006c2b19d2",
+    "test/browser/explorer.spec.ts": "cb2c923cfd7d5d1a347de9685c5d865f50ec11768b793d9e5009ee16e1e8b698",
+    "test/browser/framework-native.spec.mjs": "265ce076ae906721704063c1e82288eaafc1bb9dbff3927a05e15c7cdd1cd425",
+    "test/browser/routing.spec.mjs": "4f299d3782094edfd2fdab14e7bea8dff270adb8d0d1a06e3956798cdcf55542",
+    "test/crosswave.test.ts": "237047cb7c99eac78a5a73e7b323656425d3ccfe312d4cffcb4b1f7edca65059",
+    "test/explorer.test.ts": "1a63efdb8a80b9a131bb787bb9cf52db8797ed6cf5382f1c60ba2b694c65ed8f",
+    "test/routing.test.mjs": "21f65226ec7ea25f1714f94203658135324dc4ef7799d659e0d7a0c77af717c1",
+    "test/server-frameworks.test.mjs": "7324f53707d6598038247a4314547444d11ea40a3c3244d08b7368e514637498",
+    "test/server-html.test.mjs": "e640a3b55caaa262ff1aa3974df967b711df5182582efc4a5742eb97ad4a0055",
+    "test/theme-customization.test.mjs": "ea043c6d8b5be13548a51e0dcca1fa680be1e5d200e0616096df6dd827388828",
+    "test/theme-examples.test.ts": "96e86302c29eaa9487602f9c684cd78b90b394f99b04f9bde7e2f132c9baa897",
+    "test/timestamp.test.ts": "f7d332b74716ba67b92b440677de6127cd4e46e7212a233ba44e5283d0f8dc14"
+  },
+  "limits": [
+    "No vendor deployment or arbitrary rewrite qualification. Fixtures model exact files, directory indexes and explicit file-first extensionless HTML mapping.",
+    "No comparative performance SLA, other operating systems/architectures, physical controller or physical mobile-device validation.",
+    "Node 22 consumer used 22.19.0, not exact minimum 22.12.0.",
+    "No commit, push, version bump, package publication or deployment. Historical host matrix and baseline are labeled separately."
+  ],
+  "dependencyAudit": "Passed policy gate: two already documented Farm development advisories retained; zero unreviewed advisories."
+}

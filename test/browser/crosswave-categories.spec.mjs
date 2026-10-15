@@ -73,7 +73,7 @@ test("arbitrary first category, overlapping counts, trusted icon, keyboard, sear
   await page.keyboard.press("ArrowRight");
   await expect(page.getByRole("tab", { name: /資料夾/ })).toHaveAttribute("aria-selected", "true");
   await page.getByRole("link", { name: /Albums\/ Folder/ }).click();
-  await expect(page).toHaveURL(/Albums\/$/);
+  await expect(page).toHaveURL(/Albums\/index\.html$/);
   await expect(page.getByRole("tab", { name: /Source & scripts/ })).toHaveAttribute(
     "aria-selected",
     "true",

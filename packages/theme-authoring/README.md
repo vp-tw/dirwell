@@ -9,7 +9,7 @@ this package or its compilers.
 ## Compile and publish a Vue wrapper
 
 ```sh
-npm install @dirwell/theme-authoring@0.0.2 @dirwell/theme-crosswave@0.0.2 @dirwell/core@0.0.2
+npm install @dirwell/theme-authoring@0.0.3 @dirwell/theme-crosswave@0.0.3 @dirwell/core@0.0.3
 ```
 
 Create `files/note.txt`. Save this as `Downloads.vue`:

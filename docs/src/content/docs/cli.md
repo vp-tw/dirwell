@@ -36,3 +36,11 @@ Custom themes use `--theme './theme.mjs#createTheme'` or a module default export
 The CLI discovers `dirwell.config.mjs` in the working directory. `--config` selects another native JavaScript module. Precedence is `--theme` → `config.theme` → Plain. Server port precedence is `--port` → `PORT` → `config.server.port` → an available port. See [configuration](../configuration/).
 
 There are two commands: `build` and `server`. Source-component HMR uses the optional [authoring API](../themes/#source-component-customization). Server defaults preview safe media and download HTML, SVG and other active formats.
+
+## Directory URL policy
+
+Both modes accept `--directory-urls explicit|slash|clean`, overriding top-level
+`routing.directoryUrls` in the config. The default is `explicit`. `--urls` still
+selects build link strategy; it does not control slashes. Dry-run reports each
+directory entry's `outputPath` and `publicPath`; skipped pages report null.
+See [directory URLs](../urls/) for host requirements and the removed Plain option.

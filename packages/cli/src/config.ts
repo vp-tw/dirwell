@@ -1,5 +1,5 @@
 import type { CliConfig } from "./index.ts";
-import { resolveIgnoreFiles } from "@dirwell/core";
+import { resolveIgnoreFiles, resolveDirectoryUrls } from "@dirwell/core";
 
 type RecordValue = Record<string, unknown>;
 function object(value: unknown, name: string): RecordValue {
@@ -126,10 +126,11 @@ export function validateCliConfig(value: unknown): asserts value is CliConfig {
   const config = object(value, "Config");
   // Preserve the top-level diagnostic used by CLI consumers.
   for (const key of Object.keys(config))
-    if (!["theme", "listing", "build", "server", "ignoreFiles"].includes(key))
+    if (!["theme", "listing", "build", "server", "ignoreFiles", "routing"].includes(key))
       throw new TypeError(
-        `Unsupported config key "${key}". Use { theme, listing, build, server }; selection rules belong in build/server.`,
+        `Unsupported config key "${key}". Use { theme, routing, listing, build, server }; selection rules belong in build/server.`,
       );
+  resolveDirectoryUrls(config.routing);
   listing(config.listing, "listing");
   resolveIgnoreFiles(config.ignoreFiles as CliConfig["ignoreFiles"]);
   for (const mode of ["build", "server"] as const) {

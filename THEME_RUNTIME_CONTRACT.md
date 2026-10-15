@@ -9,3 +9,16 @@ SSR and client output must come from the same compilation. Failed builds retain 
 Source HMR is a loopback-only trusted development service. CSS-only edits preserve state; template/script edits can remount children. File changes use separate SSE revision notifications. Do not expose source HMR publicly.
 
 Verify custom wrappers in SSG and MPA, with and without JavaScript, narrow widths, directory/history navigation, search and appearance modes. Large-list changes also need virtualization coverage. See [the Catppuccin wrapper](examples/default-theme-override/Ledger.svelte) and [public examples](docs/src/content/docs/examples.mdx).
+
+## Next routing context contract
+
+Core owns directory URL policy. Render `hrefFor` and nullable `hrefForDirectory`
+results directly; render missing targets as text. Do not append `index.html` or
+infer logical paths from URL shape. `directoryPathForEntry(entryId)` returns the
+permitted generated directory identity, and `assetHrefForDirectory(path, name)`
+resolves theme-owned data/assets from the current public document base. Live
+`pageDataHref` remains a separate endpoint contract. Native anchors, public
+records, client History, pagination and metadata must identify the same target.
+The removed Plain `portableLinks` maps to shared explicit/slash routing. See
+[the URL guide](docs/src/content/docs/urls.md). This changes the next SDK contract;
+it does not describe the capabilities of already-published historical releases.

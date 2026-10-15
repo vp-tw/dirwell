@@ -50,18 +50,21 @@ export const internationalTheme: ExplorerTheme = {
   render(context) {
     const { directory } = context;
     const segments = directory.current.relativePath.split("/").filter(Boolean);
+    const link = (logical: string, text: string, attributes = "") => {
+      const href = context.hrefForDirectory(logical);
+      return href === null
+        ? `<span ${attributes}>${text}</span>`
+        : `<a ${attributes} href="${escapeHtml(href)}">${text}</a>`;
+    };
     const ancestors = segments
       .slice(0, -1)
-      .map(
-        (segment, index) =>
-          `<a href="${escapeHtml(context.hrefForDirectory(segments.slice(0, index + 1).join("/")))}">${escapeHtml(segment)}</a>`,
-      )
+      .map((segment, index) => link(segments.slice(0, index + 1).join("/"), escapeHtml(segment)))
       .join('<span aria-hidden="true">/</span>');
-    const breadcrumbs = `<nav data-i18n-label="breadcrumb" aria-label="${english.breadcrumb}"><a data-i18n="home" href="${escapeHtml(context.hrefForDirectory(""))}">${english.home}</a>${ancestors ? `<span aria-hidden="true">/</span>${ancestors}` : ""}${segments.length ? `<span aria-hidden="true">/</span><span aria-current="page">${escapeHtml(segments.at(-1)!)}</span>` : ""}</nav>`;
+    const breadcrumbs = `<nav data-i18n-label="breadcrumb" aria-label="${english.breadcrumb}">${link("", english.home, 'data-i18n="home"')}${ancestors ? `<span aria-hidden="true">/</span>${ancestors}` : ""}${segments.length ? `<span aria-hidden="true">/</span><span aria-current="page">${escapeHtml(segments.at(-1)!)}</span>` : ""}</nav>`;
     const parent =
       directory.parent === null
         ? ""
-        : `<a class="parent" data-i18n="parent" href="${escapeHtml(context.hrefForDirectory(directory.parent.relativePath))}">${english.parent}</a>`;
+        : link(directory.parent.relativePath, english.parent, 'class="parent" data-i18n="parent"');
     const count = directory.entries.length;
     const html = `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">${context.documentBaseHref === null ? "" : `<base href="${escapeHtml(context.documentBaseHref)}">`}<title>Files · ${escapeHtml(directory.current.relativePath || "/")}</title><link rel="stylesheet" href="${escapeHtml(context.assetHref("i18n.css"))}"><script type="module" src="${escapeHtml(context.assetHref("i18n.js"))}"></script></head>

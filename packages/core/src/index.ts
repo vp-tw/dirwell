@@ -15,5 +15,6 @@ export { SelectionBudgetError } from "./filters.ts";
 export type { SelectionBudget } from "./filters.ts";
 export type { DirectoryService, DirectoryServiceOptions } from "./service.ts";
 export { copyJsonObject } from "./json.ts";
+export { resolveDirectoryUrls, directoryRoute, encodeLogicalPath } from "./routing.ts";
 export { resolveIgnoreFiles } from "./filters.ts";
 export type { JsonObject, JsonValue } from "./json.ts";

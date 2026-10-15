@@ -1,0 +1,132 @@
+[
+  {
+    "case": "index.htm",
+    "pages": [
+      {
+        "directory": "",
+        "outputName": "_dirwell.html"
+      },
+      {
+        "directory": "parent",
+        "outputName": "index.html"
+      },
+      {
+        "directory": "parent/child",
+        "outputName": "index.html"
+      }
+    ],
+    "observations": [
+      {
+        "path": "",
+        "parent": null,
+        "links": ["parent/index.html", "index.htm"]
+      },
+      {
+        "path": "parent",
+        "parent": "../_dirwell.html",
+        "links": ["../_dirwell.html", "../_dirwell.html", "child/index.html"]
+      },
+      {
+        "path": "parent/child",
+        "parent": "../",
+        "links": ["../../_dirwell.html", "../index.html", "../index.html"]
+      }
+    ],
+    "mirroredHomepagePreserved": true
+  },
+  {
+    "case": "index-and-fallback",
+    "pages": [
+      {
+        "directory": "",
+        "outputName": null
+      },
+      {
+        "directory": "parent",
+        "outputName": "index.html"
+      },
+      {
+        "directory": "parent/child",
+        "outputName": "index.html"
+      }
+    ],
+    "observations": [
+      {
+        "path": "parent",
+        "parent": "../",
+        "links": ["../", "../", "child/index.html"]
+      },
+      {
+        "path": "parent/child",
+        "parent": "../",
+        "links": ["../../", "../index.html", "../index.html"]
+      }
+    ],
+    "mirroredHomepagePreserved": true
+  },
+  {
+    "case": "custom-index-collision",
+    "pages": [
+      {
+        "directory": "",
+        "outputName": "index.html"
+      },
+      {
+        "directory": "parent",
+        "outputName": "index.html"
+      },
+      {
+        "directory": "parent/child",
+        "outputName": "index.html"
+      }
+    ],
+    "observations": [
+      {
+        "path": "",
+        "parent": null,
+        "links": ["parent/index.html", "index.html"]
+      },
+      {
+        "path": "parent",
+        "parent": "../",
+        "links": ["../index.html", "../index.html", "child/index.html"]
+      },
+      {
+        "path": "parent/child",
+        "parent": "../",
+        "links": ["../../index.html", "../index.html", "../index.html"]
+      }
+    ],
+    "mirroredHomepagePreserved": false
+  },
+  {
+    "case": "skip-parent",
+    "pages": [
+      {
+        "directory": "",
+        "outputName": "index.html"
+      },
+      {
+        "directory": "parent",
+        "outputName": null
+      },
+      {
+        "directory": "parent/child",
+        "outputName": "index.html"
+      }
+    ],
+    "observations": [
+      {
+        "path": "",
+        "parent": null,
+        "links": ["parent/"]
+      },
+      {
+        "path": "parent/child",
+        "parent": "../",
+        "links": ["../../index.html", "../", "../"]
+      }
+    ],
+    "mirroredHomepagePreserved": null
+  }
+]

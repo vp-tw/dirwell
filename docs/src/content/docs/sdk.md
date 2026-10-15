@@ -161,3 +161,7 @@ these tools. The package includes both framework compilers and their matching SS
 Use a fixed approved root and resolve the current application session on every request. The [private-downloads recipe](https://github.com/vp-tw/dirwell/tree/main/examples/private-downloads) gates HTML, JSON, blocks, theme assets, ranges, conditional requests and SSE; its authorization callback rechecks revocation while SSE is active. It composes a fresh CSP nonce for trusted rendered documents.
 
 An allowed parent listing reveals selected child names. Separate tenant/role roots or explicit publication selection establish the names boundary; the hook is not row redaction. Keep private-target aliases out of an approved tree. Already delivered content and downloads cannot be retracted after revocation. The recipe provides no identity provider, cookie issuer or session store; the host supplies a current same-origin session and owns shutdown.
+
+## Shared directory routing
+
+Pass `routing: { directoryUrls: "explicit" }` to Core or server APIs. Core owns the policy; themes only render resolved URLs. Static `base`/`urlStrategy` and live `mountPath` stay separate. The server authorizes before canonical 307 redirects and preserves query strings. See [directory URLs](../urls/).

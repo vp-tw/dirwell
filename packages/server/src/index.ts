@@ -11,9 +11,11 @@ import type {
   FileSystemEntry,
   ExplorerTheme,
   ListingPolicy,
+  RoutingOptions,
 } from "@dirwell/core";
 
 export interface ExplorerHandlerOptions extends DirectoryServiceOptions {
+  readonly routing?: RoutingOptions;
   readonly search?: false | LiveSearchOptions;
   /** Opt-in SSE revision notifications. No filesystem watcher is required. */
   readonly live?: false | { readonly intervalMs?: number; readonly maxClients?: number };
@@ -180,10 +182,11 @@ export async function createExplorerHandler(
             const target = targetFor(entry);
             return entry.kind === "directory" || link?.targetKind === "directory"
               ? `${mount}/listing?path=${encodeURIComponent(target)}`
-              : (options.fileHref?.(target) ??
-                  (options.files
-                    ? `${mount}/files/${target.split("/").map(encodeURIComponent).join("/")}`
-                    : null));
+              : options.fileHref !== undefined
+                ? options.fileHref(target)
+                : options.files
+                  ? `${mount}/files/${target.split("/").map(encodeURIComponent).join("/")}`
+                  : null;
           },
           exitsExplorerFor(entry) {
             const link = entry.symlink;

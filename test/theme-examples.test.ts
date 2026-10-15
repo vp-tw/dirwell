@@ -21,7 +21,7 @@ test("release catalog theme owns HTML, CSS, and safe navigation", async (context
     });
     const html = await readFile(path.join(outputDir, "index.html"), "utf8");
     assert.match(html, /<h1>Release catalog<\/h1>/);
-    assert.match(html, /href="stable\/"/);
+    assert.match(html, /href="stable\/index\.html"/);
     assert.doesNotMatch(html, /dirwell\.runtime\.js|data-search-input|file-icon/);
     const assetDir = path.join(outputDir, mode === "mpa" ? "__dirwell" : "");
     assert.match(await readFile(path.join(assetDir, "release-catalog.css"), "utf8"), /main/);

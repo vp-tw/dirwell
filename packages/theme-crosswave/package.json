@@ -1,6 +1,6 @@
 {
   "name": "@dirwell/theme-crosswave",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Vue-owned media navigation with VueUse gamepad support.",
   "homepage": "https://vp-tw.github.io/dirwell/themes/",
   "bugs": {

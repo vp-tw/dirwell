@@ -2,6 +2,14 @@
 
 The nine official `@dirwell/*` packages use synchronized versions. `0.0.1` is the first non-prerelease family; the 0.0.x API may evolve, so pin the version qualified by your application.
 
+## 0.0.3
+
+- Move directory URL policy into Core `routing.directoryUrls`, shared by static builds, Server, CLI and every theme. Default to explicit `folder/index.html`; support directory-index `slash` and file-first extensionless `clean` publication with coordinated resource and metadata bases.
+- Remove Plain `portableLinks` and theme-side URL guessing. Third-party renderers consume resolved nullable directory links and the new directory/asset identity callbacks; CLI config owns routing at the top level.
+- Preserve owned homepages with explicit `_dirwell.html` fallback and co-located native pagination. Reject source/page/resource conflicts without replacing the previous successful output, including forced homepage replacement, case/Unicode conflicts and clean same-stem downloads.
+- Normalize authorized live GET/HEAD aliases with query-preserving temporary redirects. Keep literal `index.html` directory identities in clean mode and honor explicit null file mappings.
+- Preserve WebKit History focus after mouse activation and Crosswave native no-script hit testing. Qualify 864 publication combinations, three-engine routing/regression, installed family consumers and deployment guidance; actual vendor host configurations still require qualification.
+
 ## 0.0.2
 
 - Accept local body/headline TTF/OTF fonts for deterministic branded/CJK share images, with bounded reads, role-specific glyph errors and cache invalidation by font bytes. Preserve default PNG bytes and optional dependency isolation.

@@ -274,15 +274,7 @@ let wave,
   disposed = false,
   padIdentity = null,
   motionQuery;
-function safeHref(entry) {
-  return typeof location !== "undefined" &&
-    location.protocol === "file:" &&
-    directoryLike(entry) &&
-    !entry.exitsExplorer &&
-    entry.href?.endsWith("/")
-    ? entry.href + "index.html"
-    : entry.href;
-}
+
 async function loadComplete() {
   if (complete.value || !model.value.manifestHref || location.protocol === "file:") return;
   const local = abort,
@@ -396,6 +388,7 @@ function navigateLink(event, href, dataHref) {
   openFolder(dataHref, new URL(href, document.baseURI).href, true);
 }
 async function openEntry(event, entry) {
+  selected.value = entry.id;
   saveView();
   const href = entry.presentation?.folderDataHref;
   if (
@@ -856,7 +849,7 @@ onBeforeUnmount(() => {
             <a
               v-if="entry.href"
               class="cw-entry"
-              :href="safeHref(entry)"
+              :href="entry.href"
               :target="entry.exitsExplorer ? '_blank' : undefined"
               :rel="entry.exitsExplorer ? 'noopener' : undefined"
               @click="openEntry($event, entry)"
@@ -926,7 +919,7 @@ onBeforeUnmount(() => {
                     !directoryLike(entry) &&
                     !entry.link?.unavailable
                   "
-                  :href="safeHref(entry)"
+                  :href="entry.href"
                   download
                   >{{ ui.labels.download }}</a
                 >

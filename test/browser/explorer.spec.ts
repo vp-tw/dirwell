@@ -259,7 +259,7 @@ for (const mode of ["ssg", "mpa"] as const) {
       await expect(page).toHaveURL(/\/catalog\/docs\/_dirwell\.html$/);
       await expect(page.getByRole("heading", { name: "/docs/" })).toBeVisible();
       await page.getByRole("link", { name: "Home" }).click();
-      await expect(page).toHaveURL(/\/catalog\/$/);
+      await expect(page).toHaveURL(/\/catalog\/index\.html$/);
       const existing = await page.request.get(new URL("docs/", server.url).href);
       expect(await existing.text()).toContain("Existing document");
     } finally {
@@ -272,11 +272,11 @@ for (const mode of ["ssg", "mpa"] as const) {
     await expect(page.getByRole("heading", { name: "/" })).toBeVisible();
     await assertFilePolicy(page);
     await page.getByRole("link", { name: "docs/" }).click();
-    await expect(page).toHaveURL(/\/catalog\/docs\/$/);
+    await expect(page).toHaveURL(/\/catalog\/docs\/index\.html$/);
     await expect(page.getByRole("navigation", { name: "Breadcrumb" })).toContainText("docs");
     await expect(page.locator('[aria-current="page"]')).toHaveText("docs");
     await page.keyboard.press("Backspace");
-    await expect(page).toHaveURL(/\/catalog\/$/);
+    await expect(page).toHaveURL(/\/catalog\/index\.html$/);
   });
 
   test(`${mode}: search, type filters, IME-safe shortcuts, and persistence`, async ({ page }) => {
@@ -381,7 +381,7 @@ for (const mode of ["ssg", "mpa"] as const) {
       await expect(page.getByRole("link", { name: "docs/" })).toBeVisible();
       await expect(page.locator("[data-entry] time").first()).toContainText("UTC");
       await page.getByRole("link", { name: "docs/" }).click();
-      await expect(page).toHaveURL(/\/catalog\/docs\/$/);
+      await expect(page).toHaveURL(/\/catalog\/docs\/index\.html$/);
       await expect(page.getByRole("link", { name: "Home" })).toBeVisible();
     } finally {
       await context.close();
@@ -748,7 +748,7 @@ for (const mode of ["serveSsg", "serveMpa"] as const) {
     await page.goto(urls[mode]);
     await assertFilePolicy(page);
     await page.getByRole("link", { name: "docs/" }).click();
-    await expect(page).toHaveURL(/\/catalog\/docs\/$/);
+    await expect(page).toHaveURL(/\/catalog\/docs\/index\.html$/);
     await page.getByRole("link", { name: "Home" }).click();
     await writeFile(path.join(sourceDirs[mode], `added-${mode}.txt`), "new\n");
     await expect(page.getByRole("link", { name: `added-${mode}.txt` })).toBeVisible();

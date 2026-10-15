@@ -38,7 +38,7 @@ for (const mode of ["ssg", "mpa"] as const) {
       assert.match(nested, /data-cw-parent/);
       if (urlStrategy === "html-base") {
         assert.match(nested, /<base href="\/library\/">/);
-        assert.match(nested, /class="cw-skip" href="nested\/#cw-panel"/);
+        assert.match(nested, /class="cw-skip" href="nested\/index\.html#cw-panel"/);
       }
       assert.doesNotMatch(html, /search-index\.json/);
       assert.doesNotMatch(html, /source bytes/);
