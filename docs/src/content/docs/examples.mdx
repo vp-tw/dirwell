@@ -1,6 +1,6 @@
 ---
 title: Examples
-description: Pick a working build, inspect its config, and compare the result.
+description: Try an explorer in the browser or run a Node integration locally.
 ---
 
 import { exampleGroups } from "../../../../examples/catalog.ts";
@@ -8,10 +8,9 @@ export const siteBase = import.meta.env.BASE_URL;
 export const repositoryUrl =
   import.meta.env.PUBLIC_REPOSITORY_URL ?? "https://github.com/vp-tw/dirwell";
 
-Compare the three built-in themes first. Then choose a customization or
-deployment example for the behavior you want to change. Each item links to
-its live page and the source directory that generates it. Names such as
-“Sample files” and “Sample downloads” identify the demo content, not a theme.
+Choose an interface, customize an explorer, or connect Dirwell to a Node application.
+Browser demos open the generated explorer. Server integrations link to a local
+run guide and source code.
 
 {exampleGroups.map((group) => (
 
@@ -22,7 +21,11 @@ its live page and the source directory that generates it. Names such as
       {group.examples.map((example) => (
         <li>
           <strong>{example.name}</strong>: {example.description}{" "}
-          <a href={`${siteBase}examples/${example.slug}/`}>Live example</a> ·{" "}
+          {example.preview ? (
+            <a href={`${siteBase}examples/${example.slug}/`}>Open demo</a>
+          ) : (
+            <a href={`${siteBase}${example.guide}`}>Run locally</a>
+          )} ·{" "}
           <a href={`${repositoryUrl}/tree/main/examples/${example.slug}`}>Source and instructions</a>
         </li>
       ))}
@@ -30,9 +33,9 @@ its live page and the source directory that generates it. Names such as
   </section>
 ))}
 
-Each `config.ts` exports core `GenerateOptions` using the published SDK. The site build calls `generateExplorer` for each example before Astro copies the output to the publish tree. The Ledger source example compiles its wrapper with the optional authoring package first. These TypeScript API configs are not CLI configuration files.
+## Build a static example
 
-## Run one example
+Each source directory includes a README and a TypeScript `config.ts` that selects its theme, input folder and output. These configs use the Dirwell API; they are not CLI configuration files.
 
 From an [installed repository checkout](https://github.com/vp-tw/dirwell/blob/main/CONTRIBUTING.md):
 
@@ -40,12 +43,6 @@ From an [installed repository checkout](https://github.com/vp-tw/dirwell/blob/ma
 node scripts/build-example.ts file-icons ./generated-example
 ```
 
-Build replaces the dedicated output directory. Serve the complete result over HTTP. The base example requires its configured mount. For a standalone CLI project, use `dirwell.config.mjs` with `theme`, `build`, `server` and `listing` sections.
+Serve the complete `generated-example` directory over HTTP. For the URL-prefix example, use the `/examples/base/` path described in its README so its links resolve correctly.
 
-## Build the complete site
-
-```sh
-SITE_BASE=/dirwell/ pnpm site:build
-```
-
-`pnpm docs:dev` rebuilds examples, starts Astro and watches package/example inputs. `SITE_BASE` sets the documentation prefix. `PUBLIC_REPOSITORY_URL` controls source links; GitHub Actions supplies the repository URL.
+To build your own folder without a repository checkout, follow [Getting started](../getting-started/). To work on the Dirwell documentation website, see [Contributing](https://github.com/vp-tw/dirwell/blob/main/CONTRIBUTING.md).

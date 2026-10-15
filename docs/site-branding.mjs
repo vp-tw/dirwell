@@ -1,7 +1,7 @@
 export const siteDescription =
-  "Turn a folder of downloads, reports, or build artifacts into a searchable website. Generate static files you can publish on a static host.";
+  "Browse downloads, reports, or build artifacts through a Node server, or publish a folder as a static website.";
 
-export const siteTitle = "Dirwell — static file explorer";
+export const siteTitle = "Dirwell — directory explorer";
 export const shareImagePath = "brand/dirwell-og.png";
 export const shareImageWidth = 1199;
 export const shareImageHeight = 630;

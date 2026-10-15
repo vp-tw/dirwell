@@ -67,7 +67,7 @@ const shareImageUrl = new URL(path(shareImagePath), Astro.site);
           <div class="hero-copy">
             <h1 id="hero-title">Put a directory<br />on the web.</h1>
             <p>
-              Dirwell builds a static file explorer from the folders and files you already have. Browse release downloads, reports, or build artifacts. Publish the generated files on a static host.
+              Dirwell turns folders into browsable websites for downloads, reports, and build artifacts. Serve current files from a Node application, or build static files for your host.
             </p>
             <div class="actions">
               <a class="primary-action" href={path("getting-started/")}>Build your first explorer</a>
@@ -133,22 +133,22 @@ npx dirwell server ./downloads --theme ledger --live</code></pre>
         <div>
           <h2 id="problem-title">The folder already has the information.</h2>
           <p>
-            Most directory listings lose the context people need, or turn a small publishing
-            job into an application. Dirwell keeps the filesystem legible and the output static.
+            Start with file names, sizes and timestamps. Add public descriptions or checksums
+            when names need more explanation. Serve the current directory or publish a static snapshot.
           </p>
         </div>
         <dl>
-          <div><dt>Start</dt><dd>No config file required.</dd></div>
-          <div><dt>Inspect</dt><dd>Full metadata and explicit symlink states.</dd></div>
-          <div><dt>Ship</dt><dd>Plain files for any static host.</dd></div>
-          <div><dt>Adapt</dt><dd>Replace components or the renderer.</dd></div>
+          <div><dt>Start</dt><dd>Browse a folder without a config file.</dd></div>
+          <div><dt>Inspect</dt><dd>File sizes, timestamps and symlink targets.</dd></div>
+          <div><dt>Ship</dt><dd>Serve generated HTML from a static host.</dd></div>
+          <div><dt>Adapt</dt><dd>Customize a theme or supply your own renderer.</dd></div>
         </dl>
       </section>
 
       <section class="examples" id="examples" aria-labelledby="examples-title">
         <div class="section-heading">
           <h2 id="examples-title">Choose an example to try.</h2>
-          <p>Open the generated site, then inspect the exact source that produced it.</p>
+          <p>Try an explorer in your browser, or run a server integration locally. Each example includes its source and instructions.</p>
         </div>
         {exampleGroups.map((group) => (
           <section class="example-group" aria-labelledby={`examples-${group.id}`}>
@@ -163,7 +163,11 @@ npx dirwell server ./downloads --theme ledger --live</code></pre>
                     <span class="example-detail">{example.detail}</span>
                   </div>
                   <div class="example-actions">
-                    <a href={examplePath(example.slug)} target="_blank" rel="noopener">Live demo</a>
+                    {example.preview ? (
+                      <a href={examplePath(example.slug)} target="_blank" rel="noopener">Open demo</a>
+                    ) : (
+                      <a href={path(example.guide)}>Run locally</a>
+                    )}
                     <a href={`${repositoryUrl}/tree/main/examples/${example.slug}`} target="_blank" rel="noopener">GitHub source</a>
                   </div>
                 </article>

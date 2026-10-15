@@ -51,6 +51,7 @@ export default defineConfig({
             { label: "Themes", slug: "themes" },
             { label: "Page metadata and share images", slug: "metadata" },
             { label: "Build tool adapters", slug: "build-tools" },
+            { label: "Server integrations", slug: "server-integrations" },
             { label: "Support and verification", slug: "support" },
           ],
         },

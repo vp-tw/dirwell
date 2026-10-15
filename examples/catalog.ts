@@ -1,28 +1,40 @@
-/** Visitor-facing examples: compare themes before exploring customization. */
+type Example = {
+  group: "themes" | "guides" | "servers";
+  slug: string;
+  name: string;
+  description: string;
+  detail: string;
+} & ({ preview: true } | { preview: false; guide: string });
+
+/** One catalog supplies the site; only previewable examples enter the static build. */
 export const exampleCatalog = [
   {
+    preview: true,
     group: "themes",
     slug: "file-icons",
     name: "Ledger",
     description: "Search, sort, and browse a folder with bundled file icons.",
-    detail: "Built-in theme · search and sorting",
+    detail: "Optional Svelte theme · search and sorting",
   },
   {
+    preview: true,
     group: "themes",
     slug: "plain",
     name: "Plain",
     description: "Minimal directory HTML with native links, system fonts, and no generated assets.",
-    detail: "Built-in theme · minimal HTML",
+    detail: "Included with the CLI · minimal HTML",
   },
   {
+    preview: true,
     group: "themes",
     slug: "crosswave",
     name: "Crosswave",
     description:
       "A PSP-inspired crossbar with flowing light and keyboard or controller navigation.",
-    detail: "Built-in theme · crossbar navigation",
+    detail: "Optional Vue theme · crossbar navigation",
   },
   {
+    preview: true,
     group: "guides",
     slug: "base",
     name: "Deploy under a URL prefix",
@@ -30,6 +42,7 @@ export const exampleCatalog = [
     detail: "Ledger · deployment URLs",
   },
   {
+    preview: true,
     group: "guides",
     slug: "default-theme-override",
     name: "Customize Ledger source",
@@ -37,6 +50,7 @@ export const exampleCatalog = [
     detail: "Ledger · Svelte snippets and custom icons",
   },
   {
+    preview: true,
     group: "guides",
     slug: "custom-theme",
     name: "Build an independent theme",
@@ -44,6 +58,7 @@ export const exampleCatalog = [
     detail: "Independent renderer · complete HTML",
   },
   {
+    preview: true,
     group: "guides",
     slug: "i18n",
     name: "Add theme-owned languages",
@@ -51,6 +66,7 @@ export const exampleCatalog = [
     detail: "Custom theme · language switching",
   },
   {
+    preview: true,
     group: "guides",
     slug: "crosswave-categories",
     name: "Customize Crosswave categories",
@@ -58,31 +74,49 @@ export const exampleCatalog = [
     detail: "Crosswave · category rules and icons",
   },
   {
+    preview: true,
     group: "guides",
     slug: "dynamic-og",
     name: "Generate per-folder share images",
     description: "Generate an image for each folder in a small Design kit.",
     detail: "Crosswave · build-time image callbacks",
   },
-] as const;
+  {
+    preview: false,
+    group: "servers",
+    slug: "shared-cache",
+    name: "Cache a public listing",
+    description: "Run two Hono servers that share listing data through Redis.",
+    detail: "Node.js and Redis · run locally",
+    guide: "server-integrations/#cache-a-public-listing",
+  },
+] as const satisfies readonly Example[];
 
 /** The same groups drive the homepage and documentation. */
 export const exampleGroups = [
   {
     id: "themes",
-    name: "Built-in themes",
+    name: "Official themes",
     description:
-      "Choose an interface: Plain is the CLI default; Ledger and Crosswave add interaction.",
+      "Plain comes with the CLI. Install Ledger or Crosswave for search, sorting and keyboard navigation.",
     examples: exampleCatalog.filter(({ group }) => group === "themes"),
   },
   {
     id: "guides",
     name: "Customization and deployment",
-    description:
-      "These examples extend or configure a theme; they are not additional built-in themes.",
+    description: "Change colors, languages, file categories, share images or deployment URLs.",
     examples: exampleCatalog.filter(({ group }) => group === "guides"),
+  },
+  {
+    id: "servers",
+    name: "Server integrations",
+    description: "Run Dirwell inside a Node application and connect it to your services.",
+    examples: exampleCatalog.filter(({ group }) => group === "servers"),
   },
 ] as const;
 
 /** Keep the earlier basic archive URL available without listing a second Ledger demo. */
-export const publishedExampleSlugs = [...exampleCatalog.map(({ slug }) => slug), "basic"];
+export const publishedExampleSlugs = [
+  ...exampleCatalog.filter(({ preview }) => preview).map(({ slug }) => slug),
+  "basic",
+];
