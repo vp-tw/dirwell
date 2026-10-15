@@ -56,7 +56,9 @@ await writeFile(
   path.join(folder, "render-generated.d.mts"),
   "import type {ThemePage} from '../shared-theme/src/page.ts'; export declare const renderBody: (model: ThemePage & {readonly searchIndexHref?: string | null}) => string | Promise<string>;\n",
 );
-{
+if (framework === "svelte") {
+  await copyFile(path.join(folder, "src/styles.css"), path.join(output, "styles.css"));
+} else {
   await build({
     entryPoints: [path.join(folder, "src/styles-legacy.ts")],
     bundle: true,
@@ -75,8 +77,7 @@ await writeFile(
   const adjustments = await import(pathToFileURL(path.join(generated, "adjustments.mjs")));
   await writeFile(
     path.join(output, "styles.css"),
-    (legacy.defaultStyles ?? legacy.crosswaveStyles) +
-      (framework === "svelte" ? adjustments.ledgerAdjustments : adjustments.crosswaveAdjustments),
+    legacy.crosswaveStyles + adjustments.crosswaveAdjustments,
   );
 }
 
