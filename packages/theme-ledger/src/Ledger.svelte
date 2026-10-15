@@ -75,7 +75,7 @@
   let offsets = $derived.by(() => {
     const values = [0];
     for (const entry of rows)
-      values.push(values.at(-1) + (heights.get(entry.id) ?? 76));
+      values.push(values.at(-1) + (heights.get(entry.id) ?? 52));
     return values;
   });
   let start = $derived.by(() => {
@@ -100,14 +100,53 @@
       }
       return Math.min(rows.length, Math.max(start + 35, low + 5));
     });
+  function stickyLayout(node) {
+    const heading = node.querySelector(":scope > header");
+    const columns = node.querySelector(".entry-head");
+    const update = () => {
+      const height = heading.getBoundingClientRect().height;
+      const disabled = height > Math.min(innerHeight / 4, 192);
+      node.toggleAttribute("data-sticky-header-disabled", disabled);
+      node.style.setProperty(
+        "--dw-sticky-header-height",
+        `${disabled ? 0 : height}px`,
+      );
+      node.style.setProperty(
+        "--dw-sticky-columns-height",
+        `${columns.getBoundingClientRect().height}px`,
+      );
+      node.setAttribute("data-sticky-ready", "");
+    };
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(heading);
+    observer.observe(columns);
+    window.addEventListener("resize", update);
+    return {
+      destroy() {
+        observer.disconnect();
+        window.removeEventListener("resize", update);
+      },
+    };
+  }
   function measure(node, id) {
     if (typeof ResizeObserver === "undefined") return;
     const observer = new ResizeObserver(() => {
       const value = node.getBoundingClientRect().height;
       if (value > 0 && heights.get(id) !== value) {
+        const focused = list?.contains(document.activeElement)
+          ? document.activeElement
+          : null;
+        const top = focused?.getBoundingClientRect().top;
         const next = new Map(heights);
         next.set(id, value);
         heights = next;
+        // Updating spacer estimates must preserve the focused link's viewport position.
+        if (focused)
+          tick().then(() => {
+            if (focused.isConnected && document.activeElement === focused)
+              window.scrollBy(0, focused.getBoundingClientRect().top - top);
+          });
       }
     });
     observer.observe(node);
@@ -320,16 +359,29 @@
     if (!row) return;
     selected = row.id;
     if (virtual) {
-      scrollTop = Math.max(0, offsets[target] - 100);
+      const inset = list
+        ? parseFloat(
+            getComputedStyle(list).getPropertyValue(
+              "--dw-sticky-header-height",
+            ),
+          ) +
+          parseFloat(
+            getComputedStyle(list).getPropertyValue(
+              "--dw-sticky-columns-height",
+            ),
+          ) +
+          8
+        : 0;
+      scrollTop = Math.max(0, offsets[target] - inset);
       if (list)
         window.scrollTo({
           top: list.getBoundingClientRect().top + window.scrollY + scrollTop,
         });
     }
     await tick();
-    list
-      ?.querySelector(`[data-order="${index}"] a`)
-      ?.focus({ preventScroll: true });
+    const link = list?.querySelector(`[data-order="${target}"] a`);
+    link?.focus({ preventScroll: true });
+    link?.closest(".entry")?.scrollIntoView({ block: "nearest" });
   }
   function keyboard(event) {
     if (event.isComposing || event.altKey || event.ctrlKey || event.metaKey)
@@ -626,32 +678,32 @@
     if (list) scrollTop = Math.max(0, window.scrollY - list.offsetTop);
   }}
 />
-<header class="page-header">
-  <div class="wordmark">
-    {#if header}{@render header({ model })}{:else}{#if ui.brand.logoUrl}<img
-          src={ui.brand.logoUrl}
-          alt={ui.brand.logoAlt ?? ""}
-          width="40"
-          height="40"
-        />{/if}
-      <h1>{ui.brand.name ?? model.title}</h1>
-      <span>{ui.labels.archive}</span>{/if}
-  </div>
-  <nav aria-label={ui.labels.breadcrumb}>
-    <a
-      href={model.rootHref}
-      onclick={(event) =>
-        navigateLink(event, model.rootHref, model.rootDataHref)}
-      >{ui.labels.home}</a
-    >{#each model.breadcrumbs as crumb}
-      / <a
-        href={crumb.href}
-        onclick={(event) => navigateLink(event, crumb.href, crumb.dataHref)}
-        >{crumb.name}</a
-      >{/each}
-  </nav>
-</header>
-<main data-explorer data-framework="svelte" aria-busy={busy}>
+<main data-explorer data-framework="svelte" aria-busy={busy} use:stickyLayout>
+  <header class="page-header">
+    <div class="wordmark">
+      {#if header}{@render header({ model })}{:else}{#if ui.brand.logoUrl}<img
+            src={ui.brand.logoUrl}
+            alt={ui.brand.logoAlt ?? ""}
+            width="40"
+            height="40"
+          />{/if}
+        <h1>{ui.brand.name ?? model.title}</h1>
+        <span>{ui.labels.archive}</span>{/if}
+    </div>
+    <nav aria-label={ui.labels.breadcrumb}>
+      <a
+        href={model.rootHref}
+        onclick={(event) =>
+          navigateLink(event, model.rootHref, model.rootDataHref)}
+        >{ui.labels.home}</a
+      >{#each model.breadcrumbs as crumb}
+        / <a
+          href={crumb.href}
+          onclick={(event) => navigateLink(event, crumb.href, crumb.dataHref)}
+          >{crumb.name}</a
+        >{/each}
+    </nav>
+  </header>
   <div class="toolbar">
     <label class="search-field"
       >{ui.labels.searchDirectory}<input
@@ -755,14 +807,10 @@
     <div
       class="entry-head"
       data-custom-columns={Boolean(model.ui?.columns)}
-      style:grid-template-columns={model.ui?.columns
+      style:--dw-entry-columns={model.ui?.columns
         ? ui.columns
             .map((column) =>
-              column === "name"
-                ? "minmax(0,1fr)"
-                : typeof column === "object"
-                  ? "minmax(0,12rem)"
-                  : "minmax(6rem,max-content)",
+              column === "name" ? "minmax(0,1fr)" : "minmax(0,12rem)",
             )
             .join(" ")
         : undefined}
@@ -791,12 +839,10 @@
           data-id={entry.id}
           data-order={start + index}
           data-active={selected === entry.id}
-          style:grid-template-columns={model.ui?.columns
+          style:--dw-entry-columns={model.ui?.columns
             ? ui.columns
                 .map((column) =>
-                  column === "name"
-                    ? "minmax(0,1fr)"
-                    : "minmax(6rem,max-content)",
+                  column === "name" ? "minmax(0,1fr)" : "minmax(0,12rem)",
                 )
                 .join(" ")
             : undefined}

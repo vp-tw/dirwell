@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.0.4
+
+### Patch Changes
+
+- Restore compact aligned rows and persistent directory context. Use one Ledger stylesheet, measure wrapped sticky headers, remove the exposed content gap, and preserve keyboard focus through variable-height virtual row measurements. Native no-script pages retain top-aligned column labels and pagination.
+- Updated dependencies
+  - @dirwell/core@0.0.4
+
 ## 0.0.3
 
 ### Patch Changes

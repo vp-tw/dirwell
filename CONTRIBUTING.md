@@ -62,16 +62,16 @@ Pages prefix. `pnpm docs:build` alone does not regenerate explorer examples.
 
 ## Documentation map
 
-| Reader or task                       | Source                                                                                                                                            |
-| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| New package user                     | [README](README.md), [docs overview](docs/src/content/docs/overview.mdx), [getting started](docs/src/content/docs/getting-started.md)             |
-| Usage and public contracts           | [Docs guides and reference](docs/src/content/docs), [theme architecture](THEMING.md), [theme package contract](THEME_PACKAGE_CONTRACT.md)         |
-| Integration promises and limits      | [Support policy](docs/src/content/docs/support.md), [verified build behavior](docs/src/content/docs/build-tools.md)                               |
-| Implementation and product decisions | [Architecture](ARCHITECTURE.md), [product](PRODUCT.md), [experience](EXPERIENCE.md)                                                               |
-| Interface design                     | [Official site](DESIGN.md), [Ledger](src/theme-default/DESIGN.md), [Plain](src/theme-plain/DESIGN.md), [Crosswave](src/theme-crosswave/DESIGN.md) |
-| Performance evidence                 | [Recorded benchmarks](BENCHMARKS.md)                                                                                                              |
-| Historical decisions                 | [Unplugin evaluation](UNPLUGIN_EVALUATION.md), [timestamp presentation](TIMESTAMP_PRESENTATION.md)                                                |
-| Package release                      | [Releasing](RELEASING.md), [trusted publishing](TRUSTED_PUBLISHING_PLAN.md)                                                                       |
+| Reader or task                       | Source                                                                                                                                                |
+| ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| New package user                     | [README](README.md), [docs overview](docs/src/content/docs/overview.mdx), [getting started](docs/src/content/docs/getting-started.md)                 |
+| Usage and public contracts           | [Docs guides and reference](docs/src/content/docs), [theme architecture](THEMING.md), [theme package contract](THEME_PACKAGE_CONTRACT.md)             |
+| Integration promises and limits      | [Support policy](docs/src/content/docs/support.md), [verified build behavior](docs/src/content/docs/build-tools.md)                                   |
+| Implementation and product decisions | [Architecture](ARCHITECTURE.md), [product](PRODUCT.md), [experience](EXPERIENCE.md)                                                                   |
+| Interface design                     | [Official site](DESIGN.md), [Ledger](packages/theme-ledger/DESIGN.md), [Plain](src/theme-plain/DESIGN.md), [Crosswave](src/theme-crosswave/DESIGN.md) |
+| Performance evidence                 | [Recorded benchmarks](BENCHMARKS.md)                                                                                                                  |
+| Historical decisions                 | [Unplugin evaluation](UNPLUGIN_EVALUATION.md), [timestamp presentation](TIMESTAMP_PRESENTATION.md)                                                    |
+| Package release                      | [Releasing](RELEASING.md), [trusted publishing](TRUSTED_PUBLISHING_PLAN.md)                                                                           |
 
 Keep the docs site and packaged README aligned with current code. Put the first
 working command before advanced options. Label historical evidence instead of

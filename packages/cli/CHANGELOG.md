@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.0.4
+
+### Patch Changes
+
+- Synchronize the SDK family for the Ledger layout correction. No public API changes in this package.
+- Updated dependencies
+  - @dirwell/core@0.0.4
+  - @dirwell/server@0.0.4
+  - @dirwell/theme-plain@0.0.4
+
 ## 0.0.3
 
 ### Patch Changes

@@ -28,7 +28,7 @@ Version `0.0.1` adds shared `language`, `direction`, `locale`, `timeZone`, parti
 
 Svelte owns the server markup, client state, keyed rows, search, sorting, dialogs, navigation and cleanup. No framework-neutral serialized UI tree or imperative theme controller is used.
 
-Use `createLedgerTheme({ title: "Sample downloads" })` with `@dirwell/core` and an explicit listing policy. Paged HTML preserves native links without JavaScript. The browser loads and validates the complete compact listing before enabling directory-wide search and sorting; directories exceeding 500 visible rows use measured row virtualization. Folder snapshots resolve navigation URLs before updating History.
+Use `createLedgerTheme({ title: "Sample downloads" })` with `@dirwell/core` and an explicit listing policy. Paged HTML preserves native links without JavaScript. The browser loads and validates the complete compact listing before enabling directory-wide search and sorting; directories exceeding 500 visible rows use measured row virtualization. Ordinary desktop rows remain compact; wrapped names, link targets and optional actions grow naturally. The sticky header follows its measured height and stops sticking when too tall for the viewport. Folder snapshots resolve navigation URLs before updating History.
 
 The theme includes directory type filtering, fuzzy search, name/size/modified sorting, natural/locale/Unicode names, color schemes, timestamp details, archive search, and keyboard selection. File URLs use native navigation and pagination.
 
