@@ -1,6 +1,6 @@
 # Directory URL policies
 
-This example targets the next SDK release or the built checkout, not published 0.0.2.
+This example uses SDK 0.0.3 or the matching built checkout. Upgrade the official package family together.
 From the repository root, generate each policy into its own dedicated tree:
 
 ```sh

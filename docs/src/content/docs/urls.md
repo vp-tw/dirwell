@@ -5,7 +5,7 @@ description: Choose one Core routing policy for page links, static output and li
 
 Directory routing belongs to Core. Set `routing.directoryUrls` once; every theme receives the same resolved links. The default is `explicit`. Routing changes explorer pages, not the names or bytes of your downloadable files. It does not configure your hosting provider.
 
-This contract is a breaking change prepared for the next SDK release. The published `0.0.2` family does not accept `routing` yet; use the matching release family when these changes are published.
+This guide describes SDK `0.0.3`. It changes the directory URL and theme-context contracts from `0.0.2`; upgrade the official package family together and follow the migration section below.
 
 ## Choose a policy
 
@@ -66,6 +66,8 @@ For a file at `folder/note.txt`, `note.txt` works from `/folder/index.html` or `
 The default resolver preserves source `index.html` and `index.htm`. Its explorer page uses the explicit `_dirwell.html` fallback, even under `slash` or `clean`; this prevents the explorer URL from becoming the owned homepage. Its later pagination files also stay explicit and co-located. If that fallback is occupied too, the explorer page is skipped.
 
 `outputName` remains an explicit filename override or async directory callback. A custom filename other than `index.html` requires `routing.directoryUrls: "explicit"`. Returning `null` skips that explorer page. An owned homepage remains an exit; a skipped directory without a homepage has no generated navigation link. Descendant pages can still be generated, and unavailable ancestor breadcrumbs render as text.
+
+Homepage recognition uses selected entries. Excluding every `index.html` also hides owned homepages from the planner: if their directory is skipped, its navigation link becomes unavailable. Keep owned-site homepages selected, and exclude only obsolete generated listing pages when replacing them. Verify both the explorer listing and the original site entry after changing selection.
 
 A caller-forced `index.html` cannot replace a source homepage anymore. Clean output also cannot replace a real `folder.html` download. Source/output page collisions, including case and normalized-name conflicts, fail without replacing the previous successful output. Change the policy or explicit output name, or deliberately change source selection; do not rename downloads automatically.
 

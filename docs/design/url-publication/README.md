@@ -1,6 +1,6 @@
 # Directory URL and publication design
 
-Status: **Implemented and locally qualified**. Runtime changes are present in the working tree and are not released. The shared explicit-filename default has owner approval. Updated 2026-10-15. Decision owner: repository owner. Breaking changes, implementation and evidence-driven spec revisions are authorized. Actual hosting configuration remains a deployment-owner qualification.
+Status: **Implemented in SDK 0.0.3**. The [SDK release](https://github.com/vp-tw/dirwell/releases/tag/%40dirwell/workspace%400.0.3) records the published family; this document retains the earlier local qualification and design decisions. The shared explicit-filename default has owner approval. Updated 2026-10-15. Decision owner: repository owner. Breaking changes, implementation and evidence-driven spec revisions are authorized. Actual hosting configuration remains a deployment-owner qualification.
 
 Dirwell should own directory routing in Core, share the policy with the live server, and give themes resolved URLs. A theme must not append `index.html`, remove a slash, infer a data URL from a page URL, or choose a deployment policy. Static publication and HTTP redirects remain different responsibilities.
 

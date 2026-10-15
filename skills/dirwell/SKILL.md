@@ -21,6 +21,7 @@ simple default experience and typed extension points.
 ## Preserve these invariants
 
 - Generated pages and directory links work without a client router. Plain stays script-free; rich themes retain native HTML pagination independently of client virtualization.
+- Core owns `routing.directoryUrls`; themes render resolved URLs without rewriting filenames or inferring directory identity.
 - Existing `index.html` and `index.htm` documents are preserved by default.
 - `outputName(directory)` may return `null` to skip a directory.
 - Symlink cycles remain visible and link to their canonical generated target;
@@ -40,7 +41,7 @@ simple default experience and typed extension points.
 Treat these as coordinated public contracts:
 
 - `DirectoryData`, file metadata, navigation decisions, and theme context.
-- `dirwell.config.mjs` with `{ theme, build, server, listing }`.
+- `dirwell.config.mjs` with `{ theme, routing, build, server, listing }`.
 - `@dirwell/cli` build/server CLI help.
 - `@dirwell/core` contracts and paired Svelte/Vue source extension contexts.
 - Documentation examples.

@@ -10,7 +10,7 @@ Source HMR is a loopback-only trusted development service. CSS-only edits preser
 
 Verify custom wrappers in SSG and MPA, with and without JavaScript, narrow widths, directory/history navigation, search and appearance modes. Large-list changes also need virtualization coverage. See [the Catppuccin wrapper](examples/default-theme-override/Ledger.svelte) and [public examples](docs/src/content/docs/examples.mdx).
 
-## Next routing context contract
+## SDK 0.0.3 routing context contract
 
 Core owns directory URL policy. Render `hrefFor` and nullable `hrefForDirectory`
 results directly; render missing targets as text. Do not append `index.html` or

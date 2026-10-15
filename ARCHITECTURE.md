@@ -8,10 +8,10 @@ see [package responsibilities](PACKAGE_TRANSITION.md) and the
 
 ## Package boundaries
 
-- Core selects filesystem entries, prepares safe links, projects public records
-  and publishes static HTML/assets. It requires a theme and has no framework,
-  config loader, watcher or image renderer dependency.
-- Plain owns minimal native HTML, portable links and pagination. It has no
+- Core selects filesystem entries, owns shared directory routing, prepares safe
+  links, projects public records and publishes static HTML/assets. It requires a
+  theme and has no framework, config loader, watcher or image renderer dependency.
+- Plain renders minimal native HTML, resolved Core links and pagination. It has no
   runtime npm dependencies, browser JavaScript, fonts or default metadata assets.
 - Ledger and Crosswave own their Svelte/Vue SSR and client state, DOM and
   lifecycle. Framework dependencies belong to those themes.
@@ -43,6 +43,10 @@ SSG stores runtime assets beside generated pages; MPA shares them through the
 reserved `__dirwell/` output-root path. Source collisions with reserved paths
 fail. Relative links are portable; base/html-base layouts are explicit choices.
 Source files are mirrored by default, and existing source indexes are preserved.
+Core `routing.directoryUrls` coordinates public paths with HTML placement: explicit
+filenames by default, directory-index `slash`, or file-first extensionless `clean`.
+Themes receive resolved links and directory identities. See the [URL guide](docs/src/content/docs/urls.md)
+for collision rules, owned-homepage fallbacks and host qualification.
 
 Layout does not imply a particular DOM strategy. Plain's native pagination works
 without JavaScript. Rich themes can load a complete compact listing for
