@@ -12,7 +12,7 @@ Assets use validated filenames. MPA shared filenames must have identical bytes a
 
 Declare and test the supported Core version in peer dependencies. Verify imports/types, SSG/MPA, encoded names, child navigation, asset loading and unavailable symlinks in an installed consumer. Official Svelte/Vue source customization instead uses the [paired source compiler](THEME_RUNTIME_CONTRACT.md).
 
-## Next routing context contract
+## SDK 0.0.3 routing context contract
 
 Core owns directory URL policy. Render `hrefFor` and nullable `hrefForDirectory`
 results directly; render missing targets as text. Do not append `index.html` or

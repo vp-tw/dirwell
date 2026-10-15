@@ -3,7 +3,7 @@ title: SDK and live server
 description: Explicit themes, static builds, live server mode and the optional package boundaries.
 ---
 
-The nine `@dirwell/*` packages are published at `0.0.2`, tagged `latest`. The [SDK release](https://github.com/vp-tw/dirwell/releases/tag/%40dirwell/workspace%400.0.2) passed registry integrity, signatures, provenance and installed-consumer checks. The CLI, guides and public examples use this package family.
+The nine `@dirwell/*` packages are published at `0.0.3`, tagged `latest`. The [SDK release](https://github.com/vp-tw/dirwell/releases/tag/%40dirwell/workspace%400.0.3) passed registry integrity, signatures, provenance and installed-consumer checks. The CLI and guides target this release. Standalone integration examples record their own qualified package versions.
 
 ## Choose a mode
 
@@ -19,13 +19,13 @@ Server mode handles file data without a Farm/compiler watcher. Theme source stil
 
 ## Install only the capabilities you need
 
-Core requires an explicit theme. CLI `0.0.2` includes Plain by default; its behavior is described below. Plain emits native HTML with no JavaScript, image, font or icon assets by default. Ledger uses Svelte; Crosswave uses Vue and VueUse gamepad support. `@dirwell/share-image` supplies optional build-time metadata/PNG images. `@dirwell/integrations` supplies explicit-theme build adapters. Core and Plain do not depend on either optional package.
+Core requires an explicit theme. CLI `0.0.3` includes Plain by default; its behavior is described below. Plain emits native HTML with no JavaScript, image, font or icon assets by default. Ledger uses Svelte; Crosswave uses Vue and VueUse gamepad support. `@dirwell/share-image` supplies optional build-time metadata/PNG images. `@dirwell/integrations` supplies explicit-theme build adapters. Core and Plain do not depend on either optional package.
 
 The nine packages have separate dependency graphs, but share one official version. The minimum **verified** Node version is 22.12; publishing tools use Node 26. See [support and verification](../support/) for device and scale qualification.
 
 ## CLI: minimal default and project configuration
 
-CLI `0.0.2` includes Plain by default. The commands below select `latest`. Core and integrated HTML require an explicit theme.
+CLI `0.0.3` includes Plain by default. The commands below select `latest`. Core and integrated HTML require an explicit theme.
 
 ```sh
 npx @dirwell/cli server ./files
