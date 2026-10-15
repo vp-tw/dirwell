@@ -2,6 +2,14 @@
 
 The nine official `@dirwell/*` packages use synchronized versions. `0.0.1` is the first non-prerelease family; the 0.0.x API may evolve, so pin the version qualified by your application.
 
+## 0.0.4
+
+- Restore Ledger's compact inventory layout: 52px default desktop rows, aligned headings and cells, and natural growth for long names, link targets and custom actions.
+- Keep directory context and desktop column headings together while scrolling. Measure wrapped headers, release oversized headers from sticky positioning, and retain gap-free native no-script column headings and pagination.
+- Replace Ledger's legacy stylesheet plus SDK overrides with one complete stylesheet. Share configured column tracks between header and rows; keep the other themes' styling unchanged.
+- Preserve keyboard-selected virtual rows through height measurements. Qualify narrow mixed Latin/CJK content, no-script navigation and sticky hit testing in Chromium, Firefox and WebKit.
+- Synchronize all nine SDK packages at 0.0.4 with exact packed internal dependencies. No public API changes.
+
 ## 0.0.3
 
 - Move directory URL policy into Core `routing.directoryUrls`, shared by static builds, Server, CLI and every theme. Default to explicit `folder/index.html`; support directory-index `slash` and file-first extensionless `clean` publication with coordinated resource and metadata bases.
