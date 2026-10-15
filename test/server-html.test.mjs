@@ -32,7 +32,7 @@ for (const [name, creator] of [
     const base = server.url + "/downloads";
     const redirect = await fetch(base + "/", { redirect: "manual" });
     assert.equal(redirect.status, 307);
-    assert.equal(redirect.headers.get("location"), "/downloads/browse/");
+    assert.equal(redirect.headers.get("location"), "/downloads/browse/index.html");
     const first = await fetch(base + "/browse/");
     assert.equal(first.status, 200);
     const html = await first.text();

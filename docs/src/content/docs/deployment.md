@@ -11,6 +11,19 @@ npx @dirwell/cli build ./downloads --out ./site-downloads
 
 A static host serves the generated HTML, listing data, theme assets and mirrored source files. No Dirwell server is needed. Rebuild when the source changes. Do not overlay only selected HTML files; their asset/data references belong to the same build.
 
+## Directory URLs and hosting
+
+Core's `routing.directoryUrls` applies to every theme. It defaults to `explicit`
+(`/folder/index.html`). `slash` emits `/folder/`; `clean` emits `/folder` and writes
+`folder.html`. These choices require different host lookup rules. Hosts can also
+redirect explicit filenames; inspect the final URL and a nested download, not
+only a root response. See [directory URLs](../urls/) to choose a policy and run
+the host qualification steps.
+
+```sh
+npx @dirwell/cli build ./downloads --out ./site-downloads --directory-urls explicit
+```
+
 ## URL strategies
 
 | Strategy    | Behavior                                                |
@@ -33,7 +46,7 @@ Plain is included and emits no browser JavaScript by default. Install a rich the
 
 ## Existing source pages
 
-Source `index.html` and `index.htm` are preserved. The default output-name resolver uses `_dirwell.html` when the preferred index is occupied. Override `build.outputName` only when that layout is deliberate. Do not use a build output directory for unrelated files: builds replace it.
+Source `index.html` and `index.htm` are preserved. The default output-name resolver uses `_dirwell.html` when the preferred index is occupied. Custom `build.outputName` filenames require explicit routing; collisions fail instead of overwriting source content. Returning null skips an explorer page, and missing ancestor targets render without links. Do not use a build output directory for unrelated files: builds replace it.
 
 ## Live hosting
 

@@ -2,6 +2,7 @@ import type { GenerateOptions, ExplorerTheme } from "./model.ts";
 import type { DirectoryServiceOptions } from "./service.ts";
 import type { ListingPlan } from "./listing.ts";
 import { resolveIgnoreFiles } from "./filters.ts";
+import { resolveDirectoryUrls } from "./routing.ts";
 
 type Options = Record<string, unknown>;
 export function optionObject(value: unknown, name: string): Options {
@@ -106,6 +107,7 @@ export function validateTheme(
   }
 }
 const generateKeys = {
+  routing: true,
   sourceDir: true,
   outputDir: true,
   theme: true,
@@ -129,6 +131,7 @@ const generateKeys = {
 export function validateGenerateOptions(value: unknown): asserts value is GenerateOptions {
   const options = optionObject(value, "options");
   optionKeys(options, Object.keys(generateKeys), "options");
+  resolveDirectoryUrls(options.routing, "options.routing");
   requiredString(options.sourceDir, "options.sourceDir");
   requiredString(options.outputDir, "options.outputDir");
   validateTheme(options.theme);

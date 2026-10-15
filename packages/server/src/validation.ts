@@ -1,4 +1,4 @@
-import { validateListingPlan } from "@dirwell/core";
+import { validateListingPlan, resolveDirectoryUrls } from "@dirwell/core";
 import type { ExplorerHandlerOptions } from "./index.ts";
 
 type Options = Record<string, unknown>;
@@ -45,6 +45,7 @@ function integer(value: unknown, minimum: number, name: string): void {
     throw new TypeError(`${name} must be a safe integer of at least ${minimum}`);
 }
 const handlerKeys = {
+  routing: true,
   root: true,
   include: true,
   exclude: true,
@@ -66,6 +67,7 @@ const handlerKeys = {
 } satisfies Record<keyof ExplorerHandlerOptions, true>;
 export function validateHandlerOptions(value: unknown, node = false): void {
   const options = object(value, "options");
+  resolveDirectoryUrls(options.routing, "options.routing");
   keys(options, [...Object.keys(handlerKeys), ...(node ? ["host", "port"] : [])], "options");
   for (const key of ["entryData", "fileHref", "headers", "authorize"])
     scalar(options[key], "function", `options.${key}`);

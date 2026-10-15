@@ -7,7 +7,7 @@ Explicit-theme static build adapters for Vite and unplugin hosts. No default the
 ## Build with Vite
 
 ```sh
-npm install --save-dev vite @dirwell/integrations@0.0.2 @dirwell/theme-plain@0.0.2
+npm install --save-dev vite @dirwell/integrations@0.0.3 @dirwell/theme-plain@0.0.3
 ```
 
 Create `files/note.txt` and an `index.html` for your host page. Save the following as `vite.config.mjs`, then run `npx vite build`:
@@ -32,3 +32,13 @@ The adapters retain existing build/watch and Vite/Farm generated-preview behavio
 Unknown top-level and nested sort/symlink/listing keys fail before the adapter publishes output. Errors name the config path and suggest the closest known key. `cwd` and `outputPath` belong to adapters; server startup belongs to the host. `defineConfig` validates object configuration immediately and retains lazy callback factories; their resolved result must pass validation when supplied to the adapter. These checks are included in `0.0.1`.
 
 The 0.0.x API may evolve. Pin your qualified version and upgrade the official family together. See [support and verification](https://vp-tw.github.io/dirwell/support/) for host, browser and device boundaries.
+
+## Directory URLs
+
+Version 0.0.3 uses Core `routing: { directoryUrls: "explicit" }` by default
+for every theme. Choose `slash` for directory-index hosts or `clean` for a
+qualified extensionless host. Themes do not rewrite links. Existing source
+homepages and download names are preserved; output conflicts fail. CLI config
+puts routing at the top level, and `--directory-urls` overrides it.
+See [directory URL guidance](https://vp-tw.github.io/dirwell/urls/) for output
+placement, host requirements, native Plain file navigation and migration.

@@ -31,8 +31,16 @@ Rich themes filter complete directory data. Ledger archive search is available i
 
 ## Nested pages or assets fail
 
-Publish the entire output tree and match `--base` to its deployed root when using rooted URLs. Serve directory indexes over HTTP. Source index pages may cause an explorer to use `_dirwell.html`. Do not assume opening a rich page through `file://` qualifies its fetch-based client.
+Publish the entire output tree and match `--base` to its deployed root when using rooted URLs. Check `routing.directoryUrls` against the host lookup rules. Explicit links need exact file access, slash links need directory indexes, and clean links need extensionless mapping. A SPA fallback can return 200 for the wrong document. See [directory URLs](../urls/#qualify-your-host). Source index pages may cause an explorer to use `_dirwell.html`. Do not assume opening a rich page through `file://` qualifies its fetch-based client.
 
 ## Files download instead of previewing
 
 Standalone safe-media mode previews supported images/audio/video and downloads HTML, SVG and other active formats. Integrated handlers disable file transport by default; the host must opt in or delegate file links. Outside, broken and excluded targets remain unavailable.
+
+## Unexpected redirect or clean URL collision
+
+Inspect the final URL and relative file/data requests. Host redirects can override
+explicit filenames. Do not remove slashes in theme code. A real `folder.html`
+file conflicts with clean output for `folder/`; choose explicit/slash routing or
+change publication selection deliberately. The build preserves the previous
+output when it rejects a conflict. See [existing pages](../urls/#existing-pages-and-conflicts).

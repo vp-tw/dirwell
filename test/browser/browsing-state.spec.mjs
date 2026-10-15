@@ -76,7 +76,7 @@ for (const [name, creator] of [
           });
           server = await serve(outputDir);
         }
-        const url = server.url + (mode === "live" ? "/browse/" : "");
+        const url = server.url + (mode === "live" ? "/browse/index.html" : "");
         const errors = [];
         page.on("pageerror", (error) => errors.push(error.message));
         await page.goto(url);

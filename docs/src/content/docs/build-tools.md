@@ -52,3 +52,7 @@ These specific modes are qualified; other host/version/framework combinations ne
 Static build-watch follows the host lifecycle and rebuilds generated output. It does not become live server mode. For files that should update on requests, mount `@dirwell/server` or proxy a standalone CLI server. For Svelte/Vue source changes, use `@dirwell/theme-authoring/dev`.
 
 Farm standalone watch cannot reliably detect arbitrary non-module changes. Verify the host mode you intend to use; framework plugins and adapter interfaces alone do not prove runtime integration.
+
+## Directory routing in build adapters
+
+Supply `routing: { directoryUrls: "explicit" }` in the adapter options. Adapters forward the Core contract and do not inspect CLI config files. A host dev preview does not establish production rewrite behavior. In clean mode, check real file and host-application routes before publishing. See [directory URLs](../urls/).

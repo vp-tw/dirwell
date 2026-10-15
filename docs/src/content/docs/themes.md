@@ -92,7 +92,7 @@ export default {
 
 Categories have unique ids, labels, icons and extension/MIME match rules. MIME inference happens on Node, not through a browser database. Inspect the [category example](https://github.com/vp-tw/dirwell/tree/main/examples/crosswave-categories) for ordering, custom SVG and overlapping rules.
 
-Plain accepts `project` attribution options and `portableLinks`; its normal minimal mode emits no footer/image/font assets. Page metadata belongs in the optional [metadata provider](../metadata/), independently of theme selection.
+Plain accepts `project` attribution options. URL policy belongs to Core `routing`, not themes; `portableLinks` is removed. See [directory URLs](../urls/#migrate-theme-code). Its normal minimal mode emits no footer/image/font assets. Page metadata belongs in the optional [metadata provider](../metadata/), independently of theme selection.
 
 ## Source component customization
 

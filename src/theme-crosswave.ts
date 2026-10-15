@@ -26,14 +26,11 @@ const runtime = await readFile(new URL("./crosswave-runtime.js", import.meta.url
 function pageAsset(relativePath: string): string {
   return `crosswave-page-${createHash("sha256").update(relativePath).digest("hex").slice(0, 24)}.js`;
 }
-function navigationData(context: ThemeContext, relativePath: string, href: string): string {
-  const asset = pageAsset(relativePath);
-  const dataHref =
-    context.mode === "mpa"
-      ? context.assetHref(asset)
-      : `${href.endsWith("/") ? href : href.slice(0, href.lastIndexOf("/") + 1)}${asset}`;
+function navigationData(context: ThemeContext, relativePath: string): string {
+  const dataHref = context.assetHrefForDirectory(relativePath, pageAsset(relativePath));
   return ` data-cw-page="${escapeHtml(dataHref)}" data-cw-path="${escapeHtml(relativePath)}"`;
 }
+
 export type CrosswaveColor = "azure" | "violet" | "amber" | "rose" | "jade" | "graphite";
 export interface CrosswaveThemeOptions {
   readonly categories?: readonly CrosswaveCategory[];
@@ -84,7 +81,7 @@ function row(
       : `<span class="cw-target">${escapeHtml(entry.symlink.target)}</span>`;
   const data = `data-cw-entry data-category="${type}" data-cw-categories="${matches.map((category) => category.id).join(" ")}" data-icon="${icon}" data-name="${escapeHtml(entry.name)}" data-path="${escapeHtml(entry.relativePath)}" data-size="${escapeHtml(bytes)}" data-modified="${modified}" data-status="${escapeHtml(status(entry))}" data-exits="${context.exitsExplorerFor(entry)}"`;
   const contents = `<span class="cw-entry-icon">${svg}</span><span class="cw-entry-label"><span class="cw-name">${escapeHtml(label)}</span>${target}<span class="cw-row-meta">${escapeHtml(status(entry))}${type === "folder" || unavailable ? "" : ` · ${bytes}`}</span><span class="cw-row-date">Modified ${modified}</span></span>`;
-  return `<li class="cw-row${index === 0 ? " cw-selected" : ""}" ${data}>${href === null ? `<span class="cw-entry cw-unavailable">${contents}</span>` : `<a class="cw-entry" href="${escapeHtml(href)}"${context.exitsExplorerFor(entry) ? ' target="_blank" rel="noopener"' : ` data-cw-navigation${navigationData(context, entry.symlink?.targetRelativePath ?? entry.relativePath, href)}`}>${contents}</a>`}</li>`;
+  return `<li class="cw-row${index === 0 ? " cw-selected" : ""}" ${data}>${href === null ? `<span class="cw-entry cw-unavailable">${contents}</span>` : `<a class="cw-entry" href="${escapeHtml(href)}"${context.exitsExplorerFor(entry) ? ' target="_blank" rel="noopener"' : ` data-cw-navigation${navigationData(context, entry.symlink?.targetRelativePath ?? entry.relativePath)}`}>${contents}</a>`}</li>`;
 }
 
 /** PSP-inspired media navigation with original wave graphics and ordinary static links. */
@@ -116,12 +113,18 @@ export function createCrosswaveTheme(options: CrosswaveThemeOptions = {}): Explo
       const path = directory.current.relativePath || "/";
       const parent =
         directory.parent === null ? null : context.hrefForDirectory(directory.parent.relativePath);
+      const navigationLink = (logical: string, label: string) => {
+        const href = context.hrefForDirectory(logical);
+        return href === null
+          ? `<span>${label}</span>`
+          : `<a data-cw-navigation${navigationData(context, logical)} href="${escapeHtml(href)}">${label}</a>`;
+      };
       const segments = directory.current.relativePath.split("/").filter(Boolean);
       const breadcrumbs = segments
         .map((segment, i) =>
           i === segments.length - 1
             ? `<span aria-current="page">${escapeHtml(segment)}</span>`
-            : `<a data-cw-navigation${navigationData(context, segments.slice(0, i + 1).join("/"), context.hrefForDirectory(segments.slice(0, i + 1).join("/")))} href="${escapeHtml(context.hrefForDirectory(segments.slice(0, i + 1).join("/")))}">${escapeHtml(segment)}</a>`,
+            : navigationLink(segments.slice(0, i + 1).join("/"), escapeHtml(segment)),
         )
         .join('<span class="cw-separator" aria-hidden="true">/</span>');
       const tabs = categories
@@ -132,10 +135,10 @@ export function createCrosswaveTheme(options: CrosswaveThemeOptions = {}): Explo
         .join("");
       const html = `<!doctype html>
 <html lang="en" data-cw-color="${color}" data-cw-motion="${options.backgroundMotion !== false}" data-cw-transitions="${options.pageTransitions !== false}" data-cw-gamepad="${options.gamepad !== false}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">${context.documentBaseHref === null ? "" : `<base href="${escapeHtml(context.documentBaseHref)}">`}${context.metadata?.head ?? `<title>${escapeHtml(path)} · ${escapeHtml(project.name)} · Crosswave</title>`}<link rel="stylesheet" href="${escapeHtml(context.assetHref("crosswave.css"))}"><script src="${escapeHtml(context.assetHref("crosswave.js"))}"></script></head>
-<body><a class="cw-skip" href="${escapeHtml(context.hrefForDirectory(directory.current.relativePath))}#cw-panel">Skip to files</a><div class="cw-background" aria-hidden="true"><canvas id="cw-wave"></canvas><svg class="cw-fallback-wave" viewBox="0 0 1440 900" preserveAspectRatio="none"><path d="M-80 570C220 300 370 690 760 450S1260 290 1510 510"/><path d="M-80 540C220 640 400 330 820 470S1240 620 1510 360"/></svg></div>
-<header class="cw-top"><div class="cw-brand"><a data-cw-navigation${navigationData(context, "", context.hrefForDirectory(""))} href="${escapeHtml(context.hrefForDirectory(""))}">${escapeHtml(project.name)}</a><p class="cw-credits"><a href="https://github.com/vp-tw/dirwell/blob/main/src/theme-crosswave/README.md" target="_blank" rel="noopener">Crosswave</a><span>by</span><a href="https://github.com/VdustR" target="_blank" rel="noopener">VdustR</a></p></div><nav class="cw-location" aria-label="Location"><a data-cw-navigation${navigationData(context, "", context.hrefForDirectory(""))} href="${escapeHtml(context.hrefForDirectory(""))}">Home</a>${breadcrumbs ? `<span class="cw-separator" aria-hidden="true">/</span>${breadcrumbs}` : ""}</nav><span id="cw-clock-context" hidden>Current time</span><time class="cw-clock" aria-describedby="cw-clock-context" hidden></time></header>
-<main class="cw-stage" data-cw-root="${escapeHtml(context.hrefForDirectory(""))}" data-cw-path="${escapeHtml(directory.current.relativePath)}" data-cw-page="${escapeHtml(context.assetHref(pageAsset(directory.current.relativePath)))}" data-cw-file="${escapeHtml(context.outputName)}" data-cw-category-config="${categoryConfig}"><h1 class="cw-sr">Files in ${escapeHtml(path)}</h1><nav class="cw-rail" aria-label="File categories" hidden><div class="cw-categories" role="tablist" aria-label="File categories">${tabs}</div></nav>
-<section class="cw-browser" id="cw-panel" aria-label="Files"><div class="cw-list-head"><div class="cw-directory">${parent === null ? '<span class="cw-parent-placeholder"></span>' : `<a class="cw-parent" data-cw-parent data-cw-navigation${navigationData(context, directory.parent?.relativePath ?? "", parent)} href="${escapeHtml(parent)}" aria-label="Parent directory">${crosswaveIcon("back")}</a>`}<h2 data-cw-heading>All files</h2><span data-cw-count>${directory.entries.length} items</span></div><div class="cw-search" hidden>${crosswaveIcon("search")}<label class="cw-sr" for="cw-search">Search this folder</label><input id="cw-search" type="search" placeholder="Search this folder" autocomplete="off" spellcheck="false"><button type="button" data-cw-clear hidden>Clear</button></div></div>
+<body><a class="cw-skip" href="${escapeHtml(context.hrefForDirectory(directory.current.relativePath)!)}#cw-panel">Skip to files</a><div class="cw-background" aria-hidden="true"><canvas id="cw-wave"></canvas><svg class="cw-fallback-wave" viewBox="0 0 1440 900" preserveAspectRatio="none"><path d="M-80 570C220 300 370 690 760 450S1260 290 1510 510"/><path d="M-80 540C220 640 400 330 820 470S1240 620 1510 360"/></svg></div>
+<header class="cw-top"><div class="cw-brand">${navigationLink("", escapeHtml(project.name))}<p class="cw-credits"><a href="https://github.com/vp-tw/dirwell/blob/main/src/theme-crosswave/README.md" target="_blank" rel="noopener">Crosswave</a><span>by</span><a href="https://github.com/VdustR" target="_blank" rel="noopener">VdustR</a></p></div><nav class="cw-location" aria-label="Location">${navigationLink("", "Home")}${breadcrumbs ? `<span class="cw-separator" aria-hidden="true">/</span>${breadcrumbs}` : ""}</nav><span id="cw-clock-context" hidden>Current time</span><time class="cw-clock" aria-describedby="cw-clock-context" hidden></time></header>
+<main class="cw-stage" data-cw-root="${escapeHtml(context.hrefForDirectory("") ?? "")}" data-cw-path="${escapeHtml(directory.current.relativePath)}" data-cw-page="${escapeHtml(context.assetHref(pageAsset(directory.current.relativePath)))}" data-cw-file="${escapeHtml(context.outputName)}" data-cw-category-config="${categoryConfig}"><h1 class="cw-sr">Files in ${escapeHtml(path)}</h1><nav class="cw-rail" aria-label="File categories" hidden><div class="cw-categories" role="tablist" aria-label="File categories">${tabs}</div></nav>
+<section class="cw-browser" id="cw-panel" aria-label="Files"><div class="cw-list-head"><div class="cw-directory">${parent === null ? '<span class="cw-parent-placeholder"></span>' : `<a class="cw-parent" data-cw-parent data-cw-navigation${navigationData(context, directory.parent?.relativePath ?? "")} href="${escapeHtml(parent)}" aria-label="Parent directory">${crosswaveIcon("back")}</a>`}<h2 data-cw-heading>All files</h2><span data-cw-count>${directory.entries.length} items</span></div><div class="cw-search" hidden>${crosswaveIcon("search")}<label class="cw-sr" for="cw-search">Search this folder</label><input id="cw-search" type="search" placeholder="Search this folder" autocomplete="off" spellcheck="false"><button type="button" data-cw-clear hidden>Clear</button></div></div>
 <div class="cw-list-scroll"><ul class="cw-files">${directory.entries.map((entry, i) => row(entry, context, i, categories)).join("")}</ul><p class="cw-empty" data-cw-empty${directory.entries.length ? " hidden" : ""}>${directory.entries.length ? "No files match this search." : "This folder is empty."}</p></div><p class="cw-sr" role="status" aria-live="polite" data-cw-status></p></section>
 <aside class="cw-detail" aria-label="Selected file details" hidden><div class="cw-detail-symbol" data-cw-detail-icon></div><h2 data-cw-detail-name></h2><p data-cw-detail-status></p><dl><div><dt>Path</dt><dd data-cw-detail-path></dd></div><div><dt>Size</dt><dd data-cw-detail-size></dd></div><div><dt>Modified</dt><dd data-cw-detail-modified></dd></div></dl><a class="cw-open" data-cw-open>Open file</a></aside></main>
 <footer class="cw-bottom"><span class="cw-key-help" hidden><span><kbd>Arrow keys</kbd> Navigate</span><span><kbd>Enter</kbd> Open</span><span><kbd>Backspace</kbd> Parent</span></span><span class="cw-controller" role="status" hidden>${crosswaveIcon("controller")}<span data-cw-controller-label></span></span><div class="cw-appearance" hidden><label class="cw-sr" for="cw-color">Background color</label><select id="cw-color" aria-label="Background color"><option value="azure">Azure</option><option value="violet">Violet</option><option value="amber">Amber</option><option value="rose">Rose</option><option value="jade">Jade</option><option value="graphite">Graphite</option></select><button data-cw-motion aria-pressed="false" type="button">${crosswaveIcon("pause")}<span>Pause waves</span></button></div></footer><noscript><p class="cw-noscript">All files are available below. Categories, search, animated waves, and controller navigation need JavaScript.</p></noscript></body></html>`;

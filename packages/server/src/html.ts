@@ -1,7 +1,9 @@
 import path from "node:path";
+import { browseHref } from "./routing.ts";
 import { createHash } from "node:crypto";
 import {
   projectListingEntry,
+  resolveDirectoryUrls,
   copyJsonObject,
   listingRevision,
   validateListingPlan,
@@ -29,7 +31,8 @@ export async function themeResponse(
   if (theme === undefined) return null;
   const url = new URL(request.url),
     mount = options.mountPath ?? "";
-  const browse = route === "/" || route.startsWith("/browse/");
+  const style = resolveDirectoryUrls(options.routing);
+  const browse = route === "/" || route === "/browse" || route.startsWith("/browse/");
   const virtual = [
     "/__dirwell/page",
     "/__dirwell/asset",
@@ -48,20 +51,10 @@ export async function themeResponse(
     return new Response("Invalid encoding", { status: 400 });
   }
   if (route === "/") logicalPath = "";
-  if (browse && !route.endsWith("/") && logicalPath.endsWith("/index.html"))
+  if (style !== "clean" && browse && !route.endsWith("/") && logicalPath.endsWith("/index.html"))
     logicalPath = logicalPath.slice(0, -"/index.html".length);
-  else if (browse && !route.endsWith("/") && logicalPath === "index.html") logicalPath = "";
-  if (
-    route === "/" &&
-    options.authorize &&
-    (await options.authorize(request, logicalPath)) !== true
-  )
-    return new Response("Forbidden", { status: 403, headers: { "cache-control": "no-store" } });
-  if (route === "/")
-    return new Response(null, {
-      status: 307,
-      headers: { location: mount + "/browse/", "cache-control": "no-store" },
-    });
+  else if (style !== "clean" && browse && !route.endsWith("/") && logicalPath === "index.html")
+    logicalPath = "";
   const resolved = await resolveAuthorizedDirectory(
     request,
     logicalPath,
@@ -71,12 +64,22 @@ export async function themeResponse(
   if ("response" in resolved) return resolved.response;
   logicalPath = resolved.path;
   const directory = await service.listDirectory(logicalPath);
-  const hrefForDirectory = (logical: string) =>
-    `${mount}/browse/${encodePath(logical)}${logical ? "/" : ""}`;
+  const hrefForDirectory = (logical: string) => browseHref(logical, options);
+  if (browse && url.pathname !== hrefForDirectory(logicalPath)) {
+    const headers = await headersFor(
+      request,
+      new Headers({ location: hrefForDirectory(logicalPath) + url.search }),
+    );
+    return new Response(null, { status: 307, headers });
+  }
   const virtualHref = (name: string, parameters: Record<string, string>) =>
     `${mount}/__dirwell/${name}?${new URLSearchParams(parameters)}`;
   const fileHref = (logical: string) =>
-    options.fileHref?.(logical) ?? (options.files ? `${mount}/files/${encodePath(logical)}` : null);
+    options.fileHref === undefined
+      ? options.files
+        ? `${mount}/files/${encodePath(logical)}`
+        : null
+      : options.fileHref(logical);
   const hrefFor = (entry: FileSystemEntry) => {
     const link = entry.symlink;
     if (link && (link.isBroken || link.isOutsideRoot || link.isTargetExcluded))
@@ -93,6 +96,20 @@ export async function themeResponse(
     nameMode: "natural",
     ...options.sort,
   } as const;
+  const directoryTargets = new Map(
+    directory.entries
+      .filter(
+        (entry) =>
+          (entry.kind === "directory" || entry.symlink?.targetKind === "directory") &&
+          !entry.symlink?.isBroken &&
+          !entry.symlink?.isOutsideRoot &&
+          !entry.symlink?.isTargetExcluded,
+      )
+      .map((entry) => [
+        entry.relativePath,
+        entry.symlink?.targetRelativePath ?? entry.relativePath,
+      ]),
+  );
   const baseContext: ThemeContext = {
     operation: "server",
     ...(options.live ? { updatesHref: virtualHref("updates", { path: logicalPath }) } : {}),
@@ -109,6 +126,8 @@ export async function themeResponse(
         }
       : {}),
     hrefForDirectory,
+    assetHrefForDirectory: (logical, name) => virtualHref("asset", { path: logical, name }),
+    directoryPathForEntry: (entryId) => directoryTargets.get(entryId) ?? null,
     hrefFor,
     hasPageForDirectory: () => true,
     exitsExplorerFor: (entry) =>
@@ -132,6 +151,8 @@ export async function themeResponse(
               outputName: baseContext.outputName,
               assetHref: baseContext.assetHref,
               hrefForDirectory,
+              assetHrefForDirectory: baseContext.assetHrefForDirectory,
+              directoryPathForEntry: baseContext.directoryPathForEntry,
               documentBaseHref: null,
               directoryPath: logicalPath,
               pageDataHref: baseContext.pageDataHref!,

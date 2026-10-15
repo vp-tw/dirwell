@@ -9,6 +9,15 @@ type Example = {
 /** One catalog supplies the site; only previewable examples enter the static build. */
 export const exampleCatalog = [
   {
+    preview: false,
+    group: "guides",
+    slug: "url-routing",
+    name: "Choose directory URLs",
+    description: "Compare explicit filenames, directory indexes and extensionless routing.",
+    detail: "Core routing · output placement and hosting requirements",
+    guide: "urls/",
+  },
+  {
     preview: true,
     group: "themes",
     slug: "file-icons",

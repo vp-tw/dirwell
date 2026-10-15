@@ -28,3 +28,7 @@ Browser regressions cover keyboard operation, desktop/mobile viewport sizes and 
 Hostile filesystem mutation, distributed caching and production-scale performance are not fully qualified. Rich clients load the complete directory. Ledger and Crosswave window large rendered lists while retaining full directory data. Opt-in live archive queries search fresh names/paths under entry, directory, concurrency and time budgets; they do not download a complete browser archive index. Source HMR and file-data refresh are separate mechanisms.
 
 Controller polling uses VueUse `useGamepad`; regression covers simulated standard input, held buttons, deadzones, disconnects and unavailable APIs. Physical-controller testing is not a separate `0.0.2` release gate.
+
+## Directory URL qualification
+
+Routing tests cover a synthetic exact-file host, directory-index lookup, file-first extensionless mapping, three official themes, native pagination and live routes. They do not establish vendor-wide defaults. Qualify the actual deployed configuration, prefix, redirect chain, canonical metadata and downloaded bytes. Rich-theme file-URL fetch behavior remains outside the native Plain guarantee. See [directory URLs](../urls/).

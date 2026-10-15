@@ -37,6 +37,7 @@ export const releaseCatalogTheme: ExplorerTheme = {
       parentHref !== null
         ? `<a href="${escapeHtml(parentHref)}">Back to ${escapeHtml(directory.parent?.name || "home")}</a>`
         : "";
+    const homeHref = context.hrefForDirectory("");
     const rows = directory.entries.map((entry) => renderEntry(entry, context)).join("");
     const html = `<!doctype html>
 <html lang="en">
@@ -51,7 +52,7 @@ export const releaseCatalogTheme: ExplorerTheme = {
     <main>
       <header>
         <nav aria-label="Location">
-          <a href="${escapeHtml(context.hrefForDirectory(""))}">Home</a>
+          ${homeHref === null ? "<span>Home</span>" : `<a href="${escapeHtml(homeHref)}">Home</a>`}
           ${parentLink ? `<span aria-hidden="true">/</span>${parentLink}` : ""}
         </nav>
         <h1>${visiblePath === "/" ? "Release catalog" : escapeHtml(visiblePath)}</h1>

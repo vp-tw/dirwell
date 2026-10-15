@@ -1,4 +1,3 @@
-import path from "node:path";
 import { createHash } from "node:crypto";
 import { projectListingEntry, copyJsonObject } from "@dirwell/core";
 import type {
@@ -16,7 +15,7 @@ export interface ThemePage {
   readonly title: string;
   readonly metadataHead?: string;
   readonly path: string;
-  readonly rootHref: string;
+  readonly rootHref: string | null;
   readonly parentHref: string | null;
   readonly parentDataHref: string | null;
   readonly rootDataHref: string | null;
@@ -32,7 +31,7 @@ export interface ThemePage {
   readonly page: ListingPage | null;
   readonly breadcrumbs: readonly {
     readonly name: string;
-    readonly href: string;
+    readonly href: string | null;
     readonly dataHref: string | null;
   }[];
 }
@@ -49,40 +48,12 @@ export function folderDataHref(
     !(entry.kind === "directory" || entry.link?.targetKind === "directory")
   )
     return null;
-  const fake = "https://dirwell.invalid/";
-  const base = new URL(
-    context.documentBaseHref ?? `${context.directoryPath ? context.directoryPath + "/" : ""}`,
-    fake,
+  const logical = context.directoryPathForEntry(entry.id);
+  if (logical === null) return null;
+  return (
+    context.pageDataHref?.(theme, logical, 1) ??
+    context.assetHrefForDirectory(logical, pageAsset(theme, logical))
   );
-  const root = new URL(context.hrefForDirectory(""), base);
-  const target = new URL(entry.href, base);
-  const rootPath = root.pathname.endsWith("/")
-    ? root.pathname
-    : root.pathname.slice(0, root.pathname.lastIndexOf("/") + 1);
-  const directoryPath = target.pathname.endsWith("/")
-    ? target.pathname
-    : target.pathname.slice(0, target.pathname.lastIndexOf("/") + 1);
-  const logical = directoryPath
-    .slice(rootPath.length)
-    .split("/")
-    .filter(Boolean)
-    .map(decodeURIComponent)
-    .join("/");
-  const filename = pageAsset(theme, logical);
-  if (context.pageDataHref !== undefined) return context.pageDataHref(theme, logical, 1);
-  if (context.mode === "mpa") return context.assetHref(filename);
-  const href = new URL(filename, new URL(directoryPath, target));
-  if (href.origin !== new URL(fake).origin) return href.href;
-  if (context.documentBaseHref === null && !entry.href.startsWith("/")) {
-    return path.posix
-      .relative(context.directoryPath || ".", path.posix.join(logical, filename))
-      .split("/")
-      .map((segment) =>
-        segment === ".." || segment === "." ? segment : encodeURIComponent(segment),
-      )
-      .join("/");
-  }
-  return href.pathname;
 }
 export function createThemePage(
   context: ThemeContext,
@@ -95,6 +66,8 @@ export function createThemePage(
     mode: context.mode,
     outputName: context.outputName,
     assetHref: context.assetHref,
+    assetHrefForDirectory: context.assetHrefForDirectory,
+    directoryPathForEntry: context.directoryPathForEntry,
     hrefForDirectory: context.hrefForDirectory,
     documentBaseHref: context.documentBaseHref,
     directoryPath,
@@ -102,20 +75,8 @@ export function createThemePage(
   const dataForDirectory = (logicalPath: string) =>
     context.hasPageForDirectory?.(logicalPath) === false
       ? null
-      : folderDataHref(
-          {
-            id: logicalPath,
-            name: logicalPath,
-            kind: "directory",
-            href: context.hrefForDirectory(logicalPath),
-            exitsExplorer: false,
-            size: 0,
-            modifiedAt: "",
-            link: null,
-          },
-          safeContext,
-          theme.name,
-        )!;
+      : (context.pageDataHref?.(theme.name, logicalPath, 1) ??
+        context.assetHrefForDirectory(logicalPath, pageAsset(theme.name, logicalPath)));
   const entries = context.directory.entries.map((entry) => {
     const record = projectListingEntry(entry, context);
     return theme.entryData === undefined

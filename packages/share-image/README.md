@@ -7,7 +7,7 @@ Optional build-time metadata and 1200 × 630 PNG images. Install this package on
 ## Save a share image
 
 ```sh
-npm install @dirwell/share-image@0.0.2
+npm install @dirwell/share-image@0.0.3
 ```
 
 Save this as `image.mjs`, then run `node image.mjs`:
@@ -28,7 +28,7 @@ The result is a local 1200 × 630 PNG. No explorer build or browser runtime is r
 ## Add metadata to an explorer
 
 ```sh
-npm install @dirwell/core@0.0.2 @dirwell/theme-plain@0.0.2 @dirwell/share-image@0.0.2
+npm install @dirwell/core@0.0.3 @dirwell/theme-plain@0.0.3 @dirwell/share-image@0.0.3
 ```
 
 Create `files/note.txt`, save the following as `build.mjs` and run `node build.mjs`. Serve the complete `public/downloads` folder over HTTP; its pages reference the generated metadata/image assets.

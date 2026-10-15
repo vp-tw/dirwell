@@ -86,6 +86,8 @@ test("default and plain static rows preserve the instant without JavaScript", as
     documentBaseHref: null,
     hrefFor: () => "report.txt",
     hrefForDirectory: () => "./",
+    assetHrefForDirectory: () => "",
+    directoryPathForEntry: () => null,
     exitsExplorerFor: () => false,
     mode: "ssg",
     outputName: "index.html",

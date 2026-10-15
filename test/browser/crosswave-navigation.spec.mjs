@@ -59,7 +59,7 @@ async function fixture(mode = "mpa", urlStrategy = "relative", outputName) {
   await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
   return {
     output,
-    url: `http://127.0.0.1:${server.address().port}/catalog/`,
+    url: `http://127.0.0.1:${server.address().port}/catalog/index.html`,
     close: () => new Promise((resolve) => server.close(resolve)),
   };
 }
@@ -89,7 +89,7 @@ for (const mode of ["ssg", "mpa"])
         await page.getByRole("tab", { name: /Folders/ }).click();
         await page.getByRole("link", { name: /Albums\/ Folder/ }).focus();
         await page.keyboard.press("Enter");
-        await expect(page).toHaveURL(/Albums\/$/);
+        await expect(page).toHaveURL(/Albums\/index\.html$/);
         await expect(page.getByRole("link", { name: /album\.txt/ })).toBeVisible();
         await preserved(page);
         await page.goBack();
@@ -100,7 +100,7 @@ for (const mode of ["ssg", "mpa"])
         );
         await expect(page.getByRole("link", { name: /Albums\/ Folder/ })).toBeFocused();
         await page.goForward();
-        await expect(page).toHaveURL(/Albums\/$/);
+        await expect(page).toHaveURL(/Albums\/index\.html$/);
         await preserved(page);
         await page.reload();
         await expect(page.getByRole("link", { name: /album\.txt/ })).toBeVisible();
@@ -194,7 +194,7 @@ test("slow superseded requests never overwrite the latest folder or add stale hi
     await expect(page.getByRole("button", { name: "Cancel", exact: true })).toBeVisible();
     await expect(page.getByRole("link", { name: /root\.txt/ })).toBeVisible();
     await page.getByRole("link", { name: /Documents\/ Folder/ }).click();
-    await expect(page).toHaveURL(/Documents\/$/);
+    await expect(page).toHaveURL(/Documents\/index\.html$/);
     release();
     await page.waitForTimeout(200);
     await expect(page.getByRole("link", { name: /doc\.txt/ })).toBeVisible();
@@ -231,7 +231,7 @@ test("missing or incompatible folder data keeps files usable and allows retry", 
     await expect(page.getByRole("link", { name: "Open normally", exact: true })).toBeVisible();
     await page.unrouteAll();
     await page.getByRole("button", { name: "Retry", exact: true }).click();
-    await expect(page).toHaveURL(/Albums\/$/);
+    await expect(page).toHaveURL(/Albums\/index\.html$/);
     await preserved(page);
     expect(errors).toEqual([]);
   } finally {
@@ -269,7 +269,7 @@ test("cancel, timeout, reduced motion, and interruption do not strand an invisib
     await page.clock.resume();
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.getByRole("button", { name: "Retry", exact: true }).click();
-    await expect(page).toHaveURL(/Albums\/$/);
+    await expect(page).toHaveURL(/Albums\/index\.html$/);
     expect(
       await page.evaluate(() => document.querySelector(".cw-browser").getAnimations().length),
     ).toBe(0);
@@ -277,7 +277,7 @@ test("cancel, timeout, reduced motion, and interruption do not strand an invisib
     await page.getByRole("link", { name: "Parent directory", exact: true }).click();
     await expect(page).toHaveURL(app.url);
     await page.getByRole("link", { name: /Documents\/ Folder/ }).click();
-    await expect(page).toHaveURL(/Documents\/$/);
+    await expect(page).toHaveURL(/Documents\/index\.html$/);
     await expect(page.locator(".cw-browser:not(.cw-transition-layer)")).toHaveCSS("opacity", "1");
     await expect(page.locator(".cw-transition-layer")).toHaveCount(0);
     await preserved(page);
@@ -300,7 +300,7 @@ test("restricted history retains native navigation", async ({ page }) => {
     });
     await page.goto(app.url);
     await page.getByRole("link", { name: /Albums\/ Folder/ }).click();
-    await expect(page).toHaveURL(/Albums\/$/);
+    await expect(page).toHaveURL(/Albums\/index\.html$/);
     await expect(page.getByRole("link", { name: /album\.txt/ })).toBeVisible();
     expect(errors).toEqual([]);
   } finally {
@@ -324,7 +324,7 @@ test("script CSP failure leaves current files, and Open normally reaches the des
     await expect(page.getByRole("button", { name: "Retry", exact: true })).toBeVisible();
     await expect(page.getByRole("link", { name: /root\.txt/ })).toBeVisible();
     await page.getByRole("link", { name: "Open normally", exact: true }).click();
-    await expect(page).toHaveURL(/Albums\/$/);
+    await expect(page).toHaveURL(/Albums\/index\.html$/);
     await expect(page.getByRole("link", { name: /album\.txt/ })).toBeVisible();
   } finally {
     await app.close();
@@ -372,7 +372,7 @@ test("parser and animation failures retain a recoverable or usable page", async 
       };
     });
     await page.getByRole("button", { name: "Retry", exact: true }).click();
-    await expect(page).toHaveURL(/Albums\/$/);
+    await expect(page).toHaveURL(/Albums\/index\.html$/);
     await expect(page.getByRole("link", { name: /album\.txt/ })).toBeVisible();
     await expect(page.locator(".cw-transition-layer")).toHaveCount(0);
     expect(errors).toEqual([]);
@@ -407,7 +407,7 @@ test("large folder exchanges bound animation layers and restore exact view state
       requestAnimationFrame(frame);
     });
     await page.getByRole("link", { name: /Large\/ Folder/ }).click();
-    await expect(page).toHaveURL(/Large\/$/);
+    await expect(page).toHaveURL(/Large\/index\.html$/);
     await expect(page.locator(".cw-stage [data-cw-entry]")).toHaveCount(1000);
     expect(await page.locator(".cw-transition-layer .cw-row").count()).toBeLessThan(25);
     await page.waitForTimeout(300);
@@ -420,7 +420,7 @@ test("large folder exchanges bound animation layers and restore exact view state
     await page.getByRole("link", { name: "Parent directory", exact: true }).click();
     await expect(page).toHaveURL(app.url);
     await page.goBack();
-    await expect(page).toHaveURL(/Large\/$/);
+    await expect(page).toHaveURL(/Large\/index\.html$/);
     await expect(page.getByRole("link", { name: /file-0500\.txt/ })).toBeFocused();
     expect(await page.evaluate(() => document.querySelector(".cw-list-scroll").scrollTop)).toBe(
       scroll,
@@ -505,14 +505,14 @@ test("Back and Forward retain edits made in the active folder", async ({ page })
   try {
     await page.goto(app.url);
     await page.getByRole("link", { name: /Albums\/ Folder/ }).click();
-    await expect(page).toHaveURL(/Albums\/$/);
+    await expect(page).toHaveURL(/Albums\/index\.html$/);
     await page.getByRole("tab", { name: /Documents/ }).click();
     await page.getByRole("searchbox").fill("album");
     await expect(page.locator(".cw-stage [data-cw-count]")).toHaveText("1 item");
     await page.goBack();
     await expect(page).toHaveURL(app.url);
     await page.goForward();
-    await expect(page).toHaveURL(/Albums\/$/);
+    await expect(page).toHaveURL(/Albums\/index\.html$/);
     await expect(page.getByRole("searchbox")).toHaveValue("album");
     await expect(page.getByRole("tab", { name: /Documents/ })).toHaveAttribute(
       "aria-selected",
@@ -540,7 +540,7 @@ test("a new choice during a slow history load keeps address and history entries 
   try {
     await page.goto(app.url);
     await page.getByRole("link", { name: /Albums\/ Folder/ }).click();
-    await expect(page).toHaveURL(/Albums\/$/);
+    await expect(page).toHaveURL(/Albums\/index\.html$/);
     const rootAsset = await page
       .getByRole("link", { name: "Home", exact: true })
       .getAttribute("data-cw-page");
@@ -554,7 +554,7 @@ test("a new choice during a slow history load keeps address and history entries 
     await expect(page).toHaveURL(app.url);
     await expect(page.locator("[data-cw-root]")).toHaveAttribute("aria-busy", "true");
     await page.getByRole("link", { name: /Deep\/ Folder/ }).click();
-    await expect(page).toHaveURL(/Albums\/Deep\/$/);
+    await expect(page).toHaveURL(/Albums\/Deep\/index\.html$/);
     await expect(page.getByRole("link", { name: /deep\.txt/ })).toBeVisible();
     release();
     await page.goBack();

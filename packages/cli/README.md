@@ -11,8 +11,8 @@ The CLI supports short theme names and automatic `dirwell.config.mjs` discovery.
 ## Open or publish a folder
 
 ```sh
-npx @dirwell/cli@0.0.2 server ./files
-npx @dirwell/cli@0.0.2 build ./files --out ./generated
+npx @dirwell/cli@0.0.3 server ./files
+npx @dirwell/cli@0.0.3 build ./files --out ./generated
 ```
 
 No project, configuration file or global installation is required. Open the URL
@@ -42,7 +42,7 @@ Builds replace missing, empty or Dirwell-marked output directories. A nonempty u
 For repeated project use, install the CLI and the theme you want:
 
 ```sh
-npm install --save-dev @dirwell/cli@0.0.2 @dirwell/theme-ledger@0.0.2
+npm install --save-dev @dirwell/cli@0.0.3 @dirwell/theme-ledger@0.0.3
 npx dirwell server ./files --theme ledger
 ```
 
@@ -89,3 +89,13 @@ Mode-specific flags fail when used with the other mode. Legacy dev/daemon
 commands are unsupported; the CLI does not silently translate them.
 
 The 0.0.x API may evolve. Pin your qualified version and upgrade the official family together. See [support and verification](https://vp-tw.github.io/dirwell/support/) for host, browser and device boundaries.
+
+## Directory URLs
+
+Version 0.0.3 uses Core `routing: { directoryUrls: "explicit" }` by default
+for every theme. Choose `slash` for directory-index hosts or `clean` for a
+qualified extensionless host. Themes do not rewrite links. Existing source
+homepages and download names are preserved; output conflicts fail. CLI config
+puts routing at the top level, and `--directory-urls` overrides it.
+See [directory URL guidance](https://vp-tw.github.io/dirwell/urls/) for output
+placement, host requirements, native Plain file navigation and migration.

@@ -127,13 +127,13 @@ for (const [name, creator] of [
         await expect(page).toHaveURL(/docs/);
         await expect(rows).toHaveCount(1);
         await page.keyboard.press("Backspace");
-        await expect(page).toHaveURL(server.url);
+        await expect(page).toHaveURL(new URL("index.html", server.url).href);
         await expect(search).toBeEnabled();
         await page.goBack();
         await expect(page).toHaveURL(/docs/);
         await expect(rows).toHaveCount(1);
         await page.goForward();
-        await expect(page).toHaveURL(server.url);
+        await expect(page).toHaveURL(new URL("index.html", server.url).href);
         await expect(search).toBeEnabled();
         expect(await page.evaluate(() => window.__nativeLifetime)).toBe("same component");
         await page.setViewportSize({ width: 1280, height: 4000 });
@@ -383,7 +383,7 @@ for (const [name, creator] of [
       );
       await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
         "href",
-        "https://example.com/files/docs/",
+        "https://example.com/files/docs/index.html",
       );
       await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
         "content",

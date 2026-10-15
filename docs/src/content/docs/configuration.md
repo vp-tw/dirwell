@@ -3,7 +3,7 @@ title: Configuration
 description: Configure themes, file selection, static builds and live server behavior.
 ---
 
-The CLI reads `dirwell.config.mjs` in the working directory, or the native JavaScript module selected by `--config`. It expects a resolved default object with `theme`, `listing`, `build` and `server` keys. Use top-level await for asynchronous setup.
+The CLI reads `dirwell.config.mjs` in the working directory, or the native JavaScript module selected by `--config`. It expects a resolved default object with `theme`, `routing`, `listing`, `build` and `server` keys. Use top-level await for asynchronous setup.
 
 ```js
 import { createLedgerTheme } from "@dirwell/theme-ledger";
@@ -17,15 +17,25 @@ export default {
 
 Install the imported theme in the working project. Run `npx dirwell build ./files --out ./generated` or `npx dirwell server ./files`. Source and build output remain explicit command arguments. Put selection rules in both sections if both modes should use them.
 
+## Shared routing
+
+Set `routing: { directoryUrls: "explicit" }` at the top level. It applies to every
+theme in build and server modes; `explicit` is the default. `slash` needs directory
+index serving; `clean` needs extensionless routing and changes static output
+placement. Null and invalid policies fail, rather than selecting a fallback.
+`--directory-urls` overrides the shared config value. Keep static `urlStrategy`
+and `base` inside `build`, and live `mountPath` inside `server`.
+See [directory URLs](../urls/) for output trees, conflicts and migration.
+
 ## Build settings
 
-`build` accepts [GenerateOptions](../api-reference/) except `sourceDir`, `outputDir`, `theme` and `listing`. Set `include`, `exclude`, `mode`, `base`, `urlStrategy`, `mirror`, `outputName`, `sort`, `symlinks` and optional `metadata`. Default mode is `ssg`, links are relative, and selected files are mirrored.
+`build` accepts [GenerateOptions](../api-reference/) except `sourceDir`, `outputDir`, `theme`, `routing` and `listing`. Set `include`, `exclude`, `mode`, `base`, `urlStrategy`, `mirror`, `outputName`, `sort`, `symlinks` and optional `metadata`. Default mode is `ssg`, links are relative, and selected files are mirrored.
 
 `outputName` can be a filename or an async per-directory callback returning a filename or `null` to omit an explorer page. The dedicated output tree is replaced after a successful build. `mirror: false` avoids copying source files; supply a URL layout that reaches files hosted elsewhere.
 
 ## Server settings
 
-`server` accepts Node server options except `root`, `theme` and `listing`. Configure `host`, `port`, `mountPath`, selection, sorting, headers, authorization, file transport and `live`. Standalone defaults bind loopback and use safe media previews. Integrated handlers disable file transport unless configured.
+`server` accepts Node server options except `root`, `theme`, `routing` and `listing`. Configure `host`, `port`, `mountPath`, selection, sorting, headers, authorization, file transport and `live`. Standalone defaults bind loopback and use safe media previews. Integrated handlers disable file transport unless configured.
 
 Authorization runs before conditional responses and byte transfer. It controls requests, not individual child-name redaction. Allowing a directory listing exposes its selected child names. See [server behavior](../sdk/#headers-authorization-and-freshness).
 

@@ -1,6 +1,6 @@
 # @dirwell/core
 
-Framework-neutral filesystem, listing and static-publication SDK. Requires Node.js 22.12 or newer. For this quick start, install `npm install @dirwell/core@0.0.2 @dirwell/theme-plain@0.0.2`.
+Framework-neutral filesystem, listing and static-publication SDK. Requires Node.js 22.12 or newer. For this quick start, install `npm install @dirwell/core@0.0.3 @dirwell/theme-plain@0.0.3`.
 
 Core owns filesystem selection, safe navigation, public listing projection and static publication. It requires an explicit theme and does not load a default theme, image renderer, frontend framework, config loader or watcher. Runtime matching uses picomatch for globs and ignore for Git-style ignore files.
 
@@ -32,3 +32,13 @@ JavaScript callers receive the same recognized-option checks as typed consumers:
 Custom theme objects may carry extra private fields. Their required name/render and known hooks must match the theme contract. Metadata and annotation callbacks remain trusted executable host code and are awaited where the public contract is asynchronous. These controls are included in `0.0.1`.
 
 The 0.0.x API may evolve. Pin your qualified version and upgrade the official family together. See [support and verification](https://vp-tw.github.io/dirwell/support/) for host, browser and device boundaries.
+
+## Directory URLs
+
+Version 0.0.3 uses Core `routing: { directoryUrls: "explicit" }` by default
+for every theme. Choose `slash` for directory-index hosts or `clean` for a
+qualified extensionless host. Themes do not rewrite links. Existing source
+homepages and download names are preserved; output conflicts fail. CLI config
+puts routing at the top level, and `--directory-urls` overrides it.
+See [directory URL guidance](https://vp-tw.github.io/dirwell/urls/) for output
+placement, host requirements, native Plain file navigation and migration.

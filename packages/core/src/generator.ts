@@ -1,4 +1,10 @@
 import { validateGenerateOptions } from "./validation.ts";
+import {
+  resolveDirectoryUrls,
+  directoryRoute,
+  createHrefResolver,
+  encodeLogicalPath,
+} from "./routing.ts";
 import { copyJsonObject } from "./json.ts";
 import { describeEntry, isInsideRoot } from "./filesystem.ts";
 import {
@@ -53,14 +59,21 @@ const defaultSort = {
 } as const satisfies Required<SortOptions>;
 
 export const defaultOutputName: OutputNameResolver = ({ entries }) =>
-  entries.some((entry) => entry.kind === "file" && indexPattern.test(entry.name))
+  entries.some((entry) => indexPattern.test(entry.name))
     ? entries.some((entry) => entry.name.toLowerCase() === "_dirwell.html")
       ? null
       : "_dirwell.html"
     : "index.html";
 
 function assertSafeOutputName(name: string): void {
-  if (name.length === 0 || path.basename(name) !== name || name === "." || name === "..") {
+  if (
+    name.length === 0 ||
+    name.includes("\\") ||
+    Array.from(name).some((character) => character.charCodeAt(0) < 32) ||
+    path.basename(name) !== name ||
+    name === "." ||
+    name === ".."
+  ) {
     throw new Error(`Output name must be a single safe filename: ${name}`);
   }
 }
@@ -78,14 +91,6 @@ function normalizeBase(value: string): string {
     throw new TypeError('base must start with "/" or be an absolute HTTP(S) URL');
   }
   return `${value.replace(/\/+$/, "")}/`;
-}
-
-function encodeLogicalPath(value: string): string {
-  return value
-    .split("/")
-    .filter((segment) => segment.length > 0)
-    .map((segment) => encodeURIComponent(segment))
-    .join("/");
 }
 
 function isDirectoryLike(entry: FileSystemEntry): boolean {
@@ -187,6 +192,7 @@ async function generateExplorerUnlocked(
     typeof outputName === "string" ? () => outputName : outputName;
   const theme: ExplorerTheme = options.theme;
   if (theme === undefined) throw new TypeError("Core requires an explicit theme");
+  const directoryUrls = resolveDirectoryUrls(options.routing);
   const mode = options.mode ?? "ssg";
   const urlStrategy = options.urlStrategy ?? "relative";
   const base = normalizeBase(options.base ?? "/");
@@ -206,16 +212,10 @@ async function generateExplorerUnlocked(
   if (isInsideRoot(outputDir, sourceDir)) {
     throw new Error("outputDir must not contain the sourceDir");
   }
-  try {
-    await lstat(path.join(sourceDir, "__dirwell"));
+  if (
+    (await readdir(sourceDir)).some((name) => name.normalize("NFC").toLowerCase() === "__dirwell")
+  )
     throw new Error('Dirwell reserves the source-root path "__dirwell"');
-  } catch (error) {
-    if (error instanceof Error && "code" in error && error.code === "ENOENT") {
-      // The reserved asset path is available.
-    } else {
-      throw error;
-    }
-  }
   const outputIsWithinSource = isInsideRoot(sourceDir, outputDir);
   const selection = await selectSourcePaths(
     sourceDir,
@@ -349,7 +349,11 @@ async function generateExplorerUnlocked(
     };
 
     const name = await resolveOutputName(directory);
-    if (name !== null) assertSafeOutputName(name);
+    if (name !== null) {
+      assertSafeOutputName(name);
+      if (options.outputName !== undefined && directoryUrls !== "explicit" && name !== "index.html")
+        throw new TypeError("Custom outputName requires routing.directoryUrls: explicit");
+    }
     plans.push({ directory, logicalDir, outputName: name });
 
     for (const entry of entries) {
@@ -394,6 +398,47 @@ async function generateExplorerUnlocked(
   try {
     await visit("", sourceDir, new Set());
 
+    const generatedPages = new Map(
+      plans
+        .filter((plan) => plan.outputName !== null)
+        .map((plan) => [
+          plan.logicalDir,
+          directoryRoute(plan.logicalDir, plan.outputName!, directoryUrls),
+        ]),
+    );
+    const sourcePaths = new Set(
+      [...selection.selected].map((value) => value.normalize("NFC").toLowerCase()),
+    );
+    const claimedPages = new Set<string>();
+    const claimedAssets = new Set<string>();
+    const claimPage = (outputPath: string) => {
+      const key = outputPath.normalize("NFC").toLowerCase();
+      if (
+        key === "__dirwell" ||
+        key.startsWith("__dirwell/") ||
+        sourcePaths.has(key) ||
+        claimedPages.has(key) ||
+        claimedAssets.has(key)
+      )
+        throw new Error(`Explorer page conflicts with source or generated output: ${outputPath}`);
+      claimedPages.add(key);
+    };
+    for (const route of generatedPages.values()) claimPage(route.outputPath);
+    const ownedDirectories = new Set(
+      plans
+        .filter(
+          (plan) =>
+            plan.outputName === null &&
+            plan.directory.entries.some(
+              (entry) => entry.kind === "file" && indexPattern.test(entry.name),
+            ),
+        )
+        .map((plan) => plan.logicalDir),
+    );
+    const generatedDirectories = new Set(generatedPages.keys());
+    const pagePathForDirectory = (logicalPath: string): string | null =>
+      generatedPages.get(logicalPath)?.publicPath ??
+      (ownedDirectories.has(logicalPath) ? (logicalPath ? `${logicalPath}/` : "") : null);
     const report: BuildReport = {
       sourceDir,
       outputDir,
@@ -402,24 +447,14 @@ async function generateExplorerUnlocked(
       mirror: options.mirror ?? true,
       replacesOutput,
       selectedPaths: [...selection.selected].filter(Boolean).sort(),
-      pages: plans.map((plan) => ({ directory: plan.logicalDir, outputName: plan.outputName })),
+      pages: plans.map((plan) => ({
+        directory: plan.logicalDir,
+        outputName: plan.outputName,
+        outputPath: generatedPages.get(plan.logicalDir)?.outputPath ?? null,
+        publicPath: generatedPages.get(plan.logicalDir)?.publicPath ?? null,
+      })),
     };
     if (options.dryRun) return report;
-
-    const generatedPages = new Map(
-      plans
-        .filter(
-          (plan): plan is typeof plan & { readonly outputName: string } => plan.outputName !== null,
-        )
-        .map((plan) => [plan.logicalDir, plan.outputName]),
-    );
-    const generatedDirectories = new Set(generatedPages.keys());
-    const pagePathForDirectory = (logicalPath: string): string => {
-      const pageName = generatedPages.get(logicalPath);
-      return pageName === undefined || pageName === "index.html"
-        ? logicalPath
-        : path.posix.join(logicalPath, pageName);
-    };
     const sourceKinds = new Map<string, string>();
     for (const { directory } of plans)
       for (const entry of directory.entries) {
@@ -487,10 +522,7 @@ async function generateExplorerUnlocked(
           rawLinkFiles.set(filename, entry.symlink.target);
           href = `raw-links/${filename}`;
         } else if (linkedPath !== null) {
-          href =
-            linkedPath === ""
-              ? "../"
-              : `../${encodeLogicalPath(linkedPath)}${directoryLike && linkedPath === targetLogicalPath ? "/" : ""}`;
+          href = createHrefResolver("__dirwell/search-index.json", "relative", base)(linkedPath);
           if (!directoryLike && options.fileHref !== undefined) href = mappedFileHref(linkedPath);
         }
         searchEntries.set(entry.relativePath, {
@@ -516,7 +548,6 @@ async function generateExplorerUnlocked(
 
     for (const plan of plans) {
       const { directory, logicalDir, outputName: name } = plan;
-      const sourceEntryNames = new Set(directory.entries.map((entry) => entry.name.toLowerCase()));
       if (name === null) continue;
 
       const targetLogicalPathFor = (entry: FileSystemEntry): string | null => {
@@ -526,34 +557,32 @@ async function generateExplorerUnlocked(
         }
         return path.posix.join(logicalDir, entry.name);
       };
-      const hrefForLogicalPath = (targetPath: string, directoryLike: boolean): string => {
-        const linkedPath = directoryLike ? pagePathForDirectory(targetPath) : targetPath;
-        const linkToDirectory = directoryLike && linkedPath === targetPath;
-        if (urlStrategy === "relative") {
-          const relativeTarget = path.posix.relative(
-            logicalDir === "" ? "." : logicalDir,
-            linkedPath === "" ? "." : linkedPath,
-          );
-          const encodedTarget = relativeTarget
-            .split("/")
-            .map((segment) =>
-              segment === "." || segment === ".." ? segment : encodeURIComponent(segment),
-            )
-            .join("/");
-          return `${encodedTarget || "."}${linkToDirectory ? "/" : ""}`;
-        }
-        const encodedTarget = encodeLogicalPath(linkedPath);
-        if (encodedTarget === "") {
-          return urlStrategy === "base" ? base : "./";
-        }
-        const suffix = `${encodedTarget}${linkToDirectory ? "/" : ""}`;
-        return urlStrategy === "base" ? `${base}${suffix}` : suffix;
+      const currentRoute = generatedPages.get(logicalDir)!;
+      const hrefForPath = createHrefResolver(currentRoute.publicPath, urlStrategy, base);
+      const hrefForDirectory = (targetPath: string) => {
+        const target = pagePathForDirectory(targetPath);
+        return target === null ? null : hrefForPath(target);
       };
+      const assetHrefForDirectory = (targetPath: string, assetName: string) => {
+        assertSafeOutputName(assetName);
+        return hrefForPath(path.posix.join(mode === "ssg" ? targetPath : "__dirwell", assetName));
+      };
+      const directoryTargets = new Map(
+        directory.entries
+          .filter((entry) => isDirectoryLike(entry) && !isUnavailableSymlink(entry))
+          .flatMap((entry) => {
+            const target = targetLogicalPathFor(entry);
+            return target !== null && generatedDirectories.has(target)
+              ? [[entry.relativePath, target] as const]
+              : [];
+          }),
+      );
+      const directoryPathForEntry = (entryId: string) => directoryTargets.get(entryId) ?? null;
       const hrefFor = (entry: FileSystemEntry): string | null => {
         if (entry.symlink !== null && isUnavailableSymlink(entry)) {
           const filename = rawLinkFilename(entry);
           rawLinkFiles.set(filename, entry.symlink.target);
-          return hrefForLogicalPath(path.posix.join("__dirwell", "raw-links", filename), false);
+          return hrefForPath(path.posix.join("__dirwell", "raw-links", filename));
         }
         const targetLogicalPath = targetLogicalPathFor(entry);
         if (targetLogicalPath === null) return null;
@@ -561,7 +590,7 @@ async function generateExplorerUnlocked(
           entry.kind === "directory" || entry.symlink?.targetKind === "directory";
         if (!directoryLike && options.fileHref !== undefined)
           return mappedFileHref(targetLogicalPath);
-        return hrefForLogicalPath(targetLogicalPath, directoryLike);
+        return directoryLike ? hrefForDirectory(targetLogicalPath) : hrefForPath(targetLogicalPath);
       };
       const baseContext: ThemeContext = {
         operation: "build",
@@ -569,22 +598,13 @@ async function generateExplorerUnlocked(
         documentBaseHref: urlStrategy === "html-base" ? base : null,
         outputName: name,
         mode,
-        searchIndexHref: hrefForLogicalPath(
-          path.posix.join("__dirwell", "search-index.json"),
-          false,
-        ),
+        searchIndexHref: hrefForPath("__dirwell/search-index.json"),
         sort: { ...defaultSort, ...options.sort },
-        assetHref: (assetName) => {
-          assertSafeOutputName(assetName);
-          return hrefForLogicalPath(
-            mode === "ssg"
-              ? path.posix.join(logicalDir, assetName)
-              : path.posix.join("__dirwell", assetName),
-            false,
-          );
-        },
+        assetHref: (assetName) => assetHrefForDirectory(logicalDir, assetName),
         hrefFor,
-        hrefForDirectory: (relativePath) => hrefForLogicalPath(relativePath, true),
+        hrefForDirectory,
+        assetHrefForDirectory,
+        directoryPathForEntry,
         hasPageForDirectory: (relativePath) => generatedDirectories.has(relativePath),
         exitsExplorerFor: (entry) => {
           if (isUnavailableSymlink(entry)) return true;
@@ -616,6 +636,8 @@ async function generateExplorerUnlocked(
                     outputName: baseContext.outputName,
                     assetHref: baseContext.assetHref,
                     hrefForDirectory: baseContext.hrefForDirectory,
+                    assetHrefForDirectory,
+                    directoryPathForEntry,
                     documentBaseHref: baseContext.documentBaseHref,
                     directoryPath: logicalDir,
                   }),
@@ -642,12 +664,15 @@ async function generateExplorerUnlocked(
         const directoryId = createHash("sha256").update(logicalDir).digest("hex");
         const manifestDirectory = path.posix.join("__dirwell", "listing", directoryId);
         // Relative records belong to the document directory, not to the JSON asset directory.
+        const documentDirectory = currentRoute.publicPath.endsWith("/")
+          ? currentRoute.publicPath
+          : path.posix.dirname(currentRoute.publicPath || ".");
         const hrefBase =
           urlStrategy === "relative"
-            ? `../../../${encodeLogicalPath(logicalDir)}${logicalDir ? "/" : ""}`
+            ? `../../../${documentDirectory === "." ? "" : `${encodeLogicalPath(documentDirectory.replace(/\/$/, ""))}/`}`
             : base;
         const manifestPath = path.posix.join(manifestDirectory, "manifest.json");
-        manifestHref = hrefForLogicalPath(manifestPath, false);
+        manifestHref = hrefForPath(manifestPath);
         const blocks: Array<ListingManifest["blocks"][number]> = [];
         const blockSize =
           candidate.data.strategy === "blocks"
@@ -681,22 +706,25 @@ async function generateExplorerUnlocked(
       const pageNames = Array.from({ length: pageCount }, (_, index) =>
         index === 0 ? name : `${pagePrefix}-${index + 1}.html`,
       );
-      for (const pageName of pageNames.slice(1)) {
-        if (directory.entries.some((entry) => entry.name.toLowerCase() === pageName.toLowerCase()))
-          throw new Error(
-            `Listing page conflicts with source entry: ${path.posix.join(logicalDir, pageName)}`,
-          );
-      }
+      const pageRoutes = pageNames.map((pageName, index) =>
+        directoryRoute(
+          logicalDir,
+          pageName,
+          name === "index.html" ? directoryUrls : "explicit",
+          index + 1,
+        ),
+      );
+      for (const route of pageRoutes.slice(1)) claimPage(route.outputPath);
       const pagedAssets = new Map<string, Buffer>();
       for (const [index, pageName] of pageNames.entries()) {
-        const pagePath = path.posix.join(logicalDir, pageName);
+        const pageRoute = pageRoutes[index]!;
         const metadata = await metadataResolver?.resolve(
           directory,
-          (outputPath) => hrefForLogicalPath(outputPath, false),
-          pageName === "index.html" ? (logicalDir ? `${logicalDir}/` : "") : pagePath,
+          (outputPath) => hrefForPath(outputPath),
+          pageRoute.publicPath,
         );
         const pageHref = (number: number): string =>
-          hrefForLogicalPath(path.posix.join(logicalDir, pageNames[number] ?? name), false);
+          hrefForPath(pageRoutes[number]?.publicPath ?? currentRoute.publicPath);
         const page = await theme.render({
           ...baseContext,
           ...(metadata === undefined ? {} : { metadata }),
@@ -726,20 +754,20 @@ async function generateExplorerUnlocked(
                 },
               }),
         });
-        await writeFile(path.join(targetDir, pageName), page.html);
+        const pageDestination = path.join(buildOutputDir, pageRoute.outputPath);
+        await mkdir(path.dirname(pageDestination), { recursive: true });
+        await writeFile(pageDestination, page.html);
         for (const [assetName, contents] of Object.entries(page.assets ?? {})) {
           assertSafeOutputName(assetName);
-          if (
-            (options.listing !== undefined || theme.listing?.pagination === true) &&
-            mode === "ssg" &&
-            sourceEntryNames.has(assetName.toLowerCase())
-          )
+          const assetPathKey = path.posix
+            .join(mode === "ssg" ? logicalDir : "__dirwell", assetName)
+            .normalize("NFC")
+            .toLowerCase();
+          if (sourcePaths.has(assetPathKey))
             throw new Error(`Theme asset conflicts with source entry: ${assetName}`);
-          if (
-            options.listing !== undefined &&
-            pageNames.some((pageName) => pageName.toLowerCase() === assetName.toLowerCase())
-          )
+          if (claimedPages.has(assetPathKey))
             throw new Error(`Theme asset conflicts with listing page: ${assetName}`);
+          claimedAssets.add(assetPathKey);
           if (options.listing !== undefined && pageCount > 1) {
             const bytes = Buffer.from(contents);
             const existing = pagedAssets.get(assetName);

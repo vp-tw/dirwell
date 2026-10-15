@@ -3,7 +3,13 @@ import { access, stat } from "node:fs/promises";
 import { pathToFileURL } from "node:url";
 import { resolve as resolveModule } from "import-meta-resolve";
 import { parseArgs } from "node:util";
-import { generateExplorer, resolveIgnoreFiles } from "@dirwell/core";
+import {
+  generateExplorer,
+  resolveIgnoreFiles,
+  resolveDirectoryUrls,
+  directoryRoute,
+  encodeLogicalPath,
+} from "@dirwell/core";
 import type { ExplorerTheme, ListingPolicy, GenerateOptions } from "@dirwell/core";
 import { createPlainTheme } from "@dirwell/theme-plain";
 import { startExplorerServer } from "@dirwell/server/node";
@@ -11,11 +17,18 @@ import { validateCliConfig } from "./config.ts";
 export { defineConfig } from "./config.ts";
 
 export interface CliConfig {
+  readonly routing?: GenerateOptions["routing"];
   readonly ignoreFiles?: GenerateOptions["ignoreFiles"];
-  readonly build?: Omit<GenerateOptions, "sourceDir" | "outputDir" | "theme" | "listing">;
+  readonly build?: Omit<
+    GenerateOptions,
+    "sourceDir" | "outputDir" | "theme" | "listing" | "routing"
+  >;
   readonly theme?: ExplorerTheme;
   readonly listing?: ListingPolicy;
-  readonly server?: Omit<Parameters<typeof startExplorerServer>[0], "root" | "theme" | "listing">;
+  readonly server?: Omit<
+    Parameters<typeof startExplorerServer>[0],
+    "root" | "theme" | "listing" | "routing"
+  >;
 }
 const help = `Usage:
   dirwell build <source> --out <output>
@@ -30,7 +43,7 @@ Build options: --mode ssg|mpa, --urls relative|base|html-base, --base <path>
 Build safety: --dry-run, --force (-f) replaces an unowned nonempty output.
 Selection: --ignore-file <path> (repeatable), --no-ignore disables ignore files.
 Server options: --host <host>, --port <port>, --mount <path>, --live
-Both modes: --page-size <n>, --block-size <n>
+Both modes: --directory-urls explicit|slash|clean, --page-size <n>, --block-size <n>
 Live server reads on request. It does not build an output tree or require watch mode.
 `;
 const positive = (value: string | undefined, name: string): number | undefined => {
@@ -114,6 +127,7 @@ export async function runCli(
       out: { type: "string" },
       mode: { type: "string" },
       urls: { type: "string" },
+      "directory-urls": { type: "string" },
       base: { type: "string" },
       host: { type: "string" },
       port: { type: "string" },
@@ -178,11 +192,6 @@ export async function runCli(
       Array.isArray(module.default)
     )
       throw new TypeError("Config must export an object");
-    for (const key of Object.keys(module.default))
-      if (!["theme", "listing", "build", "server", "ignoreFiles"].includes(key))
-        throw new TypeError(
-          `Unsupported config key "${key}". Use { theme, listing, build, server }; selection rules belong in build/server.`,
-        );
     if (typeof module.default.then === "function")
       throw new TypeError(
         "Config must export a resolved object; use top-level await for async setup",
@@ -197,6 +206,12 @@ export async function runCli(
         ? createPlainTheme()
         : config.theme;
   assertTheme(theme);
+  const directoryUrls = resolveDirectoryUrls(
+    parsed.values["directory-urls"] === undefined
+      ? config.routing
+      : { directoryUrls: parsed.values["directory-urls"] },
+  );
+  const routing = { directoryUrls };
   const pageSize = positive(parsed.values["page-size"], "page-size"),
     blockSize = positive(parsed.values["block-size"], "block-size");
   const listing: ListingPolicy | undefined =
@@ -230,6 +245,7 @@ export async function runCli(
       throw new TypeError("Unknown URL strategy");
     const report = await generateExplorer({
       ...config.build,
+      routing,
       sourceDir: root,
       outputDir: path.resolve(cwd, parsed.values.out),
       theme,
@@ -252,7 +268,7 @@ export async function runCli(
           log(
             page.outputName === null
               ? `Skipped explorer page: ${page.directory || "/"}`
-              : `Explorer entry: ${path.join(report.outputDir, page.outputName)}`,
+              : `Explorer entry: ${path.join(report.outputDir, page.outputPath!)} (public: ${page.publicPath || "/"})`,
           );
     }
     return null;
@@ -262,6 +278,7 @@ export async function runCli(
     throw new TypeError("port must be between 0 and 65535");
   const server = await startExplorerServer({
     ...config.server,
+    routing,
     ...(parsed.values.live ? { live: config.server?.live || {} } : {}),
     root,
     theme,
@@ -274,7 +291,7 @@ export async function runCli(
     ...(parsed.values.mount === undefined ? {} : { mountPath: parsed.values.mount }),
   });
   log(
-    `Dirwell server: ${server.url}${parsed.values.mount ?? config.server?.mountPath ?? ""}/browse/`,
+    `Dirwell server: ${server.url}${parsed.values.mount ?? config.server?.mountPath ?? ""}/browse${directoryUrls === "clean" ? "" : "/"}${encodeLogicalPath(directoryRoute("", "index.html", directoryUrls).publicPath)}`,
   );
   return server;
 }

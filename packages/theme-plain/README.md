@@ -5,7 +5,7 @@ Native HTML, links and pagination with no browser JavaScript or runtime dependen
 Requires Node.js 22.12 or newer. Install the first stable family:
 
 ```sh
-npm install @dirwell/core@0.0.2 @dirwell/theme-plain@0.0.2
+npm install @dirwell/core@0.0.3 @dirwell/theme-plain@0.0.3
 ```
 
 Create `files/note.txt`, save this as `build.mjs`, then run `node build.mjs`:
@@ -30,8 +30,18 @@ A native HTML renderer with no runtime npm dependencies, browser JavaScript, ico
 
 `createPlainTheme` returns a structurally compatible core theme. It handles independently generated static pages with native Previous/Next anchors and directory-wide counts. A page remains usable without JavaScript over HTTP and file URLs. Project attribution is optional; metadata appears only when the caller supplies a provider through core.
 
-Install with `npm install @dirwell/core@0.0.2 @dirwell/theme-plain@0.0.2` for API use. CLI `0.0.1` includes Plain as its minimal default.
+Install with `npm install @dirwell/core@0.0.3 @dirwell/theme-plain@0.0.3` for API use. CLI `0.0.1` includes Plain as its minimal default.
 
-Standalone Plain uses explicit generated index filenames for portable no-JavaScript directory links, including breadcrumbs and parent navigation. Set `portableLinks: false` to prefer native directory URLs.
+Core now supplies explicit filenames by default for native no-JavaScript links. The Plain `portableLinks` option is removed; select Core `routing.directoryUrls` instead.
 
 The 0.0.x API may evolve. Pin your qualified version and upgrade the official family together. See [support and verification](https://vp-tw.github.io/dirwell/support/) for host, browser and device boundaries.
+
+## Directory URLs
+
+Version 0.0.3 uses Core `routing: { directoryUrls: "explicit" }` by default
+for every theme. Choose `slash` for directory-index hosts or `clean` for a
+qualified extensionless host. Themes do not rewrite links. Existing source
+homepages and download names are preserved; output conflicts fail. CLI config
+puts routing at the top level, and `--directory-urls` overrides it.
+See [directory URL guidance](https://vp-tw.github.io/dirwell/urls/) for output
+placement, host requirements, native Plain file navigation and migration.

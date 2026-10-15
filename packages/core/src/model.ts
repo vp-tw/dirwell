@@ -1,6 +1,7 @@
 import type { JsonObject } from "./json.ts";
 import type { ListingEntry, ListingContext, ListingPolicy } from "./listing.ts";
 import type { PageMetadata, ThemeMetadataDefaults } from "./metadata.ts";
+import type { RoutingOptions } from "./routing.ts";
 export type EntryKind = "directory" | "file" | "symlink" | "other";
 
 export interface FileTimes {
@@ -106,7 +107,11 @@ export interface ThemeContext {
   readonly searchIndexHref: string;
   readonly sort: Required<SortOptions>;
   readonly assetHref: (assetName: string) => string;
-  readonly hrefForDirectory: (relativePath: string) => string;
+  readonly hrefForDirectory: (relativePath: string) => string | null;
+  /** Resolve a theme-owned asset without inferring a directory from a page URL. */
+  readonly assetHrefForDirectory: (relativePath: string, assetName: string) => string;
+  /** Resolve a public entry id to its permitted generated directory identity. */
+  readonly directoryPathForEntry: (entryId: string) => string | null;
   readonly hasPageForDirectory?: (relativePath: string) => boolean;
   readonly hrefFor: (entry: FileSystemEntry) => string | null;
   readonly exitsExplorerFor: (entry: FileSystemEntry) => boolean;
@@ -118,7 +123,14 @@ export interface ExplorerTheme {
     entry: ListingEntry,
     context: Pick<
       ThemeContext,
-      "mode" | "outputName" | "assetHref" | "hrefForDirectory" | "documentBaseHref" | "pageDataHref"
+      | "mode"
+      | "outputName"
+      | "assetHref"
+      | "hrefForDirectory"
+      | "documentBaseHref"
+      | "pageDataHref"
+      | "assetHrefForDirectory"
+      | "directoryPathForEntry"
     > & { readonly directoryPath: string },
   ) => JsonObject;
   /** Opt in only when the renderer handles listing.page and emits native pagination anchors. */
@@ -132,6 +144,7 @@ export interface ExplorerTheme {
 }
 
 export interface GenerateOptions {
+  readonly routing?: RoutingOptions;
   /** Synchronous public file URL mapping, independent of explorer/data/asset URLs. */
   readonly fileHref?: (logicalPath: string) => string | null;
   readonly entryData?: EntryDataProvider;
@@ -173,8 +186,14 @@ export interface BuildReport {
   readonly mirror: boolean;
   readonly replacesOutput: boolean;
   readonly selectedPaths: readonly string[];
-  readonly pages: readonly { readonly directory: string; readonly outputName: string | null }[];
+  readonly pages: readonly {
+    readonly directory: string;
+    readonly outputName: string | null;
+    readonly outputPath: string | null;
+    readonly publicPath: string | null;
+  }[];
 }
+export type { DirectoryUrls, RoutingOptions } from "./routing.ts";
 
 export interface MetadataProvider {
   readonly assets: ReadonlyMap<string, Uint8Array>;

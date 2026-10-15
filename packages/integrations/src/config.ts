@@ -1,9 +1,10 @@
-import { validateListingPlan, resolveIgnoreFiles } from "@dirwell/core";
+import { validateListingPlan, resolveIgnoreFiles, resolveDirectoryUrls } from "@dirwell/core";
 import path from "node:path";
 import type { ExplorerTheme, GenerateOptions, SortOptions } from "@dirwell/core";
 import { normalizePathPatterns } from "../../core/src/filters.ts";
 
 export interface DirwellConfig {
+  readonly routing?: GenerateOptions["routing"];
   readonly fileHref?: GenerateOptions["fileHref"];
   readonly entryData?: GenerateOptions["entryData"];
   readonly listing?: GenerateOptions["listing"];
@@ -83,6 +84,7 @@ function configKeys(
   }
 }
 const configFields = {
+  routing: true,
   fileHref: true,
   entryData: true,
   listing: true,
@@ -117,6 +119,7 @@ export function validateConfig(
     [...Object.keys(configFields), ...(adapter ? ["cwd", "outputPath"] : [])],
     "config",
   );
+  resolveDirectoryUrls(config.routing);
   if (adapter) {
     assertOptionalString(config.cwd, "config.cwd");
     assertOptionalString(config.outputPath, "config.outputPath");
@@ -237,6 +240,7 @@ export function resolveGenerateOptions(
     sourceDir,
     outputDir,
     theme: config.theme,
+    ...(config.routing === undefined ? {} : { routing: config.routing }),
     ...(config.fileHref === undefined ? {} : { fileHref: config.fileHref }),
     ...(config.entryData === undefined ? {} : { entryData: config.entryData }),
     ...(config.listing === undefined ? {} : { listing: config.listing }),

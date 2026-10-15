@@ -13,6 +13,19 @@ await generateExplorer({ sourceDir: "files", outputDir: "generated", theme: crea
 
 `GenerateOptions` requires source, dedicated output and an explicit theme. Build awaits renderers and metadata, validates assets, then replaces the output tree. It defaults to SSG, relative links and mirrored source files. `outputName` can return a filename or null per directory. `listing` controls HTML pages and data independently. See [configuration](../configuration/) and [deployment](../deployment/).
 
+## Directory routing
+
+`RoutingOptions` contains `directoryUrls`: `explicit` (default), `slash`, or `clean`.
+The same Core policy is accepted by build and live server APIs. Themes receive
+resolved URLs and do not select the policy. See [directory URLs](../urls/).
+
+`resolveDirectoryUrls` validates this policy and returns the resolved style.
+`directoryRoute` returns archive-relative
+`outputPath` and `publicPath`; it does not configure a host or authorize access.
+`encodeLogicalPath` encodes each URL path segment once.
+`DirectoryUrls` is the style union. Do not use these helpers to bypass the
+publisher's collision checks; `generateExplorer` validates the complete output.
+
 ## Core public contracts
 
 All names below come from `@dirwell/core`. Source definitions live in [the Core package](https://github.com/vp-tw/dirwell/tree/main/packages/core/src).

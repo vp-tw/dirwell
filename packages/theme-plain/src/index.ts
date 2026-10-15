@@ -24,8 +24,6 @@ export type {
 
 export interface PlainThemeOptions extends ThemeCustomization {
   readonly project?: ThemeProjectOptions;
-  /** Use explicit generated HTML filenames for no-script file-URL navigation. */
-  readonly portableLinks?: boolean;
   readonly renderEntry?: (entry: ListingEntry) => string;
   /** Trusted markup outside the primary link; callers own any interactive behavior. */
   readonly renderEntryActions?: (entry: ListingEntry) => string;
@@ -58,22 +56,25 @@ function status(entry: FileSystemEntry, ui: ResolvedThemeCustomization): string 
 
 function renderBreadcrumbs(
   context: ThemeContext,
-  directoryHref: (path: string) => string,
+  directoryHref: (path: string) => string | null,
   ui: ResolvedThemeCustomization,
 ): string {
   const segments = context.directory.current.relativePath.split("/").filter(Boolean);
   if (segments.length === 0) return "";
   const ancestors = segments.slice(0, -1).map((segment, index) => {
     const relativePath = segments.slice(0, index + 1).join("/");
-    return `<a href="${escapeHtml(directoryHref(relativePath))}">${escapeHtml(segment)}</a>`;
+    const href = directoryHref(relativePath);
+    return href === null
+      ? `<span>${escapeHtml(segment)}</span>`
+      : `<a href="${escapeHtml(href)}">${escapeHtml(segment)}</a>`;
   });
-  return `<nav aria-label="${escapeHtml(ui.labels.breadcrumb)}"><a href="${escapeHtml(directoryHref(""))}">${escapeHtml(ui.labels.home)}</a> / ${ancestors.length === 0 ? "" : `${ancestors.join(" / ")} / `}<span aria-current="page">${escapeHtml(segments.at(-1) ?? "")}</span></nav>`;
+  const home = directoryHref("");
+  return `<nav aria-label="${escapeHtml(ui.labels.breadcrumb)}">${home === null ? `<span>${escapeHtml(ui.labels.home)}</span>` : `<a href="${escapeHtml(home)}">${escapeHtml(ui.labels.home)}</a>`} / ${ancestors.length === 0 ? "" : `${ancestors.join(" / ")} / `}<span aria-current="page">${escapeHtml(segments.at(-1) ?? "")}</span></nav>`;
 }
 
 function renderEntry(
   entry: FileSystemEntry,
   context: ThemeContext,
-  portableLinks: boolean,
   options: PlainThemeOptions,
   ui: ResolvedThemeCustomization,
 ): string {
@@ -82,12 +83,8 @@ function renderEntry(
   const name =
     options.renderEntry?.(record) ?? `${escapeHtml(entry.name)}${directoryLike ? "/" : ""}`;
   if (typeof name !== "string") throw new TypeError("renderEntry must return a string");
-  const prepared = context.hrefFor(entry);
+  const href = context.hrefFor(entry);
   const exitsExplorer = context.exitsExplorerFor(entry);
-  const href =
-    portableLinks && directoryLike && !exitsExplorer && prepared?.endsWith("/")
-      ? `${prepared}index.html`
-      : prepared;
   const link =
     href === null
       ? `<span>${name}</span>`
@@ -139,22 +136,16 @@ function renderEntry(
 
 /** A no-icon, no-script theme that leaves navigation and controls to the browser. */
 export function createPlainTheme(options: PlainThemeOptions = {}): ExplorerTheme {
-  assertThemeOptions(options, ["project", "portableLinks", "renderEntry", "renderEntryActions"]);
+  if ("portableLinks" in options)
+    throw new TypeError(
+      "portableLinks moved to Core routing.directoryUrls: use explicit for true, slash for false",
+    );
+  assertThemeOptions(options, ["project", "renderEntry", "renderEntryActions"]);
   const ui = resolveCustomization(options);
   if (ui.actions.some((action) => action !== "download"))
     throw new TypeError(
       "Plain supports native download actions only; copy actions require a browser runtime supplied by a custom theme",
     );
-  const portableLinks = options.portableLinks ?? true;
-  if (typeof portableLinks !== "boolean") throw new TypeError("portableLinks must be a boolean");
-  const directoryHref = (context: ThemeContext, relativePath: string) => {
-    const href = context.hrefForDirectory(relativePath);
-    return portableLinks &&
-      context.hasPageForDirectory?.(relativePath) === true &&
-      href.endsWith("/")
-      ? `${href}index.html`
-      : href;
-  };
   const project = resolveThemeProject(options.project);
   const repositoryHref = externalHref(project.repositoryUrl);
   const licenseHref = externalHref(
@@ -178,11 +169,11 @@ export function createPlainTheme(options: PlainThemeOptions = {}): ExplorerTheme
       const parentHref =
         context.directory.parent === null
           ? null
-          : directoryHref(context, context.directory.parent.relativePath);
+          : context.hrefForDirectory(context.directory.parent.relativePath);
       const parentRow =
         parentHref === null ? "" : `<li><a href="${escapeHtml(parentHref)}">../</a></li>`;
       const rows = context.directory.entries
-        .map((entry) => renderEntry(entry, context, portableLinks, options, ui))
+        .map((entry) => renderEntry(entry, context, options, ui))
         .join("");
       const count = context.directory.entries.length;
       const page = context.listing?.page;
@@ -206,7 +197,7 @@ export function createPlainTheme(options: PlainThemeOptions = {}): ExplorerTheme
           : `<footer><hr><p>${escapeHtml(ui.labels.repository)}: ${externalLink(project.name, repositoryHref)} ${escapeHtml(ui.labels.author)} ${escapeHtml(project.author)} · ${externalLink(project.license, licenseHref)}</p></footer>`;
       const html = `<!doctype html>
 <html lang="${escapeHtml(ui.language)}" dir="${ui.direction}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">${context.documentBaseHref === null ? "" : `<base href="${escapeHtml(context.documentBaseHref)}">`}${context.metadata?.head ?? `<title>${escapeHtml(fallbackTitle)}${page === undefined || page.count === 1 ? "" : ` · page ${page.number}`}</title>`}${ui.brand.faviconUrl ? `<link rel="icon" href="${escapeHtml(ui.brand.faviconUrl)}">` : ""}<style>:root{color-scheme:light dark}body{max-width:72ch;margin:2rem auto;padding:0 1rem}h1,li,nav{overflow-wrap:anywhere}li{margin:.6rem 0}small{display:block}${customizationCss(ui)}</style></head>
-<body><main>${ui.brand.logoUrl ? `<img src="${escapeHtml(ui.brand.logoUrl)}" alt="${escapeHtml(ui.brand.logoAlt ?? "")}" width="40" height="40">` : ""}${ui.brand.name ? `<header>${escapeHtml(ui.brand.name)}</header>` : ""}${renderBreadcrumbs(context, (path) => directoryHref(context, path), ui)}<h1>${escapeHtml(label(ui, "indexOf", { path: visiblePath }))}</h1><p>${countLabel}</p>${pagination}${count === 0 ? `<p>${escapeHtml(ui.labels.empty)}</p>` : ""}<ul>${parentRow}${rows}</ul>${pagination}</main>${ui.brand.footerText ? `<footer>${ui.brand.footerUrl ? `<a href="${escapeHtml(ui.brand.footerUrl)}">${escapeHtml(ui.brand.footerText)}</a>` : escapeHtml(ui.brand.footerText)}</footer>` : footer}</body></html>`;
+<body><main>${ui.brand.logoUrl ? `<img src="${escapeHtml(ui.brand.logoUrl)}" alt="${escapeHtml(ui.brand.logoAlt ?? "")}" width="40" height="40">` : ""}${ui.brand.name ? `<header>${escapeHtml(ui.brand.name)}</header>` : ""}${renderBreadcrumbs(context, context.hrefForDirectory, ui)}<h1>${escapeHtml(label(ui, "indexOf", { path: visiblePath }))}</h1><p>${countLabel}</p>${pagination}${count === 0 ? `<p>${escapeHtml(ui.labels.empty)}</p>` : ""}<ul>${parentRow}${rows}</ul>${pagination}</main>${ui.brand.footerText ? `<footer>${ui.brand.footerUrl ? `<a href="${escapeHtml(ui.brand.footerUrl)}">${escapeHtml(ui.brand.footerText)}</a>` : escapeHtml(ui.brand.footerText)}</footer>` : footer}</body></html>`;
       return { html };
     },
   };

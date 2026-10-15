@@ -30,3 +30,7 @@ Use it for public data. It does not cache user-specific listings, search results
 Start with normal live reads. A cache is useful when repeated listing work is expensive enough to justify a Redis dependency and a delay before file changes appear. Static output can use the caching facilities of its HTTP host instead; it does not need a runtime listing cache.
 
 Choose which data may be reused, how long it may be stored, and who invalidates it after a change. Measure source work and response time with your own directory and request load. The example's hit and read-count headers show which path ran; they are not a production performance benchmark.
+
+## Directory route normalization
+
+Server adapters accept `routing.directoryUrls` from Core. The default root HTML route ends in `/browse/index.html`; slash and clean modes use `/browse/` and `/browse`. Canonical aliases redirect only after authorization; file/data namespaces stay separate. Register the intended mount in the host application and test route conflicts. See [directory URLs](../urls/).

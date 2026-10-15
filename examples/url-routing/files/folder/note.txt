@@ -1,0 +1,1 @@
+This download keeps the same folder/note.txt path under every page URL policy.

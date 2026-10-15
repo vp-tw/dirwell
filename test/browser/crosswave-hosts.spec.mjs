@@ -28,6 +28,7 @@ async function source() {
   return root;
 }
 async function browse(page, url) {
+  url = new URL("index.html", url).href;
   await page.goto(url);
   await page.evaluate(() => {
     window.__cwCanvas = document.querySelector("#cw-wave");
