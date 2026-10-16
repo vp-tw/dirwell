@@ -2,6 +2,11 @@
 
 The nine official `@dirwell/*` packages use synchronized versions. `0.0.1` is the first non-prerelease family; the 0.0.x API may evolve, so pin the version qualified by your application.
 
+## 0.0.8
+
+- Group Crosswave names, target paths and readable sizes inside a complete selected surface and primary-link focus boundary. Keep native exact-size disclosures and configured actions separate.
+- Keep focused normal-height entries above the fixed footer in short viewports, and retain narrow/no-script layout and virtual-list keyboard behavior.
+
 ## 0.0.7
 
 - Remove Plain's repeated visible new-tab captions while preserving existing link targets, downloads and navigation. Attach the localized hint as an accessible description instead.

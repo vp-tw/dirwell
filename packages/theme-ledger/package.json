@@ -1,6 +1,6 @@
 {
   "name": "@dirwell/theme-ledger",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Svelte-owned searchable directory explorer.",
   "homepage": "https://vp-tw.github.io/dirwell/themes/",
   "bugs": {

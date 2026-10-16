@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.8
+
+### Patch Changes
+
+- Keep file names, target paths and size values inside one selected/focused Crosswave surface. Preserve independent disclosures/actions and footer-aware focus visibility in short viewports.
+
 ## 0.0.7
 
 ### Patch Changes

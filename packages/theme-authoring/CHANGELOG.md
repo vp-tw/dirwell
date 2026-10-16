@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.8
+
+### Patch Changes
+
+- Synchronize the SDK patch family for the Crosswave row-boundary correction. No public API changes in this package.
+
 ## 0.0.7
 
 ### Patch Changes
