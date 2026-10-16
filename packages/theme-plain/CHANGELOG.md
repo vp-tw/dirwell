@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.7
+
+### Patch Changes
+
+- Remove repeated visible new-tab captions from Plain rows while preserving new-tab behavior and providing a localized accessible description.
+
 ## 0.0.6
 
 ### Patch Changes

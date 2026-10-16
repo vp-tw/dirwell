@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.7
+
+### Patch Changes
+
+- Synchronize the SDK patch family for the Plain new-tab hint correction. No public API changes in this package.
+
 ## 0.0.6
 
 ### Patch Changes

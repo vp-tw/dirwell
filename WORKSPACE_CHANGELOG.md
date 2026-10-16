@@ -2,6 +2,10 @@
 
 The nine official `@dirwell/*` packages use synchronized versions. `0.0.1` is the first non-prerelease family; the 0.0.x API may evolve, so pin the version qualified by your application.
 
+## 0.0.7
+
+- Remove Plain's repeated visible new-tab captions while preserving existing link targets, downloads and navigation. Attach the localized hint as an accessible description instead.
+
 ## 0.0.6
 
 - Make readable, non-interactive size text the default in Plain, Ledger and Crosswave. Raw bytes continue to drive numeric sorting and remain available to custom themes.

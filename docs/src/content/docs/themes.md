@@ -190,3 +190,10 @@ The formatter supports binary, decimal and exact bytes with an explicit locale.
 It accepts known non-negative safe integers, not nullable state. Directory totals,
 disk allocation and compressed transfer sizes are separate capabilities and are
 not calculated by these helpers.
+
+## Plain new-tab hints
+
+Plain keeps file links opening in a new tab and directory navigation in the
+current tab. The new-tab hint is a localized accessible description attached to
+the affected links; it does not repeat as visible metadata in each row. Native
+download actions and Core routing remain unchanged.
