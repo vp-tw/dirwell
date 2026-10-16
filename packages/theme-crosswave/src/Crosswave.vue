@@ -192,13 +192,37 @@ const end = computed(() => {
 const visibleRows = computed(() => rows.value.slice(start.value, end.value));
 const heightCache = new Map();
 let rowObserver, layoutObserver, viewHistory, measuredWidth;
+function updateHeights(next) {
+  const scroller = listScroll.value;
+  const currentRows = rows.value;
+  const focusedRow = scroller?.contains(document.activeElement)
+    ? document.activeElement.closest("[data-cw-entry]")
+    : null;
+  const position = scrollTop.value - (model.value.parentHref ? 76 : 0);
+  let index = currentRows.findIndex((entry) => entry.id === focusedRow?.dataset.id);
+  if (index < 0) index = currentRows.findIndex((_, index) => offsets.value[index + 1] > position);
+  const previous = offsets.value[index];
+  heights.value = next;
+  if (!virtual.value || !scroller || index < 0) return;
+
+  // Change the range and its scroll offset together, before Vue can remove the anchor row.
+  const target = Math.max(0, scrollTop.value + offsets.value[index] - previous);
+  scrollTop.value = target;
+  nextTick(() => {
+    if (rows.value !== currentRows || listScroll.value !== scroller || scrollTop.value !== target)
+      return;
+    // The new spacers must exist before the browser clamps the requested scroll position.
+    scroller.scrollTop = target;
+    scrollTop.value = scroller.scrollTop;
+  });
+}
 function measureLayout() {
   if (!listScroll.value) return;
   const width = listScroll.value.clientWidth;
   if (measuredWidth !== undefined && width !== measuredWidth) {
     heightCache.clear();
-    heights.value = new Map(
-      [...nodes].map(([id, node]) => [id, node.getBoundingClientRect().height]),
+    updateHeights(
+      new Map([...nodes].map(([id, node]) => [id, node.getBoundingClientRect().height])),
     );
   }
   measuredWidth = width;
@@ -590,7 +614,7 @@ onMounted(() => {
           changed = true;
         }
       }
-      if (changed) heights.value = next;
+      if (changed) updateHeights(next);
     });
     for (const node of nodes.values()) rowObserver.observe(node);
     layoutObserver = new ResizeObserver(measureLayout);

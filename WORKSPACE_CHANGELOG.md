@@ -2,6 +2,11 @@
 
 The nine official `@dirwell/*` packages use synchronized versions. `0.0.1` is the first non-prerelease family; the 0.0.x API may evolve, so pin the version qualified by your application.
 
+## 0.0.9
+
+- Preserve Crosswave's focused virtual row, selection and scroll position when resizing or reflow changes measured row heights. Keep native size disclosures, configured actions and search focus independent.
+- Qualify the resize and variable-height regressions in SSG and MPA across Chromium, Firefox and WebKit, alongside the existing row-boundary, no-script and simulated controller behavior. No public API changes.
+
 ## 0.0.8
 
 - Group Crosswave names, target paths and readable sizes inside a complete selected surface and primary-link focus boundary. Keep native exact-size disclosures and configured actions separate.

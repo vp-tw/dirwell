@@ -37,11 +37,40 @@ test.beforeAll(async () => {
       symlink("missing.txt", path.join(largeSource, `link-${String(i).padStart(3, "0")}`)),
     ),
   );
-  await generateExplorer({
-    sourceDir: largeSource,
-    outputDir: path.join(root, "large"),
-    theme: createCrosswaveTheme({ gamepad: false, backgroundMotion: false }),
-  });
+  const variableSource = path.join(root, "variable-files");
+  await mkdir(path.join(variableSource, "nested"), { recursive: true });
+  await writeFile(path.join(variableSource, "payload.bin"), Buffer.alloc(4097));
+  await Promise.all(
+    Array.from({ length: 510 }, (_, i) =>
+      symlink(
+        "../payload.bin",
+        path.join(
+          variableSource,
+          "nested",
+          `item-${String(i).padStart(3, "0")}` + (i % 7 === 0 ? "-日本語-long-name".repeat(4) : ""),
+        ),
+      ),
+    ),
+  );
+  for (const mode of ["ssg", "mpa"]) {
+    await generateExplorer({
+      sourceDir: largeSource,
+      outputDir: path.join(root, `large-${mode}`),
+      mode,
+      theme: createCrosswaveTheme({ gamepad: false, backgroundMotion: false }),
+    });
+    await generateExplorer({
+      sourceDir: variableSource,
+      outputDir: path.join(root, `variable-${mode}`),
+      mode,
+      theme: createCrosswaveTheme({
+        gamepad: false,
+        backgroundMotion: false,
+        size: { exact: "details" },
+        actions: ["download"],
+      }),
+    });
+  }
   server = createServer(async (req, res) => {
     try {
       let file = path.resolve(
@@ -299,7 +328,7 @@ for (const width of [1280, 320])
   test(`virtual rows at ${width}px keep metadata together during keyboard scrolling`, async ({
     page,
   }) => {
-    await page.goto(`${url}/large/`);
+    await page.goto(`${url}/large-ssg/`);
     await expect(page.locator(".cw-list-scroll")).toHaveAttribute("data-virtual", "true");
     await page.setViewportSize({ width, height: 740 });
     const first = page.locator("[data-cw-entry]").first();
@@ -316,3 +345,119 @@ for (const width of [1280, 320])
     await page.keyboard.press("ArrowDown");
     await expect(page.locator("a.cw-entry:focus")).toContainText("link-046");
   });
+
+async function settleLayout(page) {
+  await page.evaluate(
+    () => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))),
+  );
+}
+
+async function focusMiddle(page) {
+  await expect(page.locator(".cw-list-scroll")).toHaveAttribute("data-virtual", "true");
+  await page.locator("[data-cw-entry] a.cw-entry").first().focus();
+  for (let i = 0; i < 45; i++) await page.keyboard.press("ArrowDown");
+  await settleLayout(page);
+  return page.evaluateHandle(() => document.activeElement);
+}
+
+async function retainedFocus(focused) {
+  expect(
+    await focused.evaluate((node) => ({
+      connected: node.isConnected,
+      focused: document.activeElement === node,
+    })),
+  ).toEqual({ connected: true, focused: true });
+}
+
+for (const mode of ["ssg", "mpa"]) {
+  test(`${mode}: virtual rows retain focus and visibility across viewport resize`, async ({
+    page,
+  }, testInfo) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto(`${url}/large-${mode}/`);
+    const focused = await focusMiddle(page);
+    for (const width of [320, 1280, 320]) {
+      await page.setViewportSize({ width, height: 740 });
+      await settleLayout(page);
+      await retainedFocus(focused);
+      await expect(page.locator("a.cw-entry:focus")).toContainText("link-045");
+      const row = page.locator("[data-cw-entry]:has(a.cw-entry:focus)");
+      await expect(row).toHaveClass(/cw-selected/);
+      expect(await boundary(row, "focus")).toMatchObject({
+        inside: true,
+        verticallyVisible: true,
+        overlapsNext: false,
+      });
+      expect(await page.locator("[data-cw-entry]").count()).toBeLessThan(60);
+      if (process.env.CW_FOCUS_CAPTURE && mode === "ssg" && testInfo.project.name === "chromium")
+        await page.screenshot({ path: `.impeccable/review/crosswave-row/focus-${width}.png` });
+    }
+    await page.keyboard.press("ArrowDown");
+    await expect(page.locator("a.cw-entry:focus")).toContainText("link-046");
+    await page.keyboard.press("End");
+    await expect(page.locator("a.cw-entry:focus")).toContainText("link-509");
+    const last = await page.evaluateHandle(() => document.activeElement);
+    for (const width of [1280, 320]) {
+      await page.setViewportSize({ width, height: 740 });
+      await settleLayout(page);
+      await retainedFocus(last);
+    }
+    await page.keyboard.press("ArrowUp");
+    await expect(page.locator("a.cw-entry:focus")).toContainText("link-508");
+  });
+
+  test(`${mode}: virtual measurements preserve position and independent control focus`, async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto(`${url}/variable-${mode}/nested/`);
+    const focused = await focusMiddle(page);
+    const row = page.locator("[data-cw-entry].cw-selected");
+    await expect(row.locator("a.cw-entry")).toContainText("item-045");
+    const top = await row.evaluate((node) => node.getBoundingClientRect().top);
+    await page.addStyleTag({
+      content:
+        ".cw-row:not(.cw-selected) .cw-name{font-size:36px;line-height:1.5;letter-spacing:.12em;word-spacing:.16em}",
+    });
+    await settleLayout(page);
+    await retainedFocus(focused);
+    expect(
+      Math.abs((await row.evaluate((node) => node.getBoundingClientRect().top)) - top),
+    ).toBeLessThan(2);
+    await page.setViewportSize({ width: 320, height: 740 });
+    await settleLayout(page);
+    await retainedFocus(focused);
+    expect(await boundary(row, "focus")).toMatchObject({
+      inside: true,
+      verticallyVisible: true,
+      overlapsNext: false,
+    });
+
+    const summary = row.locator("summary");
+    await summary.focus();
+    const summaryNode = await summary.elementHandle();
+    await page.keyboard.press("Enter");
+    await expect(row.locator("details")).toHaveAttribute("open", "");
+    await settleLayout(page);
+    await retainedFocus(summaryNode);
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await settleLayout(page);
+    await retainedFocus(summaryNode);
+
+    const download = row.getByRole("link", { name: "Download" });
+    await download.focus();
+    const downloadNode = await download.elementHandle();
+    await page.setViewportSize({ width: 320, height: 740 });
+    await settleLayout(page);
+    await retainedFocus(downloadNode);
+
+    const search = page.getByRole("searchbox").first();
+    await search.focus();
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await settleLayout(page);
+    await expect(search).toBeFocused();
+    await search.fill("item-045");
+    await expect(page.locator("[data-cw-entry]")).toHaveCount(1);
+    await expect(search).toBeFocused();
+  });
+}
