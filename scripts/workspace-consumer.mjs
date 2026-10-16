@@ -1,3 +1,4 @@
+import { formatBytes, sizeValue } from "@dirwell/core/format";
 import assert from "node:assert/strict";
 import { mkdir, readFile, writeFile, rm } from "node:fs/promises";
 import { generateExplorer } from "@dirwell/core";
@@ -15,6 +16,9 @@ import { buildFrameworkTheme } from "@dirwell/theme-authoring";
 import { startAuthoringServer } from "@dirwell/theme-authoring/dev";
 assert.equal(typeof createExpressMiddleware, "function");
 assert.equal(typeof createFastifyPlugin, "function");
+assert.equal(formatBytes(1536), "1.5 KiB");
+assert.equal(formatBytes(1536, { units: "bytes" }), "1,536 B");
+assert.equal(typeof sizeValue, "function");
 assert.equal(typeof loadListing, "function");
 assert.equal(typeof parseListingEntries, "function");
 await rm("source", { recursive: true, force: true });
@@ -22,6 +26,24 @@ await mkdir("source/docs", { recursive: true });
 for (const name of ["one.txt", "two.txt", "three.txt", "active.html", "picture.png"])
   await writeFile("source/" + name, "data");
 await assert.rejects(generateExplorer({ sourceDir: "source", outputDir: "out" }), /explicit theme/);
+await generateExplorer({
+  sourceDir: "source",
+  outputDir: "custom-size-out",
+  theme: {
+    name: "custom-size",
+    searchIndex: false,
+    render: ({ directory }) => ({
+      html: `<pre>${directory.entries
+        .filter((entry) => entry.kind === "file")
+        .map(
+          (entry) =>
+            `${entry.metadata.size}|${formatBytes(entry.metadata.size, { units: "bytes" })}`,
+        )
+        .join(";")}</pre>`,
+    }),
+  },
+});
+assert.match(await readFile("custom-size-out/index.html", "utf8"), /4\|4 B/);
 for (const [name, theme] of [
   ["plain", createPlainTheme()],
   ["ledger", createLedgerTheme()],

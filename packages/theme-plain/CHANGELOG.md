@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.5
+
+### Patch Changes
+
+- Use shared configurable binary/decimal/bytes formatting. Show labeled symlink target and link sizes by default, with native exact-byte disclosures and both/target/entry options. Plain now defaults to readable units; size.units: bytes retains exact-byte presentation.
+
 ## 0.0.4
 
 ### Patch Changes

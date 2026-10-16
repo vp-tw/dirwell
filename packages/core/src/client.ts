@@ -82,7 +82,7 @@ function manifest(value: unknown): ListingManifest {
   const sort = value.sort;
   if (
     typeof sort.field !== "string" ||
-    !["name", "size", "modified"].includes(sort.field) ||
+    !["name", "size", "targetSize", "modified"].includes(sort.field) ||
     typeof sort.direction !== "string" ||
     !["asc", "desc"].includes(sort.direction) ||
     typeof sort.nameMode !== "string" ||
@@ -91,7 +91,14 @@ function manifest(value: unknown): ListingManifest {
   )
     throw new ListingDataError("Invalid listing order");
   // Guarded enum members are copied through explicit branches, without trusting an assertion.
-  const field = sort.field === "size" ? "size" : sort.field === "modified" ? "modified" : "name";
+  const field =
+    sort.field === "targetSize"
+      ? "targetSize"
+      : sort.field === "size"
+        ? "size"
+        : sort.field === "modified"
+          ? "modified"
+          : "name";
   const direction = sort.direction === "desc" ? "desc" : "asc";
   const nameMode =
     sort.nameMode === "unicode" ? "unicode" : sort.nameMode === "locale" ? "locale" : "natural";

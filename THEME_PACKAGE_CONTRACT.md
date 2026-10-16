@@ -24,3 +24,13 @@ records, client History, pagination and metadata must identify the same target.
 The removed Plain `portableLinks` maps to shared explicit/slash routing. See
 [the URL guide](docs/src/content/docs/urls.md). This changes the next SDK contract;
 it does not describe the capabilities of already-published historical releases.
+
+## Optional size helpers
+
+Themes receive raw bytes; formatting is never mandatory. The browser-safe
+`@dirwell/core/format` entry exports `formatBytes` and `sizeValue` without Node
+filesystem imports or official-theme markup. A theme may ignore these helpers.
+Official themes share configurable formatting defaults, but independent themes
+own units, precision, disclosure, labels and layout. Preserve the difference
+between entry bytes, target bytes, unavailable targets and uncalculated directory
+contents. See [official size display guide](https://vp-tw.github.io/dirwell/themes/#file-size-display) for the official policy.

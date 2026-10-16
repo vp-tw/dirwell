@@ -1,4 +1,5 @@
 <script>
+  import { renderSize } from "../../shared-theme/src/size.ts";
   import { onMount, tick, untrack } from "svelte";
   import { queryLiveArchive } from "../../shared-theme/src/live-search.ts";
   import {
@@ -16,7 +17,6 @@
     visibleRecords,
     directoryLike,
     entryType,
-    size,
     fuzzy,
   } from "../../shared-theme/src/records.ts";
   import {
@@ -397,7 +397,7 @@
       if (event.key === "Escape") timestamp = null;
       return;
     }
-    if (event.target?.closest?.("[data-dirwell-actions]")) return;
+    if (event.target?.closest?.("[data-dirwell-actions], summary")) return;
     const editable = /INPUT|TEXTAREA|SELECT/.test(event.target?.tagName ?? "");
     if (event.key === "/" && !editable) {
       event.preventDefault();
@@ -736,8 +736,10 @@
         onchange={(event) =>
           (sort = { ...sort, field: event.currentTarget.value })}
         ><option value="name">{ui.labels.name}</option><option value="size"
-          >{ui.labels.size}</option
-        ><option value="modified">{ui.labels.modified}</option></select
+          >{ui.labels.entrySize}</option
+        ><option value="targetSize">{ui.labels.targetSize}</option><option
+          value="modified">{ui.labels.modified}</option
+        ></select
       ></label
     >
     <label
@@ -876,11 +878,9 @@
                       : "→ "}{entry.link.target}</small
                   >{/if}</span
               >
-            {:else if column === "size"}<span class="kind"
-                >{isDirectory(entry)
-                  ? ui.labels.folder
-                  : size(entry.size)}</span
-              >
+            {:else if column === "size"}<div class="kind">
+                {@html renderSize(entry, ui)}
+              </div>
             {:else if column === "modified"}<button
                 class="timestamp-button"
                 disabled={!ready}

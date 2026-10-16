@@ -55,7 +55,7 @@ function sort(value: unknown, name: string): void {
   scalar(options.directoriesFirst, "boolean", `${name}.directoriesFirst`);
   for (const [key, allowed] of Object.entries({
     direction: ["asc", "desc"],
-    field: ["name", "size", "modified"],
+    field: ["name", "size", "targetSize", "modified"],
     nameMode: ["natural", "unicode", "locale"],
   }))
     if (options[key] !== undefined && !allowed.includes(String(options[key])))

@@ -211,9 +211,10 @@ export function validateConfig(
     configKeys(sort, ["field", "direction", "directoriesFirst", "nameMode"], "config.sort");
     if (
       sort.field !== undefined &&
-      (typeof sort.field !== "string" || !["name", "modified", "size"].includes(sort.field))
+      (typeof sort.field !== "string" ||
+        !["name", "modified", "size", "targetSize"].includes(sort.field))
     ) {
-      throw new TypeError('sort.field must be "name", "modified", or "size"');
+      throw new TypeError('sort.field must be "name", "modified", "size", or "targetSize"');
     }
     if (
       sort.nameMode !== undefined &&

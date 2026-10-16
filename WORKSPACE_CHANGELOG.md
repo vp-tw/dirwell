@@ -2,6 +2,14 @@
 
 The nine official `@dirwell/*` packages use synchronized versions. `0.0.1` is the first non-prerelease family; the 0.0.x API may evolve, so pin the version qualified by your application.
 
+## 0.0.5
+
+- Expose browser-safe `@dirwell/core/format` helpers for independent themes; raw byte fields remain unchanged and formatting is optional.
+- Apply shared binary-unit and automatic-precision defaults across Plain, Ledger and Crosswave. Add decimal/bytes, precision and locale options. Plain now defaults to readable units; choose `size.units: "bytes"` to keep exact-byte presentation.
+- Show labeled symlink Target and Link sizes by default, with both/target/entry settings and native exact-byte disclosures. Keep unavailable targets distinct from zero and directory content totals.
+- Add explicit `targetSize` sorting across build, live service, manifests and Ledger URL/History state. Existing `size` retains entry-byte meaning; non-comparable sizes follow numeric values in both directions, subject to folders-first.
+- Preserve Ledger compact rows/sticky context and ship standalone source helpers for Svelte/Vue authoring. Directory aggregation, allocated disk space and transfer size remain separate opt-in proposals.
+
 ## 0.0.4
 
 - Restore Ledger's compact inventory layout: 52px default desktop rows, aligned headings and cells, and natural growth for long names, link targets and custom actions.

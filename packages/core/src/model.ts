@@ -65,7 +65,7 @@ export interface RenderedPage {
   readonly assets?: Readonly<Record<string, string | Uint8Array>>;
 }
 
-export type SortField = "modified" | "name" | "size";
+export type SortField = "modified" | "name" | "size" | "targetSize";
 export type NameSortMode = "locale" | "natural" | "unicode";
 export type SortDirection = "asc" | "desc";
 export type EntryDataProvider = (

@@ -80,7 +80,7 @@ function selection(value: Options, name: string): void {
     const sort = optionObject(value.sort, `${name}.sort`);
     optionKeys(sort, ["field", "direction", "directoriesFirst", "nameMode"], `${name}.sort`);
     scalar(sort.directoriesFirst, "boolean", `${name}.sort.directoriesFirst`);
-    choice(sort.field, ["name", "size", "modified"], `${name}.sort.field`);
+    choice(sort.field, ["name", "size", "targetSize", "modified"], `${name}.sort.field`);
     choice(sort.direction, ["asc", "desc"], `${name}.sort.direction`);
     choice(sort.nameMode, ["natural", "locale", "unicode"], `${name}.sort.nameMode`);
   }
