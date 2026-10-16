@@ -323,6 +323,11 @@ export async function themeResponse(
       ".svg": "image/svg+xml",
       ".png": "image/png",
       ".jpg": "image/jpeg",
+      ".jpeg": "image/jpeg",
+      ".ico": "image/vnd.microsoft.icon",
+      ".gif": "image/gif",
+      ".webp": "image/webp",
+      ".avif": "image/avif",
     };
     return respond(asset, types[path.extname(name)] ?? "application/octet-stream");
   }

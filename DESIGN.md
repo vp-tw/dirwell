@@ -176,7 +176,10 @@ the landing-header name, and up to 330px above the hero terminal. At the existin
 uses the same original asset beside its title. Favicon exports are 16px, 32px, and
 48px transparent PNGs from [a separate 1254px square favicon master](assets/brand/favicon-source.png),
 created by an `image_gen` edit of the same approved bird. The landing page declares
-all three sizes; Starlight uses the 48px export.
+all three sizes; Starlight uses the 48px export. Ledger and Crosswave package the
+same three exports from `docs/public/brand/` without changing their bytes, and
+publish them through theme asset URLs. `brand.favicon` replaces this default with local images or public URLs;
+`false` disables its declarations and assets. `brand.faviconUrl` remains a URL shorthand. Plain has no default favicon.
 Only tighter framing and small-size contour cleanup are permitted; preserve the
 full bird, including its eye, orange wing, beak, and both feet. The original
 mascot remains unchanged. See [favicon provenance](assets/brand/favicon-provenance.json).
@@ -224,7 +227,7 @@ components, assets, or the complete document without using the official-site tok
 ### Don't:
 
 - **Don't** replace the favicon with a different character, unrelated badge, or cropped bird body.
-- **Don't** derive new UI palette colors from the illustration or force official-site branding into explorer themes.
+- **Don't** derive new UI palette colors from the illustration or extend the optional Ledger/Crosswave favicon default into unrelated explorer branding.
 - **Don't** crop, manually composite, or reletter generated share artwork; the approved dark-cover disk is a localized image-tool edit.
 - **Don't** turn the page into an equal-card feature grid.
 - **Don't** use invented adoption claims, customers, metrics, or testimonials.

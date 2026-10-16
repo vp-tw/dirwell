@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.0.10
+
+No changes in this release.
+
 ## 0.0.9
 
 No changes in this release.

@@ -2,6 +2,12 @@
 
 The nine official `@dirwell/*` packages use synchronized versions. `0.0.1` is the first non-prerelease family; the 0.0.x API may evolve, so pin the version qualified by your application.
 
+## 0.0.10
+
+- Add theme-owned favicons from `File`, local path or file-URL sources, existing public URLs, or multiple descriptors with MIME type, size and media hints. Custom icons replace defaults; `false` disables declarations and copied assets. Keep the existing `faviconUrl` shorthand and reject conflicting options.
+- Bundle the approved paper-bird PNGs in Ledger and Crosswave; retain Plain's empty default. Publish original image bytes through static or mounted live asset routes, keep local inputs out of browser models, and refresh icon links during navigation and History restoration.
+- Qualify favicon source forms against deployment bases, routing, layouts, pagination, image types, failures and installed-package consumers. Rewrite favicon guidance around choosing a source, understanding path bases, and deploying the generated assets.
+
 ## 0.0.9
 
 - Preserve Crosswave's focused virtual row, selection and scroll position when resizing or reflow changes measured row heights. Keep native size disclosures, configured actions and search focus independent.

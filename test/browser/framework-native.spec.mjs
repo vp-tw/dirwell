@@ -361,8 +361,12 @@ for (const [name, creator] of [
         const filename = path.join(root, "out", file);
         const snapshot = JSON.parse(await readFile(filename, "utf8"));
         if (snapshot.theme !== name || snapshot.path !== "docs") continue;
+        snapshot.metadataHead = snapshot.metadataHead.replace(
+          'rel="icon"',
+          'rel="icon" onload="window.__metadataInjected=true"',
+        );
         snapshot.metadataHead +=
-          '<script data-dirwell-metadata>window.__metadataInjected=true</script><img src="/unexpected-metadata-resource"><meta data-dirwell-metadata http-equiv="refresh" content="0;url=/unexpected"><link data-dirwell-metadata rel="canonical" href="javascript:alert(1)">';
+          '<script data-dirwell-metadata>window.__metadataInjected=true</script><img src="/unexpected-metadata-resource"><meta data-dirwell-metadata http-equiv="refresh" content="0;url=/unexpected"><link data-dirwell-metadata rel="canonical" href="javascript:alert(1)"><link data-dirwell-metadata rel="icon" href="javascript:alert(1)">';
         await writeFile(filename, JSON.stringify(snapshot));
       }
       let unsafeRequests = 0;
@@ -396,6 +400,8 @@ for (const [name, creator] of [
       expect(await page.evaluate(() => window.__metadataInjected)).toBeUndefined();
       expect(unsafeRequests).toBe(0);
       await expect(page.locator('link[rel="canonical"]')).toHaveCount(1);
+      await expect(page.locator('link[rel="icon"]')).toHaveCount(3);
+      await expect(page.locator('link[rel="icon"][onload]')).toHaveCount(0);
       await expect(page.locator('meta[http-equiv="refresh"]')).toHaveCount(0);
       await page.getByRole("link", { name: "Home", exact: true }).click();
       await expect(page.locator('meta[property="og:title"]')).toHaveAttribute(

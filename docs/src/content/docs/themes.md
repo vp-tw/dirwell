@@ -38,7 +38,7 @@ Save as `dirwell.config.mjs` after installing CLI and Ledger. Rich themes load c
 
 ## Shared configuration
 
-All three official factories accept the same small, serializable customization surface:
+All three official factories accept shared presentation options. Local favicon inputs stay on Node; browser models contain only public presentation data:
 
 ```js
 createLedgerTheme({
@@ -51,7 +51,7 @@ createLedgerTheme({
     name: "Sample downloads",
     logoUrl: "/brand/logo.png",
     logoAlt: "Sample project",
-    faviconUrl: "/brand/favicon.png",
+    favicon: { source: new URL("./brand/favicon.png", import.meta.url) },
     footerText: "Project documentation",
     footerUrl: "https://example.com/docs",
   },
@@ -64,7 +64,7 @@ createLedgerTheme({
 
 Partial `labels` retain English defaults. `ThemeLabels` from each theme package lists every key, including accessible names, errors, dialogs and pagination. Keep placeholders such as `{count}`, `{path}`, `{page}` and `{pages}` in translated strings. Document language does not translate labels automatically. Supply `locale` **and** `timeZone` for identical server/browser date formatting. Without either, server dates use UTC and hydrated dates use the viewer's local setting. Locale affects dates; listing name collation remains controlled by the listing sort contract.
 
-Brand assets must use HTTP(S) or root-relative URLs. Dirwell does not copy external brand assets: publish them at the specified URLs. Footer text is escaped. No footer, logo or font download is added by default. `--dw-font-family` accepts an installed font stack; loading font files belongs to the host. Ledger exposes `--paper`, `--surface`, `--ink`, `--muted`, `--rule`, `--accent` and `--focus`; Crosswave exposes `--cw-top`, `--cw-bottom`, `--cw-text`, `--cw-muted` and `--cw-focus`. Set a coherent palette for contrast. Other internal CSS variables and selectors are not compatibility promises.
+The logo and footer link accept HTTP(S) or root-relative URLs that you serve. Favicons also accept local images that Dirwell publishes, as described below. Footer text is escaped. No footer, logo or font download is added by default. `--dw-font-family` accepts an installed font stack; loading font files belongs to the host. Ledger exposes `--paper`, `--surface`, `--ink`, `--muted`, `--rule`, `--accent` and `--focus`; Crosswave exposes `--cw-top`, `--cw-bottom`, `--cw-text`, `--cw-muted` and `--cw-focus`. Set a coherent palette for contrast. Other internal CSS variables and selectors are not compatibility promises.
 
 Columns retain the configured order and must include `name`. Custom columns display explicitly supplied public JSON fields; strings are escaped, objects/arrays display as JSON. Ledger uses columns across a row; Crosswave stacks these fields in its entry card. For richer formatting, use a source row wrapper or an independent renderer.
 
@@ -73,6 +73,139 @@ Actions are opt-in and separate from the primary navigation link. `copy-link` co
 Ledger's `archiveSearch: false` hides its archive control and omits the generated index. Directory filtering remains available. Static archive search covers names/paths, not file contents or public annotations; live archive queries are available when Server `search` is enabled. Loaded archive data is reused for up to 60 seconds, with a 100,000-entry safety limit and at most 100 displayed results. Retry is available after loading failure. Crosswave exposes a live archive dialog with the same Server query capability; `archiveSearch: false` hides it. Both retain current-directory filtering. Live queries scan fresh names/paths under server budgets and refresh open visible dialogs every two seconds by default; they do not download a static archive index. See [live query configuration](../configuration/#live-archive-search).
 
 See the [release annotation example](https://github.com/vp-tw/dirwell/tree/main/examples/release-downloads) for build and live use without a theme fork.
+
+### Favicons
+
+Ledger and Crosswave include the Dirwell website's 16, 32 and 48px paper-bird PNGs
+by default. Plain has no default favicon. Use `brand.favicon` in any official theme
+to publish your own image, reference an existing public image, or disable icon links.
+You do not need `@dirwell/share-image` for favicons.
+
+#### Publish a local image
+
+Put your image beside `dirwell.config.mjs`, then configure its source:
+
+```js
+import { createLedgerTheme } from "@dirwell/theme-ledger";
+
+export default {
+  theme: createLedgerTheme({
+    brand: {
+      favicon: { source: new URL("./favicon.png", import.meta.url) },
+    },
+  }),
+};
+```
+
+Dirwell copies the original bytes into theme assets and creates the appropriate
+icon link for the current folder, deployment base and output layout. A `file:` URL
+is useful in configuration modules because it resolves from the module's location.
+The image can live outside the archive's `sourceDir`.
+
+`source` also accepts a local path string or a Node `File`:
+
+```js
+const fromPath = createLedgerTheme({
+  brand: { favicon: { source: "./brand/favicon.png" } },
+});
+
+const fromFile = createLedgerTheme({
+  brand: {
+    favicon: {
+      source: new File(
+        [
+          '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><circle cx="16" cy="16" r="14" fill="#174ea6"/></svg>',
+        ],
+        "favicon.svg",
+        { type: "image/svg+xml" },
+      ),
+    },
+  },
+});
+```
+
+Relative path strings resolve from the process working directory **when the theme
+is created**, not from the configuration file or archive root. Absolute paths are
+also supported. Options are snapshotted at creation; local bytes are read on the
+first render and cached for that theme instance. Create a new instance after
+changing the image. Missing or unreadable files fail the build without replacing
+the previous successful output. Source paths and `File` objects are not serialized
+into page data.
+
+#### Reference an image you already serve
+
+Use `href` for an HTTP(S) or root-relative URL. Dirwell emits the URL without
+fetching or copying the image:
+
+```js
+createLedgerTheme({
+  brand: { favicon: { href: "/downloads/brand/favicon.png" } },
+});
+```
+
+A root-relative URL starts at the effective base URL's host root; include any
+required deployment prefix yourself. An absolute HTML `<base>` can also change
+that host. A fully qualified `https://…` URL fixes both the host and path.
+A descriptor must have exactly one of `source` and `href`.
+
+#### Supply multiple sizes or light/dark icons
+
+An array replaces all default icons. Each entry may specify `type`, `sizes` and
+`media`; the browser chooses an applicable image:
+
+```js
+createLedgerTheme({
+  brand: {
+    favicon: [
+      {
+        source: new URL("./brand/light.svg", import.meta.url),
+        media: "(prefers-color-scheme: light)",
+      },
+      {
+        source: new URL("./brand/dark.svg", import.meta.url),
+        media: "(prefers-color-scheme: dark)",
+      },
+    ],
+  },
+});
+```
+
+Supported source formats are PNG, SVG, ICO, JPEG, GIF, WebP and AVIF. MIME type
+comes from explicit `type`, then a nonempty `File.type`, then the filename extension.
+An unknown type requires a supported explicit image MIME type. SVG sources default
+to `sizes: "any"`; other sources omit `sizes` unless supplied. Use `"32x32"` or
+space-separated dimensions such as `"16x16 32x32"` for raster sizes. These attributes
+describe your image; Dirwell does not inspect dimensions, resize, convert or sanitize
+image bytes. Use images you trust. Browser format and icon-selection support varies.
+
+#### Disable icons and understand publication
+
+```js
+createLedgerTheme({ brand: { favicon: false } });
+```
+
+`false` omits icon declarations and copied favicon assets. It does not guarantee
+an empty browser tab icon: browsers may request the host's `/favicon.ico` under the
+[HTML icon standard](https://html.spec.whatwg.org/multipage/links.html#rel-icon).
+An archive file named `favicon.ico` remains an ordinary file; it is not automatically
+selected or replaced. Home-screen icons and PWA manifests require separate setup.
+
+The existing `brand.faviconUrl` shorthand accepts an HTTP(S)/root-relative URL or
+`false`. It has the same replacement behavior. Configure only one of `favicon` and
+`faviconUrl`; supplying both is an error.
+
+SSG publishes copied icons beside each folder; MPA shares them under `__dirwell`.
+The live server serves them through its mounted theme-asset route with the matching
+MIME type. Identical image bytes and output formats share a content-based filename.
+Ledger and Crosswave keep icon links current during folder navigation and History
+restoration. Enhanced navigation requires same-origin page snapshots; when a
+cross-origin deployment base prevents loading a snapshot, the current view stays
+visible and offers retry or the native folder link. Serve the complete output at
+the configured base so that native navigation can reach it.
+
+Favicons belong to each theme's document. Core supplies asset publication and URL
+resolution, while the optional metadata provider supplies social previews.
+Independent themes retain control over their own icon policy.
 
 ## Crosswave options
 

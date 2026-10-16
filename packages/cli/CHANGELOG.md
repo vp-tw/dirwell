@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.0.10
+
+### Patch Changes
+
+- Updated dependencies
+  - @dirwell/theme-plain@0.0.10
+  - @dirwell/server@0.0.10
+  - @dirwell/core@0.0.10
+
 ## 0.0.9
 
 ### Patch Changes

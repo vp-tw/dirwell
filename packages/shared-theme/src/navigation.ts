@@ -199,12 +199,19 @@ export function applyThemeMetadata(page: Record<string, unknown>, pageHref: stri
       next = document.createElement("meta");
       next.setAttribute(attribute, key);
       next.setAttribute("content", content);
-    } else if (element.tagName === "LINK" && element.getAttribute("rel") === "canonical") {
+    } else if (
+      element.tagName === "LINK" &&
+      ["canonical", "icon"].includes(element.getAttribute("rel") ?? "")
+    ) {
       const href = url(element.getAttribute("href") ?? "");
       if (href === null) continue;
       next = document.createElement("link");
-      next.setAttribute("rel", "canonical");
+      next.setAttribute("rel", element.getAttribute("rel")!);
       next.setAttribute("href", href);
+      if (element.getAttribute("rel") === "icon")
+        for (const attribute of ["type", "sizes", "media"])
+          if (element.hasAttribute(attribute))
+            next.setAttribute(attribute, element.getAttribute(attribute)!);
     } else continue;
     next.setAttribute("data-dirwell-metadata", "");
     document.head.append(next);

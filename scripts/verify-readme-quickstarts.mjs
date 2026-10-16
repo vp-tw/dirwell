@@ -106,6 +106,24 @@ try {
     await writeFile(path.join(cwd, "build.mjs"), (await blocks(name))[0]);
     run(process.execPath, ["build.mjs"], cwd);
     assert.match(await readFile(path.join(cwd, "generated/index.html"), "utf8"), /note\.txt/);
+    if (name.startsWith("theme-")) {
+      const factory = {
+        "theme-plain": "createPlainTheme",
+        "theme-ledger": "createLedgerTheme",
+        "theme-crosswave": "createCrosswaveTheme",
+      }[name];
+      const png = await readFile(path.join(repository, "docs/public/brand/favicon-32.png"));
+      await writeFile(path.join(cwd, "favicon.png"), png);
+      const example = (await blocks(name))[1];
+      await writeFile(
+        path.join(cwd, "favicon.mjs"),
+        `import { generateExplorer } from "@dirwell/core";\nimport { ${factory} } from "@dirwell/${name}";\nconst theme = ${example}\nawait generateExplorer({ sourceDir: "files", outputDir: "favicon-output", theme });`,
+      );
+      run(process.execPath, ["favicon.mjs"], cwd);
+      const html = await readFile(path.join(cwd, "favicon-output/index.html"), "utf8");
+      const href = html.match(/<link rel="icon" href="([^"]+)"/)[1];
+      assert.deepEqual(await readFile(path.join(cwd, "favicon-output", href)), png);
+    }
     await record(name, cwd);
   }
   const cli = await trial("cli", ["@dirwell/cli"]);

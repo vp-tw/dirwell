@@ -10,6 +10,16 @@ Opt into `listing.pagination` only when native page links are rendered. HTML pag
 
 Assets use validated filenames. MPA shared filenames must have identical bytes across pages; collisions fail. Refer to assets using context links. Optional share metadata/images are injected through `@dirwell/share-image`, not implicitly bundled in a theme.
 
+Favicons are theme-owned document assets. Official Ledger and Crosswave bundle the
+website's 16/32/48px PNG icons; Plain has no default icon. All three accept
+`brand.favicon` as a local File/path/file-URL source, an HTTP(S)/root-relative href,
+an array of descriptors, or `false` to omit icon declarations. Custom icons replace
+the default. Local inputs remain on Node; only resolved links enter browser models.
+`brand.faviconUrl` remains a URL/false shorthand and cannot be combined with `favicon`. Use `RenderedPage.assets`
+and `context.assetHref` for packaged icons, and keep relative icon links correct
+during client navigation. Core and the optional share-image provider impose no icon
+policy on independent renderers.
+
 Declare and test the supported Core version in peer dependencies. Verify imports/types, SSG/MPA, encoded names, child navigation, asset loading and unavailable symlinks in an installed consumer. Official Svelte/Vue source customization instead uses the [paired source compiler](THEME_RUNTIME_CONTRACT.md).
 
 ## SDK 0.0.3 routing context contract
