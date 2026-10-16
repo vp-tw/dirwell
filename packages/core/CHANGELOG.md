@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.5
+
+### Patch Changes
+
+- Expose optional browser-safe byte formatting and size selection through @dirwell/core/format. Preserve raw byte fields and add explicit targetSize sorting; non-comparable sizes follow numeric values in either direction.
+
 ## 0.0.4
 
 ### Patch Changes

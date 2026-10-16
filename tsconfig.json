@@ -21,7 +21,8 @@
     "verbatimModuleSyntax": true,
     "paths": {
       "@dirwell/core": ["./packages/core/src/index.ts"],
-      "@dirwell/core/client": ["./packages/core/src/client.ts"]
+      "@dirwell/core/client": ["./packages/core/src/client.ts"],
+      "@dirwell/core/format": ["./packages/core/src/format.ts"]
     }
   },
   "include": [

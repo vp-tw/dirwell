@@ -1,3 +1,4 @@
+import { sizeValue } from "../../core/src/format.ts";
 import type { ListingEntry, SortOptions } from "@dirwell/core";
 export const directoryLike = (entry: ListingEntry) =>
   entry.kind === "directory" || entry.link?.targetKind === "directory";
@@ -33,6 +34,14 @@ export function visibleRecords(
         b = right.entry;
       if (sort.directoriesFirst && directoryLike(a) !== directoryLike(b))
         return directoryLike(a) ? -1 : 1;
+      const sizeBasis = sort.field === "targetSize" ? "target" : "entry";
+      const aSize = sizeValue(a, sizeBasis),
+        bSize = sizeValue(b, sizeBasis);
+      if (
+        (sort.field === "size" || sort.field === "targetSize") &&
+        (aSize === null) !== (bSize === null)
+      )
+        return aSize === null ? 1 : -1;
       const name = () =>
         sort.nameMode === "unicode"
           ? compareUnicode(a.name, b.name)
@@ -43,8 +52,8 @@ export function visibleRecords(
       const primary =
         (sort.field === "name"
           ? name()
-          : sort.field === "size"
-            ? (a.kind === "directory" ? 0 : a.size) - (b.kind === "directory" ? 0 : b.size)
+          : sort.field === "size" || sort.field === "targetSize"
+            ? (aSize ?? 0) - (bSize ?? 0)
             : a.modifiedAt.localeCompare(b.modifiedAt)) || name();
       return (sort.direction === "asc" ? primary : -primary) || compareUnicode(a.id, b.id);
     })
@@ -58,16 +67,6 @@ function compareUnicode(left: string, right: string): number {
     if (delta) return delta;
   }
   return a.length - b.length;
-}
-export function size(bytes: number): string {
-  const units = ["B", "KiB", "MiB", "GiB", "TiB"];
-  let value = bytes,
-    index = 0;
-  while (value >= 1024 && index < 4) {
-    value /= 1024;
-    index++;
-  }
-  return `${value.toFixed(index === 0 || value >= 100 ? 0 : 1)} ${units[index]}`;
 }
 export function modified(value: string, local = false): string {
   const date = new Date(value);

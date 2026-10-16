@@ -14,7 +14,7 @@ function validSort(value: unknown): value is Required<SortOptions> {
   if (typeof value !== "object" || value === null) return false;
   const sort = value as Record<string, unknown>;
   return (
-    ["name", "size", "modified"].includes(String(sort.field)) &&
+    ["name", "size", "targetSize", "modified"].includes(String(sort.field)) &&
     ["asc", "desc"].includes(String(sort.direction)) &&
     ["natural", "locale", "unicode"].includes(String(sort.nameMode)) &&
     typeof sort.directoriesFirst === "boolean"

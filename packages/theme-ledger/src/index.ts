@@ -16,6 +16,7 @@ import {
 } from "../../shared-theme/src/customization.ts";
 export type {
   ThemeCustomization,
+  SizeDisplayOptions,
   ThemeLabels,
   ThemeColumn,
   ThemeAction,

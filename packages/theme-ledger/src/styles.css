@@ -468,3 +468,60 @@ dialog p {
     justify-self: start;
   }
 }
+
+/* Size remains theme-owned; the formatter and native disclosure are shared. */
+.kind:has(.dw-size) {
+  min-inline-size: 0;
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+}
+.dw-size {
+  display: block;
+  overflow-wrap: anywhere;
+}
+.dw-size > summary {
+  min-block-size: 44px;
+  align-content: center;
+  cursor: pointer;
+}
+.dw-size > summary:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+.dw-size-values {
+  display: inline-flex;
+  flex-direction: column;
+  max-inline-size: 100%;
+  vertical-align: middle;
+}
+.dw-size-line {
+  display: block;
+}
+.dw-size-label {
+  margin-inline-end: 0.45em;
+}
+.dw-size-value {
+  color: var(--ink);
+}
+.dw-size-exact {
+  display: block;
+  margin-block: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+}
+@media (hover: hover) {
+  .dw-size > summary:hover {
+    color: var(--ink);
+  }
+}
+.dw-size > summary:active {
+  color: var(--ink);
+}
+@media (max-width: 672px) {
+  .kind:has(.dw-size) {
+    text-align: start;
+  }
+}
+
+.dw-size-separator {
+  display: none;
+}

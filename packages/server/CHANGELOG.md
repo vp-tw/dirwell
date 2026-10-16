@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.5
+
+### Patch Changes
+
+- Synchronize the SDK family for shared size presentation and explicit target-size sorting.
+
 ## 0.0.4
 
 ### Patch Changes

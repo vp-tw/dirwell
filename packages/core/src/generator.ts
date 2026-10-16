@@ -1,3 +1,4 @@
+import { sizeValue } from "./format.ts";
 import { validateGenerateOptions } from "./validation.ts";
 import {
   resolveDirectoryUrls,
@@ -135,10 +136,30 @@ export function compareEntries(
   let result: number;
   if (resolved.field === "modified") {
     result = left.metadata.times.modifiedAt.localeCompare(right.metadata.times.modifiedAt);
-  } else if (resolved.field === "size") {
-    result =
-      (left.kind === "directory" ? 0 : left.metadata.size) -
-      (right.kind === "directory" ? 0 : right.metadata.size);
+  } else if (resolved.field === "size" || resolved.field === "targetSize") {
+    const value = (entry: FileSystemEntry) =>
+      sizeValue(
+        {
+          kind: entry.kind,
+          size: entry.metadata.size,
+          link:
+            entry.symlink === null
+              ? null
+              : {
+                  targetKind: entry.symlink.targetKind,
+                  targetSize: entry.symlink.targetSize ?? null,
+                  unavailable:
+                    entry.symlink.isBroken ||
+                    entry.symlink.isOutsideRoot ||
+                    Boolean(entry.symlink.isTargetExcluded),
+                },
+        },
+        resolved.field === "targetSize" ? "target" : "entry",
+      );
+    const a = value(left),
+      b = value(right);
+    if ((a === null) !== (b === null)) return a === null ? 1 : -1;
+    result = (a ?? 0) - (b ?? 0);
   } else {
     result = compareNames(left.name, right.name, resolved.nameMode);
   }

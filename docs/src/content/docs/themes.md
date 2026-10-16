@@ -138,3 +138,53 @@ Large Crosswave directories now use measured DOM windows above 500 visible rows,
 Common identity, logo, footer and font/color variables use the shared configuration above. For application styles/head elements without source compilation, wrap the typed `render(context)` result, retain its assets/client/data protocol and add assets through `RenderedPage.assets` plus `context.assetHref`. See the [document branding helper](https://github.com/vp-tw/dirwell/tree/main/examples/private-downloads). Asset names must not collide with selected source files; use source snippets/slots for body layout changes.
 
 The private live recipe composes fresh response nonces with a nonce/`strict-dynamic` script policy and nonced stylesheet elements. Inline style attributes remain explicitly allowed for measured row positioning; inline scripts, event handlers and eval remain blocked. Host sessions, CSP delivery and external brand-resource permissions belong to the application. This is an executed production-renderer recipe, not a development-Vite policy or an HTML sanitizer. [W3C CSP3](https://www.w3.org/TR/CSP3/#strict-dynamic-usage) defines the policy model.
+
+## File size display
+
+Plain, Ledger and Crosswave use the same size defaults: binary units, up to three
+significant digits for converted values, both target and link sizes for symlinks,
+and a native disclosure for exact bytes. Plain remains script-free.
+
+All three factories accept:
+
+```ts
+const size = {
+  units: "decimal", // "binary" (default), "decimal", or "bytes"
+  symlink: "both", // "both" (default), "target", or "entry"
+  exact: "details", // "details" (default), "inline", or "none"
+  maximumFractionDigits: 2, // optional; overrides automatic precision
+} as const;
+createPlainTheme({ size });
+createLedgerTheme({ size });
+createCrosswaveTheme({ size });
+```
+
+Numbers use the theme's `locale` (default `en-US`); `size.locale` can override it.
+Known zero is `0 B`. Folders have no calculated content size. A symlink's target
+is labeled separately from its own link size; an unavailable or withheld target
+never silently uses the link size. Exact details work with keyboard and touch,
+without relying on hover. Bytes mode does not repeat an exact disclosure.
+
+Display settings do not change sorting. `sort.field: "size"` means item size;
+`sort.field: "targetSize"` means file-target size. Ledger exposes both choices
+and supports `targetSize` in `dw.sort` URLs. Non-comparable sizes follow numeric
+sizes in either direction, subject to folders-first.
+
+### Independent themes
+
+Raw `ListingEntry.size` and `link.targetSize` remain available. Custom themes
+can use the optional, browser-safe public helper without importing an official
+theme or adopting its markup:
+
+```ts
+import { formatBytes, sizeValue } from "@dirwell/core/format";
+
+const bytes = sizeValue(entry);
+const text = bytes === null ? "Unavailable" : formatBytes(bytes);
+// Or render entry.size directly using your own rules.
+```
+
+The formatter supports binary, decimal and exact bytes with an explicit locale.
+It accepts known non-negative safe integers, not nullable state. Directory totals,
+disk allocation and compressed transfer sizes are separate capabilities and are
+not calculated by these helpers.

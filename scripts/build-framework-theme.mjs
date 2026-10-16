@@ -77,7 +77,7 @@ if (framework === "svelte") {
   const adjustments = await import(pathToFileURL(path.join(generated, "adjustments.mjs")));
   await writeFile(
     path.join(output, "styles.css"),
-    legacy.crosswaveStyles + adjustments.crosswaveAdjustments,
+    legacy.crosswaveStyles + legacy.sizeStyles + adjustments.crosswaveAdjustments,
   );
 }
 
@@ -152,6 +152,7 @@ const componentSource = (await readFile(path.join(folder, "src", componentName),
   .replaceAll('icons.ts"', 'icons.mjs"')
   .replaceAll('navigation.ts"', 'navigation.mjs"')
   .replaceAll('records.ts"', 'records.mjs"')
+  .replaceAll('size.ts"', 'size.mjs"')
   .replaceAll('view-state.ts"', 'view-state.mjs"')
   .replaceAll('live-search.ts"', 'live-search.mjs"')
   .replaceAll('customization.ts"', 'customization.mjs"');
@@ -160,6 +161,7 @@ for (const helper of [
   "icons",
   "navigation",
   "records",
+  "size",
   "customization",
   "view-state",
   "live-search",

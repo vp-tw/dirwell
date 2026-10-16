@@ -1,6 +1,6 @@
 {
   "name": "@dirwell/core",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Framework-neutral directory listing and static publication kernel.",
   "homepage": "https://vp-tw.github.io/dirwell/api-reference/",
   "bugs": {
@@ -22,6 +22,10 @@
     ".": {
       "types": "./dist/index.d.mts",
       "import": "./dist/index.mjs"
+    },
+    "./format": {
+      "types": "./dist/format.d.mts",
+      "import": "./dist/format.mjs"
     },
     "./client": {
       "types": "./dist/client.d.mts",

@@ -42,3 +42,30 @@ homepages and download names are preserved; output conflicts fail. CLI config
 puts routing at the top level, and `--directory-urls` overrides it.
 See [directory URL guidance](https://vp-tw.github.io/dirwell/urls/) for output
 placement, host requirements, native Plain file navigation and migration.
+
+## Optional byte formatting
+
+Themes receive raw byte counts. Use the browser-safe formatter only when useful:
+
+```ts
+import { formatBytes, sizeValue } from "@dirwell/core/format";
+
+formatBytes(1536); // "1.5 KiB"
+formatBytes(1536, { units: "decimal" }); // "1.54 kB"
+formatBytes(1536, { units: "bytes" }); // "1,536 B"
+```
+
+`formatBytes` accepts `units`, `locale` (default `en-US`) and an optional
+`maximumFractionDigits` from 0 to 6. Converted values otherwise use up to three
+significant digits. Bytes remain exact integers. Invalid or unsafe byte counts
+throw; handle absent values before formatting.
+
+`sizeValue(entry)` selects a regular file's bytes or an allowed symlink target's
+file bytes. It returns `null` for unavailable targets and directories.
+`sizeValue(entry, "entry")` selects the entry's own bytes, including a link's own
+size. It never calculates directory contents. Independent themes may ignore both
+helpers and format the original fields themselves.
+
+Size sorting is explicit: `sort.field: "size"` compares entry sizes;
+`"targetSize"` compares target-file sizes for links. Missing/non-comparable values
+sort after numeric values in either direction, subject to folders-first.

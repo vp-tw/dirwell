@@ -19,7 +19,8 @@ import {
 } from "../../shared-theme/src/navigation.ts";
 import { readView, createViewHistory } from "../../shared-theme/src/view-state.ts";
 import { entryIcon } from "../../shared-theme/src/icons.ts";
-import { directoryLike, size } from "../../shared-theme/src/records.ts";
+import { renderSize } from "../../shared-theme/src/size.ts";
+import { directoryLike } from "../../shared-theme/src/records.ts";
 import {
   resolveCustomization,
   label,
@@ -452,7 +453,7 @@ function parent() {
 function keyboard(event) {
   if (archiveOpen.value) return;
   if (event.isComposing || event.altKey || event.ctrlKey || event.metaKey) return;
-  if (event.target?.closest?.("[data-dirwell-actions]")) return;
+  if (event.target?.closest?.("[data-dirwell-actions], summary")) return;
   const editing = /INPUT|TEXTAREA|SELECT/.test(event.target?.tagName ?? "");
   if (editing) {
     if (event.key === "Escape") query.value = "";
@@ -878,14 +879,6 @@ onBeforeUnmount(() => {
                     <span v-if="entry.link && column === 'name'" class="cw-target">{{
                       entry.link.target
                     }}</span>
-                    <span v-if="column === 'size'" class="cw-row-meta"
-                      >{{
-                        entry.link?.unavailable
-                          ? ui.labels.unavailable
-                          : ui.labels[entry.kind === "symlink" ? "link" : entry.kind]
-                      }}
-                      · {{ directoryLike(entry) ? ui.labels.folder : size(entry.size) }}</span
-                    >
                     <span v-if="column === 'modified'" class="cw-row-date"
                       >{{ ui.labels.modified }}
                       {{ formattedDate(entry.modifiedAt, ui, ready) }}</span
@@ -900,6 +893,11 @@ onBeforeUnmount(() => {
                 entry.name
               }}</slot></span
             >
+            <div
+              v-if="ui.columns.includes('size') && !$slots.row"
+              class="cw-size-cell"
+              v-html="renderSize(entry, ui)"
+            ></div>
             <span
               v-if="ui.actions.length || $slots.actions"
               data-dirwell-actions
@@ -962,10 +960,11 @@ onBeforeUnmount(() => {
     </section>
     <aside class="cw-detail" v-if="ready && active">
       <h2>{{ active.name }}</h2>
-      <p v-if="ui.columns.includes('size')">
-        {{ ui.labels[active.kind === "symlink" ? "link" : active.kind] }} ·
-        {{ directoryLike(active) ? ui.labels.folder : size(active.size) }}
-      </p>
+      <div
+        v-if="ui.columns.includes('size')"
+        class="cw-detail-size"
+        v-html="renderSize(active, ui)"
+      ></div>
       <p v-if="ui.columns.includes('modified')">
         {{ formattedDate(active.modifiedAt, ui, ready) }}
       </p>

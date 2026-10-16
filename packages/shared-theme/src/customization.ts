@@ -1,3 +1,4 @@
+import { validateByteFormatOptions, type ByteFormatOptions } from "../../core/src/format.ts";
 /** Small serializable inputs shared by official themes; layout stays theme-owned. */
 export const defaultLabels = {
   other: "other",
@@ -33,6 +34,12 @@ export const defaultLabels = {
   sort: "Sort",
   name: "Name",
   size: "Size",
+  targetSize: "Target size",
+  entrySize: "Item size",
+  sizeTarget: "Target",
+  sizeLink: "Link",
+  exactSize: "Exact size",
+  sizeUnavailable: "Unavailable",
   modified: "Modified",
   names: "Names",
   natural: "Natural",
@@ -96,7 +103,12 @@ export type ThemeColumn =
   | "modified"
   | { readonly dataKey: string; readonly label: string };
 export type ThemeAction = "copy-link" | "copy-path" | "download";
+export interface SizeDisplayOptions extends ByteFormatOptions {
+  readonly symlink?: "both" | "target" | "entry";
+  readonly exact?: "details" | "inline" | "none";
+}
 export interface ThemeCustomization {
+  readonly size?: SizeDisplayOptions;
   readonly language?: string;
   readonly direction?: "ltr" | "rtl";
   readonly locale?: string;
@@ -116,6 +128,7 @@ export interface ThemeCustomization {
   readonly cssVariables?: Readonly<Record<`--${string}`, string>>;
 }
 export interface ResolvedThemeCustomization {
+  readonly size: SizeDisplayOptions;
   readonly language: string;
   readonly dateOptions: { readonly locale?: string; readonly timeZone?: string };
   readonly direction: "ltr" | "rtl";
@@ -128,6 +141,18 @@ export interface ResolvedThemeCustomization {
   readonly cssVariables: Readonly<Record<string, string>>;
 }
 export function resolveCustomization(options: ThemeCustomization = {}): ResolvedThemeCustomization {
+  const size = options.size === undefined ? {} : options.size;
+  if (typeof size !== "object" || size === null || Array.isArray(size))
+    throw new TypeError("size must be an object");
+  for (const key of Object.keys(size))
+    if (!["units", "locale", "maximumFractionDigits", "symlink", "exact"].includes(key))
+      throw new TypeError(`Unsupported size option: ${key}`);
+  const { symlink, exact, ...byteOptions } = size;
+  validateByteFormatOptions(byteOptions);
+  if (symlink !== undefined && !["both", "target", "entry"].includes(symlink))
+    throw new TypeError("Unsupported symlink size display");
+  if (exact !== undefined && !["details", "inline", "none"].includes(exact))
+    throw new TypeError("Unsupported exact size display");
   const language = options.language === undefined ? "en" : options.language,
     locale = options.locale === undefined ? "en-US" : options.locale,
     timeZone = options.timeZone === undefined ? "UTC" : options.timeZone;
@@ -221,6 +246,7 @@ export function resolveCustomization(options: ThemeCustomization = {}): Resolved
     timeZone,
     labels,
     brand: { ...brand },
+    size: { ...size, locale: size.locale ?? options.locale ?? "en-US" },
     columns: columns.map((column) => (typeof column === "string" ? column : { ...column })),
     actions: [...actions],
     cssVariables: { ...cssVariables },
@@ -285,6 +311,7 @@ export async function copyEntryAction(
 export function pickCustomization(options: ThemeCustomization): ThemeCustomization | undefined {
   const result: ThemeCustomization = {};
   for (const key of [
+    "size",
     "language",
     "direction",
     "locale",
@@ -313,6 +340,7 @@ export function assertThemeOptions(value: unknown, extraKeys: readonly string[])
   if (typeof value !== "object" || value === null || Array.isArray(value))
     throw new TypeError("Theme options must be an object");
   const allowed = [
+    "size",
     "language",
     "direction",
     "locale",

@@ -1,3 +1,4 @@
+import { renderSize } from "../../shared-theme/src/size.ts";
 import { escapeHtml } from "./html.ts";
 import type { ExplorerTheme, FileSystemEntry, ThemeContext } from "../../core/src/model.ts";
 import { resolveThemeProject, type ThemeProjectOptions } from "./theme-project.ts";
@@ -17,6 +18,7 @@ import {
 } from "../../shared-theme/src/customization.ts";
 export type {
   ThemeCustomization,
+  SizeDisplayOptions,
   ThemeLabels,
   ThemeColumn,
   ThemeAction,
@@ -90,7 +92,7 @@ function renderEntry(
       ? `<span>${name}</span>`
       : `<a href="${escapeHtml(href)}"${exitsExplorer ? ' target="_blank" rel="noopener"' : ""}>${name}</a>`;
   const details = [status(entry, ui)];
-  if (!directoryLike && options.columns === undefined) details.push(`${entry.metadata.size} B`);
+
   if (entry.symlink !== null) details.push(`${ui.labels.target}: ${entry.symlink.target}`);
   if (exitsExplorer) details.push(ui.labels.newTab);
   const modified = utcTimestamp(entry.metadata.times.modifiedAt);
@@ -99,9 +101,7 @@ function renderEntry(
       column === "name"
         ? link
         : column === "size"
-          ? directoryLike
-            ? ""
-            : `${entry.metadata.size} B`
+          ? renderSize(record, ui)
           : column === "modified"
             ? modified === null
               ? escapeHtml(ui.labels.unknown)
@@ -129,7 +129,7 @@ function renderEntry(
       : `<time datetime="${modified.datetime}">${escapeHtml(options.locale !== undefined || options.timeZone !== undefined ? formattedDate(modified.datetime, ui) : modified.label)}</time>`;
   const content =
     options.columns === undefined
-      ? `${link}<small>${escapeHtml(details.join(" · "))} · ${time}</small>`
+      ? `${link}${entry.kind === "directory" ? "" : `<div class="dw-plain-size">${renderSize(record, ui)}</div>`}<small>${escapeHtml(details.join(" · "))} · ${time}</small>`
       : `${columns.join(" · ")}<small>${escapeHtml(details.join(" · "))}</small>`;
   return `<li>${content}${customActions}${download}</li>`;
 }

@@ -35,7 +35,7 @@ export async function fetchThemePage(
   if (
     !sort ||
     typeof sort !== "object" ||
-    !["name", "size", "modified"].includes(String(sort.field)) ||
+    !["name", "size", "targetSize", "modified"].includes(String(sort.field)) ||
     !["asc", "desc"].includes(String(sort.direction)) ||
     !["natural", "locale", "unicode"].includes(String(sort.nameMode)) ||
     typeof sort.directoriesFirst !== "boolean"
