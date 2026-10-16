@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.0.9
+
+### Patch Changes
+
+- Preserve the focused virtual row and its scroll position when viewport changes or content reflow updates row heights. Keep native disclosure, action and search focus independent.
+- @dirwell/core@0.0.9
+
 ## 0.0.8
 
 ### Patch Changes

@@ -142,13 +142,61 @@ interactive disclosure markup inside a file link is not an acceptable fix.
    and an installed registry consumer.
 
 The regression lives in `test/browser/crosswave-row-boundary.spec.mjs`.
-The pre-existing loss of focus when resizing a virtual list in its middle is
-tracked separately in [the Crosswave resize issue](https://github.com/vp-tw/dirwell/issues/99);
-this correction does not qualify that path.
+The virtual-list resize path is covered by the acceptance criteria below.
 
 Browser geometry checks establish layout bounds; screenshots establish the
 visible grouping. Neither is a claim of physical-device or spoken screen-reader
 verification.
+
+## Crosswave virtual-focus acceptance
+
+[The resize issue](https://github.com/vp-tw/dirwell/issues/99) is reproduced on
+[SDK 0.0.8](https://github.com/vp-tw/dirwell/tree/6096b459dcc77d7373ea1a1048c4469f53d08f35):
+generate 510 broken symlinks named `link-000` through `link-509`, focus the first
+link at 1280px, press ArrowDown 45 times, resize to 320 by 740px, then wait two
+animation frames. The original `link-045` DOM node becomes disconnected and
+loses focus. This is an unmounted row, not just a missing visual indicator.
+
+Width invalidation replaces previous row measurements with estimates outside
+the rendered window. Using the old scroll offset with the new cumulative
+heights can move the rendered range past the focused row. Incremental
+`ResizeObserver` measurements can also change cumulative heights before it.
+
+Keep an anchor row's offset stable when committing either measurement update.
+Use the row containing the actual focused control, or the first visible row
+when focus is elsewhere. Update reactive height and scroll state together so
+Vue retains the keyed row, then apply the DOM scroll offset after its spacers
+are updated. Ignore the deferred scroll write after navigation or a newer
+scroll change. Disable native scroll anchoring only on the virtual scroller
+so it cannot apply a second correction. Never call `focus()` from measurement.
+
+This follows the identity preservation described by [Vue's keyed list
+rendering](https://vuejs.org/guide/essentials/list#maintaining-state-with-key)
+and its [DOM update timing](https://vuejs.org/api/general.html#nexttick).
+Virtualizers also expose [measurement and scroll-offset adjustments](https://tanstack.com/virtual/latest/docs/api/virtualizer#scrolltofn).
+Larger overscan only hides some failures; retaining an offscreen row alone
+does not preserve its visible position. Replacing the virtualizer would expand
+this patch without changing the required invariant.
+
+The row-boundary browser regression additionally requires:
+
+1. At 1280px and 320px, repeated resize in either direction retains the exact
+   focused DOM node, selected entry, visible focus boundary and next ArrowDown.
+   End, resize and ArrowUp also work at the final row, where scroll clamping
+   differs from the middle. Rendered row counts remain bounded.
+2. Mixed Latin/CJK names and text-spacing/size changes above the focused row
+   preserve its viewport position within 2px. Nested directories exercise the
+   parent row and variable-height symlinks with native size details and actions.
+3. Resizing with a size summary or Download focused preserves that same control;
+   opening exact sizes also retains summary focus. Search keeps focus during
+   resize and filtering, without selecting or focusing a file link.
+4. SSG and MPA pass in Chromium, Firefox and WebKit. The existing entry-boundary,
+   no-script pagination/navigation, history and simulated Gamepad API regressions
+   remain valid. The three-engine compatibility workflow runs the row-boundary
+   and virtual-focus suite.
+
+These are browser-engine and emulated-viewport checks. Physical devices,
+physical controllers and screen-reader output remain unverified.
 
 ## Deferred capabilities
 
