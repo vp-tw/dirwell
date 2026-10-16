@@ -204,9 +204,13 @@ function measureLayout() {
   measuredWidth = width;
   const footerHeight = footerElement.value?.getBoundingClientRect().height ?? 82;
   document.documentElement.style.setProperty("--cw-footer-height", footerHeight + "px");
+  const shortViewport = innerHeight <= 520;
   const available = Math.max(
-    160,
-    innerHeight - listScroll.value.getBoundingClientRect().top - footerHeight - 24,
+    shortViewport ? 80 : 160,
+    innerHeight -
+      listScroll.value.getBoundingClientRect().top -
+      footerHeight -
+      (shortViewport ? 8 : 24),
   );
   viewportHeight.value = available;
   listScroll.value.style.setProperty("--cw-list-height", available + "px");
@@ -406,6 +410,10 @@ async function openEntry(event, entry) {
   event?.preventDefault();
   await openFolder(href, new URL(entry.href, document.baseURI).href, true);
 }
+function focusEntry(entry, event) {
+  selected.value = entry.id;
+  event.currentTarget.closest(".cw-entry-group")?.scrollIntoView({ block: "nearest" });
+}
 async function move(index) {
   const target = Math.max(0, Math.min(rows.value.length - 1, index));
   const entry = rows.value[target];
@@ -418,7 +426,7 @@ async function move(index) {
   await nextTick();
   const node = nodes.get(entry.id);
   node?.querySelector("a")?.focus({ preventScroll: true });
-  node?.scrollIntoView({ block: "nearest" });
+  node?.querySelector(".cw-entry-group")?.scrollIntoView({ block: "nearest" });
 }
 async function stepCategory(delta) {
   if (ui.value.direction === "rtl") delta = -delta;
@@ -847,57 +855,60 @@ onBeforeUnmount(() => {
             :data-custom-columns="Boolean(model.ui?.columns)"
             :data-id="entry.id"
           >
-            <a
-              v-if="entry.href"
-              class="cw-entry"
-              :href="entry.href"
-              :target="entry.exitsExplorer ? '_blank' : undefined"
-              :rel="entry.exitsExplorer ? 'noopener' : undefined"
-              @click="openEntry($event, entry)"
-              @focus="selected = entry.id"
-              ><slot name="row" :model="model" :entry="entry" :selected="selected === entry.id"
-                ><span
-                  class="cw-entry-icon"
-                  aria-hidden="true"
-                  v-html="
-                    entryIcon(
-                      entry.kind === 'symlink'
-                        ? 'link'
-                        : directoryLike(entry)
-                          ? 'directory'
-                          : 'file',
-                    )
-                  "
-                ></span>
-                <span class="cw-entry-label">
-                  <template
-                    v-for="column in ui.columns"
-                    :key="typeof column === 'string' ? column : column.dataKey"
-                    ><span v-if="column === 'name'" class="cw-name"
-                      >{{ entry.name }}{{ directoryLike(entry) ? "/" : "" }}</span
+            <div class="cw-entry-group">
+              <a
+                v-if="entry.href"
+                class="cw-entry"
+                :href="entry.href"
+                :target="entry.exitsExplorer ? '_blank' : undefined"
+                :rel="entry.exitsExplorer ? 'noopener' : undefined"
+                @click="openEntry($event, entry)"
+                @focus="focusEntry(entry, $event)"
+                ><slot name="row" :model="model" :entry="entry" :selected="selected === entry.id"
+                  ><span
+                    class="cw-entry-icon"
+                    aria-hidden="true"
+                    v-html="
+                      entryIcon(
+                        entry.kind === 'symlink'
+                          ? 'link'
+                          : directoryLike(entry)
+                            ? 'directory'
+                            : 'file',
+                      )
+                    "
+                  ></span>
+                  <span class="cw-entry-label">
+                    <template
+                      v-for="column in ui.columns"
+                      :key="typeof column === 'string' ? column : column.dataKey"
+                      ><span v-if="column === 'name'" class="cw-name"
+                        >{{ entry.name }}{{ directoryLike(entry) ? "/" : "" }}</span
+                      >
+                      <span v-if="entry.link && column === 'name'" class="cw-target">{{
+                        entry.link.target
+                      }}</span>
+                      <span v-if="column === 'modified'" class="cw-row-date"
+                        >{{ ui.labels.modified }}
+                        {{ formattedDate(entry.modifiedAt, ui, ready) }}</span
+                      ><span v-if="typeof column === 'object'" class="cw-data-value"
+                        >{{ column.label }}:
+                        {{ publicDataValue(entry.data?.[column.dataKey]) }}</span
+                      ></template
                     >
-                    <span v-if="entry.link && column === 'name'" class="cw-target">{{
-                      entry.link.target
-                    }}</span>
-                    <span v-if="column === 'modified'" class="cw-row-date"
-                      >{{ ui.labels.modified }}
-                      {{ formattedDate(entry.modifiedAt, ui, ready) }}</span
-                    ><span v-if="typeof column === 'object'" class="cw-data-value"
-                      >{{ column.label }}: {{ publicDataValue(entry.data?.[column.dataKey]) }}</span
-                    ></template
-                  >
-                </span></slot
-              ></a
-            ><span v-else class="cw-entry cw-unavailable"
-              ><slot name="row" :model="model" :entry="entry" :selected="selected === entry.id">{{
-                entry.name
-              }}</slot></span
-            >
-            <div
-              v-if="ui.columns.includes('size') && !$slots.row"
-              class="cw-size-cell"
-              v-html="renderSize(entry, ui)"
-            ></div>
+                  </span></slot
+                ></a
+              ><span v-else class="cw-entry cw-unavailable"
+                ><slot name="row" :model="model" :entry="entry" :selected="selected === entry.id">{{
+                  entry.name
+                }}</slot></span
+              >
+              <div
+                v-if="ui.columns.includes('size') && !$slots.row"
+                class="cw-size-cell"
+                v-html="renderSize(entry, ui)"
+              ></div>
+            </div>
             <span
               v-if="ui.actions.length || $slots.actions"
               data-dirwell-actions

@@ -108,6 +108,48 @@ policy. Equal numeric values retain the existing name tie-breaker.
    call and shared official settings. Physical touch and screen-reader behavior
    remain unverified unless actually exercised.
 
+## Crosswave row-boundary acceptance
+
+The selected surface and the primary-link focus indicator must group an entry's
+name, target path and size values. File navigation, optional native size
+disclosures and configured actions remain separate controls. A non-focusable
+wrapper owns the shared presentation; it adds no tab stop or activation handler.
+The disclosure and action controls retain their own focus indicators. Moving
+interactive disclosure markup inside a file link is not an acceptable fix.
+
+1. **Containment:** ordinary files and available/unavailable symlinks keep their
+   name, full wrapped target path and Target/Link values inside the same selected
+   surface and primary-link focus boundary. Size text aligns with the name;
+   expanded values grow the row and never overlap the next entry.
+2. **Independent controls:** keyboard navigation visibly focuses the whole entry
+   when its primary link is focused. Tab reaches the exact-size disclosure and
+   Download separately, with their own focus indicators. Enter/Space on the
+   disclosure never opens the file; file and download activation retain their
+   existing outcomes. Custom row slots retain ownership of their contents.
+3. **Resilience:** check 1280px desktop, 390px and 320px portrait, and 844px by
+   390px landscape. Long mixed Latin/CJK names and unbroken target paths wrap.
+   Enlarged row text and user text-spacing overrides neither clip values nor
+   create horizontal page overflow. Check focused entries near scroll edges.
+4. **Runtime parity:** SSG and MPA, enhanced and no-JavaScript pages retain
+   native links and layout. More than 500 variable-height rows remain navigable
+   during keyboard scrolling at desktop and narrow widths. Existing custom-row, navigation
+   and gamepad regression tests remain green; physical input devices and screen
+   readers are not qualified by emulation.
+5. **Evidence and delivery:** preserve a pre-fix failing containment test and
+   screenshot, then run the regression in Chromium, Firefox and WebKit. Inspect
+   desktop and narrow captures, complete the independent finish review, and
+   qualify the synchronized SDK patch through the repository release workflow
+   and an installed registry consumer.
+
+The regression lives in `test/browser/crosswave-row-boundary.spec.mjs`.
+The pre-existing loss of focus when resizing a virtual list in its middle is
+tracked separately in [the Crosswave resize issue](https://github.com/vp-tw/dirwell/issues/99);
+this correction does not qualify that path.
+
+Browser geometry checks establish layout bounds; screenshots establish the
+visible grouping. Neither is a claim of physical-device or spoken screen-reader
+verification.
+
 ## Deferred capabilities
 
 Recursive folder totals, allocated disk usage, transfer/compressed size, remote
