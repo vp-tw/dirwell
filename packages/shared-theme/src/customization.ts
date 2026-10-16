@@ -105,6 +105,7 @@ export type ThemeColumn =
 export type ThemeAction = "copy-link" | "copy-path" | "download";
 export interface SizeDisplayOptions extends ByteFormatOptions {
   readonly symlink?: "both" | "target" | "entry";
+  /** Exact bytes are opt-in; the default is readable text only. */
   readonly exact?: "details" | "inline" | "none";
 }
 export interface ThemeCustomization {

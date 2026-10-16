@@ -5,7 +5,7 @@ import type { ResolvedThemeCustomization } from "./customization.ts";
 
 /** Official-theme markup only. Independent themes can use raw bytes or the public formatter. */
 export function renderSize(entry: ListingEntry, ui: ResolvedThemeCustomization): string {
-  const { symlink = "both", exact = "details", ...format } = ui.size;
+  const { symlink = "both", exact = "none", ...format } = ui.size;
   const lines: { label: string; bytes: number | null; text: string }[] = [];
   const directory = entry.kind === "directory";
   if (directory) return `<span class="dw-size-folder">${escapeHtml(ui.labels.folder)}</span>`;
@@ -29,13 +29,17 @@ export function renderSize(entry: ListingEntry, ui: ResolvedThemeCustomization):
     if (symlink !== "target") add(ui.labels.sizeLink, sizeValue(entry, "entry"));
   } else add("", sizeValue(entry, "entry"));
   const summary = `<span class="dw-size-values">${lines.map(({ label, text }) => `<span class="dw-size-line">${label ? `<span class="dw-size-label">${escapeHtml(label)}</span> ` : ""}<span class="dw-size-value">${escapeHtml(text)}</span></span>`).join('<span class="dw-size-separator"> · </span>')}</span>`;
-  const known = lines.filter((line) => line.bytes !== null);
-  if (exact === "none" || format.units === "bytes" || known.length === 0)
-    return `<span class="dw-size">${summary}</span>`;
-  const full = known
+  if (exact === "none") return `<span class="dw-size">${summary}</span>`;
+  const additional = lines.flatMap(({ label, bytes, text }) => {
+    if (bytes === null) return [];
+    const full = formatBytes(bytes, { units: "bytes", locale: format.locale ?? "en-US" });
+    return full === text ? [] : [{ label, text: full }];
+  });
+  if (additional.length === 0) return `<span class="dw-size">${summary}</span>`;
+  const full = additional
     .map(
-      ({ label, bytes }) =>
-        `<span class="dw-size-line">${label ? `${escapeHtml(label)} ` : ""}${escapeHtml(formatBytes(bytes ?? 0, { units: "bytes", locale: format.locale ?? "en-US" }))}</span>`,
+      ({ label, text }) =>
+        `<span class="dw-size-line">${label ? `${escapeHtml(label)} ` : ""}${escapeHtml(text)}</span>`,
     )
     .join('<span class="dw-size-separator"> · </span>');
   if (exact === "inline")

@@ -27,7 +27,7 @@ createPlainTheme({
   size: {
     units: "binary", // binary | decimal | bytes
     symlink: "both", // both | target | entry
-    exact: "details", // details | inline | none
+    exact: "none", // none (default) | details | inline
   },
 });
 ```
@@ -38,8 +38,11 @@ createPlainTheme({
 - Unconverted bytes and bytes mode preserve the full integer.
 - Locale defaults to the theme locale, then `en-US`; `size.locale` overrides it.
   Node and browser receive the same explicit locale.
-- Exact values use a native disclosure by default. Inline and hidden exact
-  values are publisher options. Bytes mode avoids a redundant exact disclosure.
+- Sizes are non-interactive, human-readable text by default. Raw bytes support
+  sorting and custom themes; they do not require a visitor control.
+- Exact values are explicit publisher opt-ins: native disclosure or inline.
+  Only values that differ from the visible text are added. Small byte counts,
+  zero and bytes mode never create redundant details or repeated inline values.
 - These are publisher settings, not a new visitor preference menu.
 
 Known byte counts must be non-negative safe integers. Formatter inputs outside
@@ -72,13 +75,13 @@ policy. Equal numeric values retain the existing name tie-breaker.
 
 ## Theme interaction and layout
 
-- Plain uses native HTML disclosures and stays script-free. Metadata is not
+- Plain stays script-free, including opt-in native HTML disclosures. Metadata is not
   inserted as an interactive descendant of a file link.
-- Ledger right-aligns size values and keeps ordinary collapsed desktop rows at
+- Ledger right-aligns size values and keeps ordinary desktop rows at
   the existing compact height. Link labels, target paths and expanded exact
   values may grow naturally. The sticky header remains unchanged.
 - Crosswave keeps file navigation and size disclosure separate. Its detail pane
-  can repeat the selected entry's size; the list still exposes exact values on
+  can repeat the selected entry's size; opt-in exact values remain available on
   narrow screens and without browser JavaScript.
 - Native Enter/Space disclosure activation must not trigger file opening or
   global navigation shortcuts. Values wrap without horizontal page overflow.
@@ -94,8 +97,10 @@ policy. Equal numeric values retain the existing name tie-breaker.
    MPA. Tests cover both/target/entry, exact modes and bytes/decimal/binary.
 4. Target/entry sorting agree across Node and browser, including unavailable
    targets, directory targets, ascending/descending and equal rounded values.
-5. Keyboard Enter and Space expand/collapse exact values without navigation;
-   touch-sized disclosures and no-JavaScript output remain usable.
+5. Default output has no size disclosures or duplicate exact values, including
+   files, zero and unavailable links. Opt-in details add new information only;
+   mixed symlink values do not repeat already-exact byte counts. Keyboard Enter
+   and Space work without navigation; no-JavaScript output remains usable.
 6. Desktop and 320px screenshots cover ordinary files, zero, file links and
    unavailable links. Ordinary Ledger rows and sticky/header regression tests
    still pass; expanded values remain in measured row flow.

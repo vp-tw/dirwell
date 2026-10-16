@@ -53,16 +53,15 @@ test("size selection distinguishes missing target, withheld target and directory
   assert.equal(sizeValue({ ...link, link: { ...link.link!, targetSize: null } }), null);
 });
 
-test("official size markup labels both values and provides a native exact disclosure", () => {
+test("official size defaults show readable values without exact-byte controls", () => {
   const ui = resolveCustomization();
   assert.throws(() => resolveCustomization({ size: null } as never), /size must be an object/);
   const html = renderSize(link, ui);
-  assert.match(html, /<details/);
-  assert.match(html, /<summary/);
+  assert.doesNotMatch(html, /<details|<summary|dw-size-exact/);
   assert.match(html, /Target/);
   assert.match(html, /Link/);
   assert.match(html, /1.5 KiB/);
-  assert.match(html, /1,536 B/);
+  assert.doesNotMatch(html, /1,536 B/);
   assert.match(html, /4 B/);
   const target = renderSize(link, resolveCustomization({ size: { symlink: "target" } }));
   assert.doesNotMatch(target, /size-label">Link/);
@@ -71,7 +70,13 @@ test("official size markup labels both values and provides a native exact disclo
   const unavailable = renderSize({ ...link, link: { ...link.link!, unavailable: true } }, ui);
   assert.match(unavailable, /Unavailable/);
   assert.doesNotMatch(unavailable, /1.5 KiB|1,536 B/);
-  assert.match(renderSize({ ...link, name: '<script>"' }, ui), /&lt;script&gt;/);
+  assert.match(
+    renderSize(
+      { ...link, name: '<script>"' },
+      resolveCustomization({ size: { exact: "details" } }),
+    ),
+    /&lt;script&gt;/,
+  );
   assert.doesNotMatch(
     renderSize(link, resolveCustomization({ size: { units: "bytes" } })),
     /<details/,
@@ -118,4 +123,46 @@ test("target and item size sorting are independent of formatting and missing val
     visibleRecords([link, big], "", ["file", "link"], { ...sort, field: "size" }).map((e) => e.id),
     ["link", "big"],
   );
+});
+
+test("opt-in exact values add information without repeating visible byte counts", () => {
+  for (const exact of ["details", "inline"] as const) {
+    const ui = resolveCustomization({ size: { exact } });
+    for (const size of [0, 12, 1023])
+      assert.doesNotMatch(renderSize({ ...file, size }, ui), /<details|dw-size-exact/);
+    for (const targetKind of ["file", "directory"] as const)
+      assert.doesNotMatch(
+        renderSize({ ...link, link: { ...link.link!, targetKind, unavailable: true } }, ui),
+        /<details|dw-size-exact/,
+      );
+    const html = renderSize(link, ui);
+    assert.match(html, /1,536 B/);
+    assert.equal(html.match(/4 B/g)?.length, exact === "details" ? 2 : 1);
+    const extra = html.slice(html.indexOf('<span class="dw-size-exact">'));
+    assert.doesNotMatch(extra, /Link|4 B/);
+    assert.equal(html.includes("<details"), exact === "details");
+    assert.doesNotMatch(
+      renderSize(link, resolveCustomization({ size: { exact, units: "bytes" } })),
+      /<details|dw-size-exact/,
+    );
+  }
+});
+
+test("equal readable sizes retain their distinct byte ordering", () => {
+  const smaller = { ...file, id: "smaller", name: "Z smaller", size: 1310720 };
+  const larger = { ...file, id: "larger", name: "A larger", size: 1310721 };
+  assert.equal(formatBytes(smaller.size), formatBytes(larger.size));
+  for (const field of ["size", "targetSize"] as const) {
+    const sort = { field, direction: "asc", nameMode: "unicode", directoriesFirst: false } as const;
+    assert.deepEqual(
+      visibleRecords([larger, smaller], "", ["file"], sort).map((entry) => entry.id),
+      ["smaller", "larger"],
+    );
+    assert.deepEqual(
+      visibleRecords([smaller, larger], "", ["file"], { ...sort, direction: "desc" }).map(
+        (entry) => entry.id,
+      ),
+      ["larger", "smaller"],
+    );
+  }
 });

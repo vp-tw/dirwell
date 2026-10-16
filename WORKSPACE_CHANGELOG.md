@@ -2,6 +2,11 @@
 
 The nine official `@dirwell/*` packages use synchronized versions. `0.0.1` is the first non-prerelease family; the 0.0.x API may evolve, so pin the version qualified by your application.
 
+## 0.0.6
+
+- Make readable, non-interactive size text the default in Plain, Ledger and Crosswave. Raw bytes continue to drive numeric sorting and remain available to custom themes.
+- Keep exact bytes as an explicit publisher opt-in. Add only values that differ from the visible text; omit pointless disclosures and repeated byte counts.
+
 ## 0.0.5
 
 - Expose browser-safe `@dirwell/core/format` helpers for independent themes; raw byte fields remain unchanged and formatting is optional.

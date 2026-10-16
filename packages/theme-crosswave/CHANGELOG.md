@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.6
+
+### Patch Changes
+
+- Show readable sizes without expand controls by default. Keep exact bytes opt-in and omit redundant exact values.
+
 ## 0.0.5
 
 ### Patch Changes
