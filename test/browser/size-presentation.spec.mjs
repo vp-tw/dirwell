@@ -23,12 +23,16 @@ test.beforeAll(async () => {
     ["crosswave", createCrosswaveTheme],
   ])
     for (const mode of ["ssg", "mpa"])
-      await generateExplorer({
-        sourceDir,
-        outputDir: path.join(root, name + "-" + mode),
-        mode,
-        theme: creator(name === "crosswave" ? { gamepad: false, backgroundMotion: false } : {}),
-      });
+      for (const exact of ["none", "details"])
+        await generateExplorer({
+          sourceDir,
+          outputDir: path.join(root, name + "-" + mode + (exact === "details" ? "-exact" : "")),
+          mode,
+          theme: creator({
+            ...(name === "crosswave" ? { gamepad: false, backgroundMotion: false } : {}),
+            ...(exact === "details" ? { size: { exact } } : {}),
+          }),
+        });
   server = createServer(async (req, res) => {
     try {
       let file = path.resolve(
@@ -64,7 +68,7 @@ test.afterAll(async () => {
 
 for (const theme of ["plain", "ledger", "crosswave"])
   for (const mode of ["ssg", "mpa"])
-    test(`${theme} ${mode}: both sizes, keyboard exact disclosure and narrow layout`, async ({
+    test(`${theme} ${mode}: readable defaults, opt-in exact disclosure and narrow layout`, async ({
       page,
       browser,
     }) => {
@@ -76,18 +80,10 @@ for (const theme of ["plain", "ledger", "crosswave"])
         .locator("li")
         .filter({ has: page.getByRole("link", { name: /^current\.bin/ }) })
         .first();
-      const size = row.locator("details.dw-size").first();
-      await expect(size.locator("summary")).toContainText("Target");
-      await expect(size.locator("summary")).toContainText("Link");
-      await expect(size.locator("summary")).toContainText("1.25 MiB");
-      const before = page.url();
-      await size.locator("summary").focus();
-      await page.keyboard.press("Enter");
-      await expect(size).toHaveAttribute("open", "");
-      await expect(size.locator(".dw-size-exact")).toContainText("1,310,720 B");
-      expect(page.url()).toBe(before);
-      await page.keyboard.press("Space");
-      await expect(size).not.toHaveAttribute("open", "");
+      await expect(row.locator(".dw-size").first()).toContainText("Target");
+      await expect(row.locator(".dw-size").first()).toContainText("Link");
+      await expect(row.locator(".dw-size").first()).toContainText("1.25 MiB");
+      await expect(page.locator("details.dw-size, .dw-size-exact")).toHaveCount(0);
       expect(errors).toEqual([]);
       if (mode === "ssg")
         await page.screenshot({
@@ -95,8 +91,6 @@ for (const theme of ["plain", "ledger", "crosswave"])
           fullPage: true,
         });
       await page.setViewportSize({ width: 320, height: 740 });
-      await size.locator("summary").click();
-      await expect(size.locator(".dw-size-exact")).toBeVisible();
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
         true,
       );
@@ -108,6 +102,38 @@ for (const theme of ["plain", "ledger", "crosswave"])
       const context = await browser.newContext({ javaScriptEnabled: false });
       const native = await context.newPage();
       await native.goto(`${url}/${theme}-${mode}/`);
+      await expect(native.locator("details.dw-size, .dw-size-exact")).toHaveCount(0);
+      await expect(
+        native.locator(".dw-size").filter({ hasText: "1.25 MiB" }).first(),
+      ).toBeVisible();
+
+      await page.goto(`${url}/${theme}-${mode}-exact/`);
+      const size = row.locator("details.dw-size").first();
+      await expect(size.locator("summary")).toContainText("Target");
+      await expect(size.locator("summary")).toContainText("Link");
+      for (const name of [/^empty\.txt/, /^unavailable\.bin/]) {
+        const unchanged = page
+          .locator("li")
+          .filter({ has: page.getByRole("link", { name }) })
+          .first();
+        await expect(unchanged.locator("details.dw-size, .dw-size-exact")).toHaveCount(0);
+      }
+      const before = page.url();
+      await size.locator("summary").focus();
+      await page.keyboard.press("Enter");
+      await expect(size).toHaveAttribute("open", "");
+      await expect(size.locator(".dw-size-exact")).toContainText("1,310,720 B");
+      expect(page.url()).toBe(before);
+      await page.keyboard.press("Space");
+      await expect(size).not.toHaveAttribute("open", "");
+      expect(errors).toEqual([]);
+      await expect(size.locator(".dw-size-exact")).not.toContainText("Link");
+      await size.locator("summary").click();
+      await expect(size.locator(".dw-size-exact")).toBeVisible();
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+        true,
+      );
+      await native.goto(`${url}/${theme}-${mode}-exact/`);
       const disclosure = native.locator("details.dw-size").first();
       await disclosure.locator("summary").click();
       await expect(disclosure.locator(".dw-size-exact")).toBeVisible();

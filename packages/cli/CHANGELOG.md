@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.6
+
+### Patch Changes
+
+- Synchronize the SDK family for the official-theme size display correction. Raw byte data and numeric sorting remain unchanged.
+
 ## 0.0.5
 
 ### Patch Changes

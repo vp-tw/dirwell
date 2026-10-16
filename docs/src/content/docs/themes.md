@@ -142,8 +142,8 @@ The private live recipe composes fresh response nonces with a nonce/`strict-dyna
 ## File size display
 
 Plain, Ledger and Crosswave use the same size defaults: binary units, up to three
-significant digits for converted values, both target and link sizes for symlinks,
-and a native disclosure for exact bytes. Plain remains script-free.
+significant digits for converted values, and both target and link sizes for symlinks.
+Sizes are plain text by default, without expand controls. Plain remains script-free.
 
 All three factories accept:
 
@@ -151,7 +151,7 @@ All three factories accept:
 const size = {
   units: "decimal", // "binary" (default), "decimal", or "bytes"
   symlink: "both", // "both" (default), "target", or "entry"
-  exact: "details", // "details" (default), "inline", or "none"
+  exact: "none", // "none" (default), "details", or "inline"
   maximumFractionDigits: 2, // optional; overrides automatic precision
 } as const;
 createPlainTheme({ size });
@@ -162,8 +162,10 @@ createCrosswaveTheme({ size });
 Numbers use the theme's `locale` (default `en-US`); `size.locale` can override it.
 Known zero is `0 B`. Folders have no calculated content size. A symlink's target
 is labeled separately from its own link size; an unavailable or withheld target
-never silently uses the link size. Exact details work with keyboard and touch,
-without relying on hover. Bytes mode does not repeat an exact disclosure.
+never silently uses the link size. Raw bytes remain available for numeric sorting
+and custom themes. Publishers can opt into exact bytes with `exact: "details"`
+or `exact: "inline"`; these only add values that differ from the visible text.
+Opt-in details work with keyboard and touch, without relying on hover.
 
 Display settings do not change sorting. `sort.field: "size"` means item size;
 `sort.field: "targetSize"` means file-target size. Ledger exposes both choices

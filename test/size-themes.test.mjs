@@ -47,6 +47,7 @@ for (const creator of [createPlainTheme, createLedgerTheme, createCrosswaveTheme
           assert.match(html, /size-label">Target/);
           assert.match(html, /size-label">Link/);
           assert.match(html, /Unavailable/);
+          assert.doesNotMatch(html, /<details class="dw-size"|<span class="dw-size-exact"/);
         }
         if (suffix === "decimal") assert.doesNotMatch(html, /<details class="dw-size"/);
         if (creator === createPlainTheme) assert.doesNotMatch(html, /<script/);
