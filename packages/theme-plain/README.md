@@ -20,7 +20,7 @@ await generateExplorer({
 });
 ```
 
-Serve the complete `generated` folder over HTTP and open its root. Native links/pagination remain usable without JavaScript.
+Serve the complete `generated` folder over HTTP and open its root. Native links/pagination remain usable without JavaScript. File links keep opening in a new tab; the hint is an accessible description instead of repeated visible row text.
 
 Version `0.0.1` adds shared `language`, `direction`, `locale`, `timeZone`, partial `labels`, `brand`, `columns` and `cssVariables`. Plain supports opt-in `download` actions while staying script-free. See [theme configuration](https://vp-tw.github.io/dirwell/themes/) and [the public annotation example](https://github.com/vp-tw/dirwell/tree/main/examples/release-downloads). Official themes do not embed media previews.
 

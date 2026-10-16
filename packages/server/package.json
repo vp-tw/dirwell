@@ -1,6 +1,6 @@
 {
   "name": "@dirwell/server",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Host-neutral directory listing Request/Response handler.",
   "homepage": "https://vp-tw.github.io/dirwell/sdk/",
   "bugs": {

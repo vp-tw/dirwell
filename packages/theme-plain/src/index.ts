@@ -90,11 +90,10 @@ function renderEntry(
   const link =
     href === null
       ? `<span>${name}</span>`
-      : `<a href="${escapeHtml(href)}"${exitsExplorer ? ' target="_blank" rel="noopener"' : ""}>${name}</a>`;
+      : `<a${exitsExplorer ? ' aria-describedby="dw-plain-new-tab"' : ""} href="${escapeHtml(href)}"${exitsExplorer ? ' target="_blank" rel="noopener"' : ""}>${name}</a>`;
   const details = [status(entry, ui)];
 
   if (entry.symlink !== null) details.push(`${ui.labels.target}: ${entry.symlink.target}`);
-  if (exitsExplorer) details.push(ui.labels.newTab);
   const modified = utcTimestamp(entry.metadata.times.modifiedAt);
   const columns = ui.columns
     .map((column) =>
@@ -197,7 +196,7 @@ export function createPlainTheme(options: PlainThemeOptions = {}): ExplorerTheme
           : `<footer><hr><p>${escapeHtml(ui.labels.repository)}: ${externalLink(project.name, repositoryHref)} ${escapeHtml(ui.labels.author)} ${escapeHtml(project.author)} · ${externalLink(project.license, licenseHref)}</p></footer>`;
       const html = `<!doctype html>
 <html lang="${escapeHtml(ui.language)}" dir="${ui.direction}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">${context.documentBaseHref === null ? "" : `<base href="${escapeHtml(context.documentBaseHref)}">`}${context.metadata?.head ?? `<title>${escapeHtml(fallbackTitle)}${page === undefined || page.count === 1 ? "" : ` · page ${page.number}`}</title>`}${ui.brand.faviconUrl ? `<link rel="icon" href="${escapeHtml(ui.brand.faviconUrl)}">` : ""}<style>:root{color-scheme:light dark}body{max-width:72ch;margin:2rem auto;padding:0 1rem}h1,li,nav{overflow-wrap:anywhere}li{margin:.6rem 0}small{display:block}${customizationCss(ui)}</style></head>
-<body><main>${ui.brand.logoUrl ? `<img src="${escapeHtml(ui.brand.logoUrl)}" alt="${escapeHtml(ui.brand.logoAlt ?? "")}" width="40" height="40">` : ""}${ui.brand.name ? `<header>${escapeHtml(ui.brand.name)}</header>` : ""}${renderBreadcrumbs(context, context.hrefForDirectory, ui)}<h1>${escapeHtml(label(ui, "indexOf", { path: visiblePath }))}</h1><p>${countLabel}</p>${pagination}${count === 0 ? `<p>${escapeHtml(ui.labels.empty)}</p>` : ""}<ul>${parentRow}${rows}</ul>${pagination}</main>${ui.brand.footerText ? `<footer>${ui.brand.footerUrl ? `<a href="${escapeHtml(ui.brand.footerUrl)}">${escapeHtml(ui.brand.footerText)}</a>` : escapeHtml(ui.brand.footerText)}</footer>` : footer}</body></html>`;
+<body><main><span id="dw-plain-new-tab" hidden>${escapeHtml(ui.labels.newTab)}</span>${ui.brand.logoUrl ? `<img src="${escapeHtml(ui.brand.logoUrl)}" alt="${escapeHtml(ui.brand.logoAlt ?? "")}" width="40" height="40">` : ""}${ui.brand.name ? `<header>${escapeHtml(ui.brand.name)}</header>` : ""}${renderBreadcrumbs(context, context.hrefForDirectory, ui)}<h1>${escapeHtml(label(ui, "indexOf", { path: visiblePath }))}</h1><p>${countLabel}</p>${pagination}${count === 0 ? `<p>${escapeHtml(ui.labels.empty)}</p>` : ""}<ul>${parentRow}${rows}</ul>${pagination}</main>${ui.brand.footerText ? `<footer>${ui.brand.footerUrl ? `<a href="${escapeHtml(ui.brand.footerUrl)}">${escapeHtml(ui.brand.footerText)}</a>` : escapeHtml(ui.brand.footerText)}</footer>` : footer}</body></html>`;
       return { html };
     },
   };
