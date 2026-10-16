@@ -2,10 +2,10 @@
 
 Vue categories, directory search and keyboard navigation with optional VueUse gamepad controls.
 
-Requires Node.js 22.12 or newer. Install the first stable family:
+Requires Node.js 22.12 or newer. Install the packages used by your project:
 
 ```sh
-npm install @dirwell/core@0.0.3 @dirwell/theme-crosswave@0.0.3
+npm install --save-exact @dirwell/core @dirwell/theme-crosswave
 ```
 
 Create `files/note.txt`, save this as `build.mjs`, then run `node build.mjs`:
@@ -22,7 +22,17 @@ await generateExplorer({
 
 Serve the complete `generated` folder over HTTP and open its root. Native links/pagination remain usable without JavaScript.
 
-Version `0.0.1` adds shared `language`, `direction`, `locale`, `timeZone`, partial `labels`, `brand`, `columns` and `cssVariables`. Opt-in `copy-link`, `copy-path` and `download` actions live outside the primary row link; source wrappers have a separate `actions` region. See [theme configuration](https://vp-tw.github.io/dirwell/themes/) and [the public annotation example](https://github.com/vp-tw/dirwell/tree/main/examples/release-downloads). Official themes do not embed media previews.
+Configure shared `language`, `direction`, `locale`, `timeZone`, partial `labels`, `brand`, `columns` and `cssVariables`. Opt-in `copy-link`, `copy-path` and `download` actions live outside the primary row link; source wrappers have a separate `actions` region. See [theme configuration](https://vp-tw.github.io/dirwell/themes/) and [the public annotation example](https://github.com/vp-tw/dirwell/tree/main/examples/release-downloads). Official themes do not embed media previews.
+
+The default favicon uses the bundled 16/32/48px paper-bird PNGs from the Dirwell website. To publish your own image, configure `brand.favicon`:
+
+```js
+createCrosswaveTheme({
+  brand: { favicon: { source: new URL("./favicon.png", import.meta.url) } },
+});
+```
+
+`source` accepts a `File`, local path or `file:` URL. Path strings resolve from cwd when the theme is created; file URLs resolve independently of cwd. Bytes are read on the first render and cached per instance. Use `{ href: "/brand/favicon.png" }` for an image you already serve, an array for multiple icons with `type`/`sizes`/`media`, or `false` to omit icon declarations and copied assets. Custom icons replace every default icon. `brand.faviconUrl` remains a public-URL/false shorthand; do not combine it with `brand.favicon`. See [favicon configuration](https://vp-tw.github.io/dirwell/themes/#favicons) for formats, deployment bases and browser limits.
 
 ## Implementation and advanced use
 
@@ -42,15 +52,15 @@ for SSR and client, or its `/dev` entry for trusted local HMR. Header, row conte
 and footer are customizable; official navigation and interaction ownership is
 retained. See [the authoring guide](https://vp-tw.github.io/dirwell/themes/#source-component-customization).
 
-Stable windows more than 500 visible rows using measured heights and a bounded desktop/mobile scroll region. Full directory data still loads before filtering; this is not query loading. Directory query/category controls are shareable, and Back/Forward restores local selection/scroll. See [view behavior](https://vp-tw.github.io/dirwell/themes/#returning-to-a-view-upcoming-stable).
+The theme renders more than 500 visible rows through a measured window inside a bounded desktop/mobile scroll region. Full directory data still loads before filtering; this is not query loading. Directory query/category controls are shareable, and Back/Forward restores local selection/scroll. See [view behavior](https://vp-tw.github.io/dirwell/themes/#returning-to-a-view-upcoming-stable).
 
 The 0.0.x API may evolve. Pin your qualified version and upgrade the official family together. See [support and verification](https://vp-tw.github.io/dirwell/support/) for host, browser and device boundaries.
 
-Version 0.0.2 exposes live archive search when Server `search: {}` is enabled. `archiveSearch: false` hides this dialog without changing directory filtering or categories. Search uses native result links, keyboard Escape/focus restoration, cancellation and retry. Static Crosswave remains directory-oriented and does not build an archive index. See the Server package for fresh-query budgets and permissions.
+Enable Server `search: {}` to offer live archive search. `archiveSearch: false` hides this dialog without changing directory filtering or categories. Search uses native result links, keyboard Escape/focus restoration, cancellation and retry. Static Crosswave remains directory-oriented and does not build an archive index. See the Server package for fresh-query budgets and permissions.
 
 ## Directory URLs
 
-Version 0.0.3 uses Core `routing: { directoryUrls: "explicit" }` by default
+Core uses `routing: { directoryUrls: "explicit" }` by default
 for every theme. Choose `slash` for directory-index hosts or `clean` for a
 qualified extensionless host. Themes do not rewrite links. Existing source
 homepages and download names are preserved; output conflicts fail. CLI config

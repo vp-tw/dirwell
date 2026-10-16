@@ -1,3 +1,5 @@
+import path from "node:path";
+import { pathToFileURL } from "node:url";
 import { formatBytes, sizeValue } from "@dirwell/core/format";
 import assert from "node:assert/strict";
 import { mkdir, readFile, writeFile, rm } from "node:fs/promises";
@@ -62,12 +64,43 @@ for (const [name, theme] of [
     });
     const html = await readFile("out-" + name + "-" + mode + "/index.html", "utf8");
     assert.match(html, /Page 1 of 3/);
-    if (name === "plain") assert.ok(!/<script|<img|og:image/.test(html));
+    if (name === "plain") assert.ok(!/<script|<img|og:image|rel="icon"/.test(html));
     else {
       assert.ok(html.includes('data-dirwell-theme="' + name + '"'));
       assert.ok(!html.includes("clientTree"));
+      const icons = [...html.matchAll(/<link rel="icon" href="([^"]+)"/g)];
+      assert.equal(icons.length, 3);
+      for (const [, href] of icons) {
+        const bytes = await readFile(path.join("out-" + name + "-" + mode, href));
+        assert.equal(bytes.readUInt32BE(0), 0x89504e47);
+      }
     }
   }
+// Exercise local sources from installed packages on every supported platform.
+const faviconBytes = Buffer.from(
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><circle cx="16" cy="16" r="14"/></svg>',
+);
+await writeFile("private icon #%.svg", faviconBytes);
+for (const factory of [createPlainTheme, createLedgerTheme, createCrosswaveTheme]) {
+  for (const source of [
+    "private icon #%.svg",
+    path.resolve("private icon #%.svg"),
+    pathToFileURL(path.resolve("private icon #%.svg")),
+    new File([faviconBytes], "icon.svg", { type: "image/svg+xml" }),
+  ]) {
+    await generateExplorer({
+      sourceDir: "source",
+      outputDir: "favicon-out",
+      mode: "mpa",
+      theme: factory({ brand: { favicon: { source } } }),
+    });
+    const html = await readFile("favicon-out/index.html", "utf8");
+    const href = html.match(/<link rel="icon" href="([^"]+)"/)[1];
+    assert.deepEqual(await readFile(path.join("favicon-out", href)), faviconBytes);
+    assert.match(html, /type="image\/svg\+xml" sizes="any"/);
+    assert.ok(!html.includes("private icon") && !html.includes("file://"));
+  }
+}
 await runCli(["build", "source", "--out", "cli-out"], process.cwd(), () => {});
 const image = await createShareImage({
   title: "Sample downloads",

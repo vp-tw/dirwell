@@ -1,6 +1,6 @@
 {
   "name": "@dirwell/theme-authoring",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "description": "Paired Svelte/Vue theme compilation and native development HMR.",
   "homepage": "https://vp-tw.github.io/dirwell/themes/#source-component-customization",
   "bugs": {

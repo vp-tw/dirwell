@@ -12,6 +12,16 @@ const folder = path.join(repo, "packages", name),
   output = path.join(folder, "dist");
 await mkdir(generated, { recursive: true });
 await mkdir(output, { recursive: true });
+// Publish the same approved PNG bytes used by the official site.
+await mkdir(path.join(output, "favicons"), { recursive: true });
+await Promise.all(
+  [16, 32, 48].map((size) =>
+    copyFile(
+      path.join(repo, "docs/public/brand", `favicon-${size}.png`),
+      path.join(output, "favicons", `favicon-${size}.png`),
+    ),
+  ),
+);
 const require = createRequire(path.join(folder, "package.json"));
 const framework = name === "theme-ledger" ? "svelte" : "vue";
 let serverSource,

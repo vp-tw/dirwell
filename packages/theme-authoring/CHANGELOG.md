@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.0.10
+
+### Patch Changes
+
+- Updated dependencies
+  - @dirwell/theme-ledger@0.0.10
+  - @dirwell/theme-crosswave@0.0.10
+  - @dirwell/server@0.0.10
+  - @dirwell/core@0.0.10
+
 ## 0.0.9
 
 ### Patch Changes

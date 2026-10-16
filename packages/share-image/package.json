@@ -1,6 +1,6 @@
 {
   "name": "@dirwell/share-image",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "description": "Optional build-time metadata and PNG share-image rendering.",
   "homepage": "https://vp-tw.github.io/dirwell/metadata/",
   "bugs": {

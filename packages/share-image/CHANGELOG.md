@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.10
+
+### Patch Changes
+
+- @dirwell/core@0.0.10
+
 ## 0.0.9
 
 ### Patch Changes

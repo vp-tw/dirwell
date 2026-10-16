@@ -3,6 +3,7 @@ import { createHash } from "node:crypto";
 import { escapeHtml } from "@dirwell/core";
 import type { ExplorerTheme } from "@dirwell/core";
 import { createThemePage, folderDataHref, pageAsset } from "../../shared-theme/src/page.ts";
+import { createThemeFavicons } from "../../shared-theme/src/favicon.ts";
 import {
   entryMimeType,
   entryCategories,
@@ -22,6 +23,8 @@ import {
 } from "../../shared-theme/src/customization.ts";
 export type {
   ThemeCustomization,
+  FaviconOptions,
+  FaviconDescriptor,
   SizeDisplayOptions,
   ThemeLabels,
   ThemeColumn,
@@ -65,6 +68,10 @@ export function createCrosswaveTheme(
       throw new TypeError(`${key} must be a boolean`);
   const ui = resolveCustomization(options);
   const publishedUi = pickCustomization(options);
+  const renderFavicons = createThemeFavicons(
+    options.brand,
+    new URL("./favicons/", import.meta.url),
+  );
   const categoryLabels: Readonly<Record<string, string>> = {
     all: ui.labels.allFiles,
     folder: ui.labels.categoryFolders,
@@ -102,8 +109,10 @@ export function createCrosswaveTheme(
       folderDataHref: folderDataHref(entry, context, "crosswave"),
     }),
     async render(context) {
+      const favicons = await renderFavicons(context.assetHref);
       const model = {
         ...createThemePage(context, theme, options.title ?? ui.brand.name ?? "Dirwell"),
+        metadataHead: (context.metadata?.head ?? "") + favicons.head,
         ...(publishedUi === undefined ? {} : { ui: publishedUi }),
         searchQueryHref: options.archiveSearch === false ? null : (context.searchQueryHref ?? null),
         categories: categories.map(({ id, label, svg }) => ({ id, label, svg })),
@@ -114,8 +123,9 @@ export function createCrosswaveTheme(
       const { script, scriptName, styles } = await loadResources();
       const json = JSON.stringify(model).replaceAll("<", "\\u003c");
       return {
-        html: `<!doctype html><html lang="${escapeHtml(ui.language)}" dir="${ui.direction}" data-cw-color="${escapeHtml(model.color)}" data-cw-motion="${model.backgroundMotion}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">${context.documentBaseHref === null ? "" : `<base href="${escapeHtml(context.documentBaseHref)}">`}${context.metadata?.head ?? `<title>${escapeHtml(model.title)}</title>`}${ui.brand.faviconUrl ? `<link rel="icon" href="${escapeHtml(ui.brand.faviconUrl)}">` : ""}<style>${styles}${renderer?.styles ?? ""}${customizationCss(ui)}</style></head><body><div data-dirwell-theme="crosswave">${await (renderer?.renderBody ?? renderBody)(model)}</div><script type="application/json" id="dirwell-page-data">${json}</script><script ${renderer?.clientType === "module" ? 'type="module"' : "defer"} src="${escapeHtml(context.assetHref(scriptName))}"></script></body></html>`,
+        html: `<!doctype html><html lang="${escapeHtml(ui.language)}" dir="${ui.direction}" data-cw-color="${escapeHtml(model.color)}" data-cw-motion="${model.backgroundMotion}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">${context.documentBaseHref === null ? "" : `<base href="${escapeHtml(context.documentBaseHref)}">`}${context.metadata?.head ?? `<title>${escapeHtml(model.title)}</title>`}${favicons.head}<style>${styles}${renderer?.styles ?? ""}${customizationCss(ui)}</style></head><body><div data-dirwell-theme="crosswave">${await (renderer?.renderBody ?? renderBody)(model)}</div><script type="application/json" id="dirwell-page-data">${json}</script><script ${renderer?.clientType === "module" ? 'type="module"' : "defer"} src="${escapeHtml(context.assetHref(scriptName))}"></script></body></html>`,
         assets: {
+          ...favicons.assets,
           [scriptName]: script,
           [pageAsset("crosswave", model.path, model.page?.number ?? 1)]: JSON.stringify(model),
         },

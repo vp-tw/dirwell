@@ -1,3 +1,5 @@
+import type { FaviconOptions } from "./favicon-options.ts";
+export type { FaviconOptions, FaviconDescriptor } from "./favicon-options.ts";
 import { validateByteFormatOptions, type ByteFormatOptions } from "../../core/src/format.ts";
 /** Small serializable inputs shared by official themes; layout stays theme-owned. */
 export const defaultLabels = {
@@ -121,13 +123,20 @@ export interface ThemeCustomization {
     readonly logoAlt?: string;
     readonly footerText?: string;
     readonly footerUrl?: string;
-    readonly faviconUrl?: string;
+    /** Local images are published; href values are used as supplied. false disables icons. */
+    readonly favicon?: FaviconOptions;
+    /** Compatibility shorthand for a public URL or false. Do not combine with favicon. */
+    readonly faviconUrl?: string | false;
   };
   readonly columns?: readonly ThemeColumn[];
   readonly actions?: readonly ThemeAction[];
   /** Theme-specific CSS variable names; declarations and markup are rejected. */
   readonly cssVariables?: Readonly<Record<`--${string}`, string>>;
 }
+/** Browser models never contain local favicon inputs. */
+export type PublishedThemeCustomization = Omit<ThemeCustomization, "brand"> & {
+  readonly brand?: Omit<NonNullable<ThemeCustomization["brand"]>, "favicon">;
+};
 export interface ResolvedThemeCustomization {
   readonly size: SizeDisplayOptions;
   readonly language: string;
@@ -136,7 +145,7 @@ export interface ResolvedThemeCustomization {
   readonly locale: string;
   readonly timeZone: string;
   readonly labels: ThemeLabels;
-  readonly brand: NonNullable<ThemeCustomization["brand"]>;
+  readonly brand: NonNullable<PublishedThemeCustomization["brand"]>;
   readonly columns: readonly ThemeColumn[];
   readonly actions: readonly ThemeAction[];
   readonly cssVariables: Readonly<Record<string, string>>;
@@ -182,8 +191,9 @@ export function resolveCustomization(options: ThemeCustomization = {}): Resolved
   if (typeof brand !== "object" || brand === null || Array.isArray(brand))
     throw new TypeError("brand must be an object");
   for (const [key, value] of Object.entries(brand)) {
+    if (key === "favicon" || key === "faviconUrl") continue;
     if (
-      !["name", "logoUrl", "logoAlt", "footerText", "footerUrl", "faviconUrl"].includes(key) ||
+      !["name", "logoUrl", "logoAlt", "footerText", "footerUrl"].includes(key) ||
       typeof value !== "string"
     )
       throw new TypeError(`Unsupported brand option or value: ${key}`);
@@ -246,7 +256,7 @@ export function resolveCustomization(options: ThemeCustomization = {}): Resolved
     locale,
     timeZone,
     labels,
-    brand: { ...brand },
+    brand: Object.fromEntries(Object.entries(brand).filter(([key]) => key !== "favicon")),
     size: { ...size, locale: size.locale ?? options.locale ?? "en-US" },
     columns: columns.map((column) => (typeof column === "string" ? column : { ...column })),
     actions: [...actions],
@@ -309,8 +319,10 @@ export async function copyEntryAction(
 }
 
 /** Publish only supplied customization instead of repeating defaults in every page. */
-export function pickCustomization(options: ThemeCustomization): ThemeCustomization | undefined {
-  const result: ThemeCustomization = {};
+export function pickCustomization(
+  options: ThemeCustomization,
+): PublishedThemeCustomization | undefined {
+  const result: PublishedThemeCustomization = {};
   for (const key of [
     "size",
     "language",
@@ -324,7 +336,12 @@ export function pickCustomization(options: ThemeCustomization): ThemeCustomizati
     "cssVariables",
   ] as const)
     if (options[key] !== undefined) {
-      const value = options[key];
+      const value =
+        key === "brand"
+          ? Object.fromEntries(
+              Object.entries(options.brand ?? {}).filter(([name]) => name !== "favicon"),
+            )
+          : options[key];
       Object.assign(result, {
         [key]: Array.isArray(value)
           ? value.map((item) => (typeof item === "object" ? { ...item } : item))

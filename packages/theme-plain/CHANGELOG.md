@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.0.10
+
+### Patch Changes
+
+- Publish local favicon images from File, path and file-URL sources, or reference
+  public URLs with optional type, sizes and media attributes. Ledger and Crosswave
+  default to the bundled paper-bird icons; Plain has no default icon. Preserve icons
+  through folder navigation, History, mounted live responses and static URL policies.
+  Keep local inputs out of browser models and retain faviconUrl as a compatible
+  URL/false shorthand. Serve supported image formats with matching MIME types.
+
 ## 0.0.9
 
 No changes in this release.
